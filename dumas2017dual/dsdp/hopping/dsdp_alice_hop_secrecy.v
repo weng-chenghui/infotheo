@@ -333,20 +333,15 @@ Definition bob_pkey : pub_key AHE := pkey_of_party Bob.
 (* The key hop 1 challenges at, the Charlie-key counterpart of bob_pkey.      *)
 Definition charlie_pkey : pub_key AHE := pkey_of_party Charlie.
 
-Local Notation enc_fdist :=
-  (enc_fdist (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_adversary := (indcpa_adversary (R:=R) AHE).
-Local Notation indcpa_success_real :=
-  (indcpa_success_real (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_success_zero :=
-  (indcpa_success_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation enc_fdist := (enc_fdist (R:=R) (S:=I)).
+Local Notation indcpa_adversary := (indcpa_adversary (R:=R) I).
+Local Notation indcpa_success_real := (indcpa_success_real (R:=R) (S:=I)).
+Local Notation indcpa_success_zero := (indcpa_success_zero (R:=R) (S:=I)).
+Local Notation indcpa_epsilon := (indcpa_epsilon (R:=R) (S:=I)).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_fdist_acceptE :=
-  (indcpa_fdist_acceptE (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation predictor := (predictor AHE).
+  (indcpa_epsilon_assumption (R:=R) I).
+Local Notation indcpa_fdist_acceptE := (indcpa_fdist_acceptE (R:=R) (S:=I)).
+Local Notation predictor := (predictor I).
 
 (* The sample space of the corrupted-Alice experiment: the two honest inputs,
    Alice's two mask plaintexts, the randomness of the two hop encryptions, and
@@ -795,11 +790,11 @@ Lemma hop0_real_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_real]
-        = `p_ (protocol_RV rand_of_renc Hop0State Rho2 bob_pkey
+        = `p_ (protocol_RV Hop0State Rho2 bob_pkey
                  (fun c : hop0_stateT => c.1.1.1.1) hop0_assemble).
   rewrite /dist_of_RV; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ _ hop0_state_prodE).
+rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
@@ -813,11 +808,11 @@ Lemma hop0_zero_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
-        = `p_ (protocol_RV rand_of_renc Hop0State Rho2 bob_pkey
+        = `p_ (protocol_RV Hop0State Rho2 bob_pkey
                  (fun _ : hop0_stateT => 0) hop0_assemble).
   rewrite /dist_of_RV; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ _ hop0_state_prodE).
+rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
 
@@ -844,11 +839,11 @@ Lemma hop1_real_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
-        = `p_ (protocol_RV rand_of_renc Hop1State Rho3 charlie_pkey
+        = `p_ (protocol_RV Hop1State Rho3 charlie_pkey
                  (fun c : hop1_stateT => c.1.1.1.2) hop1_assemble).
   rewrite /dist_of_RV; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ _ hop1_state_prodE).
+rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
@@ -862,11 +857,11 @@ Lemma hop1_zero_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_all_zero]
-        = `p_ (protocol_RV rand_of_renc Hop1State Rho3 charlie_pkey
+        = `p_ (protocol_RV Hop1State Rho3 charlie_pkey
                  (fun _ : hop1_stateT => 0) hop1_assemble).
   rewrite /dist_of_RV; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ _ hop1_state_prodE).
+rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
 
@@ -1607,9 +1602,11 @@ End dsdp_alice_hop_secrecy.
 
 Section dsdp_alice_enc_uniform_img.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
+Variable S : indcpa_scheme.
+Local Notation AHE := (scheme_AHE S).
+Local Notation Renc := (scheme_renc S).
+Local Notation card_renc := (scheme_card_renc S).
+Local Notation rand_of_renc := (@scheme_rand_of_renc S).
 
 (* The encryption of v under pk as a function of the randomness index.
    Naming: the [_of_] connective names the source the map reads, after the
@@ -1630,7 +1627,7 @@ Proof. by rewrite card_gt0 imset_eq0 -card_gt0 cardsT card_renc. Qed.
    Naming: [img] marks the image the uniformity ranges over, after
    [fdistmap_uniform_supp_img] of fdist_extra.v. *)
 Definition enc_fdist_uniform_img (pk : pub_key AHE) (v : plain AHE) : Prop :=
-  enc_fdist card_renc rand_of_renc pk v
+  enc_fdist (S:=S) pk v
   = fdist_uniform_supp R (card_enc_img_gt0 pk v).
 
 (* Equal fiber cardinalities over the image suffice.
@@ -1664,7 +1661,7 @@ Qed.
 Lemma enc_fdist_uniform_imgE (pk : pub_key AHE) (v : plain AHE) :
   enc_fdist_uniform_img pk v ->
   forall c, c \in enc_of_renc pk v @: [set: Renc] ->
-  enc_fdist (R:=R) card_renc rand_of_renc pk v c
+  enc_fdist (R:=R) (S:=S) pk v c
   = #|enc_of_renc pk v @: [set: Renc]|%:R^-1.
 Proof. by move=> H c Hc; rewrite H fdist_uniform_supp_in. Qed.
 

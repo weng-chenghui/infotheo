@@ -151,8 +151,7 @@ Arguments inst_with_rc2 : clear implicits.
 Record dsdp_instance_sequence (R : realType) := {
   sequence_instance : nat -> dsdp_instance ;
   sequence_assumption : forall k,
-    indcpa_epsilon_assumption (R:=R) (scheme_card_renc (sequence_instance k))
-      (@scheme_rand_of_renc (sequence_instance k)) }.
+    indcpa_epsilon_assumption (R:=R) (sequence_instance k) }.
 
 (* The inverse plaintext cardinality at k along Q.  It counts the DSDP
    solution fiber the leaked output confines Bob's input to, and it is the

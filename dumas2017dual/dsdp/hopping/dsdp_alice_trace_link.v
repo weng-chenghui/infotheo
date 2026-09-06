@@ -458,16 +458,15 @@ Local Notation Sout := (Sout (R:=R) (I:=I)).
 Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
 Local Notation alice_tuple_bob_zero := (alice_tuple_bob_zero (R:=R) (I:=I)).
 Local Notation alice_tuple_all_zero := (alice_tuple_all_zero (R:=R) (I:=I)).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) card_renc rand_of_renc).
+Local Notation indcpa_epsilon := (indcpa_epsilon (R:=R) (S:=I)).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) card_renc rand_of_renc).
+  (indcpa_epsilon_assumption (R:=R) I).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (I:=I)).
 Local Notation charlie_challenge_adversary :=
   (charlie_challenge_adversary (R:=R) (I:=I)).
 Local Notation alice_traceT := (alice_traceT I).
-Local Notation predictor := (predictor AHE).
+Local Notation predictor := (predictor I).
 Local Notation alice_simulator := (alice_simulator (R:=R) (I:=I)).
 Local Notation alice_ideal := (alice_ideal (R:=R) I).
 
@@ -1330,7 +1329,7 @@ Qed.
    Naming: the party owning the key comes first, as in
    [bob_trace_predictor_epsilon]; [decrypt] names what the predictor does with
    the slot it reads. *)
-Definition bob_decrypt_predictor : predictor AHE (alice_traceT I) :=
+Definition bob_decrypt_predictor : predictor I (alice_traceT I) :=
   fun b => if dec dk_b (trace_data_cipher (nth (inr tt) (bseqval b) 3))
            is Some m then m else 0.
 
@@ -1388,7 +1387,7 @@ Local Notation bob_decrypt_predictor := (bob_decrypt_predictor (I:=I)).
 Local Notation bob_trace_predictor_epsilon :=
   (bob_trace_predictor_epsilon (R:=R) (I:=I)).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) card_renc rand_of_renc).
+  (indcpa_epsilon_assumption (R:=R) I).
 Local Notation bob_trace_adversary := (bob_trace_adversary (R:=R) (I:=I)).
 Local Notation alice_trace_guess_V2_pr :=
   (alice_trace_guess_V2_pr (R:=R) (I:=I)).
@@ -1537,8 +1536,7 @@ Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 Local Notation alice_trace_ideal := (alice_trace_ideal (R:=R) I).
 Local Notation alice_trace_of_hop_tuple := (alice_trace_of_hop_tuple (I:=I)).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) card_renc rand_of_renc).
+Local Notation indcpa_epsilon := (indcpa_epsilon (R:=R) (S:=I)).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (I:=I)).
 Local Notation charlie_challenge_adversary :=
@@ -1679,8 +1677,7 @@ Local Notation AliceRawTrace_coin w :=
 Local Notation ideal_avg := (alice_trace_ideal_avg (R:=R) I).
 Local Notation alice_trace_of_hop_tuple_coin w :=
   (alice_trace_of_hop_tuple (I:=inst_with_rc2 I w)).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) card_renc rand_of_renc).
+Local Notation indcpa_epsilon := (indcpa_epsilon (R:=R) (S:=I)).
 Local Notation bob_challenge_adversary_coin w :=
   (bob_challenge_adversary (R:=R) (I:=inst_with_rc2 I w)).
 Local Notation charlie_challenge_adversary_coin w :=
@@ -1769,9 +1766,9 @@ Variables (p q : nat).
 Hypothesis card_plain_pq : #|plain AHE| = (p * q)%N.
 
 Local Notation alice_traceT := (alice_traceT I).
-Local Notation predictor := (predictor AHE).
+Local Notation predictor := (predictor I).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) card_renc rand_of_renc).
+  (indcpa_epsilon_assumption (R:=R) I).
 Local Notation bob_trace_adversary := (bob_trace_adversary (R:=R) (I:=I)).
 Local Notation charlie_trace_adversary :=
   (charlie_trace_adversary (R:=R) (I:=I)).

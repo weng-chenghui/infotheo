@@ -219,7 +219,7 @@ Variable N : dsdp_asymptotic Q.
 Local Notation I := (sequence_instance Q).
 Local Notation assumption := (sequence_assumption Q).
 Variable predict : forall k,
-    predictor (scheme_AHE (I k)) (alice_traceT (I k)).
+    predictor (I k) (alice_traceT (I k)).
 Arguments predict : clear implicits.
 
 (* The two class premises of the whole section: at every security parameter
@@ -504,8 +504,7 @@ Qed.
 Definition idealized_instance_sequence : dsdp_instance_sequence R := {|
   sequence_instance := idealized_instance ;
   sequence_assumption := fun k =>
-    cipher_constant_assumption (scheme_card_renc (idealized_instance k))
-      (@scheme_rand_of_renc (idealized_instance k)) |}.
+    cipher_constant_assumption (idealized_instance k) |}.
 
 (* The two negligibility facts about the witness sequence, discharged rather
    than assumed.  Its assumed advantage is zero at every k, so the whole
@@ -520,8 +519,7 @@ Definition idealized_asymptotic :
    cipher-constant class admits it. *)
 Lemma idealized_bob_cipher_constant (k : nat) :
   indcpa_admissible
-    (cipher_constant_assumption (R:=R) (scheme_card_renc (idealized_instance k))
-       (@scheme_rand_of_renc (idealized_instance k)))
+    (cipher_constant_assumption (R:=R) (idealized_instance k))
     (bob_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
@@ -532,8 +530,7 @@ Qed.
 (* The Charlie-key counterpart of idealized_bob_cipher_constant. *)
 Lemma idealized_charlie_cipher_constant (k : nat) :
   indcpa_admissible
-    (cipher_constant_assumption (R:=R) (scheme_card_renc (idealized_instance k))
-       (@scheme_rand_of_renc (idealized_instance k)))
+    (cipher_constant_assumption (R:=R) (idealized_instance k))
     (charlie_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
@@ -612,7 +609,8 @@ Variable dcr : dcr_assumption (R:=R) p q.
    adversaries that predictor induces.  The restriction lands on those two
    adversaries and never on the predictor itself, which is what leaves the
    trace-decrypting predictor outside the bound rather than inside it. *)
-Variable predict : predictor AHE (alice_traceT paillier_fixed_instance).
+Variable predict :
+  predictor paillier_fixed_instance (alice_traceT paillier_fixed_instance).
 Hypothesis bob_admissible :
   indcpa_admissible (paillier_indcpa_assumption p_gt1 q_gt1 dcr)
     (bob_trace_adversary (I:=paillier_fixed_instance)
@@ -793,7 +791,7 @@ Proof.
 exact: (decrypt_reduction_admissible_eventuallyF paillier_asymptotic).
 Qed.
 
-Variable predict : forall k, predictor (scheme_AHE (paillier_instance k))
+Variable predict : forall k, predictor (paillier_instance k)
     (alice_traceT (paillier_instance k)).
 Arguments predict : clear implicits.
 
@@ -898,7 +896,8 @@ Proof. by rewrite card_plain_r. Qed.
    adversaries that predictor induces.  The restriction lands on those two
    adversaries and never on the predictor itself, which is what leaves the
    trace-decrypting predictor outside the bound rather than inside it. *)
-Variable predict : predictor AHE (alice_traceT benaloh_fixed_instance).
+Variable predict :
+  predictor benaloh_fixed_instance (alice_traceT benaloh_fixed_instance).
 Hypothesis bob_admissible :
   indcpa_admissible (benaloh_indcpa_assumption r_gt1 residuosity)
     (bob_trace_adversary (I:=benaloh_fixed_instance)
@@ -1087,7 +1086,7 @@ Proof.
 exact: (decrypt_reduction_admissible_eventuallyF benaloh_asymptotic).
 Qed.
 
-Variable predict : forall k, predictor (scheme_AHE (benaloh_instance k))
+Variable predict : forall k, predictor (benaloh_instance k)
     (alice_traceT (benaloh_instance k)).
 Arguments predict : clear implicits.
 

@@ -248,7 +248,7 @@ Definition benaloh_indcpa_scheme : indcpa_scheme :=
    this law, and so against c = y^m * u^r mod n with u uniform in the unit
    group. *)
 Lemma enc_fdist_benalohE (pk : pub_key AHE) (v : plain AHE) :
-  enc_fdist (R:=R) card_renc_benaloh rand_of_renc_benaloh pk v
+  enc_fdist (R:=R) (S:=benaloh_indcpa_scheme) pk v
   = fdistmap (benaloh_enc (pub_gen pk) v) (fdist_uniform card_renc_benaloh).
 Proof. by []. Qed.
 
@@ -287,7 +287,7 @@ Definition benaloh_residuosity_epsilon
    its own plaintext names.  Under the residue law that multiplier turns the
    challenge into an encryption of m, and under the unit law it erases m. *)
 Definition residuosity_of_adversary (y : ring_units 'Z_n)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_n :=
   {| state := adv_state adv ;
      state_fdist := adv_choose adv ;
@@ -297,7 +297,7 @@ Definition residuosity_of_adversary (y : ring_units 'Z_n)
    unchanged.  Under the residue law the challenge is already an encryption of
    zero, so this distinguisher runs the zero arm of the IND-CPA experiment. *)
 Definition residuosity_of_adversary_zero
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_n :=
   {| state := adv_state adv ;
      state_fdist := adv_choose adv ;
@@ -308,7 +308,7 @@ Definition residuosity_of_adversary_zero
    r-th power of a uniform unit.  Both sides are one term once the two
    pushforwards are composed, so the reduction pays nothing here. *)
 Lemma real_accept_residuosityE (y : ring_units 'Z_n)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
       fdistmap (adv_decide c)
         (fdistmap (benaloh_enc y (adv_plain c))
@@ -325,7 +325,7 @@ Qed.
    (0 : plain AHE) because the ring 'Z_n the generator lives in fixes the
    modulus and leaves the plaintext block size r to the annotation. *)
 Lemma zero_accept_residuosityE (y : ring_units 'Z_n)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
       fdistmap (adv_decide c)
         (fdistmap (benaloh_enc y (0 : plain AHE))
@@ -344,7 +344,7 @@ Qed.
    is the value of the group power (y ^+ m)%g, hence a unit whatever y and m
    are, which is why the reduction never reads the generator's order. *)
 Lemma unit_accept_residuosityE (y : ring_units 'Z_n)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   residuosity_accept (residuosity_of_adversary y adv) unit_fdist
   = residuosity_accept (residuosity_of_adversary_zero adv) unit_fdist.
 Proof.
@@ -385,7 +385,7 @@ Variant benaloh_label := residuosity_y | residuosity_0.
    compared with the claim of the label the hop stands under, so no step can
    record a residuosity call it did not make. *)
 Definition benaloh_claim (residuosity : benaloh_residuosity_assumption)
-    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme)
     (l : benaloh_label) : claim R :=
   let D_y := residuosity_of_adversary (priv_gen dk) adv in
   let D_0 := residuosity_of_adversary_zero adv in
@@ -426,7 +426,7 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
 Section benaloh_chain.
 Variable residuosity : benaloh_residuosity_assumption.
 Variable dk : priv_key AHE.
-Variable adv : indcpa_adversary (R:=R) AHE.
+Variable adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme.
 Hypothesis admissible_y :
   residuosity_admissible residuosity
     (residuosity_of_adversary (priv_gen dk) adv).
@@ -465,7 +465,7 @@ Definition benaloh_chain :=
    above logs nothing, and a second call carries the zero arm back.  Both
    terms are assumption-conditional, so the whole bound is computational. *)
 Lemma benaloh_residuosity_epsilon_le :
-  indcpa_epsilon (R:=R) card_renc_benaloh rand_of_renc_benaloh
+  indcpa_epsilon (R:=R) (S:=benaloh_indcpa_scheme)
     (pub_of_priv dk) adv
   <= 2 * benaloh_residuosity_epsilon residuosity.
 Proof.
@@ -484,7 +484,7 @@ End benaloh_chain.
    finite type, so the quantifier is a Boolean test. *)
 Definition benaloh_residuosity_admissible
     (residuosity : benaloh_residuosity_assumption)
-    (adv : indcpa_adversary (R:=R) AHE) : bool :=
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) : bool :=
   [forall y : ring_units 'Z_n,
      residuosity_admissible residuosity (residuosity_of_adversary y adv)]
   && residuosity_admissible residuosity (residuosity_of_adversary_zero adv).
@@ -495,9 +495,9 @@ Definition benaloh_residuosity_admissible
    variant token before [le], after alice_trace_guess_V2_admissible_le. *)
 Lemma benaloh_residuosity_admissible_epsilon_le
     (residuosity : benaloh_residuosity_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   benaloh_residuosity_admissible residuosity adv ->
-  indcpa_epsilon (R:=R) card_renc_benaloh rand_of_renc_benaloh
+  indcpa_epsilon (R:=R) (S:=benaloh_indcpa_scheme)
     (pub_of_priv dk) adv
   <= 2 * benaloh_residuosity_epsilon residuosity.
 Proof.
@@ -512,8 +512,7 @@ Qed.
    r-th residuosity epsilon, at two residuosity calls per key. *)
 Definition benaloh_indcpa_assumption
     (residuosity : benaloh_residuosity_assumption) :
-    indcpa_epsilon_assumption (R:=R) card_renc_benaloh
-      rand_of_renc_benaloh :=
+    indcpa_epsilon_assumption (R:=R) benaloh_indcpa_scheme :=
   {| indcpa_admissible := benaloh_residuosity_admissible residuosity ;
      indcpa_assumption_epsilon := 2 * benaloh_residuosity_epsilon residuosity ;
      indcpa_admissible_epsilon_le :=
@@ -529,7 +528,7 @@ Definition benaloh_indcpa_assumption
    asserts and [cipher_constant] the premise's class, the token
    adv_decide_cipher_constant of indcpa_game.v carries. *)
 Lemma benaloh_residuosity_admissible_cipher_constant
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   adv_decide_cipher_constant adv ->
   benaloh_residuosity_admissible
     (decide_constant_assumption (R:=R) 'Z_n r card_renc_benaloh) adv.
@@ -551,7 +550,7 @@ Qed.
    universal over keys rather than averaged over a key-generation law, and the
    adversary holds the public key alone. *)
 Lemma benaloh_indcpa_epsilon_le (residuosity : benaloh_residuosity_assumption)
-    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   benaloh_residuosity_admissible residuosity adv ->
   `| Pr (c <- adv_choose adv ;
          fdistmap (adv_decide c)

@@ -183,10 +183,11 @@ Notation "'ret' a" := (fdist1 a) (at level 0) : fdist_scope.
    term: a second proof of the same equation is propositionally equal to it
    and not convertible with it, so bounds stated at the two would compose
    only through a rewrite.
-   Every epsilon of this file is measured at these four data, so packing them
-   makes a scheme the thing an assumption is made about, and a sequence of
-   schemes indexed by a security parameter a function nat -> indcpa_scheme
-   rather than four parallel sequences whose types depend on one another. *)
+   Every epsilon of this file is measured at these four data, and the game
+   section below quantifies over the record rather than over the four, so a
+   scheme is the thing an assumption is made about, and a sequence of schemes
+   indexed by a security parameter is a function nat -> indcpa_scheme rather
+   than four parallel sequences whose types depend on one another. *)
 Record indcpa_scheme := {
   scheme_AHE          : AHEncType ;
   scheme_renc         : finType ;
@@ -195,9 +196,11 @@ Record indcpa_scheme := {
 
 Section indcpa_game.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
+Variable S : indcpa_scheme.
+Local Notation AHE := (scheme_AHE S).
+Local Notation Renc := (scheme_renc S).
+Local Notation card_renc := (scheme_card_renc S).
+Local Notation rand_of_renc := (@scheme_rand_of_renc S).
 
 (* The law of an encryption of v under pk when the encryption randomness is
    drawn uniformly.  This is the only randomness the challenger uses, so an

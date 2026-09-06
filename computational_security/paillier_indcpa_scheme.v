@@ -234,7 +234,7 @@ Definition paillier_indcpa_scheme : indcpa_scheme :=
    against this law, and so against c = g^m * u^n mod (pq)^2 with u
    uniform in the unit group. *)
 Lemma enc_fdist_paillierE (pk : pub_key AHE) (v : plain AHE) :
-  enc_fdist (R:=R) card_renc_paillier rand_of_renc_paillier pk v
+  enc_fdist (R:=R) (S:=paillier_indcpa_scheme) pk v
   = fdistmap (paillier_enc (pub_gen pk) v) (fdist_uniform card_renc_paillier).
 Proof. by []. Qed.
 
@@ -273,7 +273,7 @@ Definition dcr_epsilon (dcr : dcr_assumption) : R :=
    encryption of that plaintext, so this distinguisher runs the real
    experiment; at the unit challenge the multiplier erases the plaintext. *)
 Definition dcr_of_adversary (g : 'Z_((p * q) * (p * q)))
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_((p * q) * (p * q)) :=
   {| state := adv_state adv ;
      state_fdist := adv_choose adv ;
@@ -282,7 +282,8 @@ Definition dcr_of_adversary (g : 'Z_((p * q) * (p * q)))
 (* The second reduction: the same adversary run on the residuosity challenge
    unchanged.  At the residue challenge the challenge is an encryption of
    zero, so this distinguisher runs the zero experiment. *)
-Definition dcr_of_adversary_zero (adv : indcpa_adversary (R:=R) AHE) :
+Definition dcr_of_adversary_zero
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_((p * q) * (p * q)) :=
   {| state := adv_state adv ;
      state_fdist := adv_choose adv ;
@@ -292,7 +293,7 @@ Definition dcr_of_adversary_zero (adv : indcpa_adversary (R:=R) AHE) :
    challenge.  Both sides draw the state the same way and compose two
    pushforwards, so the identity is one fdistmap_comp per state. *)
 Lemma real_accept_dcrE (g : 'Z_((p * q) * (p * q)))
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
       fdistmap (adv_decide c)
         (fdistmap (paillier_enc g (adv_plain c))
@@ -307,7 +308,7 @@ Qed.
    encryption of zero is the (p q)-th power alone, the generator entering to
    the power zero. *)
 Lemma zero_accept_dcrE (g : 'Z_((p * q) * (p * q)))
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
       fdistmap (adv_decide c)
         (fdistmap (paillier_enc g 0)
@@ -324,7 +325,7 @@ Qed.
    key fact, multiplication by a unit fixes the uniform law, applied state by
    state at the multiplier g ^+ (adv_plain c). *)
 Lemma unit_accept_dcrE (g : 'Z_((p * q) * (p * q))) (gn : g ^+ (p * q) = 1)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   residuosity_accept (dcr_of_adversary g adv) unit_fdist
   = residuosity_accept (dcr_of_adversary_zero adv) unit_fdist.
 Proof.
@@ -369,7 +370,8 @@ Variant paillier_label := dcr_g | dcr_0.
    compared with the claim of the label the hop stands under, so no step can
    record a residuosity call it did not make. *)
 Definition paillier_claim (dcr : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) (l : paillier_label) : claim R :=
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme)
+    (l : paillier_label) : claim R :=
   let D_g := dcr_of_adversary (priv_gen dk) adv in
   let D_0 := dcr_of_adversary_zero adv in
   match l with
@@ -408,7 +410,7 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
 Section paillier_chain.
 Variable dcr : dcr_assumption.
 Variable dk : priv_key AHE.
-Variable adv : indcpa_adversary (R:=R) AHE.
+Variable adv : indcpa_adversary (R:=R) paillier_indcpa_scheme.
 Hypothesis admissible_g :
   residuosity_admissible dcr (dcr_of_adversary (priv_gen dk) adv).
 Hypothesis admissible_0 :
@@ -450,7 +452,7 @@ Definition paillier_chain :=
    and Lindell 2015 Theorem 13.13, read at any generator whose order divides
    p q. *)
 Lemma paillier_dcr_epsilon_le :
-  indcpa_epsilon (R:=R) card_renc_paillier rand_of_renc_paillier
+  indcpa_epsilon (R:=R) (S:=paillier_indcpa_scheme)
     (pub_of_priv dk) adv
   <= 2 * dcr_epsilon dcr.
 Proof.
@@ -467,7 +469,7 @@ End paillier_chain.
    because the bound above is read at an arbitrary private key, whose
    generator the class leaves free. *)
 Definition paillier_dcr_admissible (dcr : dcr_assumption)
-    (adv : indcpa_adversary (R:=R) AHE) : bool :=
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) : bool :=
   [forall g, residuosity_admissible dcr (dcr_of_adversary g adv)]
   && residuosity_admissible dcr (dcr_of_adversary_zero adv).
 
@@ -477,9 +479,9 @@ Definition paillier_dcr_admissible (dcr : dcr_assumption)
    discharges, indcpa_admissible_epsilon_le of indcpa_game.v, with the
    scheme and the problem in front. *)
 Lemma paillier_dcr_admissible_epsilon_le (dcr : dcr_assumption)
-    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   paillier_dcr_admissible dcr adv ->
-  indcpa_epsilon (R:=R) card_renc_paillier rand_of_renc_paillier
+  indcpa_epsilon (R:=R) (S:=paillier_indcpa_scheme)
     (pub_of_priv dk) adv
   <= 2 * dcr_epsilon dcr.
 Proof.
@@ -494,8 +496,7 @@ Qed.
    computational premise those bounds carry is decisional composite
    residuosity. *)
 Definition paillier_indcpa_assumption (dcr : dcr_assumption) :
-    indcpa_epsilon_assumption (R:=R) card_renc_paillier
-      rand_of_renc_paillier :=
+    indcpa_epsilon_assumption (R:=R) paillier_indcpa_scheme :=
   {| indcpa_admissible := paillier_dcr_admissible dcr ;
      indcpa_assumption_epsilon := 2 * dcr_epsilon dcr ;
      indcpa_admissible_epsilon_le := @paillier_dcr_admissible_epsilon_le dcr |}.
@@ -510,7 +511,7 @@ Definition paillier_indcpa_assumption (dcr : dcr_assumption) :
    names it relates, paillier_dcr_admissible here and
    adv_decide_cipher_constant of indcpa_game.v. *)
 Lemma paillier_dcr_admissible_cipher_constant
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   adv_decide_cipher_constant adv ->
   paillier_dcr_admissible
     (decide_constant_assumption 'Z_((p * q) * (p * q)) (p * q)
@@ -530,7 +531,7 @@ Qed.
    averaged over a key-generation law, and the adversary holds the public key
    alone. *)
 Lemma paillier_indcpa_epsilon_le (dcr : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) :
+    (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   paillier_dcr_admissible dcr adv ->
   `| Pr (c <- adv_choose adv ;
          fdistmap (adv_decide c)
