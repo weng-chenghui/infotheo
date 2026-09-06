@@ -67,6 +67,29 @@ Require Import extra_proba.
 (* extensional, so it says which adversaries a bound covers while running     *)
 (* time stays a property of a syntax it does not read.                        *)
 (*                                                                            *)
+(* scheme_card_renc is carried as a field to pin one proof of the coin type's *)
+(* nonemptiness: a second proof of the same equation is propositionally equal *)
+(* to it and not convertible with it, so bounds stated at the two would       *)
+(* compose only through a rewrite.                                            *)
+(*                                                                            *)
+(* A class may be empty, and a bound conditional on an empty class holds      *)
+(* vacuously.  A classifier admitting every adversary is instead forced to    *)
+(* assume epsilon at least 1, once the scheme is correct and the plaintext    *)
+(* space has more than one element.  SSProve sits at the same boundary:       *)
+(* Haselwarter et al., ACM TOPLAS 45(3) Article 15, 2023, section 2.3 reads   *)
+(* the polynomial-time hypothesis off a concrete bound, outside every         *)
+(* mechanized statement, and its Coq development defines no cost notion, its  *)
+(* source at theories/Crypt/examples/PRFMAC.v:6-8 of commit c6d7d4bc leaving  *)
+(* Claim 10.3 (p. 186) unformalised because its argument depends on the       *)
+(* adversary only having polynomial time and how to formulate that is         *)
+(* unclear.  FCF states its efficiency predicate admissible_oc, in            *)
+(* WC_PolyTime.v, over families of OracleComp terms, so there the classified  *)
+(* object is a program rather than a function.                                *)
+(*                                                                            *)
+(* A protocol whose sample is laid out differently reaches the reduction      *)
+(* section by proving its own tested value equal to protocol_RV, which is     *)
+(* where the confinement of the encryption randomness is checked.             *)
+(*                                                                            *)
 (* ```                                                                        *)
 (*              indcpa_scheme == an encryption scheme, a finite coin space,   *)
 (*                               its nonemptiness, and the map from a coin    *)
@@ -170,28 +193,20 @@ Notation "x '<-' m ';' f" := (m >>= (fun x => f))
    distribution at a value. *)
 Notation "'ret' a" := (fdist1 a) (at level 0) : fdist_scope.
 
-(* The four data the real-or-zero game quantifies over, packed so that a
-   scheme is one value: an additively homomorphic scheme, the finite type
-   indexing its encryption coins, the nonemptiness of that type, and the map
-   carrying a coin index to the randomness the encryption consumes.  The coin
-   index type is kept apart from the scheme's own randomness because
-   he_types.v gives rand as a bare Type, over which no distribution is
-   well-typed; at a concrete scheme the two coincide and the map is the
-   identity.
-   scheme_card_renc is the nonemptiness the uniform coin law needs, in the
-   successor form fdist_uniform takes.  Carrying it as a field pins one proof
-   term: a second proof of the same equation is propositionally equal to it
-   and not convertible with it, so bounds stated at the two would compose
-   only through a rewrite.
-   Every epsilon of this file is measured at these four data, and the game
-   section below quantifies over the record rather than over the four, so a
-   scheme is the thing an assumption is made about, and a sequence of schemes
-   indexed by a security parameter is a function nat -> indcpa_scheme rather
-   than four parallel sequences whose types depend on one another. *)
+(* The four data every epsilon of this file is measured at, packed as one
+   value: an additively homomorphic scheme, the finite type indexing its
+   encryption coins, the nonemptiness that type needs to carry a uniform law,
+   and the map from a coin index to the randomness encryption consumes.  One
+   value rather than four arguments, so an assumption is made about a scheme
+   and a sequence of schemes is a function nat -> indcpa_scheme. *)
 Record indcpa_scheme := {
+  (* the additively homomorphic encryption scheme *)
   scheme_AHE          : AHEncType ;
+  (* the finite type indexing the coins, rand being a bare Type *)
   scheme_renc         : finType ;
+  (* nonemptiness, one pinned proof, in the form fdist_uniform takes *)
   scheme_card_renc    : #|scheme_renc| = #|scheme_renc|.-1.+1 ;
+  (* the randomness a coin index stands for *)
   scheme_rand_of_renc : scheme_renc -> rand scheme_AHE }.
 
 Section indcpa_game.
@@ -210,24 +225,15 @@ Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
     R.-fdist (cipher AHE) :=
   fdistmap (fun r => enc pk v (rand_of_renc r)) (fdist_uniform card_renc).
 
-(* A Boolean test on the value a game hands the adversary.  In a game hop the
-   same test is run on two consecutive games, and the gap between its two
-   acceptance probabilities is the cost of that hop.
-   The statistical-distance axis writes the same notion as the finfun [tester]
-   of smc/security_models/statdist.v, where finiteness is what lets
-   [class_adv] maximize over testers and recover [statdist].  A plain function
-   is enough here because every bound below is stated for one fixed
-   distinguisher, so an epsilon in this development is a per-distinguisher
-   advantage rather than a supremum. *)
+(* A Boolean test on the value a game hands the adversary, run on both games
+   of a hop so that the gap between its two acceptance probabilities is the
+   cost of that hop.  Every bound below fixes one distinguisher, so an epsilon
+   here is a per-distinguisher advantage rather than a supremum over tests. *)
 Definition distinguisher (T : finType) : Type := T -> bool.
 
-(* The probability that D accepts a value sampled from G.  This is the number
-   a game of a hopping argument is: an experiment of such an argument is one
-   law on one carrier, and a step between two experiments compares one test's
-   two acceptance probabilities.  The carrier is a parameter, so the games of
-   an argument that changes what an adversary reads, a protocol trace at one
-   end and a tuple of protocol values at the other, are all the same kind of
-   object. *)
+(* The probability that D accepts a value sampled from G.  This number is what
+   a game of a hopping argument is, and the carrier is a parameter, so a
+   protocol trace and a tuple of protocol values are games of the same kind. *)
 Definition accept (T : finType) (D : T -> bool) (G : R.-fdist T) : R :=
   Pr (fdistmap D G) [set true].
 
@@ -237,9 +243,9 @@ Lemma acceptE (T : finType) (D : T -> bool) (G : R.-fdist T) :
   accept D G = Pr G [set x | D x].
 Proof. exact: Pr_fdistmap_bool. Qed.
 
-(* That probability is nonnegative.  A step whose target is the zero game
-   measures the game it leaves as a distance from zero, and that reading is
-   a bound on the game itself only because the game is nonnegative. *)
+(* That probability is nonnegative.  A hop to the zero game reads the game it
+   leaves as a distance from zero, and that reading bounds the game itself
+   only because the game is nonnegative. *)
 Lemma accept_ge0 (T : finType) (D : T -> bool) (G : R.-fdist T) :
   0 <= accept D G.
 Proof. exact: Pr_ge0. Qed.
@@ -251,26 +257,26 @@ Proof. exact: Pr_ge0. Qed.
 Definition predictor (observation : finType) : Type := observation -> plain AHE.
 
 (* The test that accepts when a predictor, reading the observation slot,
-   returns the first input slot.  A predictor is scored by an equality event
-   while a hop speaks only about how often a Boolean test accepts; wrapping
-   the predictor this way makes the two the same number: the probability
-   that the predictor succeeds at hop i is the probability that this test
-   accepts at hop i. *)
+   returns the first input slot.  Wrapping the predictor this way makes its
+   success probability at a hop the acceptance probability of a test. *)
 Definition distinguisher_of_predictor {observation : finType}
     (predict : predictor observation) :
     distinguisher (plain AHE * plain AHE * observation)%type :=
   fun x => predict x.2 == x.1.1.
 
-(* A single-query real-or-zero adversary.  [adv_state] is everything the
-   adversary holds before the challenge, [adv_choose] is its law, [adv_plain]
-   is the challenge plaintext read off that state, and [adv_decide] is the
-   verdict on the state together with the one challenge ciphertext.  The record
-   grants the public key alone and one challenge, which is the attack model
-   every epsilon in the DSDP files is measured in. *)
+(* A single-query real-or-zero adversary: a state drawn before the challenge,
+   a challenge plaintext read off that state, and a verdict on the state and
+   the one challenge ciphertext.  It holds the public key alone and asks one
+   challenge, which is the attack model every epsilon of the DSDP files is
+   measured in. *)
 Record indcpa_adversary := {
+  (* everything the adversary holds before the challenge *)
   adv_state : finType ;
+  (* the law that state is drawn from *)
   adv_choose : R.-fdist adv_state ;
+  (* the challenge plaintext read off the state *)
   adv_plain : adv_state -> plain AHE ;
+  (* the verdict on the state and the challenge ciphertext *)
   adv_decide : adv_state -> cipher AHE -> bool }.
 
 Arguments adv_choose : clear implicits.
@@ -304,11 +310,10 @@ Definition indcpa_accept (b : bool) (pk : pub_key AHE)
    plaintext it chose. *)
 Definition indcpa_success_real := indcpa_accept true.
 
-(* The real success probability, unfolded as: draw the adversary state, encrypt
+(* The real success probability unfolded: draw the adversary state, encrypt
    the plaintext that state chose under fresh uniform randomness, and test the
-   result.  A protocol hop whose challenged slot still carries the real
-   plaintext has its acceptance probability in exactly this form, which is how
-   hop0_real_challengeE and hop1_real_challengeE close. *)
+   result.  A hop whose challenged slot still carries the real plaintext has
+   its acceptance probability in this form. *)
 Lemma indcpa_success_realE (pk : pub_key AHE)
     (adv : indcpa_adversary) :
   indcpa_success_real pk adv
@@ -321,11 +326,9 @@ Proof. by []. Qed.
    zero. *)
 Definition indcpa_success_zero := indcpa_accept false.
 
-(* The zero success probability in that same unfolded form, with the plaintext
-   replaced by zero.  The neighbouring hop, the one whose challenged slot
-   already encrypts zero, has its acceptance probability in exactly this form.
-   The two lemmas together put two neighbouring hops on the two branches of a
-   single IND-CPA experiment. *)
+(* The zero success probability in that same unfolded form, with zero in place
+   of the chosen plaintext.  With indcpa_success_realE it puts two neighbouring
+   hops on the two branches of one IND-CPA experiment. *)
 Lemma indcpa_success_zeroE (pk : pub_key AHE)
     (adv : indcpa_adversary) :
   indcpa_success_zero pk adv
@@ -341,36 +344,17 @@ Definition indcpa_epsilon (pk : pub_key AHE)
     (adv : indcpa_adversary) : R :=
   `| indcpa_success_real pk adv - indcpa_success_zero pk adv |.
 
-(* An extensional Boolean classifier. Given one epsilon, and the assumption that
-   every classified adversary stays below that epsilon at every key built
-   from a private key. Extensional means two adversaries with the same
-   state law, the same challenge plaintext and the same decision are one term
-   and receive one Boolean.
-
-   SSProve sits at the same boundary: Haselwarter
-   et al., ACM TOPLAS 45(3) Article 15, 2023, section 2.3 gives the
-   polynomial-time hypothesis as an informal reading of a concrete bound,
-   outside every mechanized statement, and its Coq development defines no
-   cost notion at all.  Its developers record the same boundary in source:
-   "It would also be nice to formalise Claim 10.3 (p. 186), but its argument
-   depends on the adversary only having polynomial time, and how to formulate
-   that is unclear" (SSProve commit c6d7d4bc,
-   theories/Crypt/examples/PRFMAC.v:6-8).
-
-   FCF instead states its efficiency
-   predicate admissible_oc, in WC_PolyTime.v, over families of OracleComp
-   terms, so there the classified object is a program rather than a function.
-
-   The class may be empty, and a bound conditional on an empty class holds
-   vacuously.  The class must also leave something out whenever the scheme is
-   correct and #|plain AHE| > 1: an adversary holding the matching private key
-   and submitting a nonzero challenge plaintext decrypts the challenge and
-   reaches advantage 1, so an assumption whose classifier admits every
-   adversary is forced to assume epsilon at least 1.
- *)
+(* A Boolean class of adversaries, one epsilon, and the assumption that every
+   adversary of the class stays below that epsilon at every public key built
+   from a private key.  The classifier is extensional, so it reads an
+   adversary as a function and running time stays a property of a syntax it
+   does not see. *)
 Record indcpa_epsilon_assumption := {
+  (* the class of adversaries the assumption speaks about *)
   indcpa_admissible : indcpa_adversary -> bool ;
+  (* the advantage assumed of every adversary of that class *)
   indcpa_assumption_epsilon : R ;
+  (* at every key of a private key, a classified adversary stays below it *)
   indcpa_admissible_epsilon_le : forall (dk : priv_key AHE) adv,
     indcpa_admissible adv ->
     indcpa_epsilon (pub_of_priv dk) adv
@@ -386,19 +370,17 @@ under eq_bigr do rewrite Hf.
 by rewrite -big_distrl /= FDist.f1 mul1r.
 Qed.
 
-(* A classifier that actually computes: it says yes exactly when the
-   adversary's decision ignores the challenge ciphertext, checked over every
-   state and every pair of ciphertexts by finite quantification.  This is what
-   "receive a function, give a boolean" looks like when the boolean is not a
-   placeholder. *)
+(* The class of adversaries whose verdict ignores the challenge ciphertext,
+   decided over every state and every pair of ciphertexts by finite
+   quantification.  It is a classifier that computes rather than a placeholder
+   Boolean. *)
 Definition adv_decide_cipher_constant (adv : indcpa_adversary) : bool :=
   [forall c, [forall ch1, [forall ch2,
      adv_decide adv c ch1 == adv_decide adv c ch2]]].
 
-(* Every adversary that classifier admits has advantage exactly zero, not at
-   most some assumed epsilon.  Ignoring the ciphertext means the real and the
-   zero experiment hand the decision the same law, so the two acceptance
-   probabilities are one number and their gap is zero. *)
+(* An adversary whose verdict ignores the challenge ciphertext has advantage
+   exactly zero.  The real and the zero experiment hand its decision the same
+   law, so the two acceptance probabilities are one number. *)
 Lemma indcpa_epsilon_cipher_constant_eq0 (pk : pub_key AHE)
     (adv : indcpa_adversary) :
   adv_decide_cipher_constant adv -> indcpa_epsilon pk adv = 0.
@@ -425,11 +407,10 @@ Let cipher_constant_epsilon_le (dk : priv_key AHE)
   indcpa_epsilon (pub_of_priv dk) adv <= 0.
 Proof. by move=> H; rewrite (indcpa_epsilon_cipher_constant_eq0 _ H). Qed.
 
-(* An assumption whose promise is proved rather than assumed.  Its classifier
-   computes, its epsilon is zero, and the bound it carries is the lemma above
-   instead of a hypothesis.  The class it admits is small, so the bounds
-   conditional on it are weak, but it settles that this record type has an
-   inhabitant with content, and it shows what one looks like. *)
+(* The cipher-ignoring class with epsilon zero, an assumption whose bound is
+   proved by the lemma above rather than assumed.  The class it admits is
+   small, so the bounds conditional on it are weak, and it settles that the
+   record type has an inhabitant with content. *)
 Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
   {| indcpa_admissible := adv_decide_cipher_constant ;
      indcpa_assumption_epsilon := 0 ;
@@ -460,9 +441,9 @@ Hypothesis state_rho_prodE :
 
 (* A state paired with a slot built from the state and a coordinate the state
    omits has the law of the state extended by resampling that coordinate.  The
-   omitted coordinate is the encryption randomness, so one protocol sample can
-   be re-read as sampling the reduction state first and drawing fresh uniform
-   randomness afterwards, which is the order the challenger works in. *)
+   omitted coordinate is the encryption randomness, so one protocol sample is
+   also a sample of the reduction state followed by fresh uniform randomness,
+   the order the challenger works in. *)
 Lemma enc_slot_resampleE :
   `p_ [% State, (fun t => enc_slot (State t) (Rho t))
         : {RV P -> cipher AHE}]
@@ -499,13 +480,11 @@ Variable challenge_plain : stateT -> plain AHE.
    on from reduction state c and challenge ciphertext ch. *)
 Variable assemble : stateT -> cipher AHE -> T.
 
-(* The value a distinguisher is tested on in a protocol run.  Rho enters it at
-   one place only, the ciphertext of the plaintext that State selects, and
+(* The value a distinguisher is tested on in a protocol run: Rho enters it at
+   one place, the ciphertext of the plaintext that State selects, and
    everything else is a function of State.  That confinement is what lets a
-   reduction hand Rho to the challenger and still rebuild the tested value
-   around the challenge ciphertext it gets back.  A protocol whose sample is
-   laid out differently reaches this section by proving its own tested value
-   equal to protocol_RV, which is where the confinement is checked. *)
+   reduction hand Rho to the challenger and rebuild the tested value around
+   the challenge ciphertext it gets back. *)
 Definition protocol_RV : {RV P -> T} :=
   fun t => assemble (State t)
              (enc pk (challenge_plain (State t)) (rand_of_renc (Rho t))).
@@ -526,12 +505,10 @@ Definition indcpa_fdist : R.-fdist T :=
   ch <- enc_fdist pk (challenge_plain c) ;
   ret (assemble c ch).
 
-(* The law read off one complete protocol sample equals the law the IND-CPA
-   experiment produces, where the reduction state and the encryption randomness
-   are sampled separately and the same deterministic encryption and assembly
-   functions are applied.  The two sides differ only in who owns the challenged
-   coordinate: on the left it is the protocol's Rho, on the right it is the
-   challenger.  So the reduction reproduces the hop with no error term. *)
+(* The law read off one protocol sample equals the law of the IND-CPA
+   experiment on the same value.  The two sides differ only in who owns the
+   challenged coordinate, the protocol's Rho on the left and the challenger on
+   the right, so the reduction reproduces the hop with no error term. *)
 Lemma protocol_indcpa_fdistE : `p_ protocol_RV = indcpa_fdist.
 Proof.
 have -> : `p_ protocol_RV
@@ -549,10 +526,10 @@ by rewrite -/(fdistmap (assemble c) (enc_fdist pk (challenge_plain c)))
            fdistmap_comp.
 Qed.
 
-(* The acceptance probability under indcpa_fdist, unfolded as the state law
-   bound with the pushforward of D along each challenge law.  Read together
-   with indcpa_success_realE and indcpa_success_zeroE it identifies a hop
-   success probability with an IND-CPA success probability. *)
+(* Acceptance under indcpa_fdist, unfolded as the state law bound with the
+   pushforward of D along each challenge law.  With indcpa_success_realE and
+   indcpa_success_zeroE it identifies a hop success probability with an
+   IND-CPA success probability. *)
 Lemma indcpa_fdist_acceptE (D : distinguisher T) :
   Pr indcpa_fdist [set x | D x]
   = Pr (c <- `p_ State ;

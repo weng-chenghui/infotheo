@@ -26,6 +26,12 @@ Require Import negligible indcpa_game epshop.
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
 (*                                                                            *)
+(* pq_gt1 is a Lemma rather than a section Let because the exported           *)
+(* statements below mention the scheme, hence this proof term, and a          *)
+(* downstream file restating that bound needs a name to write.                *)
+(* Bounds stated at two proofs of the card_renc_paillier equation would       *)
+(* compose only through a rewrite.                                            *)
+(*                                                                            *)
 (* ## How the scheme and the game are connected                               *)
 (*                                                                            *)
 (* Paillier_AHEnc packs the Paillier scheme as one structure.  It holds the   *)
@@ -183,22 +189,18 @@ Variables p q : nat.
 Hypothesis p_gt1 : (1 < p)%N.
 Hypothesis q_gt1 : (1 < q)%N.
 
-(* The modulus bound the Paillier packaging is taken at.  It is a Lemma
-   rather than a section Let because the exported statements below mention
-   the scheme, hence this proof term; a downstream file restating that bound
-   at its own proof of the same inequality needs a name to write. *)
+(* The modulus p q is greater than 1.  This is the condition the Paillier
+   packaging is taken at, and every scheme value below carries this proof
+   term. *)
 Lemma pq_gt1 : (1 < p * q)%N.
 Proof. by rewrite (leq_trans p_gt1) // leq_pmulr // (ltnW q_gt1). Qed.
 
 Local Notation AHE := (Paillier_AHEnc pq_gt1).
 
-(* The coin index type of this instantiation: the scheme's own randomness
-   carrier, the unit group of Z/(pq)^2 Z.  The abstract development draws
-   encryption randomness from a finite type and maps it into rand, because
-   the generic rand of he_types.v is a bare Type and carries no distribution;
-   at a concrete scheme the two coincide.
-   Naming: [renc] is the coin-index token of the abstract development, with
-   the scheme named after it. *)
+(* The coin index type of this instantiation: the unit group of Z/(pq)^2 Z,
+   which is the scheme's own randomness carrier.  Coins and randomness are
+   separate in the abstract development because rand is a bare Type and
+   carries no distribution, and at a concrete scheme the two coincide. *)
 Definition renc_paillier : finType := {unit 'Z_((p * q) * (p * q))}.
 
 (* The coin map of this instantiation is the identity: the coin index type
@@ -206,33 +208,27 @@ Definition renc_paillier : finType := {unit 'Z_((p * q) * (p * q))}.
    randomness the encryption consumes. *)
 Definition rand_of_renc_paillier : renc_paillier -> rand AHE := idfun.
 
-(* The coin space is nonempty, written in the successor form the uniform
-   distribution of the abstract development takes.
-   Every statement below is instantiated at this one proof term.  A second
-   proof of the same equation is propositionally equal to this one and not
-   convertible with it, so bounds stated at the two would compose only
-   through a rewrite. *)
+(* The coin space is nonempty, in the successor form the uniform distribution
+   of the abstract development takes.  Every statement below is read at this
+   one proof term, since a second proof of the same equation is not
+   convertible with it. *)
 Lemma card_renc_paillier : #|renc_paillier| = #|renc_paillier|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
-(* The Paillier scheme as one value of the scheme record the IND-CPA game is
+(* The Paillier scheme as one value of the record the IND-CPA game is
    quantified over: the packaging at modulus p q, its coin index type, the
    pinned cardinality above, and the identity coin map.  The DSDP files
-   instantiate the game at this value, so every bound they read off at
-   Paillier is a bound at the scheme record built here and at no other
-   proof of the coin-space cardinality. *)
+   instantiate the game here, so every Paillier bound they read off is a bound
+   at this record. *)
 Definition paillier_indcpa_scheme : indcpa_scheme :=
   {| scheme_AHE := AHE ; scheme_renc := renc_paillier ;
      scheme_card_renc := card_renc_paillier ;
      scheme_rand_of_renc := rand_of_renc_paillier |}.
 
 (* The IND-CPA challenger at this packaging is the Paillier encryption of
-   paillier_enc.v under uniform unit-group randomness.  The game's enc is
-   the packaging's enc and the coin map is the identity, so the two laws are
-   one term.  This is the point where the game of indcpa_game.v and the
-   scheme of paillier_ahe.v meet: every advantage measured below is measured
-   against this law, and so against c = g^m * u^n mod (pq)^2 with u
-   uniform in the unit group. *)
+   paillier_enc.v under uniform unit-group randomness.  Every advantage below
+   is measured against this law, c = g^m * u^n mod (pq)^2 with u uniform in
+   the unit group. *)
 Lemma enc_fdist_paillierE (pk : pub_key AHE) (v : plain AHE) :
   enc_fdist (R:=R) (S:=paillier_indcpa_scheme) pk v
   = fdistmap (paillier_enc (pub_gen pk) v) (fdist_uniform card_renc_paillier).
@@ -246,24 +242,19 @@ Local Notation unit_fdist :=
 Local Notation residue_fdist :=
   (residue_fdist (R:=R) 'Z_((p * q) * (p * q)) (p * q) card_renc_paillier).
 
-(* Decisional composite residuosity at modulus p q: the residuosity
-   assumption of residuosity_game.v at the ring Z/(pq)^2 Z and the exponent
-   p q, which is Paillier 1999 Conjecture 1.  A record of this type carries
-   an extensional Boolean class of distinguishers, one epsilon, and the
-   assumption that every classified distinguisher tells a uniform unit from
-   a (p q)-th power with advantage at most that epsilon.  It is the single
-   computational premise the Paillier bounds of this file are read at. *)
+(* Decisional composite residuosity at modulus p q, Paillier 1999
+   Conjecture 1: a Boolean class of distinguishers, one epsilon, and the
+   assumption that every classified distinguisher tells a uniform unit of
+   Z/(pq)^2 Z from a (p q)-th power with advantage at most that epsilon.  It
+   is the one computational premise every Paillier bound below is read at. *)
 Definition dcr_assumption : Type :=
   residuosity_assumption (R:=R) 'Z_((p * q) * (p * q)) (p * q)
     card_renc_paillier.
 
 (* The advantage a decisional composite residuosity record assumes of the
-   distinguishers its class admits.  Every Paillier IND-CPA bound of this
-   file is a multiple of it: an IND-CPA epsilon at one key is twice it, one
-   call per hop of the reduction below, and a trace bound that replaces a
-   ciphertext at two keys is four times it.
-   Naming: [dcr] names the game the epsilon belongs to, distinguishing it
-   from the IND-CPA epsilon derived from it. *)
+   distinguishers its class admits.  Every Paillier bound below is a multiple
+   of it: twice it at one key, one call per hop of the reduction, and four
+   times it for a trace that replaces a ciphertext at two keys. *)
 Definition dcr_epsilon (dcr : dcr_assumption) : R :=
   residuosity_assumption_epsilon dcr.
 
@@ -289,9 +280,10 @@ Definition dcr_of_adversary_zero
      state_fdist := adv_choose adv ;
      decide := fun c x => adv_decide c x |}.
 
-(* The real experiment is the multiplying reduction at the residue
-   challenge.  Both sides draw the state the same way and compose two
-   pushforwards, so the identity is one fdistmap_comp per state. *)
+(* The real experiment is the multiplying reduction at the residue challenge:
+   an encryption of the adversary's plaintext under g is g to that plaintext
+   times a (p q)-th power of a uniform unit.  It is the starting object of the
+   chain below. *)
 Lemma real_accept_dcrE (g : 'Z_((p * q) * (p * q)))
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
@@ -320,10 +312,10 @@ apply/funext => c; rewrite !fdistmap_comp; congr (fdistmap _ _).
 by apply/funext => u; rewrite /paillier_enc expr0 /= mul1r.
 Qed.
 
-(* At the unit challenge the two reductions accept with the same
-   probability.  This is the hop of the hybrid that costs nothing: it is the
-   key fact, multiplication by a unit fixes the uniform law, applied state by
-   state at the multiplier g ^+ (adv_plain c). *)
+(* At the unit challenge the two reductions accept with the same probability,
+   because multiplication by the unit g ^+ (adv_plain c) fixes the uniform
+   law.  It is the middle step of the chain below, the step that adds no
+   loss. *)
 Lemma unit_accept_dcrE (g : 'Z_((p * q) * (p * q))) (gn : g ^+ (p * q) = 1)
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   residuosity_accept (dcr_of_adversary g adv) unit_fdist
@@ -351,24 +343,17 @@ Qed.
    name the chain below reads at. *)
 Local Notation accept := (residuosity_accept (R:=R)).
 
-(* The two labels of the Paillier reduction, one per residuosity call:
-   dcr_g for the call made through dcr_of_adversary at the key's generator,
-   dcr_0 for the call made through dcr_of_adversary_zero, the reduction that
-   hands the challenge to the adversary unchanged.  A label names the
-   reduction the hop invokes, so the loss of a finished chain reads as the
-   list of assumption calls its bound rests on, each term traceable to the
-   distinguisher it was assumed of.
-   Naming: [dcr] is the assumption invoked, [g] the generator the first
-   reduction multiplies the challenge by, and [0] the plaintext the second
-   encrypts, the zero arm of the IND-CPA experiment. *)
+(* The two labels of the Paillier reduction, one per residuosity call: dcr_g
+   for the call through dcr_of_adversary at the key's generator, dcr_0 for the
+   call through dcr_of_adversary_zero, which hands the challenge over
+   unchanged.  A label names the reduction its hop invokes, so the loss of a
+   finished chain reads as the list of assumption calls its bound rests on. *)
 Variant paillier_label := dcr_g | dcr_0.
 
 (* What each label claims: the two acceptance probabilities its residuosity
-   call moves between, and the epsilon that call assumes.  The claims are
-   written here rather than at the steps of the chain, and that is what makes
-   a step check: the cost, the target and the justification of a hop are each
-   compared with the claim of the label the hop stands under, so no step can
-   record a residuosity call it did not make. *)
+   call moves between, and the epsilon that call assumes.  A hop's cost,
+   target and justification are each checked against the claim of its label,
+   so no step can record a residuosity call it did not make. *)
 Definition paillier_claim (dcr : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme)
     (l : paillier_label) : claim R :=
@@ -386,9 +371,9 @@ Definition paillier_claim (dcr : dcr_assumption) (dk : priv_key AHE)
 Local Open Scope epshop_scope.
 
 (* The closed form of the loss the chain below accumulates: one residuosity
-   epsilon per hop, twice the assumed epsilon.  It is the identity the return
-   statement of that chain is proved by, and the factor two in every Paillier
-   IND-CPA bound of this file comes from here. *)
+   epsilon per hop, twice the assumed epsilon.  The chain returns its bound by
+   this identity, and the factor two in every Paillier bound of this file
+   comes from here. *)
 Lemma dcr_totalE (dcr : dcr_assumption) :
   dcr_epsilon dcr + dcr_epsilon dcr = 2 * dcr_epsilon dcr.
 Proof. by rewrite mulr_natl mulr2n. Qed.
@@ -404,9 +389,7 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
    residuosity calls that comparison spends.  The two class memberships are
    variables of the section, spent in the justification of the hop each one
    licenses, so a chain that exists has already spent them and leaves nothing
-   to discharge.
-   Naming: admissible_g and admissible_0 name the labels dcr_g and dcr_0 the
-   two memberships license. *)
+   to discharge. *)
 Section paillier_chain.
 Variable dcr : dcr_assumption.
 Variable dk : priv_key AHE.
@@ -442,14 +425,11 @@ Definition paillier_chain :=
                spent *)
             bound (2 * eps) by dcr_totalE dcr }.
 
-(* The reduction and its loss.  An adversary whose two residuosity reductions
-   the residuosity class admits has IND-CPA advantage at most 2 eps_DCR at
-   every key built from a private key, one eps_DCR per hop of the two-step
-   hybrid: the first hop moves the real experiment from the residue challenge
-   to the unit challenge, the second moves the zero experiment back, and the
-   middle equality between them is unit_accept_dcrE.  Both terms are
-   assumption-conditional, so the whole bound is computational.  This is Katz
-   and Lindell 2015 Theorem 13.13, read at any generator whose order divides
+(* An adversary whose two residuosity reductions the residuosity class admits
+   has IND-CPA advantage at most 2 eps_DCR at every key built from a private
+   key: the real and the zero acceptance probabilities differ by one
+   assumption-conditional eps_DCR per residuosity call.  This is Katz and
+   Lindell 2015 Theorem 13.13, read at any generator whose order divides
    p q. *)
 Lemma paillier_dcr_epsilon_le :
   indcpa_epsilon (R:=R) (S:=paillier_indcpa_scheme)
@@ -473,11 +453,8 @@ Definition paillier_dcr_admissible (dcr : dcr_assumption)
   [forall g, residuosity_admissible dcr (dcr_of_adversary g adv)]
   && residuosity_admissible dcr (dcr_of_adversary_zero adv).
 
-(* The same 2 eps_DCR bound with the two premises read off that one Boolean,
-   which is the shape the assumption record's proof field takes.
-   Naming: paillier_dcr_admissible_epsilon_le mirrors the field it
-   discharges, indcpa_admissible_epsilon_le of indcpa_game.v, with the
-   scheme and the problem in front. *)
+(* The same 2 eps_DCR bound with the two premises read off one Boolean, the
+   shape the assumption record's proof field takes. *)
 Lemma paillier_dcr_admissible_epsilon_le (dcr : dcr_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   paillier_dcr_admissible dcr adv ->
@@ -502,14 +479,10 @@ Definition paillier_indcpa_assumption (dcr : dcr_assumption) :
      indcpa_admissible_epsilon_le := @paillier_dcr_admissible_epsilon_le dcr |}.
 
 (* At the zero-epsilon residuosity witness the induced class admits every
-   adversary whose decision ignores the ciphertext: such an adversary ignores
-   the challenge under both reductions, multiplied or not.  So the derived
-   record has an inhabited class at an epsilon that is proved rather than
-   assumed, and a statement restricted to the derived class is not empty for
-   want of an adversary to read it at.
-   Naming: paillier_dcr_admissible_cipher_constant composes the two class
-   names it relates, paillier_dcr_admissible here and
-   adv_decide_cipher_constant of indcpa_game.v. *)
+   adversary whose decision ignores the ciphertext, since such an adversary
+   ignores the challenge under both reductions.  The class is therefore
+   inhabited at an epsilon that is proved rather than assumed, so a bound
+   restricted to it has an adversary to read it at. *)
 Lemma paillier_dcr_admissible_cipher_constant
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   adv_decide_cipher_constant adv ->
@@ -522,14 +495,12 @@ move=> /'forall_'forall_forallP Hc; apply/andP; split; last first.
 by apply/'forall_'forall_'forall_forallP => g c x y; exact: Hc.
 Qed.
 
-(* What the derived assumption says of Paillier, with the experiment written
-   out.  For every private key and every adversary the induced class admits,
-   the probability that the adversary accepts an encryption of its chosen
-   plaintext under the key's generator and the probability that it accepts an
-   encryption of zero differ by at most 2 eps_DCR.  The key ranges over every
-   PaillierPrivKey record, so the bound is universal over keys rather than
-   averaged over a key-generation law, and the adversary holds the public key
-   alone. *)
+(* For every private key and every adversary the induced class admits, the
+   probability of accepting an encryption of the chosen plaintext under the
+   key's generator and the probability of accepting an encryption of zero
+   differ by at most 2 eps_DCR.  The key ranges over every PaillierPrivKey
+   record, so the bound is universal over keys rather than averaged over a
+   key-generation law, and the adversary holds the public key alone. *)
 Lemma paillier_indcpa_epsilon_le (dcr : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   paillier_dcr_admissible dcr adv ->

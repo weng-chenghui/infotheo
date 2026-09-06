@@ -107,6 +107,10 @@ From mathcomp Require Import boolp reals.
 (* separator, and that separator being right associative would swallow a      *)
 (* single ; before the bound token.                                           *)
 (*                                                                            *)
+(* The claim function indexes a chain_result although no field of the result  *)
+(* reads it: it says which program the result came from, and it is what the   *)
+(* elaborator solves from the type a client ascribes to its program.          *)
+(*                                                                            *)
 (* ```                                                                        *)
 (*                   claim R == what a label asserts: the game it goes from,  *)
 (*                              the game it goes to and a cost, the           *)
@@ -186,12 +190,17 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 
 (* What a label asserts: the game it goes from and the game it goes to lie
-   within its cost of each other.  The claim is the whole content of a label:
-   it is what a step written under that label is checked against, so an
-   assumption-conditional term of a bound cannot enter a chain under the name
-   of a different assumption. *)
+   within its cost of each other.  A step written under a label is checked
+   against its claim, so an assumption-conditional term cannot enter a chain
+   under the name of a different assumption. *)
 Record claim (R : realType) :=
-  Claim { claim_from : R ; claim_to : R ; claim_cost : R }.
+  Claim {
+    (* the game the label goes from *)
+    claim_from : R ;
+    (* the game the label goes to *)
+    claim_to : R ;
+    (* the cost, the summand the label adds to a loss *)
+    claim_cost : R }.
 
 (* The proposition a claim asserts, and the type of the justification a hop
    supplies.  A step whose justification has this type is a step whose two
@@ -209,9 +218,9 @@ Variable L : Type.
 Variable R : realType.
 Variable claim_of : L -> claim R.
 
-(* The numeric total of a loss, the monoid map to the additive reals along
-   which every bound of this file is finally read.  A label costs what its
-   claim names. *)
+(* The numeric total of a loss, each label costing what its claim names.  It
+   is the monoid map to the reals along which every bound of this file is
+   finally read. *)
 Definition loss_eval (s : loss L) : R := \sum_(l <- s) claim_cost (claim_of l).
 
 (* The empty loss is the unit: a step that assumes nothing costs nothing. *)
@@ -230,11 +239,10 @@ Proof. by rewrite /loss_eval big_cat. Qed.
 Lemma loss_eval1 l : loss_eval [:: l] = claim_cost (claim_of l).
 Proof. by rewrite /loss_eval big_cons big_nil addr0. Qed.
 
-(* The same total as a left fold, seeded at the first label's cost.  On a
-   list of literal labels it reduces by conversion to a left-associated sum
-   of the epsilons those labels name, with no summation and no list left in
-   it, which is what lets the terminal statement of a chain ask for a plain
-   algebraic identity between that sum and the bound a client publishes. *)
+(* The same total as a left fold, seeded at the first label's cost.  On a list
+   of literal labels it converts to a left-associated sum of the costs those
+   labels name, which is the shape the terminal statement asks a client to
+   match. *)
 Definition loss_total (s : loss L) : R :=
   if s is l :: s' then
     foldl (fun acc l' => acc + claim_cost (claim_of l'))
@@ -257,21 +265,22 @@ case: s => [|l s]; first exact: loss_eval_nil.
 by rewrite /loss_total foldl_lossE /loss_eval big_cons.
 Qed.
 
-(* A chain fragment: where it starts, where it now is, what it logged, and
-   the distance bound itself.  The endpoints are named for the direction a
-   step takes, the game the fragment goes from and the game it has reached.
-   chain_sound is unconditional, so a fragment is a theorem rather than an
-   implication awaiting a hypothesis, and the four statements below each
-   supply their own justification as a term. *)
+(* A chain fragment: the game it goes from, the game it has reached, the
+   labels it logged, and the proof that their total bounds the distance
+   between the two games.  The proof is unconditional, so a fragment is a
+   theorem rather than an implication waiting for a hypothesis. *)
 Record chain := Chain {
+  (* the game the fragment goes from *)
   chain_from : R ;
+  (* the game the fragment has reached *)
   chain_to : R ;
+  (* the labels its steps invoked *)
   chain_loss : loss L ;
+  (* that distance is at most the total of that loss *)
   chain_sound : `| chain_from - chain_to | <= loss_eval chain_loss }.
 
-(* The identity morphism at g: it logs nothing and moves nothing.  It is
-   where a chain opens, at the acceptance probability of a hybrid's first
-   game. *)
+(* | g - g | is within the empty loss.  It justifies the identity at g,
+   where a chain opens and logs nothing. *)
 Lemma start_sound (g : R) : `| g - g | <= loss_eval [::].
 Proof. by rewrite subrr normr0 loss_eval_nil. Qed.
 
@@ -279,11 +288,9 @@ Definition chain_start (g : R) : chain :=
   {| chain_from := g ; chain_to := g ; chain_loss := [::] ;
      chain_sound := start_sound g |}.
 
-(* One hop under the label l, justified by H.  It is the step that spends an
-   assumption, the label naming which one, so every assumption-conditional
-   term of a bound enters here.  The hop goes from the game l's claim goes
-   from, and the game g' it goes to is checked against that claim by Hg, so
-   the games a hop joins are the games the assumption is about. *)
+(* | claim_from (claim_of l) - g' | is within the loss of the single label
+   l.  It justifies the step that spends the assumption l, the games it joins
+   being the games that assumption is about. *)
 Lemma hop_sound (l : L) (g' : R) (H : hop_obligation (claim_of l))
     (Hg : g' = claim_to (claim_of l)) :
   `| claim_from (claim_of l) - g' | <= loss_eval [:: l].
@@ -295,9 +302,9 @@ Definition chain_hop (l : L) (e g' : R) (H : hop_obligation (claim_of l))
   {| chain_from := claim_from (claim_of l) ; chain_to := g' ;
      chain_loss := [:: l] ; chain_sound := @hop_sound l g' H Hg |}.
 
-(* An exact step, from x to g', logging nothing.  It is the step an
-   information-theoretic identity between two games takes, so an
-   unconditional rewriting leaves the loss of a chain as it stands. *)
+(* | x - g' | is within the empty loss when x and g' are equal.  It
+   justifies the exact step an information-theoretic identity takes, which
+   leaves the loss as it stands. *)
 Lemma same_sound (x g' : R) (H : x = g') : `| x - g' | <= loss_eval [::].
 Proof. by rewrite H subrr normr0 loss_eval_nil. Qed.
 
@@ -327,30 +334,24 @@ Definition chain_then (m frag : chain)
 
 (* What a program returns: an advantage, a loss, a bound, the proof that the
    bound bounds the advantage, and the proof that the bound is the total of
-   the loss.  This is the shape a security theorem is stated in, one number
-   bounded rather than two compared.  The claim function indexes a result
-   although no field reads it: it says which program the result came from,
-   and it is what the elaborator solves from the type a client ascribes to
-   its program before reading a single statement. *)
+   the loss.  This is the shape a security theorem takes, one number bounded
+   rather than two games compared. *)
 Record chain_result :=
   ChainResult {
+    (* the quantity the program bounds, a distance between two games *)
     result_advantage : R ;
+    (* the labels the program invoked *)
     result_loss : loss L ;
+    (* the number the program publishes *)
     result_bound : R ;
+    (* the advantage is at most that bound *)
     result_sound : result_advantage <= result_bound ;
-    (* The bound a result publishes is the total of its label list, so the
-       loss stays the source of truth for that number after bound c by H
-       republishes it.  This is what lets a reading along a family of
-       security parameters sum the cost family of each label and land on the
-       bound the program states. *)
+    (* the bound is the total of the label list, which stays its source *)
     result_total : loss_total result_loss = result_bound }.
 
-(* A chain returns the bound its loss totals, on the distance between the
-   game it opened at and the game it stopped at.  That distance is the
-   advantage of the chain: a program that stops at the zero game therefore
-   returns a bound on the probability of the game it opened at.  This is
-   the return of a program that ends without a terminal statement, and it is
-   inserted by coercion where a result is asked for. *)
+(* | chain_from m - chain_to m | is within the total of the chain's loss.
+   That distance is the advantage of the chain, so a chain stopping at the
+   zero game bounds the probability of the game it opened at. *)
 Lemma chain_result_sound (m : chain) :
   `| chain_from m - chain_to m | <= loss_total (chain_loss m).
 Proof. by rewrite -loss_evalE; exact: chain_sound. Qed.
@@ -360,12 +361,9 @@ Definition chain_result_of_chain (m : chain) : chain_result :=
      result_loss := chain_loss m ; result_bound := loss_total (chain_loss m) ;
      result_sound := chain_result_sound m ; result_total := erefl |}.
 
-(* The return statement: the result is republished at the explicit bound c,
-   which H says is the total the loss accumulated.  Since loss_total on a
-   list of literal labels converts to a left-associated sum of the epsilons
-   those labels name, H is an algebraic identity between that sum and the
-   number the client's theorem states, and no vocabulary of this file appears
-   in it. *)
+(* A result's advantage is at most any c its bound is equal to.  It justifies
+   the return statement, whose H is an algebraic identity between the sum of
+   the costs and the number the client's theorem states. *)
 Lemma bound_sound (b : chain_result) (c : R)
     (H : result_bound b = c) :
   result_advantage b <= c.
@@ -398,11 +396,9 @@ Variable L : Type.
 Variable R : realType.
 Variable claim_of : L -> claim R.
 
-(* Two chains agreeing on their three observable fields are equal.  The
-   fourth field is a proof of a Boolean, whose uniqueness is bool_irrelevance,
-   a lemma of mathcomp's eqtype; no proof irrelevance on Prop is needed, and
-   the three laws below are therefore equalities of records rather than
-   statements up to an equivalence. *)
+(* Two chains agreeing on their three observable fields are equal.  The fourth
+   field is a proof of a Boolean, unique by bool_irrelevance, so the laws below
+   are equalities of records rather than statements up to an equivalence. *)
 Lemma chain_observable_eq (c1 c2 : chain claim_of) :
   chain_from c1 = chain_from c2 -> chain_to c1 = chain_to c2 ->
   chain_loss c1 = chain_loss c2 -> c1 = c2.
@@ -419,17 +415,14 @@ Lemma chain_left_unit (g : R) (frag : chain claim_of)
   chain_then (chain_start g) frag Hb = frag.
 Proof. by apply: chain_observable_eq; rewrite //= Hb. Qed.
 
-(* Right unit: composing chain_start after a chain returns that chain, the
-   loss half by cats0.  Closing a chain at the game it already stands at
-   leaves the bound read off it. *)
+(* Composing chain_start after a chain returns that chain.  Closing a chain at
+   the game it already stands at leaves the bound read off it. *)
 Lemma chain_right_unit (m : chain claim_of) :
   chain_then m (chain_start (chain_to m)) erefl = m.
 Proof. by apply: chain_observable_eq; rewrite //= cats0. Qed.
 
-(* Associativity: the two groupings of a triple composition are equal, the
-   loss half by catA and the two side conditions the same two proofs on both
-   sides.  How the separators of a chain are grouped therefore leaves the
-   assumptions it names and their total. *)
+(* The two groupings of a triple composition are equal.  How the separators of
+   a chain are grouped therefore leaves the labels it names and their total. *)
 Lemma chain_assoc (m1 m2 m3 : chain claim_of)
     (H12 : chain_from m2 = chain_to m1)
     (H23 : chain_from m3 = chain_to m2) :
@@ -445,21 +438,15 @@ End chain_laws.
 Lemma le_of_eq (R : realType) (x y : R) : x = y -> x <= y.
 Proof. by move=> ->. Qed.
 
-(* A nonnegative quantity bounded by c lies within c of the zero game.  It is
-   what puts a bound on one game in the shape the plus statement's
-   justification takes, that statement being a hop that goes to zero.
-   Naming: after the plus statement of the entry it justifies, not after the
-   head symbol of its conclusion. *)
+(* A nonnegative quantity bounded by c satisfies | x - 0 | <= c, so it lies
+   within c of the zero game.  It is the shape the justification of a plus
+   statement takes, that statement being a hop to zero. *)
 Lemma plus_le (R : realType) (x c : R) : 0 <= x -> x <= c -> `| x - 0 | <= c.
 Proof. by move=> x0 xc; rewrite subr0 ger0_norm. Qed.
 
-(* The advantage of a nonnegative quantity against the zero game is that
-   quantity.  It is what reads a bound on the advantage of a program ending
-   at the zero game back as a bound on the probability of the game it opened
-   at.  Naming: [advantage] is the role this generic fact plays in the entry
-   and
-   [0] the zero game it is read against, neither being the head symbol of the
-   equation. *)
+(* | x - 0 | = x for nonnegative x: the advantage against the zero game is
+   the quantity itself.  It reads the bound of a program ending at zero back
+   as a bound on the probability of the game it opened at. *)
 Lemma advantage0 (R : realType) (x : R) : 0 <= x -> `| x - 0 | = x.
 Proof. by move=> x0; rewrite subr0 ger0_norm. Qed.
 
@@ -496,15 +483,10 @@ Notation "'plus' l c 'by' H" := (chain_hop l c 0 H erefl erefl)
 Notation "s1 ';' s2" := (chain_then s1 s2 erefl)
   (in custom epshop at level 90, right associativity).
 
-(* The delimiter.  As in smc/pismc.v the brace form is prefixed, {| e |}
-   being taken by the record syntax, and \epsilon[ is one lexer token.  The
-   bracket carries the dictionary, the claim function saying what each label
-   of the program asserts: a label is a bare constructor and names its claim
-   through the dictionary alone, so the ascription the delimiter inserts is
-   what lets the labels inside elaborate and a program needs no return type
-   on its Definition.  A program with no terminal is a chain, composable as a
-   fragment of a longer program, and where a result is asked for the coercion
-   chain_result_of_chain reads off its advantage result. *)
+(* The delimiter: the program e is read at the dictionary C, the claim
+   function saying what each label asserts.  The ascription is what lets a
+   bare label elaborate, and a program with no terminal is a chain, composable
+   as a fragment of a longer program. *)
 Notation "'\epsilon[' C ']{' e '}'" := (e : chain C)
   (C constr at level 0, e custom epshop at level 99) : epshop_scope.
 

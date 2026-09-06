@@ -24,6 +24,13 @@ Import Num.Theory.
 (*                                                                            *)
 (******************************************************************************)
 
+(******************************************************************************)
+(* The fiber count of dsdp_fiber_card is m only when Alice's weight on        *)
+(* Charlie is invertible modulo m.  A weight sharing a factor with the        *)
+(* modulus makes the count depend on the view, leaving some views impossible  *)
+(* and others with more candidates than m.                                    *)
+(******************************************************************************)
+
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
@@ -66,12 +73,12 @@ Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
 Local Notation m := (p * q)%N.
-(* Use Zp ring structure for composite modulus arithmetic *)
+(* The plaintext ring at the composite modulus m = p * q. *)
 Local Notation msg := 'Z_m.
 
-(* Fiber from full constraint: s - u1*v1 = u2*v2 + u3*v3.
-   Uses linear_fiber_2d from linear_fiber_zpq.v for the generic 2D linear
-   fiber. *)
+(* The set of relay input pairs (v2, v3) with u2 * v2 + u3 * v3 equal to
+   s - u1 * v1.  These are the pairs consistent with one value of Alice's
+   plaintext view. *)
 Definition dsdp_fiber (u1 u2 u3 v1 s : msg) : {set msg * msg} :=
   linear_fiber_2d u2 u3 (s - u1 * v1)%R.
 
@@ -115,19 +122,23 @@ Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
 (*    Instantiation of entropy_fiber_zpq for DSDP constraint structure       *)
 (* ========================================================================= *)
 
-(* Abbreviation for [%V1, U1, U2, U3] - the inputs independent of VarRV *)
+(* Alice's own input and her three query weights, the part of her view
+   that is independent of the relay inputs. *)
 Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
 
-(* DSDP fiber function: maps condition tuple to fiber set *)
+(* The fiber of a conditioning tuple, read as a function of that
+   tuple. *)
 Let dsdp_fiber_fn (cond : msg * msg * msg * msg * msg) : {set msg * msg} :=
   let '(v1, u1, u2, u3, s) := cond in dsdp_fiber u1 u2 u3 v1 s.
 
-(* DSDP projection: extracts input part from condition *)
+(* The conditioning tuple with the output dropped, leaving Alice's input
+   and her three weights. *)
 Let dsdp_proj_input (cond : msg * msg * msg * msg * msg) :
     msg * msg * msg * msg :=
   let '(v1, u1, u2, u3, _) := cond in (v1, u1, u2, u3).
 
-(* Prerequisite 1: VarRV is always in the fiber of CondRV *)
+(* The relay inputs of a sample always lie in the fiber of that sample's
+   conditioning tuple. *)
 Let constraint_fiber_dsdp : forall t, VarRV t \in dsdp_fiber_fn (CondRV t).
 Proof.
 move=> t.
@@ -137,14 +148,15 @@ move: (constraint_holds t).
 by rewrite /dsdp_constraint /CondRV /VarRV /= => /eqP.
 Qed.
 
-(* Prerequisite 2: InputRV is the projection of CondRV *)
+(* Alice's input and weights are the projection of the conditioning tuple
+   that drops the output. *)
 Let InputRV_proj_dsdp : forall t, InputRV t = dsdp_proj_input (CondRV t).
 Proof. by move=> t. Qed.
 
-(* Prerequisite 3: Joint probability relation - DSDP-specific.
-   The joint [%VarRV, CondRV] probability equals [%VarRV, InputRV]
-   when (v2,v3) is in the fiber (constraint is satisfied).
-   This captures that S is determined by the constraint. *)
+(* On the fiber, the joint law of the relay inputs with the conditioning
+   tuple agrees with their joint law with Alice's input and weights.  The
+   output adds nothing there, since the constraint already determines
+   it. *)
 Let joint_eq_input_dsdp :
   forall (cond : msg * msg * msg * msg * msg) (var : msg * msg),
     var \in dsdp_fiber_fn cond ->
@@ -192,17 +204,12 @@ apply/idP/idP => H.
     by move: Heq => /(f_equal (fun x => x + u1 * v1)); rewrite !subrK.
 Qed.
 
-(* The number of input pairs consistent with one fixed value of Alice's view
-   data.  It is m whenever her trust weight on Charlie lies strictly between
-   0 and both primes, since such a weight is divisible by neither and is
-   therefore invertible.  What the bound buys is uniformity rather than size:
-   the count is m for every view value alike, and that is what turns it into
-   a conditional entropy of log m.  A weight sharing a factor with the
-   modulus does not simply shrink the count, it makes the count depend on the
-   view, leaving some views impossible and others with more candidates than
-   m.  The weight is a public protocol parameter, so this is a condition on
-   how the protocol is configured rather than an assumption about an
-   adversary. *)
+(* The fiber holds m input pairs whenever Alice's weight on Charlie lies
+   strictly between 0 and both primes, since such a weight is invertible
+   modulo m.  The count is the same m at every view value, which is what
+   turns it into a conditional entropy of log m, and the weight is a
+   public protocol parameter, so this is a condition on how the protocol
+   is configured. *)
 Lemma dsdp_fiber_card (u1 u2 u3 v1 s : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   #|dsdp_fiber u1 u2 u3 v1 s| = m.
@@ -212,7 +219,8 @@ rewrite /dsdp_fiber /linear_fiber_2d.
 exact: (linear_fiber_2d_card prime_p prime_q).
 Qed.
 
-(* Non-solutions have zero probability *)
+(* An input pair outside the fiber has conditional probability zero given
+   the view value. *)
 Lemma Pr_dsdp_nosol_eq0 (u1 u2 u3 v1 s : msg) (v2 v3 : msg) :
   `Pr[CondRV = (v1, u1, u2, u3, s)] != 0 ->
   (v2, v3) \notin dsdp_fiber u1 u2 u3 v1 s ->
@@ -238,9 +246,8 @@ have Hconstraint: forall t, constraint (CondRV t) (VarRV t).
 by rewrite (cond_prob_zero_outside_constraint Hconstraint Hcond_pos).
 Qed.
 
-(* Solutions have uniform probability.
-   Instantiates cPr_uniform_fiber from entropy_fiber_zpq.v with DSDP
-   structure. *)
+(* An input pair inside the fiber has conditional probability 1 / m given
+   the view value, so the relay inputs are uniform on the fiber. *)
 Lemma Pr_dsdp_sol_uniform (u1 u2 u3 v1 s : msg) (v2 v3 : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   `Pr[CondRV = (v1, u1, u2, u3, s)] != 0 ->
@@ -264,9 +271,9 @@ have Hcpr := @cPr_uniform_fiber R p_minus_2 q_minus_2
 by rewrite Hcpr /= Hcard.
 Qed.
 
-(* Helper: Each conditioning value gives entropy log(m).
-   Uses centropy1_uniform_over_set directly with DSDP-specific probability
-   lemmas. *)
+(* At one value of Alice's plaintext view, the relay inputs keep log m
+   bits of uncertainty.  The value is the same at every view value of
+   positive probability. *)
 Lemma dsdp_centropy1_uniform (v1 u1 u2 u3 s : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   `Pr[CondRV = (v1, u1, u2, u3, s)] != 0 ->
@@ -297,15 +304,15 @@ rewrite (@centropy1_uniform_over_set R T P _ _ VarRV CondRV
 by rewrite card_m muln_gt0 prime_gt0 // prime_gt0.
 Qed.
 
-(* The constraint function g for centropy_jcond_determined_fibers:
-   given a value (v2,v3) of VarRV and a value (v1,u1,u2,u3) of InputRV,
-   produces the value of S that satisfies the DSDP constraint. *)
+(* The protocol output as a function of the relay inputs and of Alice's
+   input and weights: u1 * v1 + u2 * v2 + u3 * v3. *)
 Definition dsdp_g (var : msg * msg) (inp : msg * msg * msg * msg) : msg :=
   let '(v2, v3) := var in
   let '(v1, u1, u2, u3) := inp in
   (u1 * v1 + u2 * v2 + u3 * v3)%R.
 
-(* Bridge: the DSDP fiber matches the abstract fiber set of dsdp_g. *)
+(* The fiber of the DSDP constraint is the set of relay input pairs that
+   dsdp_g sends to the output value s. *)
 Lemma dsdp_fiber_eq_abstract (v1 u1 u2 u3 s : msg) :
   dsdp_fiber u1 u2 u3 v1 s =
   [set x' : msg * msg | dsdp_g x' (v1, u1, u2, u3) == s].
@@ -328,19 +335,20 @@ move: Heq; rewrite subr_eq addrC => /eqP ->.
 by rewrite addrA.
 Qed.
 
-(* Conditioning on Alice's inputs and the output (V1, U1, U2, U3, S), the
-   plaintext part of her observation, the relay private inputs (V2, V3)
-   retain log m bits of uncertainty.  S is a function of (V2, V3) and the
-   inputs through dsdp_g, so centropy_jcond_determined_fibers quotients the
-   conditional entropy by the fibers of that function, and dsdp_fiber_card
-   supplies the m solutions each fiber holds.  The counting axis bounds the
-   plaintexts, and Alice's key, her masks and the ciphertext hops are bounded
-   on the hopping axis.  [3-party] *)
+(* Conditioning on Alice's input, her three weights and the output, the
+   plaintext part of her view, the relay inputs keep log m bits of
+   uncertainty.  The counting axis bounds the plaintexts, while her key,
+   her masks and the ciphertexts are bounded on the hopping axis.
+   [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
   `H(VarRV | CondRV) = log (m%:R : R).
 Proof.
+(* S is a function of (V2, V3) and the inputs through dsdp_g, so
+   centropy_jcond_determined_fibers quotients the conditional entropy by the
+   fibers of that function, and dsdp_fiber_card supplies the m solutions each
+   fiber holds. *)
 move=> HU3_pos HU3_lt.
 have Hm_pos : (0 < m)%N by rewrite muln_gt0 prime_gt0 // prime_gt0.
 apply: (@centropy_jcond_determined_fibers R T P
@@ -367,7 +375,7 @@ Qed.
 
 Section dsdp_var_entropy.
 
-(* m = p * q > 1 since p, q >= 2 *)
+(* The modulus m = p * q exceeds 1, since both primes are at least 2. *)
 Let m_gt1 : (1 < m)%N.
 Proof.
 (* p >= 2, q >= 2, so p * q >= 4 > 1 *)
@@ -378,13 +386,10 @@ Qed.
 
 (* card_msg and card_msg_pair are inherited from outer section *)
 
-(* Entropy of the relay private inputs (V2, V3) before any conditioning:
-   uniform on a space of size m^2, so H(V2,V3) = log (m * m).  Read against
-   dsdp_centropy_uniform, which gives H(V2,V3 | view) = log m, it says the
-   protocol spends exactly half of that entropy: log m bits reach Alice's
-   plaintext residual and log m bits stay hidden.  This is the numerator of
-   the leakage fraction the counting axis reports.  The ciphertext-carrying
-   view is bounded separately on the hopping axis. *)
+(* The relay inputs are uniform on a space of size m ^ 2 before any
+   conditioning, so their joint entropy is log (m * m).  Against
+   dsdp_centropy_uniform, which leaves log m given Alice's plaintext
+   view, this says the run reveals exactly half of that joint entropy. *)
 Lemma dsdp_var_entropy :
   `p_VarRV = fdist_uniform card_msg_pair ->
   `H `p_VarRV = log (m%:R * m%:R : R).
@@ -450,8 +455,8 @@ rewrite card_prod prednK //.
 by rewrite muln_gt0; apply/andP; split.
 Qed.
 
-(* dsdp_constraint_ring — the ring-generic DSDP linear constraint: for
-   conditions (v1, u1, u2, u3, s) and variables (v2, v3),
+(* The DSDP linear constraint over a finite commutative ring: for the
+   conditioning tuple (v1, u1, u2, u3, s) and the pair (v2, v3),
    s - u1 * v1 = u2 * v2 + u3 * v3. *)
 Definition dsdp_constraint_ring (cond : R * R * R * R * R)
   (var : R * R) : bool :=
@@ -535,8 +540,9 @@ apply/idP/idP => H.
     by move: Heq => /eqP; rewrite -subr_eq0 opprB addrA subrK subr_eq0 => /eqP.
 Qed.
 
-(* Ring-generic conditional uniformity: when u3 is left-regular, (v2, v3) is
-   uniform on the fiber given the conditioning view. *)
+(* When u3 is left-regular, an input pair inside the fiber has
+   conditional probability 1 / #|R| given the view value, so the relay
+   inputs are uniform on the fiber. *)
 Lemma Pr_dsdp_sol_uniform_ring (u1 u2 u3 v1 s v2 v3 : R) :
   GRing.lreg u3 ->
   `Pr[CondRV_r = (v1, u1, u2, u3, s)] != 0 ->
@@ -597,15 +603,17 @@ Proof. by rewrite muln_gt0 prime_gt0 // prime_gt0. Qed.
 Let card_ffun_msg : #|{ffun 'I_n_relay.+1 -> msg}| = (m ^ n_relay.+1).-1.+1.
 Proof. by rewrite prednK ?expn_gt0 ?m_gt0 // card_ffun !card_ord Zp_cast. Qed.
 
-(* Fiber for N-party constraint:
-   s - u0*v0 = \sum_(i < n_relay.+1) u_rel(i) * v_rel(i) *)
+(* The set of relay input vectors whose weighted sum equals the target
+   s - u0 * v0, the N-party form of dsdp_fiber. *)
 Definition dsdp_fiber_n (u_rel : {ffun 'I_n_relay.+1 -> msg}) (target : msg)
     : {set {ffun 'I_n_relay.+1 -> msg}} :=
   @linear_fiber_nd p_minus_2 q_minus_2 n_relay u_rel target.
 
-(* Condition type: (v0, u0, u_relay_vector, s) *)
+(* The conditioning tuple of the N-party run: Alice's input, her own
+   weight, the vector of relay weights, and the output. *)
 Let CondT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg} * msg)%type.
-(* Input type: everything except s (which is determined by constraint) *)
+(* The conditioning tuple with the output dropped, which the constraint
+   already determines from the rest. *)
 Let InputT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg})%type.
 
 Variable VarRV : {RV P -> {ffun 'I_n_relay.+1 -> msg}}.
@@ -637,9 +645,10 @@ Hypothesis joint_eq_input_n :
     `Pr[[%VarRV, CondRV] = (var, cond)] =
     `Pr[[%VarRV, InputRV] = (var, dsdp_proj_input_n cond)].
 
-(* The N-party fiber count.  The numeric interval on the last relay weight
-   is the protocol-checkable specialization of the coprimality condition
-   linear_fiber_nd_card takes, discharged here by lt_minpq_coprime. *)
+(* The fiber holds m ^ n_relay input vectors whenever the last relay
+   weight lies strictly between 0 and both primes.  That numeric interval
+   is the protocol-checkable form of the coprimality condition
+   linear_fiber_nd_card takes. *)
 Lemma dsdp_fiber_card_n (v0 u0 s : msg)
     (u_rel : {ffun 'I_n_relay.+1 -> msg}) :
   (0 < val (u_rel ord_max))%N ->
@@ -656,7 +665,8 @@ apply: (linear_fiber_nd_card prime_p).
 exact: (lt_minpq_coprime prime_p prime_q).
 Qed.
 
-(* Per-conditioning-value entropy *)
+(* At one value of the N-party view, the relay inputs keep
+   log (m ^ n_relay) bits of uncertainty. *)
 Lemma dsdp_centropy1_uniform_n (v0 u0 s : msg)
     (u_rel : {ffun 'I_n_relay.+1 -> msg}) :
   (0 < val (u_rel ord_max))%N ->
@@ -695,23 +705,21 @@ rewrite (@centropy1_uniform_over_set R T P _ _ VarRV CondRV
 by rewrite Hcard expn_gt0 m_gt0.
 Qed.
 
-(* Extract relay coefficient vector from condition tuple *)
+(* The vector of relay weights, read off the conditioning tuple. *)
 Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
   let '(_, _, u_rel, _) := c in u_rel.
 
-(* The final relay's weight, read off the conditioning tuple.  The two
-   hypotheses of dsdp_centropy_uniform_n pin it strictly between zero and
-   min(p, q), which makes it invertible modulo m, and that invertibility is
-   what leaves the relay inputs uniform given the view. *)
+(* The last relay's weight, read off the conditioning tuple.  Held
+   strictly between 0 and min(p, q) it is invertible modulo m, and that
+   is what leaves the relay inputs uniform given the view. *)
 Definition last_relay_weight (c : CondT_n) : msg :=
   (let '(_, _, u_rel, _) := c in u_rel) ord_max.
 
-(* Conditioning on the N-party view (Alice's input and weight, the relay
-   weight vector, and the output), the n_relay + 1 relay private inputs
-   retain log (m ^ n_relay) bits of uncertainty: the output spends exactly
-   one coordinate's worth of their joint entropy, whatever the number of
-   relays.  The 3-party dsdp_centropy_uniform is the same accounting at
-   n_relay = 1.  [N-party] *)
+(* Conditioning on the N-party view, Alice's input and weight, the vector
+   of relay weights and the output, the relay inputs keep
+   log (m ^ n_relay) bits of uncertainty, one coordinate less than their
+   joint entropy whatever the number of relays.  The 3-party
+   dsdp_centropy_uniform is this statement at n_relay = 1.  [N-party] *)
 Theorem dsdp_centropy_uniform_n :
   (forall t, (0 < val (last_relay_weight (CondRV t)))%N) ->
   (forall t, (val (last_relay_weight (CondRV t)) < minn p q)%N) ->

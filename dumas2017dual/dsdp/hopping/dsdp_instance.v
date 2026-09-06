@@ -18,6 +18,12 @@ Require Import negligible indcpa_game.
 (* cardinality.  The coercion inst_scheme is what lets a game-layer constant  *)
 (* read an instance.                                                          *)
 (*                                                                            *)
+(* Two things stay outside the record.  The adversary and the two class       *)
+(* premises restrict the reduction adversaries a predictor induces, so they   *)
+(* speak about the adversary rather than about the execution.  The real field *)
+(* stays outside as well: a sequence lives over one R, which only the         *)
+(* assumption record and the probabilities mention.                           *)
+(*                                                                            *)
 (* A sequence indexes instances by the security parameter and makes the       *)
 (* IND-CPA assumption at each of them.  Two summand sequences are read off    *)
 (* it, f_size the inverse plaintext cardinality and f_adv the advantage       *)
@@ -75,8 +81,9 @@ Import Prenex Implicits.
 
 Local Open Scope ring_scope.
 
-(* Every party's public key is the one associated with its private key, so
-   dec_correct fires by conversion and no key hypothesis is needed. *)
+(* The public key of each party, read off that party's private key.
+   Decryption under it then holds by conversion, so no key hypothesis is
+   carried. *)
 Definition pkey_of_dk (AHE : AHEncType) (dk_a dk_b dk_c : priv_key AHE)
     (p : party_id) : pub_key AHE :=
   match p with
@@ -86,48 +93,45 @@ Definition pkey_of_dk (AHE : AHEncType) (dk_a dk_b dk_c : priv_key AHE)
   | NoParty => pub_of_priv dk_a
   end.
 
-(* One instance of a security-parameter-indexed sequence of DSDP executions:
-   an IND-CPA scheme, the four weights with Charlie's weight invertible, the
-   three private keys, and the two hop coins.  These are exactly the section
-   variables of the corrupted-Alice trace development
-   (dsdp_alice_trace_link.v), so every concrete trace bound applies at a
-   record unchanged.
-   The scheme enters as one field rather than as its four data because an
-   IND-CPA assumption is made about an indcpa_scheme: an instance and the
-   assumption made about it then name the same scheme value, and in
-   particular the same pinned coin-space cardinality.  It is a coercion, so
-   the scheme projections scheme_AHE, scheme_renc, scheme_card_renc and
-   scheme_rand_of_renc read an instance directly.
-   Two things stay outside.  The adversary and the two class premises, which
-   restrict the reduction adversaries a predictor induces and so speak about
-   the adversary rather than about the execution.  And the real field: a
-   sequence lives over one R, which only the assumption record and the
-   probabilities mention. *)
+(* One execution of DSDP, the section variables of the corrupted-Alice trace
+   development packed as one record: an IND-CPA scheme, Alice's input and her
+   three weights with the weight on Charlie's input invertible, the three
+   private keys, and the coins of Bob's and Charlie's second encryptions.
+   The scheme is a single field and a coercion, so an instance and the IND-CPA
+   assumption made about it name one scheme, and hence one coin space. *)
 Record dsdp_instance := {
+  (* the IND-CPA scheme the execution runs on *)
   inst_scheme  :> indcpa_scheme ;
+  (* Alice's own input *)
   inst_v1      : plain (scheme_AHE inst_scheme) ;
+  (* Alice's weight on her own input *)
   inst_u1      : plain (scheme_AHE inst_scheme) ;
+  (* Alice's weight on Bob's input *)
   inst_u2      : plain (scheme_AHE inst_scheme) ;
+  (* Alice's weight on Charlie's input *)
   inst_u3      : plain (scheme_AHE inst_scheme) ;
+  (* that weight is invertible, so the output determines Charlie's input *)
   inst_u3_unit : inst_u3 \is a GRing.unit ;
+  (* Alice's private key *)
   inst_dk_a    : priv_key (scheme_AHE inst_scheme) ;
+  (* Bob's private key *)
   inst_dk_b    : priv_key (scheme_AHE inst_scheme) ;
+  (* Charlie's private key *)
   inst_dk_c    : priv_key (scheme_AHE inst_scheme) ;
+  (* the coin of Bob's encryption to Charlie *)
   inst_rb2     : scheme_renc inst_scheme ;
+  (* the coin of Charlie's encryption to Alice *)
   inst_rc2     : scheme_renc inst_scheme }.
 
-(* The public-key table the corrupted-Alice sections read off an instance's
-   three private keys.  It stays a transparent Definition: the hop-level
-   pkey_of_party of a record and the trace-level pkey_of_dk of its three keys
-   are then the same term by delta alone. *)
+(* The public-key table of an instance's three private keys.  It stays
+   transparent, so the table read off a record and pkey_of_dk of its three
+   keys are the same term. *)
 Definition inst_pkey_of_party (I : dsdp_instance) :=
   pkey_of_dk (inst_dk_a I) (inst_dk_b I) (inst_dk_c I).
 
-(* The instance with Charlie's second-hop coin replaced.  A statement that
-   samples that coin rather than reading it off the instance is a statement
-   about the protocol rather than about one of its executions, and this is
-   the one field such a statement leaves free; every other field is the one
-   the argument is made at. *)
+(* The instance with the coin of Charlie's encryption replaced.  A statement
+   that samples that coin speaks about the protocol rather than about one
+   execution, and this is the only field it leaves free. *)
 Definition inst_with_rc2 (I : dsdp_instance) (w : scheme_renc I)
     : dsdp_instance :=
   {| inst_scheme := inst_scheme I ;
@@ -143,19 +147,19 @@ Definition inst_with_rc2 (I : dsdp_instance) (w : scheme_renc I)
 Arguments inst_with_rc2 : clear implicits.
 
 (* A sequence of DSDP instances indexed by the security parameter, with the
-   IND-CPA assumption made at each k.
-   The record fixes no relation between consecutive k: each instance is
-   supplied on its own, and an asymptotic statement along the sequence reads
-   its content off a dsdp_asymptotic value below rather than off a recurrence
-   between the instances. *)
+   IND-CPA assumption made at each k.  Consecutive instances are unrelated:
+   each one is supplied on its own, and an asymptotic statement reads its
+   content off a dsdp_asymptotic value rather than off a recurrence. *)
 Record dsdp_instance_sequence (R : realType) := {
+  (* the instance at the security parameter k *)
   sequence_instance : nat -> dsdp_instance ;
+  (* the IND-CPA assumption made at the instance at k *)
   sequence_assumption : forall k,
     indcpa_epsilon_assumption (R:=R) (sequence_instance k) }.
 
-(* The inverse plaintext cardinality at k along Q.  It counts the DSDP
-   solution fiber the leaked output confines Bob's input to, and it is the
-   summand every trace guessing bound along Q carries for that output. *)
+(* The inverse plaintext cardinality at k along Q.  It counts the solution
+   fiber the leaked output confines Bob's input to, and it is the summand
+   every trace guessing bound along Q carries for that output. *)
 Definition f_size {R : realType} (Q : dsdp_instance_sequence R) (k : nat)
     : R := (#|plain (scheme_AHE (sequence_instance Q k))|%:R : R)^-1.
 
@@ -164,25 +168,17 @@ Definition f_size {R : realType} (Q : dsdp_instance_sequence R) (k : nat)
 Definition f_adv {R : realType} (Q : dsdp_instance_sequence R) (k : nat)
     : R := indcpa_assumption_epsilon (sequence_assumption Q k).
 
-(* The two negligibility facts about a sequence Q, the asymptotic content of
-   every bound read off along it.
-   The two facts are the two terms of the bound, and the record keeps them
-   apart.  size_negligible is the unconditional one: the inverse plaintext
-   cardinality is the guessing residue the leaked output concedes, it is
-   measured in the plaintext space alone, and it holds against an adversary of
-   any running time.  adv_negligible is the assumption-conditional one: it is
-   the advantage each assumption record assumes, and it is the only place a
-   computational hypothesis enters.
-   They are a record of their own and not fields of Q because a statement made
-   at one security parameter needs the instance and the assumption there and
-   neither of these two facts, so only the statements that let the parameter
-   grow carry them. *)
+(* The two negligibility facts about a sequence Q, one for each term of every
+   bound read off along it.  They are a record of their own because a
+   statement made at a single security parameter needs neither of them. *)
 Record dsdp_asymptotic (R : realType) (Q : dsdp_instance_sequence R) := {
+  (* the unconditional term: the inverse plaintext cardinality vanishes *)
   size_negligible : negligible_fun (f_size Q) ;
+  (* the assumption-conditional term: the assumed advantage vanishes *)
   adv_negligible : negligible_fun (f_adv Q) }.
 
-(* Superpolynomial growth of (k+2)^(k+2): past c the sequence dominates
-   every monomial k^c, by base and exponent monotonicity alone. *)
+(* Superpolynomial growth of (k+2)^(k+2): past c it exceeds every monomial
+   k^c. *)
 Lemma expnn_gt_monomial (c n : nat) : (c < n)%N -> (n ^ c < n.+2 ^ n.+2)%N.
 Proof.
 move=> Hcn; apply: leq_ltn_trans (_ : (n.+2) ^ c < _)%N; last first.
@@ -194,8 +190,9 @@ Qed.
 Section negligible_helpers.
 Context {R : realType}.
 
-(* The inverse of (k+2)^(k+2) falls below every inverse polynomial: the
-   growth rate the witness sequence's plaintext spaces follow. *)
+(* The inverse of (k+2)^(k+2) is negligible, falling below every inverse
+   polynomial.  It is the growth rate a scheme sequence's plaintext spaces
+   have to follow. *)
 Lemma negligible_fun_inv_expnn :
   negligible_fun (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
 Proof.
@@ -206,12 +203,9 @@ rewrite -natrX ltf_pV2 ?ltr_nat ?expnn_gt_monomial //.
 by rewrite posrE ltr0n expn_gt0 Hn0.
 Qed.
 
-(* A sequence dominating (k+2)^(k+2) has negligible inverse.  The checkable
-   modulus-growth condition of the scheme sequences: a Paillier or Benaloh
-   sequence whose modulus (block size) grows at least this fast satisfies the
-   information-theoretic negligibility field.
-   Naming: extends [negligible_fun_inv_expnn] with the [ge] token marking the
-   domination premise that replaces the exact sequence. *)
+(* A sequence dominating (k+2)^(k+2) has negligible inverse.  It is the
+   condition on modulus growth a Paillier or Benaloh sequence is checked
+   against to supply the unconditional negligibility field. *)
 Lemma negligible_fun_inv_ge_expnn (f : nat -> nat) :
   (forall k, ((k.+2) ^ k.+2 <= f k)%N) ->
   negligible_fun (fun k => ((f k)%:R : R)^-1).

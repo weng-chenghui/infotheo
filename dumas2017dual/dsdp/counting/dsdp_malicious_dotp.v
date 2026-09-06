@@ -24,6 +24,9 @@ Import Num.Theory.
 (* N-party malicious-Alice extraction for the DSDP protocol, generalizing the *)
 (* 2D dot product analysis to N-1 dimensions.                                 *)
 (*                                                                            *)
+(* The Dotp token of AliceDotpView marks the algebraic model, after           *)
+(* Dotp_n_rv, separating that view from the AliceView of the hopping axis.    *)
+(*                                                                            *)
 (* malicious_n : Alice querying with US = e_1 obtains relay party 1's input   *)
 (*   from the dot product, dotp_n ConstUS_n v = v ord0.                       *)
 (* US_e1_centropy_VS0_eq0 : that extraction stated as a conditional entropy,  *)
@@ -55,20 +58,22 @@ Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
 
-(* N-dimensional dot product *)
+(* The dot product of two vectors of n_relay.+1 plaintext letters. *)
 Definition dotp_n (x y : {ffun 'I_n_relay.+1 -> msg}) : msg :=
   \sum_(i < n_relay.+1) x i * y i.
 
-(* Dot product as random variable *)
+(* The dot product of two vector-valued random variables, taken sample by
+   sample. *)
 Definition Dotp_n_rv (X Y : {RV P -> {ffun 'I_n_relay.+1 -> msg}}) :
     {RV P -> msg} :=
   fun t => dotp_n (X t) (Y t).
 
-(* First basis vector: e_1 = (1, 0, ..., 0) *)
+(* The first basis vector e_1 = (1, 0, ..., 0) of the plaintext ring. *)
 Definition ConstUS_n : {ffun 'I_n_relay.+1 -> msg} :=
   [ffun i => if i == ord0 then 1 else 0].
 
-(* e_1 . v = v_1: the first basis vector extracts the first component *)
+(* The first basis vector reads the first coordinate off a vector:
+   dotp_n ConstUS_n v = v ord0. *)
 Lemma dotp_n_e1 (v : {ffun 'I_n_relay.+1 -> msg}) :
   dotp_n ConstUS_n v = v ord0.
 Proof.
@@ -99,13 +104,12 @@ Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
 
-(* A corrupted Alice fixing her query to e_1 makes relay party 1's input VS_0
-   a function of her view: the protocol output is in the view and equals VS_0,
-   so its conditional entropy collapses to zero.  Read against the secrecy
-   bounds of dsdp_entropy.v, this is what confines them to an honest query.
-   The weights are Alice's to choose, and one choice reads a relay's secret
-   off the output.  N-party generic; the 3-party result is the n_relay = 1
-   instance. *)
+(* A corrupted Alice who fixes her query to e_1 makes the first relay's
+   input a function of her view, so that input keeps zero bits of
+   uncertainty given the view.  The weights are Alice's to choose, and
+   this choice reads a relay's input off the protocol output, which is
+   what restricts the secrecy bounds of dsdp_entropy.v to an honest
+   query.  [N-party] *)
 Theorem US_e1_centropy_VS0_eq0 {A : finType}
     (View : {RV P -> A}) (g : A -> msg)
     (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
@@ -161,9 +165,9 @@ Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
    masks. *)
 Let D3 : {RV P -> msg} := V3 \* U3 \+ R3 \+ D2.
 
-(* The protocol output Alice computes: she strips both of her masks from the
-   aggregate and adds her own weighted input.  US_e1_centropy_V2_eq0 is the
-   statement that at the query e_1 this value is V2 itself. *)
+(* The protocol output Alice computes: she strips both of her masks from
+   the aggregate and adds her own weighted input.  At the query e_1 this
+   value is Bob's input V2 itself. *)
 Let S  : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
 
 (* The aggregate under Alice's key, Charlie's closing message to her.         *)
@@ -175,20 +179,18 @@ Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' Charlie `o V3.
 (* Bob's input under his own key, his opening message to Alice. *)
 Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
 
-(* Alice's full real view in the dot-product model: her key, the output S, her
-   own inputs and masks, and the three ciphertext hops. V2 appears only inside
-   S and the Bob hop.  The view is the honest one; what US_e1_centropy_V2_eq0
-   makes malicious is the query US, not this observation.
-   Naming: the [Dotp] token marks the algebraic model, after [Dotp_n_rv],
-   separating this view from the AliceView of the hopping axis. *)
+(* Alice's whole honest view in the dot-product model: her key, the
+   output S, her own input and her three weights, her two masks, and the
+   three ciphertexts of the run.  Bob's input reaches this view only
+   inside S and inside his own ciphertext. *)
 Definition AliceDotpView :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
 
-(* A malicious Alice fixing her query to e_1 (U2 = 1, U3 = 0) reads Bob's
-   private input V2 off her view, ciphertext hops included; its conditional
-   entropy collapses to zero.  The hops are opaque here, so the collapse owes
-   nothing to breaking an encryption: the plaintext output alone carries V2.
-   3-party instance. *)
+(* A corrupted Alice who fixes her query to U2 = 1 and U3 = 0 reads Bob's
+   input off her view, which then keeps zero bits of uncertainty about
+   it.  The three ciphertexts stay opaque, so the plaintext output alone
+   carries V2 and the collapse owes nothing to breaking an encryption.
+   [3-party] *)
 Theorem US_e1_centropy_V2_eq0 :
   U2 = (fun _ => 1) -> U3 = (fun _ => 0) ->
   `H( V2 | AliceDotpView ) = 0.

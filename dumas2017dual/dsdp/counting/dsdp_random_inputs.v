@@ -21,6 +21,11 @@ Require Import homomorphic_encryption.
 (* probabilistic content of the counting axis, and a bound proved from its    *)
 (* fields holds against a party of any running time.                          *)
 (*                                                                            *)
+(* The counting side reads the weights and the keys as drawn together with    *)
+(* the inputs.  The hopping side of the same security parameter carries its   *)
+(* own weights and keys as fixed values inside its scheme instance, and       *)
+(* nothing relates the two.                                                   *)
+(*                                                                            *)
 (* The seven laws are the independence facts the corrupted-relay privacy      *)
 (* theorems condition on, each of them one each-against-the-rest field pushed *)
 (* through inde_RV_comp and the graphoid contractions into the shape a        *)
@@ -100,71 +105,85 @@ Local Open Scope fdist_scope.
    V1 I would not typecheck. *)
 Set Strict Implicit.
 
-(* The counting side of a 3-party run at the fixed plaintext modulus
-   a.+2 * b.+2, after du2002's scalar_product_random_inputs: one sample space
-   with one law on it, the eleven random inputs of the run, their
-   independence each against the joint of the other ten, and the uniformity
-   of the three plaintext inputs and the two masks.
-   The record is named for the counting side's reading of the eleven, where
-   the weights and the keys are drawn together with the inputs; the hopping
-   side of the same security parameter carries its own weights and keys as
-   fixed values inside its scheme instance, and nothing relates the two. *)
+(* The counting side of a 3-party DSDP run at the plaintext modulus
+   a.+2 * b.+2: one sample space with one law, the eleven random inputs of
+   the run, each input independent of the joint of the other ten, and the
+   three plaintext inputs and the two masks uniform.  Every message and
+   every party view is a deterministic function of the eleven, so a bound
+   proved from these fields holds against a party of any running time. *)
 Record dsdp_random_inputs (R : realType) (a b : nat) := {
-  (* The sample space and the law on it: every random variable below is a
-     function on this space and every bound is an average over this law. *)
+  (* The finite sample space of one run. *)
   sampleT : finType ;
+
+  (* The law on that space, which every bound below averages over. *)
   sample_fdist : R.-fdist sampleT ;
 
-  (* The entire randomness of a 3-party run at this modulus.  Every message
-     and every party view is a deterministic function of these eleven, which
-     is what lets a bound proved at the inputs transfer to a view. *)
+  (* Alice's private input. *)
   V1 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Bob's private input. *)
   V2 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Charlie's private input. *)
   V3 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Alice's query weight on her own input. *)
   U1 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Alice's query weight on Bob's input. *)
   U2 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Alice's query weight on Charlie's input. *)
   U3 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Alice's mask on the first combine, the one Bob decrypts. *)
   R2 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Alice's mask on the second combine, the one that reaches Charlie. *)
   R3 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  (* Alice's private key. *)
   Dk_a : {RV (sample_fdist) -> (Alice.-key Dec 'Z_(a.+2 * b.+2))} ;
+  (* Bob's private key. *)
   Dk_b : {RV (sample_fdist) -> (Bob.-key Dec 'Z_(a.+2 * b.+2))} ;
+  (* Charlie's private key. *)
   Dk_c : {RV (sample_fdist) -> (Charlie.-key Dec 'Z_(a.+2 * b.+2))} ;
 
-  (* Each input independent of the joint of the other ten, stated
-     each-against-the-rest because every derived fact below is one of these
-     pushed through inde_RV_comp. *)
+  (* [% V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V1. *)
   V1_indep : sample_fdist |=
     [% V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V1 ;
+  (* [% V1, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V2. *)
   V2_indep : sample_fdist |=
     [% V1, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V2 ;
+  (* [% V1, V2, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V3. *)
   V3_indep : sample_fdist |=
     [% V1, V2, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V3 ;
+  (* [% V1, V2, V3, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U1. *)
   U1_indep : sample_fdist |=
     [% V1, V2, V3, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U1 ;
+  (* [% V1, V2, V3, U1, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U2. *)
   U2_indep : sample_fdist |=
     [% V1, V2, V3, U1, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U2 ;
+  (* [% V1, V2, V3, U1, U2, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U3. *)
   U3_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U3 ;
+  (* [% V1, V2, V3, U1, U2, U3, R3, Dk_a, Dk_b, Dk_c] _|_ R2. *)
   R2_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, U3, R3, Dk_a, Dk_b, Dk_c] _|_ R2 ;
+  (* [% V1, V2, V3, U1, U2, U3, R2, Dk_a, Dk_b, Dk_c] _|_ R3. *)
   R3_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, U3, R2, Dk_a, Dk_b, Dk_c] _|_ R3 ;
+  (* [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_b, Dk_c] _|_ Dk_a. *)
   Dk_a_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_b, Dk_c] _|_ Dk_a ;
+  (* [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_c] _|_ Dk_b. *)
   Dk_b_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_c] _|_ Dk_b ;
+  (* [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b] _|_ Dk_c. *)
   Dk_c_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b] _|_ Dk_c ;
 
-  (* Uniformity of R2 and R3 is what makes the relay bounds unconditional,
-     one-time-pad masking rather than encryption hardness hiding V2 and V3;
-     uniformity of V1, V2, V3 is what makes the conditional entropy equal
-     log m rather than merely positive.  Alice's three weights carry no law:
-     they are her chosen query, not a sample. *)
+  (* V1 is uniform on the plaintext ring 'Z_(a.+2 * b.+2). *)
   pV1_unif : `p_ V1 = fdist_uniform (card_Zp_pq a b) ;
+  (* V2 is uniform on the plaintext ring 'Z_(a.+2 * b.+2). *)
   pV2_unif : `p_ V2 = fdist_uniform (card_Zp_pq a b) ;
+  (* V3 is uniform on the plaintext ring 'Z_(a.+2 * b.+2). *)
   pV3_unif : `p_ V3 = fdist_uniform (card_Zp_pq a b) ;
+  (* R2 is uniform on the plaintext ring, so it masks V2 * U2 completely. *)
   pR2_unif : `p_ R2 = fdist_uniform (card_Zp_pq a b) ;
+  (* R3 is uniform on the plaintext ring, so it masks V3 * U3 completely. *)
   pR3_unif : `p_ R3 = fdist_uniform (card_Zp_pq a b) }.
 Unset Strict Implicit.
 
@@ -198,8 +217,8 @@ Local Notation Dk_a := (Dk_a I).
 Local Notation Dk_b := (Dk_b I).
 Local Notation Dk_c := (Dk_c I).
 
-(* The joint of the ten inputs other than one plaintext input: the domain
-   every each-against-the-rest projection below reads from. *)
+(* The joint of the ten inputs other than the one being separated, the
+   domain every each-against-the-rest projection below reads from. *)
 Local Notation rest10 := (msg * msg * msg * msg * msg * msg * msg *
   (Alice.-key Dec msg) * (Bob.-key Dec msg) * (Charlie.-key Dec msg))%type.
 
@@ -228,9 +247,10 @@ Let D3 : {RV P -> msg} := VU3R \+ D2.
    ciphertext Charlie's view contains. *)
 Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
-(* Bob's key, his own input and the two combines he handles are independent of
-   Alice's input V1: V1 occurs in no protocol message, so the V1 field
-   projected onto those four suffices. *)
+(* [% Dk_b, V2, VU3R, D2] _|_ V1: Bob's key, his own input and the two
+   combines he handles are independent of Alice's input.  Alice keeps V1
+   to herself, so this is the record's V1 field projected onto those
+   four. *)
 Lemma bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1.
 Proof.
 have h := inde_RV_comp
@@ -241,8 +261,9 @@ have h := inde_RV_comp
 by rewrite /comp_RV /VU3R /VU3 /D2 /VU2 /= in h *.
 Qed.
 
-(* Charlie's key, his own input and the aggregate he decrypts are independent
-   of Alice's input V1, the same projection of the V1 field on his side. *)
+(* [% Dk_c, V3, D3] _|_ V1: Charlie's key, his own input and the
+   aggregate he decrypts are independent of Alice's input.  It is the
+   record's V1 field projected onto those three. *)
 Lemma charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1.
 Proof.
 have h := inde_RV_comp
@@ -254,9 +275,9 @@ have h := inde_RV_comp
 by rewrite /comp_RV /D3 /VU3R /VU3 /D2 /VU2 /= in h *.
 Qed.
 
-(* Alice's second mask is independent of Charlie's weighted input and of
-   Charlie's input itself, the R3 field projected onto that pair.  R3 is the
-   pad that hides V3 from Bob. *)
+(* R3 _|_ [% VU3, V3]: Alice's second mask is independent of Charlie's
+   weighted input and of Charlie's input itself.  R3 is the mask that
+   keeps V3 independent of Bob's view. *)
 Lemma R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3].
 Proof.
 have h := inde_RV_comp
@@ -266,13 +287,16 @@ rewrite /comp_RV /VU3 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
 
-(* Bob's key, his input and the combine he decrypts are independent of
-   Charlie's input, weighted input and mask together.  The V3, U3 and R3
-   fields are projected and joined by two contractions, then reshaped, since
-   contracting on VU3 directly is unavailable: VU3 shares V3 with the left
-   side. *)
+(* [% Dk_b, V2, D2] _|_ [% V3, VU3, R3]: Bob's key, his own input and the
+   combine he decrypts are independent of Charlie's input, of that input
+   under Alice's weight, and of Alice's second mask.  The whole Charlie
+   group stands on the right, so the mask may be added to the weighted
+   input afterwards and the independence still holds. *)
 Lemma bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3].
 Proof.
+(* Contracting on VU3 directly is unavailable, since VU3 shares V3 with the
+   left side.  The V3, U3 and R3 fields are projected and joined by two
+   contractions, then reshaped. *)
 have hv3 : P |= [% Dk_b, V2, D2] _|_ V3.
   have h := inde_RV_comp
     (fun w : rest10 => ((w.1.2, w.1.1.1.1.1.1.1.1.2),
@@ -300,9 +324,9 @@ have h := inde_RV_comp idfun
 by rewrite /comp_RV /VU3 /= in h *.
 Qed.
 
-(* Alice's first mask is independent of Bob's weighted input and of Bob's
-   input itself, the R2 field projected onto that pair.  R2 is the pad that
-   hides V2 from Charlie. *)
+(* R2 _|_ [% VU2, V2]: Alice's first mask is independent of Bob's
+   weighted input and of Bob's input itself.  R2 is the mask that keeps
+   V2 independent of Charlie's view. *)
 Lemma R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2].
 Proof.
 have h := inde_RV_comp
@@ -312,8 +336,9 @@ rewrite /comp_RV /VU2 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
 
-(* The same mask against the whole pair Alice's first combine enters, the R2
-   field projected one coordinate wider. *)
+(* R2 _|_ [% VU2, [% VU3R, V2]]: Alice's first mask is independent of the
+   whole tuple her first combine enters.  One coordinate wider than
+   R2_indep_VU2_V2, which is the width Charlie's aggregate needs. *)
 Lemma R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [% VU3R, V2]].
 Proof.
 have h := inde_RV_comp
@@ -324,10 +349,11 @@ rewrite /comp_RV /VU2 /VU3R /VU3 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
 
-(* Charlie's key and input are independent of Bob's input together with the
-   aggregate ciphertext Charlie receives.  Two one-time-pad steps: R2 is a
-   fresh pad inside D2, and D2 is then a fresh pad inside D3, so the whole
-   aggregate carries nothing about V2 and neither does its encryption. *)
+(* [% Dk_c, V3] _|_ [% V2, E_charlie_d3]: Charlie's key and his own input
+   are independent of Bob's input together with the aggregate ciphertext
+   Charlie receives.  Bob's input sits under two of Alice's masks inside
+   that aggregate, so the independence holds with no assumption on the
+   encryption. *)
 Lemma Dk_c_V3_indep_V2_E_charlie_d3 :
   P |= [% Dk_c, V3] _|_ [% V2, E_charlie_d3].
 Proof.
@@ -599,9 +625,12 @@ have [ind _ _] := uniform_split a b (ord5 4).
 exact: inde_RV_comp (uniform_view_mask a b w1 w2 w3) idfun ind.
 Qed.
 
-(* The three weights and the three keys are constants, and a constant is
-   independent of everything.  Six of the eleven each-against-the-rest fields
-   are therefore discharged without touching the sample space. *)
+(* The three weights and the three keys are constants of the sample space, so
+   six of the eleven each-against-the-rest fields are discharged without
+   touching the sample space. *)
+
+(* Alice's first query weight is a constant of the sample space, and a
+   constant is independent of every random variable. *)
 Lemma uniform_U1_indep (a b : nat) (w1 w2 w3 : msg a b) :
   P a b |=
     [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U2 a b w2,
