@@ -32,8 +32,7 @@ benaloh_indcpa_scheme:f_size_benaloh
 benaloh_indcpa_scheme:f_residuosity_benaloh
 benaloh_indcpa_scheme:f_adv_benaloh
 # dsdp_alice_hop_secrecy: the uniformity, product-law and slot-resampling
-# plumbing under the hop ladder, the constant-weight random variables, and the
-# per-k challenge equalities the two hop_advantageE nodes fold together.
+# plumbing under the hop ladder, and the constant-weight random variables.
 dsdp_alice_hop_secrecy:AliceSpectatorPre
 dsdp_alice_hop_secrecy:AliceSpectatorPre2
 dsdp_alice_hop_secrecy:Hop1PreState
@@ -54,14 +53,10 @@ dsdp_alice_hop_secrecy:alice_var_uniform
 dsdp_alice_hop_secrecy:fdistmap_prod
 dsdp_alice_hop_secrecy:fdistmap_prodr
 dsdp_alice_hop_secrecy:hop0_pair_uniformE
-dsdp_alice_hop_secrecy:hop0_real_challengeE
 dsdp_alice_hop_secrecy:hop0_state_prod
-dsdp_alice_hop_secrecy:hop0_zero_challengeE
 dsdp_alice_hop_secrecy:hop1_prestate_pair_uniformE
-dsdp_alice_hop_secrecy:hop1_real_challengeE
 dsdp_alice_hop_secrecy:hop1_state_of
 dsdp_alice_hop_secrecy:hop1_state_prod
-dsdp_alice_hop_secrecy:hop1_zero_challengeE
 dsdp_alice_hop_secrecy:inde_RV_of_prod
 dsdp_alice_hop_secrecy:rho3_uniformE
 dsdp_alice_hop_secrecy:spectator_pre2_uniformE
@@ -91,6 +86,16 @@ dsdp_alice_trace_link:trace_of_trace_tuple
 dsdp_alice_trace_link:trace_of_trace_tupleK
 dsdp_alice_trace_link:trace_tuple_of_trace
 dsdp_alice_trace_link:v2_trace_tuple_of_sample_rest
+# The two deterministic-image equalities the trace-level steps of a program
+# rest on; the blueprint cites those steps, not the images.
+dsdp_alice_trace_link:alice_trace_realE
+dsdp_alice_trace_link:alice_trace_idealE
+# dsdp_alice_main: the per-bit challenge equalities the two hop_advantageE
+# nodes fold together.
+dsdp_alice_main:hop0_real_challengeE
+dsdp_alice_main:hop0_zero_challengeE
+dsdp_alice_main:hop1_real_challengeE
+dsdp_alice_main:hop1_zero_challengeE
 # dsdp_entropy: the abstract-variable and non-ring forms of the fiber counting
 # facts; the blueprint cites the two ring forms.
 dsdp_entropy:Pr_dsdp_nosol_eq0

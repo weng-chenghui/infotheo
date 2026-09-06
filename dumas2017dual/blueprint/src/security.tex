@@ -311,11 +311,11 @@ finite commutative unit ring.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_stateT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Hop0State,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_assemble,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.bob_challenge_adversary,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.bob_challenge_adversary,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_stateT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Hop1State,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_assemble,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_challenge_adversary}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.charlie_challenge_adversary}
   \rocqok
   \uses{def:alice_hop_ladder,def:indcpa_epsilon}
   The hop-$i$ reduction $\hopred{i}{D}$ of a distinguisher $D$ is the
@@ -353,8 +353,8 @@ $V_3$.
 
 \begin{lemma}[One hop costs one reduction advantage]
   \label{lem:alice_view_advantage}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_advantageE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_advantageE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop0_advantageE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop1_advantageE}
   \rocqok
   \uses{def:alice_hop_reductions}
   For all weights $u_1, u_2, u_3$ and every distinguisher $D$, zeroing one
@@ -391,7 +391,7 @@ $V_3$.
 \begin{definition}[The distinguisher of a predictor]
   \label{def:distinguisher_of_predictor}
   \rocq{infotheo.computational_security.indcpa_game.distinguisher_of_predictor,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.guess_V2_acceptE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.guess_V2_acceptE}
   \rocqok
   \uses{def:alice_hop_ladder}
   The distinguisher $D_g$ of a predictor $g$ accepts when $g$, applied to the
@@ -402,7 +402,7 @@ $V_3$.
 
 \begin{theorem}[Guessing Bob's input from Alice's real tuple]
   \label{thm:alice_guess_real}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_guess_V2_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_tuple_guess_V2_le}
   \rocqok
   \uses{thm:alice_simulation_secure,lem:simulator_factorization,lem:guess_all_zero,def:distinguisher_of_predictor}
   When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
@@ -461,7 +461,7 @@ functionality on the other, rather than quantified over all input vectors.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_law,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tuple_all_zero_pfwd1E,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_idealE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_idealE}
   \rocqok
   \uses{def:alice_simulator}
   Conditioned on any honest input pair of positive probability, Alice's all-zero
@@ -474,7 +474,7 @@ functionality on the other, rather than quantified over all input vectors.
 
 \begin{theorem}[Bounded simulation security]
   \label{thm:alice_simulation_secure}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sim_advantage_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_sim_advantage_le}
   \rocqok
   \uses{def:party_views,lem:alice_view_advantage,lem:simulator_factorization}
   For all weights $u_1, u_2, u_3$, every distinguisher separates the real joint
@@ -550,10 +550,10 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[The two bounds at the trace]
   \label{thm:alice_trace_bounds}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_le,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_simulator,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_le}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantage_le}
   \rocqok
   \uses{lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
@@ -595,7 +595,7 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[Guessing from the raw interpreter trace]
   \label{thm:raw_trace_guess}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_guess_V2_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_raw_trace_guess_V2_le}
   \rocqok
   \uses{thm:alice_trace_bounds,lem:raw_trace_decode}
   With $u_3$ a unit of the plaintext ring, every predictor reading the raw
@@ -614,7 +614,7 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[Simulation at the raw trace, averaged over the coin]
   \label{thm:raw_trace_simulation}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_sim_advantage_avg_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_raw_trace_sim_advantage_avg_le}
   \rocqok
   \uses{thm:alice_trace_bounds,lem:raw_trace_decode}
   With the re-encryption coin drawn uniformly, a Boolean test tells the real
@@ -731,9 +731,9 @@ $e$-th residuosity assumption.
 
 \begin{theorem}[The class-conditional trace bound]
   \label{thm:alice_guess_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_pr,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_pq_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_pr,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
   \uses{thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_admissible}
   When both reduction adversaries of a trace predictor $g$ are admissible for
@@ -1263,7 +1263,7 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[The two ciphertext replacements as one fragment]
   \label{def:alice_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_hops}
   \rocqok
   \uses{def:chain,def:claim,def:loss,lem:alice_view_advantage,def:indcpa_assumption}
   The two ciphertext replacements as one chain over $\gamma_0(D)$,
@@ -1281,11 +1281,11 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[Alice's ladder as a chain, and the bound read off it]
   \label{def:alice_chain}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_label,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_claim,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.all_zero_game_V2_le_invm,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_chain,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_totalE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_label,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_chain,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE}
   \rocqok
   \uses{def:chain,def:chain_result,def:claim,def:loss,def:alice_hops,lem:alice_view_advantage,lem:guess_all_zero,thm:alice_guess_real}
   Alice's ladder as a chain over $\gamma_0(D_g), \gamma_1(D_g), \gamma_2(D_g)$,
@@ -1318,9 +1318,9 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[Alice's trace argument as a chain opening at the protocol]
   \label{def:alice_trace_chain}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.accept_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.hop_tuple_distinguisher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop_tuple_distinguisher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain}
   \rocqok
   \uses{def:alice_chain,def:alice_hops,def:alice_trace,lem:trace_of_hop_tuple}
   The chain of Definition~\ref{def:alice_chain} preceded by one further game.
@@ -1348,8 +1348,8 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[Alice's trace against the simulation as one chain]
   \label{def:alice_trace_sim_chain}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.accept_trace_ideal_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_ideal_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_chain}
   \rocqok
   \uses{def:alice_hops,def:alice_trace_chain,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
   The two hops of Definition~\ref{def:alice_hops} with one step at each end
@@ -1376,9 +1376,9 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[Alice's trace argument at the class epsilon]
   \label{def:alice_trace_chain_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_claim_admissible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_admissible_totalE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain_admissible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim_admissible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_admissible_totalE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain_admissible}
   \rocqok
   \uses{def:alice_trace_chain,def:alice_hops,def:indcpa_assumption,def:claim,def:loss}
   The program of Definition~\ref{def:alice_trace_chain} over the dictionary
@@ -1403,9 +1403,9 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[Alice's trace against the simulation at the class epsilon]
   \label{def:alice_trace_sim_chain_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain_admissible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantageE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantage,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_chain_admissible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantageE}
   \rocqok
   \uses{def:alice_trace_sim_chain,def:alice_trace_chain_admissible}
   The chain of Definition~\ref{def:alice_trace_sim_chain} over the dictionary
@@ -1505,7 +1505,7 @@ single member of it can carry.
 
 \begin{theorem}[The class cannot admit every adversary]
   \label{thm:decrypt_lower_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_bob_epsilon_ge}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.decrypt_bob_epsilon_ge}
   \rocqok
   \uses{def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
   With $u_3$ a unit of the plaintext ring, the hop-$0$ advantage the decrypting
@@ -1524,7 +1524,7 @@ single member of it can carry.
 
 \begin{corollary}[A small-epsilon assumption must reject the decryptor]
   \label{cor:decrypt_not_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_reduction_admissibleF}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.decrypt_reduction_admissibleF}
   \rocqok
   \uses{thm:decrypt_lower_bound,def:indcpa_assumption}
   With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ assumes an advantage
@@ -1540,7 +1540,7 @@ single member of it can carry.
 
 \begin{corollary}[The premise-free bound is false]
   \label{cor:admissible_premise_free}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_guess_V2_premise_free_lt}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.decrypt_guess_V2_premise_free_lt}
   \rocqok
   \uses{thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
   For every assumption whose promised advantage satisfies

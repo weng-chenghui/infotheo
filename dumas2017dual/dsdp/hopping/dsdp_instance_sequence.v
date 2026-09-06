@@ -9,6 +9,7 @@ Require Import negligible epshop epshop_family.
 Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
+Require Import dsdp_alice_main.
 
 (**md**************************************************************************)
 (* # A security-parameter-indexed sequence of DSDP executions                 *)
