@@ -718,7 +718,7 @@ $e$-th residuosity assumption.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_assumed}
+  \uses{def:dsdp_setting,thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_admissible}
   When both reduction adversaries of a trace predictor $g$ are admissible for
   $\mathcal{A}$, and $u_3$ is a unit of the plaintext ring, $g$ matches Bob's
   input with probability at most $1/m$ plus twice the assumed advantage; the
@@ -733,7 +733,7 @@ $e$-th residuosity assumption.
   assumes rather than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
   The bound is the soundness field of the program of
-  Definition~\ref{def:alice_trace_chain_assumed}, which spends the two
+  Definition~\ref{def:alice_trace_chain_admissible}, which spends the two
   premises at its two hops, so no triangle inequality is taken here.
   Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two forms are fields
   \texttt{trace\_guess\_V2\_admissible\_le} and
@@ -1222,8 +1222,7 @@ pending obligation, and a bound is read off it by projection.
 
 \begin{definition}[The two ciphertext replacements as one fragment]
   \label{def:alice_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hops,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_hops_assumed}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hops}
   \rocqok
   \uses{def:chain,def:claim,def:loss,lem:alice_view_advantage,def:indcpa_assumption}
   The two ciphertext replacements as one chain over $\gamma_0(D)$,
@@ -1234,14 +1233,9 @@ pending obligation, and a bound is read off it by projection.
   \[ \mathrm{tot}(s) = \epshopsum{D} \]
   Each hop is justified by Lemma~\ref{lem:alice_view_advantage}, which makes
   its gap exactly the advantage it logs, read as an inequality through
-  \texttt{le\_of\_eq}. \texttt{alice\_hops\_assumed} is the same fragment over
-  the dictionary $C^{\mathcal{A}}$ that charges each hop the advantage
-  $\mathcal{A}$ of Definition~\ref{def:indcpa_assumption} assumes, justified
-  by the class membership of that hop's reduction, so its two memberships are
-  parameters spent inside the fragment.
-  \[ \mathrm{tot}(s) = 2\,\varepsilon_{\mathrm{cpa}} \]
-  Both fragments enter a longer program through a let-bound name, an
-  application not being a statement of the entry.
+  \texttt{le\_of\_eq}. The fragment carries the simulation bound of
+  Theorem~\ref{thm:alice_simulation_secure} and nothing else; the five
+  programs below write their two hops where they take them.
 \end{definition}
 
 \begin{definition}[Alice's ladder as a chain, and the bound read off it]
@@ -1255,8 +1249,8 @@ pending obligation, and a bound is read off it by projection.
   \uses{def:chain,def:chain_result,def:claim,def:loss,def:alice_hops,lem:alice_view_advantage,lem:guess_all_zero,thm:alice_guess_real}
   Alice's ladder as a chain over $\gamma_0(D_g), \gamma_1(D_g), \gamma_2(D_g)$,
   the acceptance probabilities of a predictor's distinguisher at the three
-  hops, joined by the fragment of Definition~\ref{def:alice_hops}, which enters
-  the program through a let-bound name. Each hop logs the advantage
+  hops, written where they are taken and spanning the same two gaps as the
+  fragment of Definition~\ref{def:alice_hops}. Each hop logs the advantage
   of the reduction its label names, at Bob's key and then at Charlie's, and a
   third step hops from the all-zero endpoint to the zero game, so the program
   is a chain bound on $\gamma_0(D_g)$. \texttt{alice\_claim} fixes what
@@ -1269,7 +1263,7 @@ pending obligation, and a bound is read off it by projection.
   are the advantages of the reductions $\hopred{0}{D_g}$ and $\hopred{1}{D_g}$,
   each of which becomes conditional on a computational assumption only where a
   later statement requires it to be small. The term
-  $\mathsf{uniform\_plain}$ is information-theoretic and unconditional, the
+  $\mathsf{uniform\_fiber}$ is information-theoretic and unconditional, the
   residue the leaked output leaves along the solution fiber. The two hops are
   those of Definition~\ref{def:alice_hops}, justified by
   Lemma~\ref{lem:alice_view_advantage}, which makes each gap
@@ -1284,6 +1278,7 @@ pending obligation, and a bound is read off it by projection.
 \begin{definition}[Alice's trace argument as a chain opening at the protocol]
   \label{def:alice_trace_chain}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.accept_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.hop_tuple_distinguisher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain}
   \rocqok
   \uses{def:alice_chain,def:alice_hops,def:alice_trace,lem:trace_of_hop_tuple}
@@ -1299,9 +1294,10 @@ pending obligation, and a bound is read off it by projection.
   The step to $\gamma_0$ carries no label and adds nothing to the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift on the tuple.
-  The two hops are the fragment of Definition~\ref{def:alice_hops} at the
-  lifted test $D_{g \circ \tau}$, entering through a let-bound name, and the
-  step to the zero game and the terminal statement are those of
+  The two hops span the same two gaps as the fragment of
+  Definition~\ref{def:alice_hops} at the lifted test $D_{g \circ \tau}$, which
+  is \texttt{hop\_tuple\_distinguisher} applied once under a local name, and
+  the step to the zero game and the terminal statement are those of
   Definition~\ref{def:alice_chain}, so the loss and the bound are the same
   three terms.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
@@ -1315,7 +1311,7 @@ pending obligation, and a bound is read off it by projection.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain}
   \rocqok
   \uses{def:alice_hops,def:alice_trace_chain,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
-  The fragment of Definition~\ref{def:alice_hops} with one step at each end
+  The two hops of Definition~\ref{def:alice_hops} with one step at each end
   that adds nothing to the loss. The chain opens at $\gamma_\tau(D)$, runs the
   two ciphertext replacements at the lifted test $D \circ \tau$, and closes at
   $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
@@ -1337,11 +1333,11 @@ pending obligation, and a bound is read off it by projection.
        \le \epshopsum{D \circ \tau} \]
 \end{definition}
 
-\begin{definition}[Alice's trace argument at the assumed advantage]
-  \label{def:alice_trace_chain_assumed}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_claim_assumed,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_assumed_totalE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain_assumed}
+\begin{definition}[Alice's trace argument at the class epsilon]
+  \label{def:alice_trace_chain_admissible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_claim_admissible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_admissible_totalE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain_admissible}
   \rocqok
   \uses{def:alice_trace_chain,def:alice_hops,def:indcpa_assumption,def:claim,def:loss}
   The program of Definition~\ref{def:alice_trace_chain} over the dictionary
@@ -1353,38 +1349,37 @@ pending obligation, and a bound is read off it by projection.
      \qquad
      C^{\mathcal{A}}(\mathsf{cpa\_charlie})
        = \big(\gamma_1(D),\ \gamma_2(D),\ \varepsilon_{\mathrm{cpa}}\big) \]
-  The two class memberships are parameters of the program and are spent inside
-  the fragment \texttt{alice\_hops\_assumed} of
-  Definition~\ref{def:alice_hops}, one in the justification of each hop, which
-  is the shape Definition~\ref{def:paillier_chain} has. The zero-game label costs the same
+  The two class memberships are variables of the program's section and are
+  spent in the justification of the hop each one licenses, which is the shape
+  Definition~\ref{def:paillier_chain} has. The zero-game label costs the same
   unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
-  total adds one unconditional term to two assumption-conditional ones, and
-  \texttt{alice\_assumed\_totalE} is the reordering that states it.
+  total adds one unconditional term to two class-conditional ones, and
+  \texttt{alice\_admissible\_totalE} is the reordering that states it.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
   Theorem~\ref{thm:alice_guess_admissible} is the soundness field of this
   result at its two class memberships.
 \end{definition}
 
-\begin{definition}[Alice's trace against the simulation at the assumed advantage]
-  \label{def:alice_trace_sim_chain_assumed}
+\begin{definition}[Alice's trace against the simulation at the class epsilon]
+  \label{def:alice_trace_sim_chain_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain_assumed,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain_admissible,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantageE}
   \rocqok
-  \uses{def:alice_trace_sim_chain,def:alice_trace_chain_assumed}
+  \uses{def:alice_trace_sim_chain,def:alice_trace_chain_admissible}
   The chain of Definition~\ref{def:alice_trace_sim_chain} over the dictionary
-  $C^{\mathcal{A}}$ of Definition~\ref{def:alice_trace_chain_assumed}, which
+  $C^{\mathcal{A}}$ of Definition~\ref{def:alice_trace_chain_admissible}, which
   charges each of the two hops the advantage $\mathcal{A}$ assumes in place of
   the advantage its own reduction shows. The two class memberships are
-  parameters of the program and are spent inside the fragment
-  \texttt{alice\_hops\_assumed}, one in the justification of each hop.
+  variables of the program's section and are spent in the justification of the
+  hop each one licenses.
   \[ \mathrm{loss}(s) = [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}],
      \qquad \mathrm{tot}(s) = 2\,\varepsilon_{\mathrm{cpa}} \]
   The two steps at the ends carry the test between the executed trace and the
   hopping tuple at no loss, and the chain carries no terminal statement, so
   the quantity it opens at is the distance a trace test sees between the
   executed trace and the simulation, and the gap result it returns bounds that
-  distance by two assumption-conditional terms and nothing else.
+  distance by two class-conditional terms and nothing else.
   \[ \mathrm{adv}^\tau(D)
        = \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
        = a_s, \qquad
@@ -1572,7 +1567,7 @@ single member of it can carry.
   \label{thm:alice_guess_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible}
   \rocqok
-  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible,def:alice_trace_chain_assumed,def:negligible_claims,thm:advantage_negligible}
+  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible,def:alice_trace_chain_admissible,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances and a sequence of predictors
   $g_k$, if both reduction adversaries of $g_k$ are admissible for
   $\mathcal{A}_k$ at every $k$, then the guessing probabilities are negligible.
@@ -1582,7 +1577,7 @@ single member of it can carry.
      \implies \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
   It is Theorem~\ref{thm:advantage_negligible} read over the program of
-  Definition~\ref{def:alice_trace_chain_assumed} at the $k$-th instance. That
+  Definition~\ref{def:alice_trace_chain_admissible} at the $k$-th instance. That
   program spends the same three labels at every $k$, and the cost of each of
   them along the sequence is one of the two negligibility fields of
   $\mathcal{Q}$: both hop labels cost $\mathrm{negl}(k \mapsto
@@ -1623,7 +1618,7 @@ single member of it can carry.
   \label{thm:alice_trace_sim_advantage_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_sim_advantage_negligible}
   \rocqok
-  \uses{def:alice_trace_sim_chain_assumed,def:negligible_claims,thm:advantage_negligible}
+  \uses{def:alice_trace_sim_chain_admissible,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances and a family $D_k$ of tests
   of Alice's executed trace, if both reduction adversaries of $D_k$ are
   admissible for $\mathcal{A}_k$ at every $k$, then the distances between that
@@ -1635,7 +1630,7 @@ single member of it can carry.
   This is computational indistinguishability of Alice's view from the
   simulation, the form a simulation-based secrecy claim takes once the
   parameter is free to grow. It is Theorem~\ref{thm:advantage_negligible} read
-  over the program of Definition~\ref{def:alice_trace_sim_chain_assumed} at
+  over the program of Definition~\ref{def:alice_trace_sim_chain_admissible} at
   the $k$-th instance, the second statement that program carries. That program
   spends the two hop labels alone, so the whole distance is
   $\mathrm{negl}(k \mapsto \varepsilon_{\mathrm{cpa},k})$ and no

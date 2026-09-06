@@ -207,28 +207,29 @@ Require Import epshop.
 (*                              plaintext-space cardinality                   *)
 (*               alice_label == the three labels of the argument, cpa_bob and *)
 (*                              cpa_charlie for the IND-CPA reductions at     *)
-(*                              Bob's and Charlie's keys and uniform_plain    *)
+(*                              Bob's and Charlie's keys and uniform_fiber    *)
 (*                              for the plaintext-space bound at the all-zero *)
 (*                              endpoint                                      *)
 (*           alice_claim D l == what each label claims: the games a hop       *)
 (*                              label joins and the advantage it costs, and   *)
-(*                              the all-zero game uniform_plain bounds        *)
-(*  alice_claim_assumed A D l == what each label claims once the two hop      *)
+(*                              the all-zero game uniform_fiber bounds        *)
+(* alice_claim_admissible A D l ==                                            *)
+(*                              what each label claims once the two hop       *)
 (*                              labels are charged at the epsilon the         *)
 (*                              assumption A promises, over the games         *)
 (*                              alice_claim names                             *)
-(*             alice_totalE == the closed form of that loss, in the order     *)
+(*              alice_totalE == the closed form of that loss, in the order    *)
 (*                              alice_tuple_guess_V2_le states it             *)
-(*      alice_assumed_totalE == the closed form of the loss of a chain over   *)
-(*                              alice_claim_assumed, the residue plus twice   *)
-(*                              the assumed epsilon                           *)
+(*   alice_admissible_totalE == the closed form of the loss of a chain over   *)
+(*                              alice_claim_admissible, the residue plus      *)
+(*                              twice the class epsilon                       *)
 (*              alice_hops D == the two ciphertext replacements as one        *)
 (*                              fragment, a chain from the real tuple game to *)
 (*                              the all-zero one at the two advantages the    *)
 (*                              reductions show                               *)
-(*               alice_chain == alice_hops bounded at the all-zero endpoint,  *)
-(*                              as one chain returning its bound on the       *)
-(*                              real-view game                                *)
+(*       alice_chain predict == the two ciphertext replacements and the       *)
+(*                              all-zero endpoint bounded, as one program     *)
+(*                              returning its bound on the real-view game     *)
 (*                                                                            *)
 (* Simulation                                                                 *)
 (*                                                                            *)
@@ -1180,7 +1181,7 @@ Local Notation eps_charlie D :=
 Local Open Scope epshop_scope.
 
 (* The three labels of the argument: cpa_bob and cpa_charlie for the two
-   IND-CPA reductions, at Bob's key and at Charlie's, and uniform_plain for
+   IND-CPA reductions, at Bob's key and at Charlie's, and uniform_fiber for
    the plaintext-space bound at the all-zero endpoint.  The labels are what
    let a reader of an accumulated loss tell which of its terms are
    conditional on a computational assumption, and at which key: the two hop
@@ -1188,12 +1189,12 @@ Local Open Scope epshop_scope.
    leaked output leaves along the DSDP solution fiber.
    Naming: [cpa] is the game an advantage belongs to and [bob], [charlie] the
    key it is read at; [uniform] is the law the residue is measured against
-   and [plain] the space that law is carried on. *)
-Variant alice_label := cpa_bob | cpa_charlie | uniform_plain.
+   and [fiber] the DSDP solution fiber that law is carried on. *)
+Variant alice_label := cpa_bob | cpa_charlie | uniform_fiber.
 
 (* What each label claims: for a hop label the two acceptance probabilities
    its ciphertext replacement moves between and the advantage that
-   replacement costs, and for uniform_plain the all-zero game against the
+   replacement costs, and for uniform_fiber the all-zero game against the
    zero game, at the inverse plaintext-space cardinality.  The claims are
    written here rather than at the steps of the chain, and that is what makes
    a step check: the cost, the target and the justification of a step are
@@ -1205,7 +1206,7 @@ Definition alice_claim
   match l with
   | cpa_bob => Claim (accept D G0) (accept D G1) (eps_bob D)
   | cpa_charlie => Claim (accept D G1) (accept D G2) (eps_charlie D)
-  | uniform_plain => Claim (accept D G2) 0 #|plain AHE|%:R^-1
+  | uniform_fiber => Claim (accept D G2) 0 #|plain AHE|%:R^-1
   end.
 
 (* The dictionary of the class-conditional reading of the same argument: the
@@ -1216,9 +1217,10 @@ Definition alice_claim
    the justification it demands is that class membership rather than an
    equality of advantages; the label whose target is the zero game costs
    the same information-theoretic residue under both dictionaries.
-   Naming: extends [alice_claim] with the [assumed] variant token naming the
-   quantity the hop labels are charged at. *)
-Definition alice_claim_assumed (A : indcpa_epsilon_assumption)
+   Naming: extends [alice_claim] with the [admissible] variant token naming
+   the quantity the hop labels are charged at, the same token the bound
+   [alice_trace_guess_V2_admissible_le] already carries. *)
+Definition alice_claim_admissible (A : indcpa_epsilon_assumption)
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
     (l : alice_label) : claim R :=
   match l with
@@ -1226,7 +1228,7 @@ Definition alice_claim_assumed (A : indcpa_epsilon_assumption)
       Claim (accept D G0) (accept D G1) (indcpa_assumption_epsilon A)
   | cpa_charlie =>
       Claim (accept D G1) (accept D G2) (indcpa_assumption_epsilon A)
-  | uniform_plain => Claim (accept D G2) 0 #|plain AHE|%:R^-1
+  | uniform_fiber => Claim (accept D G2) 0 #|plain AHE|%:R^-1
   end.
 
 (* The closed form of the loss the chain below accumulates, written in the
@@ -1240,14 +1242,14 @@ Lemma alice_totalE
   = #|plain AHE|%:R^-1 + eps_bob D + eps_charlie D.
 Proof. by rewrite addrAC [X in X + _]addrC. Qed.
 
-(* The closed form of the loss a chain over alice_claim_assumed accumulates,
-   written in the order alice_trace_guess_V2_admissible_le states it: the
-   plaintext-space residue first, then the two hops, both charged at one and
-   the same assumed epsilon, which is where the factor two of that statement
-   comes from.
-   Naming: extends [alice_totalE] with the [assumed] token naming the
+(* The closed form of the loss a chain over alice_claim_admissible
+   accumulates, written in the order alice_trace_guess_V2_admissible_le
+   states it: the plaintext-space residue first, then the two hops, both
+   charged at one and the same class epsilon, which is where the factor two
+   of that statement comes from.
+   Naming: extends [alice_totalE] with the [admissible] token naming the
    dictionary whose loss is totalled. *)
-Lemma alice_assumed_totalE (A : indcpa_epsilon_assumption) :
+Lemma alice_admissible_totalE (A : indcpa_epsilon_assumption) :
   indcpa_assumption_epsilon A + indcpa_assumption_epsilon A
   + (#|plain AHE|%:R : R)^-1
   = (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
@@ -1261,10 +1263,8 @@ Proof. by rewrite mulr_natl mulr2n addrC. Qed.
    triangle inequality of the argument is spent.  The fragment carries no
    terminal, so it is a chain, and the gap result it returns on its own is
    the bound on the distance between Alice's real view and her all-zero
-   view, which is the simulation bound of alice_sim_advantage_le.  It is the
-   middle of every Alice program: alice_chain below and the two trace
-   programs of dsdp_alice_trace_link.v each take it in through a let-bound
-   name.
+   view, which is the simulation bound of alice_sim_advantage_le, the one
+   statement it carries.
    Naming: [hops] names the two hop steps the fragment is made of. *)
 Definition alice_hops
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :=
@@ -1279,28 +1279,42 @@ Definition alice_hops
             hop cpa_charlie (eps_charlie D) to (accept D G2)
               by le_of_eq (hop1_advantageE D) }.
 
-(* The computational-security argument of this file written as a chain: the
-   two ciphertext replacements of alice_hops, and then the all-zero endpoint
-   bounded.  The fragment enters as a let-bound name, so the two hops, their
-   labels and their proofs are the ones alice_hops already checked against
-   the dictionary; what this program adds is the terminal statement, which
-   turns the comparison of two acceptance probabilities into a bound on the
-   real-view game, the shape a secrecy statement takes. *)
+(* The computational-security argument of this file written as one program:
+   the two ciphertext replacements, and then the all-zero endpoint bounded.
+   Its distinguisher is the predictor scored against Bob's input, so the
+   advantage the program bounds is
+   |accept (distinguisher_of_predictor predict)
+      `p_[% V2, V3, alice_tuple_real] - 0|,
+   the probability that predict returns V2 from the real hopping tuple.  The
+   two hops are written where they are taken, at the advantages the two
+   reductions actually show, and what the terminal statement adds is the
+   turn from a comparison of two acceptance probabilities into a bound on
+   the real-view game, the shape a secrecy statement takes. *)
 Definition alice_chain (predict : predictor alice_hop_tupleT) :=
-  let D := distinguisher_of_predictor predict in
-  let hops := alice_hops D in
-  \epsilon[ alice_claim D ]{
-            (* the two ciphertext replacements, from the real view to the
-               view whose two slots both encrypt zero *)
-            hops ;
+  \epsilon[ alice_claim (distinguisher_of_predictor predict) ]{
+            (* the real view, both ciphertext slots carrying their
+               plaintexts *)
+            start (accept (distinguisher_of_predictor predict) G0) ;
+            (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
+            hop cpa_bob (eps_bob (distinguisher_of_predictor predict))
+              to (accept (distinguisher_of_predictor predict) G1)
+              by le_of_eq
+                   (hop0_advantageE (distinguisher_of_predictor predict)) ;
+            (* Charlie's slot zeroed, at a second IND-CPA advantage *)
+            hop cpa_charlie (eps_charlie (distinguisher_of_predictor predict))
+              to (accept (distinguisher_of_predictor predict) G2)
+              by le_of_eq
+                   (hop1_advantageE (distinguisher_of_predictor predict)) ;
             (* the guessing residue of the all-zero view, a term outside the
                hopping, added to the loss so the total bounds the real view *)
-            plus uniform_plain #|plain AHE|%:R^-1
+            plus uniform_fiber #|plain AHE|%:R^-1
               by plus_le (accept_ge0 _ _)
                    (all_zero_game_V2_le_invm predict) ;;
             (* the real-view game, at the residue and the two advantages *)
-            bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
-              by alice_totalE D }.
+            bound (#|plain AHE|%:R^-1
+                   + eps_bob (distinguisher_of_predictor predict)
+                   + eps_charlie (distinguisher_of_predictor predict))
+              by alice_totalE (distinguisher_of_predictor predict) }.
 
 (* A predictor reading Alice's real view returns Bob's input with probability at
    most the inverse plaintext-space cardinality plus the advantages of the two
