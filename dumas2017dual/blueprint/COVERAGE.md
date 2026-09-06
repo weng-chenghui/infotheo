@@ -6,10 +6,11 @@ declaration in scope, and that no `\rocq{}` ref dangles.
 ## Scope
 
 The `.v` files listed in `make_blueprint.sh`'s `MODULES` array, the exact set
-the blueprint claims to document. At this commit that is thirteen files, in
+the blueprint claims to document. At this commit that is fourteen files, in
 the order MODULES lists them:
 
 - `dumas2017dual/dsdp/counting/dsdp_entropy.v`
+- `dumas2017dual/dsdp/counting/dsdp_random_inputs.v`
 - `dumas2017dual/entropy_fiber/entropy_fiber_zpq.v`
 - `dumas2017dual/lib/extra_proba.v`
 - `computational_security/negligible.v`
@@ -22,11 +23,6 @@ the order MODULES lists them:
 - `dumas2017dual/dsdp/hopping/dsdp_alice_main.v`
 - `computational_security/paillier_indcpa_scheme.v`
 - `computational_security/benaloh_indcpa_scheme.v`
-
-`dumas2017dual/dsdp/counting/dsdp_random_inputs.v` is not in MODULES, so the
-checker never scans it and reports nothing about its declarations. A
-`\rocq{}` ref into it is ignored rather than resolved, so such a ref can
-neither cover a declaration nor be reported dangling.
 
 ## What it checks (hard-fail on either)
 

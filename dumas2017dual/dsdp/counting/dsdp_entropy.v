@@ -1,5 +1,6 @@
 From HB Require Import structures.
-From mathcomp Require Import all_boot all_order all_algebra fingroup finalg matrix.
+From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
+From mathcomp Require Import matrix.
 From mathcomp Require Import ring boolp finmap matrix lra reals.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_tactics.
@@ -69,7 +70,8 @@ Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 (* Fiber from full constraint: s - u1*v1 = u2*v2 + u3*v3.
-   Uses linear_fiber_2d from linear_fiber_zpq.v for the generic 2D linear fiber. *)
+   Uses linear_fiber_2d from linear_fiber_zpq.v for the generic 2D linear
+   fiber. *)
 Definition dsdp_fiber (u1 u2 u3 v1 s : msg) : {set msg * msg} :=
   linear_fiber_2d u2 u3 (s - u1 * v1)%R.
 
@@ -121,7 +123,8 @@ Let dsdp_fiber_fn (cond : msg * msg * msg * msg * msg) : {set msg * msg} :=
   let '(v1, u1, u2, u3, s) := cond in dsdp_fiber u1 u2 u3 v1 s.
 
 (* DSDP projection: extracts input part from condition *)
-Let dsdp_proj_input (cond : msg * msg * msg * msg * msg) : msg * msg * msg * msg :=
+Let dsdp_proj_input (cond : msg * msg * msg * msg * msg) :
+    msg * msg * msg * msg :=
   let '(v1, u1, u2, u3, _) := cond in (v1, u1, u2, u3).
 
 (* Prerequisite 1: VarRV is always in the fiber of CondRV *)
@@ -236,7 +239,8 @@ by rewrite (cond_prob_zero_outside_constraint Hconstraint Hcond_pos).
 Qed.
 
 (* Solutions have uniform probability.
-   Instantiates cPr_uniform_fiber from entropy_fiber_zpq.v with DSDP structure. *)
+   Instantiates cPr_uniform_fiber from entropy_fiber_zpq.v with DSDP
+   structure. *)
 Lemma Pr_dsdp_sol_uniform (u1 u2 u3 v1 s : msg) (v2 v3 : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   `Pr[CondRV = (v1, u1, u2, u3, s)] != 0 ->
@@ -261,7 +265,8 @@ by rewrite Hcpr /= Hcard.
 Qed.
 
 (* Helper: Each conditioning value gives entropy log(m).
-   Uses centropy1_uniform_over_set directly with DSDP-specific probability lemmas. *)
+   Uses centropy1_uniform_over_set directly with DSDP-specific probability
+   lemmas. *)
 Lemma dsdp_centropy1_uniform (v1 u1 u2 u3 s : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   `Pr[CondRV = (v1, u1, u2, u3, s)] != 0 ->
@@ -323,52 +328,14 @@ move: Heq; rewrite subr_eq addrC => /eqP ->.
 by rewrite addrA.
 Qed.
 
-(* Conditioned on Alice's inputs and the output (V1, U1, U2, U3, S), the relay
-   private inputs (V2, V3) retain log m bits of uncertainty.  Same statement
-   and same hypotheses as dsdp_centropy_uniform below, reached by a different
-   route: here the conditional entropy is expanded into its per-point sum and
-   each term is closed by dsdp_centropy1_uniform, where dsdp_centropy_uniform
-   instead factors through the generic fiber argument of
-   centropy_jcond_determined_fibers.  The bound therefore has two independent
-   derivations, one counting solutions point by point and one quotienting by
-   the fibers of dsdp_g.  [3-party] *)
-Theorem dsdp_centropy_uniform_direct :
-  (forall t, (0 < U3 t)%N) ->
-  (forall t, (U3 t < minn p q)%N) ->
-  `H(VarRV | CondRV) = log (m%:R : R).
-Proof.
-move=> HU3_pos HU3_lt.
-rewrite centropy_RVE' /=.
-transitivity (\sum_(a : msg * msg * msg * msg * msg)
-               `Pr[ CondRV = a ] * log (m%:R : R)).
-  apply: eq_bigr => [] [] [] [] [] v1 u1 u2 u3 s H.
-  have [->|Hcond_pos] := eqVneq (`Pr[CondRV = (v1, u1, u2, u3, s)]) 0.
-    by rewrite !mul0r.
-  have Hu3_pos: (0 < u3)%N.
-    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
-    move: Ht; rewrite inE => /eqP Ht.
-    have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
-    by rewrite -HU3t; apply: HU3_pos.
-  have Hu3_lt: (u3 < minn p q)%N.
-    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
-    move: Ht; rewrite inE => /eqP Ht.
-    have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
-    by rewrite -HU3t; apply: HU3_lt.
-  by rewrite (dsdp_centropy1_uniform Hu3_pos Hu3_lt Hcond_pos).
-under eq_bigr do rewrite mulrC.
-by rewrite -big_distrr /= sum_pfwd1 mulr1.
-Qed.
-
 (* Conditioning on Alice's inputs and the output (V1, U1, U2, U3, S), the
    plaintext part of her observation, the relay private inputs (V2, V3)
-   retain log m bits of uncertainty.  This is the fiber derivation of the
-   bound dsdp_centropy_uniform_direct reaches by summing point by point: S is
-   a function of (V2, V3) and the inputs through dsdp_g, so
-   centropy_jcond_determined_fibers quotients the conditional entropy by the
-   fibers of that function, and dsdp_fiber_card supplies the m solutions each
-   fiber holds.  The counting axis bounds the plaintexts, and Alice's key,
-   her masks and the ciphertext hops are bounded on the hopping axis.
-   [3-party] *)
+   retain log m bits of uncertainty.  S is a function of (V2, V3) and the
+   inputs through dsdp_g, so centropy_jcond_determined_fibers quotients the
+   conditional entropy by the fibers of that function, and dsdp_fiber_card
+   supplies the m solutions each fiber holds.  The counting axis bounds the
+   plaintexts, and Alice's key, her masks and the ciphertext hops are bounded
+   on the hopping axis.  [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -483,8 +450,9 @@ rewrite card_prod prednK //.
 by rewrite muln_gt0; apply/andP; split.
 Qed.
 
-(* dsdp_constraint_ring — the ring-generic DSDP linear constraint: for conditions
-   (v1, u1, u2, u3, s) and variables (v2, v3), s - u1 * v1 = u2 * v2 + u3 * v3. *)
+(* dsdp_constraint_ring — the ring-generic DSDP linear constraint: for
+   conditions (v1, u1, u2, u3, s) and variables (v2, v3),
+   s - u1 * v1 = u2 * v2 + u3 * v3. *)
 Definition dsdp_constraint_ring (cond : R * R * R * R * R)
   (var : R * R) : bool :=
   let '(v1, u1, u2, u3, s) := cond in
@@ -593,7 +561,7 @@ Qed.
 End dsdp_entropy_ring.
 
 (* ========================================================================== *)
-(* N-party entropy analysis                                                    *)
+(* N-party entropy analysis                                                   *)
 (* ========================================================================== *)
 
 (* Generalization of the 3-party entropy result to N parties.

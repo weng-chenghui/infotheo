@@ -4,6 +4,7 @@ Require Import realType_ext realType_ln ssr_ext ssralg_ext fdist proba.
 Require Import entropy graphoid.
 Require Import spp_proba extra_proba extra_entropy.
 Require Import homomorphic_encryption.
+Require Import dsdp_random_inputs.
 
 Import GRing.Theory.
 Import Num.Theory.
@@ -59,7 +60,8 @@ Definition dotp_n (x y : {ffun 'I_n_relay.+1 -> msg}) : msg :=
   \sum_(i < n_relay.+1) x i * y i.
 
 (* Dot product as random variable *)
-Definition Dotp_n_rv (X Y : {RV P -> {ffun 'I_n_relay.+1 -> msg}}) : {RV P -> msg} :=
+Definition Dotp_n_rv (X Y : {RV P -> {ffun 'I_n_relay.+1 -> msg}}) :
+    {RV P -> msg} :=
   fun t => dotp_n (X t) (Y t).
 
 (* First basis vector: e_1 = (1, 0, ..., 0) *)
@@ -128,16 +130,28 @@ Local Open Scope reals_ext_scope.
 Local Open Scope entropy_scope.
 
 Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
 Variables (p_minus_2 q_minus_2 : nat).
 Local Notation p := p_minus_2.+2.
 Local Notation q := q_minus_2.+2.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-Variables (V1 V2 V3 U1 U2 U3 R2 R3 : {RV P -> msg}).
-Variable Dk_a : {RV P -> Alice.-key Dec msg}.
+(* One 3-party run at this modulus, on the counting side.  The theorem below
+   reads a relay's input off Alice's view at a query she chooses, so it needs
+   the run's random inputs and none of the record's independence fields. *)
+Variable I : dsdp_random_inputs R p_minus_2 q_minus_2.
+
+Local Notation T := (sampleT I).
+Local Notation P := (sample_fdist I).
+Local Notation V1 := (V1 I).
+Local Notation V2 := (V2 I).
+Local Notation V3 := (V3 I).
+Local Notation U1 := (U1 I).
+Local Notation U2 := (U2 I).
+Local Notation U3 := (U3 I).
+Local Notation R2 := (R2 I).
+Local Notation R3 := (R3 I).
+Local Notation Dk_a := (Dk_a I).
 
 (* Bob's input under Alice's query weight U2 and her mask R2, the plaintext of
    her first combine. *)

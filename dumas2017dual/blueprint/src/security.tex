@@ -102,7 +102,8 @@ degenerate query that violates it lets Alice read a relay's input outright.
 
 \begin{theorem}[Residual uncertainty of the relay inputs]
   \label{thm:dsdp_centropy_uniform}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.dsdp_centropy_uniform}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.dsdp_centropy_uniform,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.dsdp_random_inputs}
   \rocqok
   \uses{def:party_views,lem:dsdp_is_correct}
   Conditioned on Alice's inputs and the decrypted output $(V_1,U_1,U_2,U_3,S)$ ---
@@ -118,9 +119,7 @@ degenerate query that violates it lets Alice read a relay's input outright.
   \texttt{dsdp\_random\_inputs}, which \texttt{uniform\_inputs} inhabits at
   every modulus. Because the each-against-the-rest independence reaches
   Alice's three weights, the equality covers honest sampling, where her
-  weights are independent of her input and of one another. The form that
-  assumes nothing about their joint law is
-  \texttt{dsdp\_centropy\_uniform\_direct} of \texttt{dsdp\_entropy.v}. At
+  weights are independent of her input and of one another. At
   every modulus the equality is exact and holds against an adversary of any
   running time.
 \end{theorem}

@@ -13,6 +13,9 @@ MODULES=(
   # The library facts the "Reused Infotheo facts" section cites: the fiber
   # counting and conditional-uniformity lemmas, and the diagonal bound.
   dumas2017dual/dsdp/counting/dsdp_entropy.v
+  # The counting facade: the run's random inputs, the laws relay secrecy
+  # reads off them, and the uniform witness that inhabits them.
+  dumas2017dual/dsdp/counting/dsdp_random_inputs.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
   dumas2017dual/lib/extra_proba.v
   # The asymptotic reading of every concrete epsilon below: negligibility of

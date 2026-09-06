@@ -4,6 +4,7 @@ Require Import realType_ext realType_ln ssr_ext ssralg_ext fdist proba.
 Require Import entropy graphoid.
 Require Import spp_proba extra_proba extra_entropy extra_algebra.
 Require Import homomorphic_encryption.
+Require Import dsdp_random_inputs.
 
 Import GRing.Theory.
 Import Num.Theory.
@@ -21,8 +22,11 @@ Import Num.Theory.
 
 (******************************************************************************)
 (* Corrupted-relay secrecy in the DSDP protocol: the two relays' full real    *)
-(* views and the inputs those views leave uncertain, stated over abstract     *)
-(* random variables and the laws they are assumed to obey.                    *)
+(* views and the inputs those views leave uncertain, at one value of          *)
+(* dsdp_random_inputs.  The record's eleven random inputs are the run, its    *)
+(* uniformity fields and its seven derived laws are what the views are        *)
+(* measured against, so a bound here holds at every run the record inhabits,  *)
+(* the uniform one of uniform_inputs included.                                *)
 (*                                                                            *)
 (* These are counting-axis bounds, so they hold against a relay of any        *)
 (* running time.  Each view is a deterministic function of data independent   *)
@@ -59,22 +63,33 @@ Section dsdp_relay_secrecy.
    real view is a deterministic function of inputs independent of V1, so its
    conditional entropy about V1 stays at log m. *)
 Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
 Variables (p_minus_2 q_minus_2 : nat).
 Local Notation p := p_minus_2.+2.
 Local Notation q := q_minus_2.+2.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-(* The plaintext count, as a named term rather than an anonymous subproof, so
-   that the uniform hypotheses below survive section discharge in a shape a
-   caller can supply. *)
-Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
+(* One 3-party run at this modulus, on the counting side: the sample space,
+   the law, the eleven random inputs, and the independence and uniformity
+   facts the two views below are measured against. *)
+Variable I : dsdp_random_inputs R p_minus_2 q_minus_2.
 
-Variables (V1 V2 V3 U2 U3 R2 R3 : {RV P -> msg}).
-Variable Dk_b : {RV P -> Bob.-key Dec msg}.
-Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
+Local Notation T := (sampleT I).
+Local Notation P := (sample_fdist I).
+Local Notation V1 := (V1 I).
+Local Notation V2 := (V2 I).
+Local Notation V3 := (V3 I).
+Local Notation U2 := (U2 I).
+Local Notation U3 := (U3 I).
+Local Notation R2 := (R2 I).
+Local Notation R3 := (R3 I).
+Local Notation Dk_b := (Dk_b I).
+Local Notation Dk_c := (Dk_c I).
+
+(* The plaintext count, as a named term rather than an anonymous subproof, so
+   that the uniform laws below survive section discharge in a shape a caller
+   can supply. *)
+Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
 
 (* Bob's input under Alice's query weight U2.  The weights U1, U2, U3 are
    Alice's, so this is the one place Bob's secret meets a factor he does not
@@ -124,9 +139,11 @@ Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
    ciphertext he receives from Bob. *)
 Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
 
-Hypothesis pV1_unif : `p_ V1 = fdist_uniform card_msg.
-Hypothesis bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1.
-Hypothesis charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1.
+Let pV1_unif : `p_ V1 = fdist_uniform card_msg := dsdp_random_inputs.pV1_unif I.
+Let bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1 :=
+  dsdp_random_inputs.bob_inputs_indep_V1 I.
+Let charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1 :=
+  dsdp_random_inputs.charlie_inputs_indep_V1 I.
 
 Let bob_view_of (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
   (((w.1.1.1, w.1.1.2), E' Charlie w.1.2), E' Bob w.2).
@@ -177,10 +194,12 @@ Qed.
 
 (* The Charlie-ciphertext Bob forwards carries plaintext V3 * U3 + R3, masked by
    Alice's fresh one-time pad R3, so Bob's full view is independent of V3. *)
-Hypothesis pV3_unif : `p_ V3 = fdist_uniform card_msg.
-Hypothesis pR3_unif : `p_ R3 = fdist_uniform card_msg.
-Hypothesis R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3].
-Hypothesis bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3].
+Let pV3_unif : `p_ V3 = fdist_uniform card_msg := dsdp_random_inputs.pV3_unif I.
+Let pR3_unif : `p_ R3 = fdist_uniform card_msg := dsdp_random_inputs.pR3_unif I.
+Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] :=
+  dsdp_random_inputs.R3_indep_VU3_V3 I.
+Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
+  dsdp_random_inputs.bob_data_indep_charlie I.
 
 (* The masked plaintext V3 * U3 + R3 is independent of V3 (one-time pad). *)
 Let VU3R_indep_V3 : P |= VU3R _|_ V3.
@@ -238,11 +257,14 @@ Qed.
 
 (* Charlie's decrypted aggregate D3 carries V2 * U2 masked by Alice's fresh pad
    R2, so the ciphertext Charlie returns to Alice is independent of V2. *)
-Hypothesis pV2_unif : `p_ V2 = fdist_uniform card_msg.
-Hypothesis pR2_unif : `p_ R2 = fdist_uniform card_msg.
-Hypothesis R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2].
-Hypothesis R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]].
-Hypothesis Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3].
+Let pV2_unif : `p_ V2 = fdist_uniform card_msg := dsdp_random_inputs.pV2_unif I.
+Let pR2_unif : `p_ R2 = fdist_uniform card_msg := dsdp_random_inputs.pR2_unif I.
+Let R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2] :=
+  dsdp_random_inputs.R2_indep_VU2_V2 I.
+Let R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]] :=
+  dsdp_random_inputs.R2_indep_VU2_VU3R_V2 I.
+Let Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3] :=
+  dsdp_random_inputs.Dk_c_V3_indep_V2_E_charlie_d3 I.
 
 (* D2 = V2 * U2 + R2 is independent of (VU3R, V2) (one-time pad). *)
 Let D2_indep_VU3R_V2 : P |= D2 _|_ [%VU3R, V2].

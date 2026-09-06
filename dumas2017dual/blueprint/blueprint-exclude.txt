@@ -115,7 +115,6 @@ dsdp_entropy:Pr_dsdp_sol_uniform
 dsdp_entropy:S_determined
 dsdp_entropy:dsdp_centropy1_uniform
 dsdp_entropy:dsdp_centropy1_uniform_n
-dsdp_entropy:dsdp_centropy_uniform_direct
 dsdp_entropy:dsdp_constraint
 dsdp_entropy:dsdp_constraint_ring
 dsdp_entropy:dsdp_fiber
@@ -126,6 +125,55 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
+# dsdp_random_inputs: the seven laws relay secrecy consumes, each one
+# each-against-the-rest field of the record pushed into the shape a party's
+# view takes; the blueprint cites the privacy theorems that read them.
+dsdp_random_inputs:Dk_c_V3_indep_V2_E_charlie_d3
+dsdp_random_inputs:R2_indep_VU2_V2
+dsdp_random_inputs:R2_indep_VU2_VU3R_V2
+dsdp_random_inputs:R3_indep_VU3_V3
+dsdp_random_inputs:bob_data_indep_charlie
+dsdp_random_inputs:bob_inputs_indep_V1
+dsdp_random_inputs:charlie_inputs_indep_V1
+# dsdp_random_inputs: the coordinates, counts, marginals and per-input facts
+# uniform_inputs is assembled from; the blueprint cites the witness itself.
+dsdp_random_inputs:uniform_Dk_a
+dsdp_random_inputs:uniform_Dk_a_indep
+dsdp_random_inputs:uniform_Dk_b
+dsdp_random_inputs:uniform_Dk_b_indep
+dsdp_random_inputs:uniform_Dk_c
+dsdp_random_inputs:uniform_Dk_c_indep
+dsdp_random_inputs:uniform_R2
+dsdp_random_inputs:uniform_R2_indep
+dsdp_random_inputs:uniform_R3
+dsdp_random_inputs:uniform_R3_indep
+dsdp_random_inputs:uniform_U1
+dsdp_random_inputs:uniform_U1_indep
+dsdp_random_inputs:uniform_U2
+dsdp_random_inputs:uniform_U2_indep
+dsdp_random_inputs:uniform_U3
+dsdp_random_inputs:uniform_U3_indep
+dsdp_random_inputs:uniform_V1
+dsdp_random_inputs:uniform_V1_indep
+dsdp_random_inputs:uniform_V2
+dsdp_random_inputs:uniform_V2_indep
+dsdp_random_inputs:uniform_V3
+dsdp_random_inputs:uniform_V3_indep
+dsdp_random_inputs:uniform_card_msg
+dsdp_random_inputs:uniform_card_rest
+dsdp_random_inputs:uniform_card_sample
+dsdp_random_inputs:uniform_coord
+dsdp_random_inputs:uniform_pR2_unif
+dsdp_random_inputs:uniform_pR3_unif
+dsdp_random_inputs:uniform_pV1_unif
+dsdp_random_inputs:uniform_pV2_unif
+dsdp_random_inputs:uniform_pV3_unif
+dsdp_random_inputs:uniform_rest
+dsdp_random_inputs:uniform_sampleT
+dsdp_random_inputs:uniform_sample_fdist
+dsdp_random_inputs:uniform_split
+dsdp_random_inputs:uniform_view_input
+dsdp_random_inputs:uniform_view_mask
 # dsdp_instance: the key table read off three private keys, the coin-replacing
 # instance the averaging statements are read at, the two summand sequences a
 # bound along an instance sequence is written from, and the
