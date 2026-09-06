@@ -6,7 +6,7 @@ Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra.
 Require Import proba jfdist_cond entropy graphoid spp_proba.
 Require Import extra_proba extra_algebra.
-Require Import homomorphic_encryption.
+Require Import homomorphic_encryption dsdp_interface.
 Require Import dsdp_entropy dsdp_relay_secrecy dsdp_malicious_dotp.
 Require Import negligible indcpa_game.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
@@ -114,16 +114,26 @@ Require Import dsdp_instance_sequence.
 (* Dk_c_V3_indep_V2_E_charlie_d3 == Charlie's key and input are independent   *)
 (*                              of Bob's input with the aggregate ciphertext  *)
 (*                    AHE_at == the k-th scheme                               *)
-(* hop_tupleT_at, viewT_at, traceT_at == the three carriers the hopping      *)
+(* hop_tupleT_at, traceT_at, raw_traceT_at == the three carriers the hopping *)
 (*                              bounds quantify predictors over               *)
+(*   renc_at, card_renc_at == the re-encryption coin space of the k-th        *)
+(*                              instance and its cardinality equation         *)
 (* hop_fdist_at, hop_V2_at, hop_V3_at == the corrupted-Alice sample space and *)
 (*                              its two honest relay inputs                   *)
-(* AliceRealTuple_at, AliceAllZeroTuple_at, AliceView_at, AliceTrace_at ==    *)
-(*                              the conditioners of the hopping ladder        *)
+(* AliceRealTuple_at, AliceAllZeroTuple_at, AliceTrace_at, AliceRawTrace_at   *)
+(*                           == the conditioners of the hopping ladder        *)
+(* alice_trace_decode_at, encoded_predictor_at == the fixed-key decoder of    *)
+(*                              the encoded trace and the encoded-trace       *)
+(*                              predictor a raw-trace predictor induces       *)
+(* alice_trace_of_hop_tuple_at == the encoded trace read off a hopping tuple  *)
+(*                              at one re-encryption coin                     *)
 (*                   Sout_at == the output the hopping side leaks             *)
 (*  bob_pkey_at, charlie_pkey_at == the two public keys the hops are taken at *)
 (* alice_ideal_at, alice_trace_ideal_at == the simulator's law at the tuple  *)
 (*                              and at the executed trace                     *)
+(* alice_raw_trace_real_avg_at, alice_raw_trace_ideal_avg_at == the two       *)
+(*                              Boolean raw-trace experiments, real and       *)
+(*                              simulated, at a uniform re-encryption coin    *)
 (* indcpa_assumptionT_at, assumption_at == the IND-CPA assumption type at k   *)
 (*                              and the assumption the sequence makes there   *)
 (* BobView_at, CharlieView_at, AliceDotpView_at == the three counting views   *)
@@ -674,11 +684,25 @@ Local Notation rc2 := (inst_rc2 Inst).
 (* The scheme packaging at the k-th instance. *)
 Definition AHE_at : AHEncType := AHE.
 
-(* The three carriers the hopping bounds quantify predictors over, at the k-th
-   instance. *)
+(* The three carriers the hopping bounds quantify predictors over at the k-th
+   instance: Alice's hopping tuple, the encoded trace the interpreter hands
+   her, and the raw interpreter trace the protocol run itself produces.  The
+   raw carrier is a plain type rather than a finType: it is what the protocol
+   emits, and no distribution is ever formed on it.
+   Naming: [raw] marks the trace before the encoding into one finite carrier,
+   after [alice_raw_trace]. *)
 Definition hop_tupleT_at : finType := alice_hop_tupleT AHE Renc.
-Definition viewT_at : finType := alice_viewT AHE Renc.
 Definition traceT_at : finType := alice_traceT AHE.
+Definition raw_traceT_at : Type :=
+  seq (di_data (Standard_DSDP_Interface AHE)).
+
+(* The re-encryption coin space of the k-th instance, and its cardinality
+   equation.  The averaged raw-trace experiments below draw this coin
+   uniformly, where every fixed-coin statement reads it at the instance's own
+   value rb2, rc2.
+   Naming: after [inst_renc] and [inst_card_renc] of the instance record. *)
+Definition renc_at : finType := Renc.
+Definition card_renc_at : #|renc_at| = #|renc_at|.-1.+1 := card_renc.
 
 (* The corrupted-Alice sample space at the k-th instance, and the two honest
    relay inputs on it. *)
@@ -689,16 +713,15 @@ Definition hop_V2_at : {RV hop_fdist_at -> plain AHE} :=
 Definition hop_V3_at : {RV hop_fdist_at -> plain AHE} :=
   sample_V3 (R:=R) (AHE:=AHE) card_renc.
 
-(* The three conditioners of the hopping ladder at the k-th instance: its
-   real endpoint, its all-zero endpoint, and Alice's whole view. *)
+(* The two endpoints of the hopping ladder at the k-th instance: the real
+   tuple, both ciphertext slots carrying their plaintexts, and the all-zero
+   tuple, both slots carrying zero.  The two advantages of every hopping
+   bound are what carries a statement from the first to the second. *)
 Definition AliceRealTuple_at : {RV hop_fdist_at -> hop_tupleT_at} :=
   alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
     v1 u1 u2 u3.
 Definition AliceAllZeroTuple_at : {RV hop_fdist_at -> hop_tupleT_at} :=
   alice_tuple_all_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
-    v1 u1 u2 u3.
-Definition AliceView_at : {RV hop_fdist_at -> viewT_at} :=
-  AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
     v1 u1 u2 u3.
 
 (* Alice's executed trace at the k-th instance, the conditioner the trace
@@ -708,6 +731,43 @@ Definition AliceTrace_at : {RV hop_fdist_at -> traceT_at} :=
     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2.
 Definition Sout_at : {RV hop_fdist_at -> plain AHE} :=
   Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3.
+
+(* Alice's raw interpreter trace at the k-th instance: the sequence of data
+   the run of the protocol records for her, which is what the protocol
+   produces and what the paper's trace statements are about.  AliceTrace_at
+   is that same trace read through the encoding into one finite carrier.
+   Naming: [Raw] marks the observation before the encoding, after
+   [alice_raw_trace]. *)
+Definition AliceRawTrace_at : alice_sampleT AHE Renc -> raw_traceT_at :=
+  alice_raw_trace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+    dk_a dk_b dk_c rb2 rc2.
+
+(* The encoded trace decoded at Alice's own key pair, the one key context in
+   which the encoding is inverted: her trace carries no public-key mark, so
+   decoding it under her own key returns the run's own trace.
+   Naming: [_at] as elsewhere here, over [di_data_of_trace_data] mapped along
+   the trace. *)
+Definition alice_trace_decode_at (b : traceT_at) : raw_traceT_at :=
+  map (di_data_of_trace_data dk_a (pub_of_priv dk_a)) b.
+
+(* The encoded-trace predictor a raw-trace predictor induces, by decoding
+   first.  A raw-trace predictor succeeds on exactly the samples this one
+   does, so the two levels are charged the same two hop advantages and the
+   encoding costs Alice nothing and withholds nothing from her.
+   Naming: after the [encoded_predictor] abbreviation of
+   dsdp_alice_trace_link.v. *)
+Definition encoded_predictor_at (g_raw : raw_traceT_at -> plain AHE) :
+    predictor AHE traceT_at :=
+  fun b => g_raw (alice_trace_decode_at b).
+
+(* Alice's encoded trace read off a value of her hopping tuple at one
+   re-encryption coin.  The coin is a parameter because the averaged
+   raw-trace bound charges one pair of hop advantages per coin.
+   Naming: the [_at] spelling of [alice_trace_of_hop_tuple], with the coin
+   left explicit. *)
+Definition alice_trace_of_hop_tuple_at (w : renc_at) :
+    hop_tupleT_at -> traceT_at :=
+  alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w.
 
 (* The two public keys the ladder's two hops are taken at, at the k-th
    instance. *)
@@ -726,6 +786,25 @@ Definition alice_trace_ideal_at :
     R.-fdist (plain AHE * plain AHE * traceT_at) :=
   alice_trace_ideal (R:=R) card_renc rand_of_renc
     v1 u1 u2 u3 dk_a dk_b dk_c rc2.
+
+(* The two Boolean raw-trace experiments at the k-th instance, the real one
+   and the simulated one, each with the re-encryption coin drawn uniformly:
+   a test applied to the two honest relay inputs beside Alice's raw trace,
+   and the same test applied to the simulated trace through the decoder.
+   Drawing the coin is what makes the pair a statement about the protocol
+   rather than about one of its executions.
+   Naming: after [alice_trace_real_avg] and [alice_trace_ideal_avg] of
+   dsdp_alice_trace_link.v, with [raw] marking the observation read. *)
+Definition alice_raw_trace_real_avg_at
+    (D_raw : plain AHE * plain AHE * raw_traceT_at -> bool) :
+    R.-fdist bool :=
+  alice_raw_trace_real_experiment_avg (R:=R) card_renc rand_of_renc
+    v1 u1 u2 u3 dk_a dk_b dk_c rb2 D_raw.
+Definition alice_raw_trace_ideal_avg_at
+    (D_raw : plain AHE * plain AHE * raw_traceT_at -> bool) :
+    R.-fdist bool :=
+  alice_raw_trace_ideal_experiment_avg (R:=R) card_renc rand_of_renc
+    v1 u1 u2 u3 dk_a dk_b dk_c D_raw.
 
 (* The IND-CPA assumption type at the k-th instance, and the assumption the
    sequence itself makes there. *)

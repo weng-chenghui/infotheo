@@ -16,27 +16,32 @@ Require Import dsdp_setting.
 (**md**************************************************************************)
 (* # What a DSDP setting proves                                               *)
 (*                                                                            *)
-(* A value of dsdp_security X is the twenty-six statements below at the       *)
+(* A value of dsdp_security X is the twenty-one statements below at the       *)
 (* setting X, with one proof each, and dsdp_securityP X is the value every    *)
 (* setting has, after du2002's pair scalar_product_is_leakage_free /          *)
 (* scalar_product_is_leakage_freeP.  What separates this file from            *)
 (* dsdp_setting.v is that every declaration here names an adversary or states *)
 (* a bound, while everything that exists before an adversary is named lives   *)
-(* there.                                                                     *)
+(* there.  The collection is the results the paper presents and no others.    *)
 (*                                                                            *)
 (* The record does not say that X is secure in any wider sense.               *)
 (*                                                                            *)
-(* Eight of the twenty-six are leakage or obstruction results rather than     *)
+(* Six of the twenty-one are leakage or obstruction results rather than       *)
 (* secrecy, and each is read at the conditioner that makes it one.            *)
 (* centropy_V2_dotp_eq0 and centropy_V2_trace_eq0 are zero conditional        *)
 (* entropies: Alice's corrupted-query view and her executed trace each        *)
-(* determine Bob's input.  centropy_V2_trace_tupleE and                       *)
-(* centropy_V2_view_tupleE carry that zero to her hopping tuple and to her    *)
-(* whole view.  The four decrypt_ fields show that the class restriction the  *)
-(* trace bounds are conditional on cannot be widened.  Next to                *)
+(* determine Bob's input.  The four decrypt_ fields show that the class       *)
+(* restriction the trace bounds are conditional on cannot be widened, the     *)
+(* last of them along the whole sequence rather than at one k.  Next to       *)
 (* centropy_V2_all_zero_logm, which is log #|plain|, this reads as a          *)
 (* contradiction unless the conditioner of each is named: the all-zero        *)
 (* endpoint of the hop ladder on one side, the executed trace on the other.   *)
+(*                                                                            *)
+(* The two trace-axis fields are read at Alice's raw interpreter trace, what  *)
+(* the run of the protocol produces, rather than at the encoded trace that    *)
+(* run is carried through to reach a finite carrier.  Decoding at her own     *)
+(* key inverts the encoding, so the two levels are the same observation and   *)
+(* the same two advantages pay for both.                                      *)
 (*                                                                            *)
 (* Bob and Charlie appear only as unconditional counting adversaries, whose   *)
 (* views are plaintexts and abstract ciphertexts; the computational axis is   *)
@@ -63,15 +68,15 @@ Require Import dsdp_setting.
 (* the block size rather than a hardness modulus; they are there for the      *)
 (* fiber count of the counting axis only.                                     *)
 (*                                                                            *)
-(* Thirteen field names coincide with the axis theorem the field cites:       *)
+(* Twelve field names coincide with the axis theorem the field cites:         *)
 (* bob_privacy_V1, charlie_privacy_V1, bob_privacy_V3, charlie_privacy_V2,    *)
-(* centropy_V2_Sout_logm, centropy_V2_all_zero_logm,                          *)
-(* centropy_V2_trace_tupleE, centropy_V2_view_tupleE, centropy_V2_trace_eq0,  *)
-(* decrypt_epsilon_sum_ge, decrypt_bob_epsilon_ge,                            *)
-(* decrypt_reduction_admissibleF and decrypt_guess_V2_premise_free_lt.  The   *)
-(* field wins the short name, so inside this file the axis theorems are cited *)
-(* qualified, as dsdp_alice_trace_link.centropy_V2_trace_eq0; downstream of   *)
-(* this file the bare name is the field.                                      *)
+(* all_zero_guess_V2_le_invm, centropy_V2_Sout_logm,                          *)
+(* centropy_V2_all_zero_logm, centropy_V2_trace_eq0, decrypt_bob_epsilon_ge,  *)
+(* decrypt_reduction_admissibleF, decrypt_guess_V2_premise_free_lt and        *)
+(* decrypt_reduction_admissible_eventuallyF.  The field wins the short name,  *)
+(* so inside this file the axis theorems are cited qualified, as              *)
+(* dsdp_alice_trace_link.centropy_V2_trace_eq0; downstream of this file the   *)
+(* bare name is the field.                                                    *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*          indcpa_epsilon_at == the IND-CPA advantage of one adversary at    *)
@@ -79,23 +84,15 @@ Require Import dsdp_setting.
 (* bob_challenge_adversary_at, charlie_challenge_adversary_at == the two      *)
 (*                              reduction adversaries a tuple distinguisher   *)
 (*                              induces                                       *)
-(* bob_view_adversary_at, charlie_view_adversary_at == the two a view         *)
-(*                              predictor induces                             *)
-(* bob_predictor_epsilon_at, charlie_predictor_epsilon_at == the two          *)
-(*                              advantages a tuple predictor buys             *)
-(* alice_predictor_unpredictability_at == the unpredictability those two      *)
-(*                              advantages correct                            *)
 (* bob_trace_predictor_epsilon_at, charlie_trace_predictor_epsilon_at == the  *)
 (*                              two advantages a trace predictor buys         *)
-(* alice_trace_unpredictability_at == the unpredictability at the executed    *)
-(*                              trace                                         *)
 (*   bob_decrypt_predictor_at == the trace predictor that decrypts with       *)
 (*                              Alice's key                                   *)
 (* dsdp_admissible_predictor == a trace predictor whose two reduction         *)
 (*                              adversaries the sequence's assumption admits  *)
 (*                    predict == that predictor                               *)
 (* bob_admissible, charlie_admissible == the two class premises               *)
-(*             dsdp_security == the twenty-six statements one setting proves  *)
+(*             dsdp_security == the twenty-one statements one setting proves  *)
 (*           centropy_uniform == log m of uncertainty about the relay pair at *)
 (*                              Alice's honest query                          *)
 (*       centropy_V2_dotp_eq0 == her corrupted-query view determines Bob's    *)
@@ -105,27 +102,30 @@ Require Import dsdp_setting.
 (*                              input                                         *)
 (*         tuple_guess_V2_le == guessing Bob's input from Alice's hopping     *)
 (*                              tuple, bounded by two hop advantages          *)
-(* unpredictability_ge, predictor_unpredictability_ge == the same bound as a  *)
-(*                              logarithmic lower bound                       *)
 (*          sim_advantage_le == the tuple against the simulator's law         *)
-(*          view_guess_V2_le == the guessing bound at Alice's whole view      *)
+(* all_zero_guess_V2_le_invm == at the all-zero endpoint the guess is the     *)
+(*                              uniform residue, the term no assumption pays  *)
+(*                              for                                           *)
 (*     centropy_V2_Sout_logm == the output alone leaves Bob's input fully     *)
 (*                              uncertain                                     *)
 (* centropy_V2_all_zero_logm == so does the all-zero endpoint of the ladder   *)
-(* trace_guess_V2_le, trace_unpredictability_ge, trace_sim_advantage_le ==    *)
-(*                              the same three bounds at the executed trace   *)
-(* centropy_V2_trace_tupleE, centropy_V2_view_tupleE == the trace and the     *)
-(*                              view leave the tuple's conditional entropy    *)
-(*      centropy_V2_trace_eq0 == that entropy is zero at the executed trace   *)
+(* raw_trace_guess_V2_le, raw_trace_sim_advantage_avg_le == the guessing and  *)
+(*                              the simulation bound at the raw interpreter   *)
+(*                              trace, the second at a uniform re-encryption  *)
+(*                              coin                                          *)
+(*      centropy_V2_trace_eq0 == the encoded trace determines Bob's input     *)
 (* trace_guess_V2_admissible_le == the trace guessing bound conditional on    *)
 (*                              the two class premises                        *)
 (* trace_guess_V2_admissible_pq_le == the same at the composite modulus       *)
-(* decrypt_epsilon_sum_ge, decrypt_bob_epsilon_ge == the decrypting predictor *)
-(*                              forces an epsilon of at least 1 - 1/#|plain|  *)
+(*    decrypt_bob_epsilon_ge == the decrypting predictor forces an epsilon    *)
+(*                              of at least 1 - 1/#|plain|                    *)
 (* decrypt_reduction_admissibleF == no assumption below that value admits its *)
 (*                              Bob-key reduction                             *)
 (* decrypt_guess_V2_premise_free_lt == the bound without its class premises   *)
 (*                              is false                                      *)
+(* decrypt_reduction_admissible_eventuallyF == past some security parameter   *)
+(*                              the sequence's own assumption admits that     *)
+(*                              reduction at no k                             *)
 (* trace_guess_V2_negligible == the trace guessing probability is negligible  *)
 (*                              along the sequence, at an asymptotic value    *)
 (*                              supplied with the statement                   *)
@@ -201,34 +201,12 @@ Definition charlie_challenge_adversary_at
   charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
     pkey_of_party v1 u1 u2 u3 D.
 
-(* The two a predictor of Bob's input at Alice's whole view induces. *)
-Definition bob_view_adversary_at
-    (predict : predictor AHE (viewT_at X k)) : indcpa_adversary AHE :=
-  bob_view_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-    pkey_of_party v1 u1 u2 u3 predict.
-Definition charlie_view_adversary_at
-    (predict : predictor AHE (viewT_at X k)) : indcpa_adversary AHE :=
-  charlie_view_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-    pkey_of_party v1 u1 u2 u3 predict.
-
-(* The two advantages a predictor at Alice's hopping tuple buys, and the
-   unpredictability those two advantages correct. *)
-Definition bob_predictor_epsilon_at
-    (predict : predictor AHE (hop_tupleT_at X k)) : R :=
-  bob_predictor_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
-    pkey_of_party v1 u1 u2 u3 predict.
-Definition charlie_predictor_epsilon_at
-    (predict : predictor AHE (hop_tupleT_at X k)) : R :=
-  charlie_predictor_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
-    pkey_of_party v1 u1 u2 u3 predict.
-Definition alice_predictor_unpredictability_at
-    (predict : predictor AHE (hop_tupleT_at X k)) : R :=
-  alice_predictor_unpredictability (R:=R) (AHE:=AHE) card_renc rand_of_renc
-    pkey_of_party v1 u1 u2 u3 predict.
-
-(* The same three quantities at Alice's executed trace. *)
-(* Naming: the [trace] variant of bob_predictor_epsilon_at, the same
-   advantage read at the adversary a trace predictor induces. *)
+(* The two advantages a predictor of Bob's input at Alice's executed trace
+   buys, one at Bob's key and one at Charlie's.  The obstruction fields read
+   them at the decrypting predictor.
+   Naming: the [trace] variant of bob_predictor_epsilon of
+   dsdp_alice_hop_secrecy.v, the same advantage read at the adversary a trace
+   predictor induces. *)
 Definition bob_trace_predictor_epsilon_at
     (predict : predictor AHE (traceT_at X k)) : R :=
   bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
@@ -238,10 +216,6 @@ Definition charlie_trace_predictor_epsilon_at
     (predict : predictor AHE (traceT_at X k)) : R :=
   charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
     v1 u1 u2 u3 dk_a dk_b dk_c rc2 predict.
-Definition alice_trace_unpredictability_at
-    (predict : predictor AHE (traceT_at X k)) : R :=
-  alice_trace_unpredictability (R:=R) card_renc rand_of_renc
-    v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2 predict.
 
 (* The trace predictor that decrypts the aggregate ciphertext with Alice's
    own key, the one no class restriction admits. *)
@@ -282,9 +256,10 @@ Section dsdp_security_record.
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 
-(* The twenty-six statements a setting proves, each at the projections of X.
-   The scope of the collection, and the eight fields that are leakage or
-   obstruction rather than secrecy, are described in the header. *)
+(* The twenty-one statements a setting proves, each at the projections of X.
+   The collection is the results the paper presents and no others.  The scope
+   of the collection, and the six fields that are leakage or obstruction
+   rather than secrecy, are described in the header. *)
 Record dsdp_security (X : dsdp_setting R) := {
 
   (* Alice's residual uncertainty about the relay pair, given her own inputs
@@ -346,33 +321,6 @@ Record dsdp_security (X : dsdp_setting R) := {
            (charlie_challenge_adversary_at X k
               (distinguisher_of_predictor predict)) ;
 
-  (* The same bound read logarithmically: minus the log of her success
-     probability is at least log #|plain| corrected by the two advantages.
-     A positive success probability is the premise. *)
-  unpredictability_ge : forall k
-      (predict : predictor (AHE_at X k) (hop_tupleT_at X k)),
-    0 < Pr (hop_fdist_at X k)
-           [set t | (predict `o AliceRealTuple_at X k) t == hop_V2_at X k t] ->
-    log (#|plain (AHE_at X k)|%:R : R)
-      - log (1 + #|plain (AHE_at X k)|%:R
-                 * (bob_predictor_epsilon_at X k predict
-                    + charlie_predictor_epsilon_at X k predict))
-    <= - log (Pr (hop_fdist_at X k)
-                 [set t | (predict `o AliceRealTuple_at X k) t
-                          == hop_V2_at X k t]) ;
-
-  (* The same lower bound at the named unpredictability quantity of the
-     predictor, which is that negated logarithm under its own name. *)
-  predictor_unpredictability_ge : forall k
-      (predict : predictor (AHE_at X k) (hop_tupleT_at X k)),
-    0 < Pr (hop_fdist_at X k)
-           [set t | (predict `o AliceRealTuple_at X k) t == hop_V2_at X k t] ->
-    log (#|plain (AHE_at X k)|%:R : R)
-      - log (1 + #|plain (AHE_at X k)|%:R
-                 * (bob_predictor_epsilon_at X k predict
-                    + charlie_predictor_epsilon_at X k predict))
-    <= alice_predictor_unpredictability_at X k predict ;
-
   (* No distinguisher separates the real joint law of the two relay inputs
      with Alice's tuple from the simulator's law by more than the two hop
      advantages: simulation security of the tuple, per distinguisher, and
@@ -388,17 +336,17 @@ Record dsdp_security (X : dsdp_setting R) := {
        + indcpa_epsilon_at X k (charlie_pkey_at X k)
            (charlie_challenge_adversary_at X k D) ;
 
-  (* The tuple guessing bound carried to Alice's whole view, bounded by the
-     two advantages of her view adversaries. *)
-  view_guess_V2_le : forall k
-      (predict : predictor (AHE_at X k) (viewT_at X k)),
+  (* At the all-zero endpoint of the hop ladder, where both ciphertext slots
+     carry zero, a predictor of Bob's input does no better than the uniform
+     residue.  This is the unconditional term every guessing bound above and
+     below carries, the fiber the leaked output confines Bob's input to on
+     its own, and it is the one term of those bounds no assumption pays
+     for. *)
+  all_zero_guess_V2_le_invm : forall k
+      (predict : predictor (AHE_at X k) (hop_tupleT_at X k)),
     Pr (hop_fdist_at X k)
-       [set t | (predict `o AliceView_at X k) t == hop_V2_at X k t]
-    <= (#|plain (AHE_at X k)|%:R : R)^-1
-       + indcpa_epsilon_at X k (bob_pkey_at X k)
-           (bob_view_adversary_at X k predict)
-       + indcpa_epsilon_at X k (charlie_pkey_at X k)
-           (charlie_view_adversary_at X k predict) ;
+       [set t | (predict `o AliceAllZeroTuple_at X k) t == hop_V2_at X k t]
+    <= (#|plain (AHE_at X k)|%:R : R)^-1 ;
 
   (* Conditioned on the protocol output alone, Bob's input keeps its whole
      log #|plain| of uncertainty.  Information-theoretic, no epsilon spent. *)
@@ -413,62 +361,56 @@ Record dsdp_security (X : dsdp_setting R) := {
     `H( hop_V2_at X k | AliceAllZeroTuple_at X k )
       = log (#|plain (AHE_at X k)|%:R : R) ;
 
-  (* The tuple guessing bound at Alice's executed piSMC trace, at the two
-     advantages the trace reduction adversaries buy. *)
-  trace_guess_V2_le : forall k
-      (predict : predictor (AHE_at X k) (traceT_at X k)),
+  (* A predictor reading the raw trace the interpreter records for Alice when
+     it runs the protocol returns Bob's input no more often than the uniform
+     residue plus the two advantages of the encoded-trace predictor it
+     induces.  The raw trace is what the protocol produces and the encoded
+     trace is the interpreter's intermediate, so this is the guessing bound
+     at the observation a corrupted Alice actually holds.  The residue is
+     unconditional; each epsilon is assumption-conditional at one key. *)
+  raw_trace_guess_V2_le : forall k
+      (g_raw : raw_traceT_at X k -> plain (AHE_at X k)),
     Pr (hop_fdist_at X k)
-       [set t | (predict `o AliceTrace_at X k) t == hop_V2_at X k t]
+       [set t | g_raw (AliceRawTrace_at X k t) == hop_V2_at X k t]
     <= (#|plain (AHE_at X k)|%:R : R)^-1
        + indcpa_epsilon_at X k (bob_pkey_at X k)
            (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X)
-              (distinguisher_of_predictor predict))
+              (distinguisher_of_predictor
+                 (encoded_predictor_at X k g_raw)))
        + indcpa_epsilon_at X k (charlie_pkey_at X k)
            (charlie_trace_adversary_at (R:=R) (Q:=instance_sequence X)
-              (distinguisher_of_predictor predict)) ;
+              (distinguisher_of_predictor
+                 (encoded_predictor_at X k g_raw))) ;
 
-  (* That bound read logarithmically at the executed trace, under a positive
-     success probability. *)
-  trace_unpredictability_ge : forall k
-      (predict : predictor (AHE_at X k) (traceT_at X k)),
-    0 < Pr (hop_fdist_at X k)
-           [set t | (predict `o AliceTrace_at X k) t == hop_V2_at X k t] ->
-    log (#|plain (AHE_at X k)|%:R : R)
-      - log (1 + #|plain (AHE_at X k)|%:R
-                 * (bob_trace_predictor_epsilon_at X k predict
-                    + charlie_trace_predictor_epsilon_at X k predict))
-    <= alice_trace_unpredictability_at X k predict ;
+  (* Simulation security at the raw interpreter trace, with the re-encryption
+     coin drawn uniformly: a Boolean test tells the executed protocol from
+     the simulation no more often, on average over the coin, than the two hop
+     advantages its decoded lift shows at that coin.  Drawing the coin makes
+     the statement one about the protocol rather than about one of its
+     executions, and both terms of the bound are assumption-conditional, one
+     at Bob's key and one at Charlie's. *)
+  raw_trace_sim_advantage_avg_le : forall k
+      (D_raw : plain (AHE_at X k) * plain (AHE_at X k)
+               * raw_traceT_at X k -> bool),
+    `| Pr (alice_raw_trace_real_avg_at X k D_raw) [set true]
+       - Pr (alice_raw_trace_ideal_avg_at X k D_raw) [set true] |
+    <= \sum_(w in renc_at X k)
+         (fdist_uniform (card_renc_at X k) : R.-fdist (renc_at X k)) w
+         * (indcpa_epsilon_at X k (bob_pkey_at X k)
+              (bob_challenge_adversary_at X k
+                 (fun x => D_raw (x.1.1, x.1.2,
+                    alice_trace_decode_at X k
+                      (alice_trace_of_hop_tuple_at X k w x.2))))
+            + indcpa_epsilon_at X k (charlie_pkey_at X k)
+              (charlie_challenge_adversary_at X k
+                 (fun x => D_raw (x.1.1, x.1.2,
+                    alice_trace_decode_at X k
+                      (alice_trace_of_hop_tuple_at X k w x.2))))) ;
 
-  (* Simulation security of the executed trace, per distinguisher, at the
-     same two advantages. *)
-  trace_sim_advantage_le : forall k
-      (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
-                          * traceT_at X k)%type),
-    `| Pr (`p_ [% hop_V2_at X k, hop_V3_at X k, AliceTrace_at X k])
-          [set x | D x]
-       - Pr (alice_trace_ideal_at X k) [set x | D x] |
-    <= indcpa_epsilon_at X k (bob_pkey_at X k)
-         (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X) D)
-       + indcpa_epsilon_at X k (charlie_pkey_at X k)
-           (charlie_trace_adversary_at (R:=R) (Q:=instance_sequence X) D) ;
-
-  (* Alice's executed trace and her hopping tuple leave the same conditional
-     entropy about Bob's input: the trace holds no coordinate the tuple
-     lacks, which is what transports a tuple bound to the trace.
-     Unconditional. *)
-  centropy_V2_trace_tupleE : forall k,
-    `H( hop_V2_at X k | AliceTrace_at X k )
-      = `H( hop_V2_at X k | AliceRealTuple_at X k ) ;
-
-  (* The same equality at Alice's whole view. *)
-  centropy_V2_view_tupleE : forall k,
-    `H( hop_V2_at X k | AliceView_at X k )
-      = `H( hop_V2_at X k | AliceRealTuple_at X k ) ;
-
-  (* At the executed trace that entropy is zero: the trace carries Alice's
-     private key alongside the aggregate ciphertext, so she recovers Bob's
-     input.  Leakage, unconditional, and the reason the trace guessing bound
-     is stated only for a class of predictors. *)
+  (* At the executed trace Bob's input keeps no uncertainty at all: the trace
+     carries Alice's private key alongside the aggregate ciphertext, so she
+     recovers it.  Leakage, unconditional, and the reason the trace guessing
+     bound is stated only for a class of predictors. *)
   centropy_V2_trace_eq0 : forall k,
     `H( hop_V2_at X k | AliceTrace_at X k ) = 0 ;
 
@@ -492,18 +434,10 @@ Record dsdp_security (X : dsdp_setting R) := {
     <= (((p_minus_2 X k).+2%:R : R) * (q_minus_2 X k).+2%:R)^-1
        + 2 * indcpa_assumption_epsilon (assumption_at X k) ;
 
-  (* The decrypting predictor drives the sum of its two reduction advantages
-     to at least 1 - 1/#|plain|, so an assumption admitting it must assume an
-     epsilon that large.  This is the obstruction the class restriction
-     answers, and it is unconditional. *)
-  decrypt_epsilon_sum_ge : forall k,
-    1 - (#|plain (AHE_at X k)|%:R : R)^-1
-    <= bob_trace_predictor_epsilon_at X k (bob_decrypt_predictor_at X k)
-       + charlie_trace_predictor_epsilon_at X k
-           (bob_decrypt_predictor_at X k) ;
-
-  (* The Bob-key half alone already reaches that value, so the obstruction is
-     not an artifact of summing the two hops. *)
+  (* The predictor that decrypts the aggregate ciphertext with Alice's own
+     key drives its Bob-key advantage to at least 1 - 1/#|plain|, so an
+     assumption admitting it must assume an epsilon that large.  This is the
+     obstruction the class restriction answers, and it is unconditional. *)
   decrypt_bob_epsilon_ge : forall k,
     1 - (#|plain (AHE_at X k)|%:R : R)^-1
     <= bob_trace_predictor_epsilon_at X k (bob_decrypt_predictor_at X k) ;
@@ -530,12 +464,27 @@ Record dsdp_security (X : dsdp_setting R) := {
     < alice_trace_guess_V2_pr_at (R:=R) (Q:=instance_sequence X)
         (bob_decrypt_predictor_at X k) ;
 
+  (* Past some security parameter the assumption the sequence makes admits
+     the decrypting predictor's Bob-key reduction at no k: the exclusion the
+     fixed-k obstruction states at one assumption holds along the whole
+     family, once the modulus grows and the assumed advantage falls.  This is
+     what keeps the asymptotic statement below about predictors the class
+     contains, and it reads the asymptotic value rather than the setting
+     alone. *)
+  decrypt_reduction_admissible_eventuallyF :
+    forall N : dsdp_asymptotic (instance_sequence X),
+    exists K, forall k, (K < k)%N ->
+      indcpa_admissible (assumption_at X k)
+        (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X)
+           (distinguisher_of_predictor (bob_decrypt_predictor_at X k)))
+      = false ;
+
   (* Along the sequence, an admissible predictor at every k makes the trace
      guessing probability a negligible sequence.  This is the asymptotic
      form, spending the sequence's own assumption at each k together with the
      two negligibility facts, which are supplied with the statement rather
-     than carried by the setting: the twenty-five fields above are made at one
-     security parameter and do not read them. *)
+     than carried by the setting: the nineteen fields before the obstruction
+     above are made at one security parameter and do not read them. *)
   trace_guess_V2_negligible :
     forall (N : dsdp_asymptotic (instance_sequence X))
            (adv : forall k, dsdp_admissible_predictor X k),
@@ -551,9 +500,9 @@ End dsdp_security_record.
 
 (* The one value of the results record, after du2002's pair
    scalar_product_is_leakage_free / scalar_product_is_leakage_freeP: each of
-   the twenty-six fields is an application of the axis theorem of its own
+   the twenty-one fields is an application of the axis theorem of its own
    file to the projections of X, so the record adds no mathematical content
-   to the axes and only fixes the setting they are read at.  Thirteen of the
+   to the axes and only fixes the setting they are read at.  Twelve of the
    citations are qualified, the field having taken the short name. *)
 Section dsdp_securityP.
 Local Open Scope reals_ext_scope.
@@ -652,36 +601,6 @@ exact: (alice_tuple_guess_V2_le (card_renc k) (rand_of_renc k)
           (pkey_of_party k) (v1 k) (u1 k) (u2 k) (u3_unit k) predict).
 Qed.
 
-Let unpredictability_ge_holds : forall k
-    (predict : predictor (AHE_at X k) (hop_tupleT_at X k)),
-  0 < Pr (hop_fdist_at X k)
-         [set t | (predict `o AliceRealTuple_at X k) t == hop_V2_at X k t] ->
-  log (#|plain (AHE_at X k)|%:R : R)
-    - log (1 + #|plain (AHE_at X k)|%:R
-               * (bob_predictor_epsilon_at X k predict
-                  + charlie_predictor_epsilon_at X k predict))
-  <= - log (Pr (hop_fdist_at X k)
-               [set t | (predict `o AliceRealTuple_at X k) t
-                        == hop_V2_at X k t]).
-Proof.
-move=> k predict hpos.
-exact: (alice_unpredictability_ge (u3_unit k) hpos).
-Qed.
-
-Let predictor_unpredictability_ge_holds : forall k
-    (predict : predictor (AHE_at X k) (hop_tupleT_at X k)),
-  0 < Pr (hop_fdist_at X k)
-         [set t | (predict `o AliceRealTuple_at X k) t == hop_V2_at X k t] ->
-  log (#|plain (AHE_at X k)|%:R : R)
-    - log (1 + #|plain (AHE_at X k)|%:R
-               * (bob_predictor_epsilon_at X k predict
-                  + charlie_predictor_epsilon_at X k predict))
-  <= alice_predictor_unpredictability_at X k predict.
-Proof.
-move=> k predict hpos.
-exact: (alice_predictor_unpredictability_ge (u3_unit k) hpos).
-Qed.
-
 Let sim_advantage_le_holds : forall k
     (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
                         * hop_tupleT_at X k)%type),
@@ -698,19 +617,16 @@ exact: (alice_sim_advantage_le (card_renc k) (rand_of_renc k)
           (pkey_of_party k) (v1 k) (u1 k) (u2 k) (u3 k) D).
 Qed.
 
-Let view_guess_V2_le_holds : forall k
-    (predict : predictor (AHE_at X k) (viewT_at X k)),
+Let all_zero_guess_V2_le_invm_holds : forall k
+    (predict : predictor (AHE_at X k) (hop_tupleT_at X k)),
   Pr (hop_fdist_at X k)
-     [set t | (predict `o AliceView_at X k) t == hop_V2_at X k t]
-  <= (#|plain (AHE_at X k)|%:R : R)^-1
-     + indcpa_epsilon_at X k (bob_pkey_at X k)
-         (bob_view_adversary_at X k predict)
-     + indcpa_epsilon_at X k (charlie_pkey_at X k)
-         (charlie_view_adversary_at X k predict).
+     [set t | (predict `o AliceAllZeroTuple_at X k) t == hop_V2_at X k t]
+  <= (#|plain (AHE_at X k)|%:R : R)^-1.
 Proof.
 move=> k predict.
-exact: (alice_view_guess_V2_le (card_renc k) (rand_of_renc k)
-          (pkey_of_party k) (v1 k) (u1 k) (u2 k) (u3_unit k) predict).
+exact: (dsdp_alice_hop_secrecy.all_zero_guess_V2_le_invm (card_renc k)
+          (rand_of_renc k) (pkey_of_party k) (v1 k) (u1 k) (u2 k)
+          (u3_unit k) predict).
 Qed.
 
 Let centropy_V2_Sout_logm_holds : forall k,
@@ -731,72 +647,46 @@ exact: (dsdp_alice_hop_secrecy.centropy_V2_all_zero_logm (card_renc k)
           (u3_unit k)).
 Qed.
 
-Let trace_guess_V2_le_holds : forall k
-    (predict : predictor (AHE_at X k) (traceT_at X k)),
+Let raw_trace_guess_V2_le_holds : forall k
+    (g_raw : raw_traceT_at X k -> plain (AHE_at X k)),
   Pr (hop_fdist_at X k)
-     [set t | (predict `o AliceTrace_at X k) t == hop_V2_at X k t]
+     [set t | g_raw (AliceRawTrace_at X k t) == hop_V2_at X k t]
   <= (#|plain (AHE_at X k)|%:R : R)^-1
      + indcpa_epsilon_at X k (bob_pkey_at X k)
          (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X)
-            (distinguisher_of_predictor predict))
+            (distinguisher_of_predictor (encoded_predictor_at X k g_raw)))
      + indcpa_epsilon_at X k (charlie_pkey_at X k)
          (charlie_trace_adversary_at (R:=R) (Q:=instance_sequence X)
-            (distinguisher_of_predictor predict)).
+            (distinguisher_of_predictor (encoded_predictor_at X k g_raw))).
 Proof.
-move=> k predict.
-exact: (alice_trace_guess_V2_le (card_renc k) (rand_of_renc k) (v1 k) (u1 k)
-          (u2 k) (u3_unit k) (dk_a k) (dk_b k) (dk_c k) (rb2 k) (rc2 k)
-          predict).
+move=> k g_raw.
+exact: (alice_raw_trace_guess_V2_le (card_renc k) (rand_of_renc k) (v1 k)
+          (u1 k) (u2 k) (u3_unit k) (dk_a k) (dk_b k) (dk_c k) (rb2 k)
+          (rc2 k) g_raw).
 Qed.
 
-Let trace_unpredictability_ge_holds : forall k
-    (predict : predictor (AHE_at X k) (traceT_at X k)),
-  0 < Pr (hop_fdist_at X k)
-         [set t | (predict `o AliceTrace_at X k) t == hop_V2_at X k t] ->
-  log (#|plain (AHE_at X k)|%:R : R)
-    - log (1 + #|plain (AHE_at X k)|%:R
-               * (bob_trace_predictor_epsilon_at X k predict
-                  + charlie_trace_predictor_epsilon_at X k predict))
-  <= alice_trace_unpredictability_at X k predict.
+Let raw_trace_sim_advantage_avg_le_holds : forall k
+    (D_raw : plain (AHE_at X k) * plain (AHE_at X k)
+             * raw_traceT_at X k -> bool),
+  `| Pr (alice_raw_trace_real_avg_at X k D_raw) [set true]
+     - Pr (alice_raw_trace_ideal_avg_at X k D_raw) [set true] |
+  <= \sum_(w in renc_at X k)
+       (fdist_uniform (card_renc_at X k) : R.-fdist (renc_at X k)) w
+       * (indcpa_epsilon_at X k (bob_pkey_at X k)
+            (bob_challenge_adversary_at X k
+               (fun x => D_raw (x.1.1, x.1.2,
+                  alice_trace_decode_at X k
+                    (alice_trace_of_hop_tuple_at X k w x.2))))
+          + indcpa_epsilon_at X k (charlie_pkey_at X k)
+            (charlie_challenge_adversary_at X k
+               (fun x => D_raw (x.1.1, x.1.2,
+                  alice_trace_decode_at X k
+                    (alice_trace_of_hop_tuple_at X k w x.2))))).
 Proof.
-move=> k predict hpos.
-exact: (alice_trace_unpredictability_ge (u3_unit k) hpos).
-Qed.
-
-Let trace_sim_advantage_le_holds : forall k
-    (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
-                        * traceT_at X k)%type),
-  `| Pr (`p_ [% hop_V2_at X k, hop_V3_at X k, AliceTrace_at X k])
-        [set x | D x]
-     - Pr (alice_trace_ideal_at X k) [set x | D x] |
-  <= indcpa_epsilon_at X k (bob_pkey_at X k)
-       (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X) D)
-     + indcpa_epsilon_at X k (charlie_pkey_at X k)
-         (charlie_trace_adversary_at (R:=R) (Q:=instance_sequence X) D).
-Proof.
-move=> k D.
-exact: (alice_trace_sim_advantage_le (card_renc k) (rand_of_renc k) (v1 k)
-          (u1 k) (u2 k) (u3 k) (dk_a k) (dk_b k) (dk_c k) (rb2 k) (rc2 k) D).
-Qed.
-
-Let centropy_V2_trace_tupleE_holds : forall k,
-  `H( hop_V2_at X k | AliceTrace_at X k )
-    = `H( hop_V2_at X k | AliceRealTuple_at X k ).
-Proof.
-move=> k.
-exact: (dsdp_alice_trace_link.centropy_V2_trace_tupleE (card_renc k)
-          (rand_of_renc k) (v1 k) (u1 k) (u2 k) (u3 k) (dk_a k) (dk_b k)
-          (dk_c k) (rb2 k) (rc2 k)).
-Qed.
-
-Let centropy_V2_view_tupleE_holds : forall k,
-  `H( hop_V2_at X k | AliceView_at X k )
-    = `H( hop_V2_at X k | AliceRealTuple_at X k ).
-Proof.
-move=> k.
-exact: (dsdp_alice_trace_link.centropy_V2_view_tupleE (card_renc k)
-          (rand_of_renc k) (v1 k) (u1 k) (u2 k) (u3 k) (dk_a k) (dk_b k)
-          (dk_c k)).
+move=> k D_raw.
+exact: (alice_raw_trace_sim_advantage_avg_le (card_renc k) (rand_of_renc k)
+          (v1 k) (u1 k) (u2 k) (u3 k) (dk_a k) (dk_b k) (dk_c k) (rb2 k)
+          D_raw).
 Qed.
 
 Let centropy_V2_trace_eq0_holds : forall k,
@@ -830,17 +720,6 @@ have -> : (((p_minus_2 X k).+2%:R : R) * (q_minus_2 X k).+2%:R)^-1
         = (#|plain (AHE_at X k)|%:R : R)^-1.
   by rewrite /AHE_at (card_plain X k) natrM.
 exact: (trace_guess_V2_admissible_le_holds a).
-Qed.
-
-Let decrypt_epsilon_sum_ge_holds : forall k,
-  1 - (#|plain (AHE_at X k)|%:R : R)^-1
-  <= bob_trace_predictor_epsilon_at X k (bob_decrypt_predictor_at X k)
-     + charlie_trace_predictor_epsilon_at X k (bob_decrypt_predictor_at X k).
-Proof.
-move=> k.
-exact: (dsdp_alice_trace_link.decrypt_epsilon_sum_ge (card_renc k)
-          (rand_of_renc k) (v1 k) (u1 k) (u2 k) (u3_unit k) (dk_a k)
-          (dk_b k) (dk_c k) (rb2 k) (rc2 k)).
 Qed.
 
 Let decrypt_bob_epsilon_ge_holds : forall k,
@@ -880,6 +759,18 @@ exact: (dsdp_alice_trace_link.decrypt_guess_V2_premise_free_lt (v1 k)
           heps).
 Qed.
 
+Let decrypt_reduction_admissible_eventuallyF_holds :
+  forall N : dsdp_asymptotic (instance_sequence X),
+  exists K, forall k, (K < k)%N ->
+    indcpa_admissible (assumption_at X k)
+      (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X)
+         (distinguisher_of_predictor (bob_decrypt_predictor_at X k)))
+    = false.
+Proof.
+move=> N.
+exact: (dsdp_instance_sequence.decrypt_reduction_admissible_eventuallyF N).
+Qed.
+
 Let trace_guess_V2_negligible_holds :
   forall (N : dsdp_asymptotic (instance_sequence X))
          (adv : forall k, dsdp_admissible_predictor X k),
@@ -899,25 +790,21 @@ Definition dsdp_securityP : dsdp_security X := {|
   bob_privacy_V3 := bob_privacy_V3_holds ;
   charlie_privacy_V2 := charlie_privacy_V2_holds ;
   tuple_guess_V2_le := tuple_guess_V2_le_holds ;
-  unpredictability_ge := unpredictability_ge_holds ;
-  predictor_unpredictability_ge := predictor_unpredictability_ge_holds ;
   sim_advantage_le := sim_advantage_le_holds ;
-  view_guess_V2_le := view_guess_V2_le_holds ;
+  all_zero_guess_V2_le_invm := all_zero_guess_V2_le_invm_holds ;
   centropy_V2_Sout_logm := centropy_V2_Sout_logm_holds ;
   centropy_V2_all_zero_logm := centropy_V2_all_zero_logm_holds ;
-  trace_guess_V2_le := trace_guess_V2_le_holds ;
-  trace_unpredictability_ge := trace_unpredictability_ge_holds ;
-  trace_sim_advantage_le := trace_sim_advantage_le_holds ;
-  centropy_V2_trace_tupleE := centropy_V2_trace_tupleE_holds ;
-  centropy_V2_view_tupleE := centropy_V2_view_tupleE_holds ;
+  raw_trace_guess_V2_le := raw_trace_guess_V2_le_holds ;
+  raw_trace_sim_advantage_avg_le := raw_trace_sim_advantage_avg_le_holds ;
   centropy_V2_trace_eq0 := centropy_V2_trace_eq0_holds ;
   trace_guess_V2_admissible_le := trace_guess_V2_admissible_le_holds ;
   trace_guess_V2_admissible_pq_le := trace_guess_V2_admissible_pq_le_holds ;
-  decrypt_epsilon_sum_ge := decrypt_epsilon_sum_ge_holds ;
   decrypt_bob_epsilon_ge := decrypt_bob_epsilon_ge_holds ;
   decrypt_reduction_admissibleF := decrypt_reduction_admissibleF_holds ;
   decrypt_guess_V2_premise_free_lt :=
     decrypt_guess_V2_premise_free_lt_holds ;
+  decrypt_reduction_admissible_eventuallyF :=
+    decrypt_reduction_admissible_eventuallyF_holds ;
   trace_guess_V2_negligible := trace_guess_V2_negligible_holds |}.
 
 End dsdp_securityP.

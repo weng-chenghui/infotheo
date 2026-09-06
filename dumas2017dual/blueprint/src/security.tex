@@ -609,7 +609,67 @@ carries the three bounds above to the executed protocol.
   supplies there.
 \end{theorem}
 
+\begin{lemma}[Decoding Alice's trace at her own key]
+  \label{lem:raw_trace_decode}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.di_data_of_trace_data,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_decodeE}
+  \rocqok
+  \uses{def:alice_trace,lem:trace_of_hop_tuple}
+  Alice's raw trace is the message log the interpreter records for her at a
+  sample, before the encoding into the finite carrier a distribution is formed
+  on. Decoding one encoded entry at a fixed key pair returns a plaintext as
+  itself, a ciphertext as itself, and the private-key mark as that key; at
+  Alice's own key pair the round trip is exact, her trace carrying no
+  public-key mark to constrain.
+  \[ \mathrm{map}\ \delta_{\mathrm{dk}_A}\ (\mathrm{AliceTrace}(s))
+       = \mathrm{AliceRawTrace}(s) \]
+  The encoding therefore costs Alice nothing and withholds nothing from her: a
+  predictor reading either format succeeds on exactly the same samples, so a
+  bound at the encoded trace is a bound at the trace the protocol produces.
+\end{lemma}
+
+\begin{theorem}[Guessing from the raw interpreter trace]
+  \label{thm:raw_trace_guess}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_guess_V2_le}
+  \rocqok
+  \uses{def:dsdp_setting,thm:alice_trace_bounds,lem:raw_trace_decode}
+  With $u_3$ a unit of the plaintext ring, every predictor reading the raw
+  trace the interpreter records for Alice when it runs the protocol returns
+  Bob's input with probability at most the uniform residue plus the two hop
+  advantages of the encoded-trace predictor it induces.
+  \[ \Pr[\,g(\mathrm{AliceRawTrace}) = V_2\,]
+       \le \tfrac{1}{m} + \epshopsum{D_{g \circ \delta \circ \tau}} \]
+  The residue is information-theoretic and each advantage is conditional on the
+  IND-CPA assumption at one key. This is the guessing bound at the observation
+  a corrupted Alice actually holds, the encoded trace being an intermediate of
+  the interpreter rather than something the protocol emits.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the bound is field
+  \texttt{raw\_trace\_guess\_V2\_le} of \texttt{dsdp\_security}, read off at
+  each instance of \texttt{dsdp\_main.v}.
+\end{theorem}
+
+\begin{theorem}[Simulation at the raw trace, averaged over the coin]
+  \label{thm:raw_trace_simulation}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_sim_advantage_avg_le}
+  \rocqok
+  \uses{def:dsdp_setting,thm:alice_trace_bounds,lem:raw_trace_decode}
+  With the re-encryption coin drawn uniformly, a Boolean test tells the real
+  raw trace from the simulated one, on average over that coin, no more often
+  than the average of the two per-coin hop advantages of its decoded lift.
+  \[ \big| \Pr[\,D(\mathrm{Real}^{\mathrm{avg}})\,]
+       - \Pr[\,D(\mathrm{Ideal}^{\mathrm{avg}})\,] \big|
+     \le \textstyle\sum_w \mathcal{U}(w)\,\epshopsum{D_w} \]
+  Drawing the coin makes the statement one about the protocol rather than about
+  one of its executions, and both terms of the bound are conditional on the
+  IND-CPA assumption, one at Bob's key and one at Charlie's.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the bound is field
+  \texttt{raw\_trace\_sim\_advantage\_avg\_le} of \texttt{dsdp\_security}, read
+  off at each instance of \texttt{dsdp\_main.v}.
+\end{theorem}
+
 \begin{theorem}[Trace, view, and tuple leave the same uncertainty]
+
   \label{thm:centropy_trace_tuple}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTraceTuple,
@@ -1726,26 +1786,36 @@ single member of it can carry.
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_security.dsdp_security}
   \rocqok
   \uses{def:dsdp_setting,def:indcpa_assumption,def:dsdp_asymptotic,def:negligible_fun}
-  A value of the results record at a setting $\mathcal{X}$ is the twenty-six
-  statements of the two axes read at $\mathcal{X}$, each with one proof. Six are
-  counting statements about the relay pair and the two relay views, thirteen
-  are hopping bounds at Alice's tuple, at her whole view and at her executed
-  trace, six are the class-conditional bound and the obstructions that force
-  its class restriction, and one is negligibility along $\mathcal{X}$'s
-  sequence, read at an asymptotic value supplied with that statement rather
-  than carried by $\mathcal{X}$: the other twenty-five are made at one security
-  parameter and do not read it.
-  A value asserts nothing wider than those twenty-six. Eight of them are
+  A value of the results record at a setting $\mathcal{X}$ is the twenty-one
+  statements of the two axes read at $\mathcal{X}$, each with one proof, and
+  they are the results the paper presents and no others. Six are counting
+  statements about the relay pair and the two relay views. Three are at
+  Alice's hopping tuple: the guessing bound, the simulation bound, and the
+  residue a predictor is left with at the all-zero endpoint. Two are the
+  entropy equalities at the leaked output and at that endpoint. Three are at
+  Alice's trace: the guessing bound and the coin-averaged simulation bound at
+  the raw interpreter trace, and the zero conditional entropy the encoded
+  trace leaves. Two are the class-conditional trace bound at the two
+  spellings of its unconditional term. Four are the obstructions that force
+  that class restriction, the last of them along the whole sequence. One is
+  negligibility along $\mathcal{X}$'s sequence, read at an asymptotic value
+  supplied with that statement rather than carried by $\mathcal{X}$: the
+  nineteen before the two asymptotic ones are made at one security parameter
+  and do not read it.
+  A value asserts nothing wider than those twenty-one. Six of them are
   leakage or obstruction results rather than secrecy, and each is read at the
   conditioner that makes it one: Alice's corrupted-query view and her executed
-  trace each determine Bob's input, her hopping tuple and her whole view inherit
-  that zero conditional entropy, and the four decrypting-predictor statements
-  show that the class restriction cannot be widened. Next to the field reading
-  $\HH(V_2 \mid \hoptuple{2}) = \log m_k$ this looks contradictory until the
-  conditioner of each is named, the all-zero endpoint of the hop ladder on one
-  side and the executed trace on the other.
+  trace each determine Bob's input, and the four decrypting-predictor
+  statements show that the class restriction cannot be widened. Next to the
+  field reading $\HH(V_2 \mid \hoptuple{2}) = \log m_k$ this looks
+  contradictory until the conditioner of each is named, the all-zero endpoint
+  of the hop ladder on one side and the executed trace on the other.
   \[ \HH(V_2 \mid \mathrm{AliceTrace}) = 0, \qquad
      \HH(V_2 \mid \hoptuple{2}) = \log m_k \]
+  The two trace-axis bounds are read at the raw trace the run of the protocol
+  produces rather than at the encoded trace it is carried through to reach a
+  finite carrier. Decoding at Alice's own key inverts that encoding, so the
+  two levels are one observation and the same two advantages pay for both.
   Bob and Charlie appear only as unconditional counting adversaries, whose
   views hold plaintexts and abstract ciphertexts, so the computational axis is
   Alice's alone. Every $\varepsilon$ is single-query and per-distinguisher, so a
@@ -1757,11 +1827,11 @@ single member of it can carry.
   \label{thm:dsdp_securityP}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_security.dsdp_securityP}
   \rocqok
-  \uses{def:dsdp_security,def:dsdp_setting,thm:dsdp_centropy_uniform,thm:US_e1_centropy_V2_eq0,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2,thm:alice_guess_real,thm:alice_unpredictability,cor:alice_guess_view,thm:alice_simulation_secure,thm:centropy_endpoints,thm:alice_trace_bounds,thm:centropy_trace_tuple,thm:centropy_trace_eq0,thm:alice_guess_admissible,thm:decrypt_lower_bound,cor:decrypt_not_admissible,cor:admissible_premise_free,thm:alice_guess_negligible}
-  Every setting proves the twenty-six, after du2002's pair
+  \uses{def:dsdp_security,def:dsdp_setting,thm:dsdp_centropy_uniform,thm:US_e1_centropy_V2_eq0,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2,thm:alice_guess_real,thm:alice_unpredictability,cor:alice_guess_view,thm:alice_simulation_secure,thm:centropy_endpoints,thm:alice_trace_bounds,thm:raw_trace_guess,thm:raw_trace_simulation,lem:guess_all_zero,thm:centropy_trace_tuple,thm:centropy_trace_eq0,thm:alice_guess_admissible,thm:decrypt_lower_bound,cor:decrypt_not_admissible,cor:admissible_premise_free,cor:decrypt_sequence_not_admissible,thm:alice_guess_negligible}
+  Every setting proves the twenty-one, after du2002's pair
   \texttt{scalar\_product\_is\_leakage\_free} and
   \texttt{scalar\_product\_is\_leakage\_freeP}.
-  \[ \forall \mathcal{X},\ \text{the twenty-six statements hold at }
+  \[ \forall \mathcal{X},\ \text{the twenty-one statements hold at }
      \mathcal{X} \]
   Each field is the theorem of its own axis file applied to the projections of
   $\mathcal{X}$, so the value carries no mathematics the two axes do not
@@ -1799,7 +1869,7 @@ single member of it can carry.
   setting is $2\varepsilon_{\mathrm{dcr},k}$.
 \end{definition}
 
-\begin{corollary}[The twenty-six at the Paillier setting]
+\begin{corollary}[The twenty-one at the Paillier setting]
   \label{cor:paillier_security}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.paillier_security,
        infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_negligible,
@@ -1809,7 +1879,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_paillier_negligible}
   \rocqok
   \uses{def:paillier_setting,thm:dsdp_securityP,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dsdp_asymptotic,def:dcr_assumption,def:paillier_indcpa_assumption}
-  All twenty-six statements hold at the Paillier setting, each written out at
+  All twenty-one statements hold at the Paillier setting, each written out at
   the instance and proved by projecting the value that every setting has. The
   asymptotic one reads: along the Paillier sequence, a predictor admissible at
   every $k$ makes the trace guessing probability negligible. The two
@@ -1855,7 +1925,7 @@ single member of it can carry.
   $2\varepsilon_{\mathrm{res},k}$.
 \end{definition}
 
-\begin{corollary}[The twenty-six at the Benaloh setting]
+\begin{corollary}[The twenty-one at the Benaloh setting]
   \label{cor:benaloh_security}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_security,
        infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_negligible,
@@ -1865,7 +1935,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_benaloh_negligible}
   \rocqok
   \uses{def:benaloh_setting,thm:dsdp_securityP,thm:alice_guess_negligible,def:dsdp_asymptotic,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
-  All twenty-six statements hold at the Benaloh setting, and the asymptotic one
+  All twenty-one statements hold at the Benaloh setting, and the asymptotic one
   reads along the Benaloh sequence. The two class-conditional trace bounds are
   restated in residuosity epsilons.
   \[ \mathrm{negl}\big(k \mapsto
@@ -1883,13 +1953,13 @@ single member of it can carry.
   key, while the unconditional summand stays at the block size.
 \end{corollary}
 
-\begin{corollary}[The twenty-six at the idealized setting]
+\begin{corollary}[The twenty-one at the idealized setting]
   \label{cor:idealized_security}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.idealized_security,
        infotheo.dumas2017dual.dsdp.dsdp_main.idealized_trace_guess_V2_negligible}
   \rocqok
   \uses{def:idealized_setting,thm:dsdp_securityP,def:cipher_constant_assumption}
-  All twenty-six statements hold at the idealized setting, which takes no
+  All twenty-one statements hold at the idealized setting, which takes no
   parameter, so each is read with no premise beyond the one the field itself
   carries. Every advantage the cipher-constant assumption assumes is zero, so
   each hopping bound is its unconditional term alone and each counting equality
