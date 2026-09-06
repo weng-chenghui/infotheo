@@ -385,10 +385,10 @@ Arguments Dk_c_V3_indep_V2_E_charlie_d3 {R a b} I.
    values of her choosing: the three plaintext inputs and the two masks are
    the five coordinates of a uniformly drawn row vector, and the three
    weights and the three private keys are constants of the sample space.
-   Constant weights are what give the two query records values.  A weight
-   drawn uniformly takes the value zero somewhere on the sample space, and
-   the honest query asks for a weight invertible at every sample, so no
-   setting whose weights are sampled satisfies either query record. *)
+   A weight drawn uniformly takes the value zero at some sample, so an
+   invertibility condition on that weight fails there.  This is why the
+   three weights are constants of the sample space rather than further
+   coordinates of the drawn vector. *)
 Section dsdp_inputs_uniform.
 Local Open Scope vec_ext_scope.
 Context {R : realType}.

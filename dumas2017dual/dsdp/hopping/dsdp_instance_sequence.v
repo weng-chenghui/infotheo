@@ -646,9 +646,7 @@ Qed.
    It is the second reading of alice_trace_sim_chain_admissible: that program
    spends the two hop labels and nothing else, so the whole distance is the
    class-epsilon family and no plaintext-size term enters, which is what
-   separates this bound from the guessing bound.  The results record
-   dsdp_security carries no field for this statement, the peer-facing record
-   holding the guessing sequence alone.
+   separates this bound from the guessing bound.
    Naming: [_negligible] marks a negligible_fun theorem over the named
    quantity family, paired with that family's [_advantageE] identification
    lemma, as at [alice_trace_guess_V2_negligible]. *)
