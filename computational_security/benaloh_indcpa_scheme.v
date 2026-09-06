@@ -387,10 +387,10 @@ Definition benaloh_claim (A : benaloh_residuosity_assumption)
   let D_0 := residuosity_of_adversary_zero adv in
   match l with
   | residuosity_y =>
-      HopClaim (accept D_y residue_fdist) (accept D_y unit_fdist)
+      Claim (accept D_y residue_fdist) (accept D_y unit_fdist)
         (benaloh_residuosity_epsilon A)
   | residuosity_0 =>
-      HopClaim (accept D_0 unit_fdist) (accept D_0 residue_fdist)
+      Claim (accept D_0 unit_fdist) (accept D_0 residue_fdist)
         (benaloh_residuosity_epsilon A)
   end.
 

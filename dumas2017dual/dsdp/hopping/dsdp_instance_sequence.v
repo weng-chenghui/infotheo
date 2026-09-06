@@ -97,8 +97,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_trace_chain_assumed_at k ==                                          *)
 (*                               the class-conditional program at the k-th    *)
 (*                               instance                                     *)
-(*              alice_first_at == the guessing sequence is the game that      *)
-(*                               program opens at                             *)
+(*       f_guess_V2_advantageE == the guessing sequence is the advantage      *)
+(*                               that program bounds                          *)
 (* alice_trace_guess_V2_negligible ==                                         *)
 (*                               the trace guessing sequence is negligible    *)
 (*                               under the two class premises                 *)
@@ -120,8 +120,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_trace_sim_advantage_at ==                                            *)
 (*                               the trace simulation distance at k           *)
 (*            f_sim_advantage == the trace simulation distance sequence       *)
-(*         alice_sim_first_at == the distance sequence is the game that       *)
-(*                               program opens at                             *)
+(*            f_sim_advantageE == the distance sequence is the advantage      *)
+(*                               that program bounds                          *)
 (* alice_trace_sim_advantage_negligible ==                                    *)
 (*                               the trace simulation distance sequence       *)
 (*                               is negligible under the two class            *)
@@ -412,13 +412,13 @@ Definition alice_trace_chain_assumed_at (k : nat)
   alice_trace_chain_assumed (inst_u3_unit (I k)) (inst_rb2 (I k))
     (HB k) (HC k).
 
-(* The quantity the theorem below is about is the game that program opens
-   at. *)
-Lemma alice_first_at k :
-  f_guess_V2 k = result_first (alice_trace_chain_assumed_at k).
+(* The quantity the theorem below is about is the advantage that program
+   bounds, its guessing probability being its distance from the zero game. *)
+Lemma f_guess_V2_advantageE k :
+  f_guess_V2 k = result_advantage (alice_trace_chain_assumed_at k).
 Proof.
 by rewrite /f_guess_V2 /alice_trace_guess_V2_pr_at /alice_trace_guess_V2_pr
-   guess_V2_acceptE.
+   guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
 Qed.
 
 Local Open Scope epshop_scope.
@@ -442,7 +442,7 @@ Local Open Scope epshop_scope.
    out of the class. *)
 Theorem alice_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (\negligible[ f_guess_V2 by alice_first_at ]
+exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]
           alice_trace_chain_assumed_at).
 Qed.
 
@@ -555,14 +555,15 @@ Definition alice_trace_sim_advantage_at k
 (* The trace simulation distance function used in the sequence theorem. *)
 Definition f_sim_advantage k : R := alice_trace_sim_advantage_at (Dfam k).
 
-(* The quantity the theorem below is about is the game that program opens
-   at. *)
-Lemma alice_sim_first_at k :
-  f_sim_advantage k = result_first (alice_trace_sim_chain_assumed_at k).
+(* The quantity the theorem below is about is the advantage that program
+   bounds, the two games it joins being the executed trace and the
+   simulation. *)
+Lemma f_sim_advantageE k :
+  f_sim_advantage k = result_advantage (alice_trace_sim_chain_assumed_at k).
 Proof.
 rewrite /f_sim_advantage /alice_trace_sim_advantage_at
         /alice_trace_sim_chain_assumed_at.
-exact: (alice_trace_sim_advantage_firstE (inst_rb2 (I k)) (HBD k) (HCD k)).
+exact: (alice_trace_sim_advantageE (inst_rb2 (I k)) (HBD k) (HCD k)).
 Qed.
 
 (* Along a sequence of DSDP instances, every family of Boolean tests of
@@ -577,11 +578,14 @@ Qed.
    assumed advantage family and no plaintext-size term enters, which is what
    separates this bound from the guessing bound.  The results record
    dsdp_security carries no field for this statement, the peer-facing record
-   holding the guessing sequence alone. *)
+   holding the guessing sequence alone.
+   Naming: [_negligible] marks a negligible_fun theorem over the named
+   quantity family, paired with that family's [_advantageE] identification
+   lemma, as at [alice_trace_guess_V2_negligible]. *)
 Theorem alice_trace_sim_advantage_negligible :
   negligible_fun f_sim_advantage.
 Proof.
-exact: (\negligible[ f_sim_advantage by alice_sim_first_at ]
+exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]
           alice_trace_sim_chain_assumed_at).
 Qed.
 

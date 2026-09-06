@@ -1193,8 +1193,8 @@ Variant alice_label := cpa_bob | cpa_charlie | uniform_plain.
 
 (* What each label claims: for a hop label the two acceptance probabilities
    its ciphertext replacement moves between and the advantage that
-   replacement costs, and for uniform_plain the all-zero game together with
-   the inverse plaintext-space cardinality bounding it.  The claims are
+   replacement costs, and for uniform_plain the all-zero game against the
+   zero game, at the inverse plaintext-space cardinality.  The claims are
    written here rather than at the steps of the chain, and that is what makes
    a step check: the cost, the target and the justification of a step are
    each compared with the claim of the label it stands under, so an advantage
@@ -1203,9 +1203,9 @@ Definition alice_claim
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
     (l : alice_label) : claim R :=
   match l with
-  | cpa_bob => HopClaim (accept D G0) (accept D G1) (eps_bob D)
-  | cpa_charlie => HopClaim (accept D G1) (accept D G2) (eps_charlie D)
-  | uniform_plain => PlusClaim (accept D G2) #|plain AHE|%:R^-1
+  | cpa_bob => Claim (accept D G0) (accept D G1) (eps_bob D)
+  | cpa_charlie => Claim (accept D G1) (accept D G2) (eps_charlie D)
+  | uniform_plain => Claim (accept D G2) 0 #|plain AHE|%:R^-1
   end.
 
 (* The dictionary of the class-conditional reading of the same argument: the
@@ -1214,8 +1214,8 @@ Definition alice_claim
    the reduction at that key actually shows.  A hop under this dictionary is
    therefore conditional on the class admitting its reduction adversary, and
    the justification it demands is that class membership rather than an
-   equality of advantages; the terminal label costs the same
-   information-theoretic residue under both dictionaries.
+   equality of advantages; the label whose target is the zero game costs
+   the same information-theoretic residue under both dictionaries.
    Naming: extends [alice_claim] with the [assumed] variant token naming the
    quantity the hop labels are charged at. *)
 Definition alice_claim_assumed (A : indcpa_epsilon_assumption)
@@ -1223,10 +1223,10 @@ Definition alice_claim_assumed (A : indcpa_epsilon_assumption)
     (l : alice_label) : claim R :=
   match l with
   | cpa_bob =>
-      HopClaim (accept D G0) (accept D G1) (indcpa_assumption_epsilon A)
+      Claim (accept D G0) (accept D G1) (indcpa_assumption_epsilon A)
   | cpa_charlie =>
-      HopClaim (accept D G1) (accept D G2) (indcpa_assumption_epsilon A)
-  | uniform_plain => PlusClaim (accept D G2) #|plain AHE|%:R^-1
+      Claim (accept D G1) (accept D G2) (indcpa_assumption_epsilon A)
+  | uniform_plain => Claim (accept D G2) 0 #|plain AHE|%:R^-1
   end.
 
 (* The closed form of the loss the chain below accumulates, written in the
@@ -1292,11 +1292,12 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) :=
   \epsilon[ alice_claim D ]{
             (* the two ciphertext replacements, from the real view to the
                view whose two slots both encrypt zero *)
-            hops ;;
+            hops ;
             (* the guessing residue of the all-zero view, a term outside the
                hopping, added to the loss so the total bounds the real view *)
             plus uniform_plain #|plain AHE|%:R^-1
-              by all_zero_game_V2_le_invm predict ;;
+              by plus_le (accept_ge0 _ _)
+                   (all_zero_game_V2_le_invm predict) ;;
             (* the real-view game, at the residue and the two advantages *)
             bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
               by alice_totalE D }.
@@ -1319,7 +1320,7 @@ Theorem alice_tuple_guess_V2_le
        + indcpa_epsilon charlie_pkey
            (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite guess_V2_acceptE.
+rewrite guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
 exact: result_sound (alice_chain predict).
 Qed.
 

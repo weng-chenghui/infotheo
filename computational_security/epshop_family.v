@@ -14,8 +14,8 @@ Require Import negligible epshop.
 (* is the monad's terminal, a statement about the whole family that no        *)
 (* single member of it can carry.                                             *)
 (*                                                                            *)
-(* A family program whose label list is the same at every k opens at a        *)
-(* negligible quantity as soon as every label's cost family is negligible.    *)
+(* A family program whose label list is the same at every k has a negligible  *)
+(* advantage as soon as every label's cost family is negligible.              *)
 (* The negligible families form a submonoid of the additive families, closed  *)
 (* under addition and containing the zero family (negligible_fun_add,         *)
 (* negligible_fun_cst0, negligible_fun_sum) and downward closed               *)
@@ -50,8 +50,8 @@ Require Import negligible epshop.
 (*       claims_negligible C == every label of C costs a negligible family    *)
 (*    loss_eval_negligible s == the total of a fixed label list, read along   *)
 (*                              the security parameter, is negligible         *)
-(*          first_negligible == a family program with a k-independent loss    *)
-(*                              opens at a negligible quantity                *)
+(*      advantage_negligible == a family program with a k-independent loss    *)
+(*                              has a negligible advantage                    *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -82,7 +82,7 @@ Structure negligibleClaims (L : Type) (R : realType) := NegligibleClaims {
    client writes the dictionary first, so it is restored. *)
 Arguments NegligibleClaims {L R} _ _.
 
-Section first_negligible_theory.
+Section advantage_negligible_theory.
 Variable L : Type.
 Variable R : realType.
 Variable C : negligibleClaims L R.
@@ -100,17 +100,17 @@ exact: claims_negligible.
 Qed.
 
 (* The terminal of the family monad: a family program spending the same
-   labels at every security parameter opens at a negligible quantity.  Hs is
+   labels at every security parameter has a negligible advantage.  Hs is
    that independence of the loss from the parameter, stated against the loss
    at 0 so that no label list is written anywhere and discharged by
    fun _ => erefl at a literal program; Hf identifies the quantity the
-   client's theorem is about with the game the program opens at.  What the
-   program contributes is result_sound and result_total: its first game is
+   client's theorem is about with the advantage the program bounds.  What the
+   program contributes is result_sound and result_total: its advantage is
    below its published bound, and that bound is the total of its labels, so
    the only thing left to read is the label list. *)
-Lemma first_negligible (f : nat -> R) (P : forall k, chain_result (C k))
+Lemma advantage_negligible (f : nat -> R) (P : forall k, chain_result (C k))
     (Hs : forall k, result_loss (P k) = result_loss (P 0))
-    (Hf : forall k, f k = result_first (P k)) : negligible_fun f.
+    (Hf : forall k, f k = result_advantage (P k)) : negligible_fun f.
 Proof.
 apply: (negligible_fun_le (g := fun k => result_bound (P k))).
   by move=> k; rewrite Hf; exact: result_sound.
@@ -119,18 +119,18 @@ apply: (negligible_fun_le (g := fun k => loss_eval (C k) (result_loss (P 0)))).
 exact: loss_eval_negligible.
 Qed.
 
-End first_negligible_theory.
+End advantage_negligible_theory.
 
-Arguments first_negligible {L R} C f P Hs Hf.
+Arguments advantage_negligible {L R} C f P Hs Hf.
 
-(* Read "f is negligible, by Hf identifying it with the first game of the
+(* Read "f is negligible, by Hf identifying it with the advantage of the
    program, for each k the program e".  The body is a value of the Reader
    monad over the security parameter, the inner program written once under
    the binder, and the dictionary it is written at is resolved to a
    registered negligibleClaims by canonical inference, so the block names no
    label.  The erefl is the check that the loss does not vary with k. *)
 Notation "'\negligible[' f 'by' Hf ']{' 'fun' k '=>' e '}'" :=
-  (first_negligible _ f (fun k => e) (fun _ => erefl) Hf)
+  (advantage_negligible _ f (fun k => e) (fun _ => erefl) Hf)
   (f constr at level 10, Hf constr at level 10, k ident,
    e constr at level 200) : epshop_scope.
 
@@ -139,6 +139,6 @@ Notation "'\negligible[' f 'by' Hf ']{' 'fun' k '=>' e '}'" :=
    block, so a program declared at a named family dictionary carries its own
    labels into the terminal and the client names none of them. *)
 Notation "'\negligible[' f 'by' Hf ']' P" :=
-  (first_negligible _ f P (fun _ => erefl) Hf)
+  (advantage_negligible _ f P (fun _ => erefl) Hf)
   (f constr at level 10, Hf constr at level 10, P constr at level 10)
   : epshop_scope.

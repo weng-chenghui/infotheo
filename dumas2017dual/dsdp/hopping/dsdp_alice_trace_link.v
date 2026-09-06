@@ -144,9 +144,9 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              the same program with both hops charged at    *)
 (*                              the epsilon A assumes, the two class          *)
 (*                              memberships spent in the hop justifications   *)
-(* alice_trace_sim_advantage_firstE ==                                        *)
-(*                              that distance is the game the assumed         *)
-(*                              program opens at                              *)
+(* alice_trace_sim_advantageE ==                                              *)
+(*                              that distance is the advantage the assumed    *)
+(*                              program bounds                                *)
 (*                                                                            *)
 (* Why the trace preserves the relevant information                           *)
 (*                                                                            *)
@@ -734,12 +734,13 @@ Definition alice_trace_chain (predict : predictor alice_traceT) :=
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept D G0) by accept_trace_tupleE D_trace ;
     (* both ciphertext slots zeroed, at the two IND-CPA advantages *)
-    hops ;;
+    hops ;
     (* the guessing residue of the all-zero view, a term outside the
        hopping, added to the loss so the total bounds the trace game *)
     plus uniform_plain #|plain AHE|%:R^-1
-      by all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
-           v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple) ;;
+      by plus_le (accept_ge0 _ _)
+           (all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
+              v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple)) ;;
     (* the trace game, at the residue and the two advantages *)
     bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
       by alice_totalE card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D }.
@@ -774,12 +775,13 @@ Definition alice_trace_chain_assumed (A : indcpa_epsilon_assumption)
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept D G0) by accept_trace_tupleE D_trace ;
     (* both ciphertext slots zeroed, at twice the epsilon A assumes *)
-    hops ;;
+    hops ;
     (* the guessing residue of the all-zero view, a term outside the
        hopping, added to the loss so the total bounds the trace game *)
     plus uniform_plain #|plain AHE|%:R^-1
-      by all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
-           v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple) ;;
+      by plus_le (accept_ge0 _ _)
+           (all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
+              v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple)) ;;
     (* the trace game, at the residue and twice the assumed epsilon *)
     bound ((#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A)
       by alice_assumed_totalE A }.
@@ -801,7 +803,7 @@ Theorem alice_trace_guess_V2_le
        + indcpa_epsilon (pkey_of_dk Charlie)
            (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite guess_V2_acceptE.
+rewrite guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
 exact: result_sound (alice_trace_chain predict).
 Qed.
 
@@ -847,6 +849,7 @@ Corollary alice_trace_guess_V2_admissible_le
     <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 move=> Hb Hc; rewrite /alice_trace_guess_V2_pr guess_V2_acceptE.
+rewrite -(advantage0 (accept_ge0 _ _)).
 exact: result_sound (alice_trace_chain_assumed Hb Hc).
 Qed.
 
@@ -1049,19 +1052,20 @@ Definition alice_trace_sim_chain_assumed (A : indcpa_epsilon_assumption)
     same to (accept D alice_trace_ideal)
       by esym (accept_trace_ideal_tupleE D) }.
 
-(* The distance a trace test sees is the game the class-conditional program
-   opens at.  That identification is what lets a statement about the program,
-   such as the negligibility of its first game along a sequence of security
-   parameters, be read as a statement about the distance between the executed
-   trace and the simulation.
-   Naming: [_firstE] marks the identification of the named quantity with the
-   first game of a program, as [alice_first_at] does at the sequence. *)
-Lemma alice_trace_sim_advantage_firstE (A : indcpa_epsilon_assumption)
+(* The distance a trace test sees is the advantage the class-conditional
+   program bounds.  That identification is what lets a statement about the
+   program, such as the negligibility of its advantage along a sequence of
+   security parameters, be read as a statement about the distance between the
+   executed trace and the simulation.
+   Naming: [_advantageE] marks the identification of the named quantity with
+   the advantage of a program, as [f_guess_V2_advantageE] does at the
+   sequence. *)
+Lemma alice_trace_sim_advantageE (A : indcpa_epsilon_assumption)
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type)
     (HB : indcpa_admissible A (bob_trace_adversary D))
     (HC : indcpa_admissible A (charlie_trace_adversary D)) :
   alice_trace_sim_advantage D
-  = result_first (alice_trace_sim_chain_assumed HB HC).
+  = result_advantage (alice_trace_sim_chain_assumed HB HC).
 Proof. by rewrite /alice_trace_sim_advantage -!acceptE. Qed.
 
 End dsdp_alice_trace_rv.

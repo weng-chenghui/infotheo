@@ -157,7 +157,6 @@ epshop:bound_sound
 epshop:chain_result_sound
 epshop:foldl_lossE
 epshop:hop_sound
-epshop:plus_sound
 epshop:same_sound
 epshop:start_sound
 epshop:then_sound

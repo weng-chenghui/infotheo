@@ -373,10 +373,10 @@ Definition paillier_claim (A : dcr_assumption) (dk : priv_key AHE)
   let D_0 := dcr_of_adversary_zero adv in
   match l with
   | dcr_g =>
-      HopClaim (accept D_g residue_fdist) (accept D_g unit_fdist)
+      Claim (accept D_g residue_fdist) (accept D_g unit_fdist)
         (dcr_epsilon A)
   | dcr_0 =>
-      HopClaim (accept D_0 unit_fdist) (accept D_0 residue_fdist)
+      Claim (accept D_0 unit_fdist) (accept D_0 residue_fdist)
         (dcr_epsilon A)
   end.
 

@@ -99,6 +99,7 @@ Require Import extra_proba.
 (*                               sampled from G, at any finite carrier        *)
 (*                    acceptE == expresses that probability as the event that *)
 (*                               the sampled value is accepted                *)
+(*                accept_ge0 == that probability is nonnegative               *)
 (*      predictor observation == a guessing strategy: a map from an           *)
 (*                               observation to a claimed plaintext           *)
 (* distinguisher_of_predictor predict ==                                      *)
@@ -232,6 +233,13 @@ Definition accept (T : finType) (D : T -> bool) (G : R.-fdist T) : R :=
 Lemma acceptE (T : finType) (D : T -> bool) (G : R.-fdist T) :
   accept D G = Pr G [set x | D x].
 Proof. exact: Pr_fdistmap_bool. Qed.
+
+(* That probability is nonnegative.  A step whose target is the zero game
+   measures the game it leaves as a distance from zero, and that reading is
+   a bound on the game itself only because the game is nonnegative. *)
+Lemma accept_ge0 (T : finType) (D : T -> bool) (G : R.-fdist T) :
+  0 <= accept D G.
+Proof. exact: Pr_ge0. Qed.
 
 (* A guessing strategy on an observation: a map from the observed value to a
    claimed plaintext.  The counterpart of [distinguisher] for guessing games:

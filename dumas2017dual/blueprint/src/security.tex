@@ -262,7 +262,8 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_bob_zero,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_all_zero,
        infotheo.computational_security.indcpa_game.accept,
-       infotheo.computational_security.indcpa_game.acceptE}
+       infotheo.computational_security.indcpa_game.acceptE,
+       infotheo.computational_security.indcpa_game.accept_ge0}
   \rocqok
   \uses{def:alice_experiment}
   Alice's tuple carries her two masks, her two combine randomnesses, the
@@ -991,14 +992,15 @@ are separated by a semicolon and read as follows.
     $H$ are each checked against it.
   \item \texttt{same to g' by H} rewrites the game to $g'$ at no loss,
     guaranteed by $H : \mathrm{current} = g'$.
-  \item \texttt{s ;; plus l c by H} adds an external term to the loss: the
-    last game is at most $c$, a term labelled $l$, guaranteed by
-    $H : \mathrm{current} \le c$, so the first game is at most the total, the
-    hops' losses plus $c$.
+  \item \texttt{plus l c by H} is \texttt{hop l c to 0 by H}, under a label
+    whose target is the zero game: the last game lies within $c$ of zero,
+    guaranteed by $H : \lvert \mathrm{current} - 0 \rvert \le c$, so it is at
+    most $c$ and $c$ enters the loss. It is spelled \texttt{plus} so that a
+    reader sees a term added rather than a hop taken.
   \item \texttt{s ;; bound c by H} returns the bound: the total of the loss is
-    $c$, guaranteed by $H : \mathrm{total} = c$, so the first game is at most
-    $c$. A program reaching it without a \texttt{plus} returns the bound on
-    the gap between its first and its last game.
+    $c$, guaranteed by $H : \mathrm{total} = c$, so the advantage of the
+    chain, the distance between the game it opened at and the game it stopped
+    at, is at most $c$.
 \end{itemize}
 The label slot names the assumption invoked and where, the cost slot is that
 assumption's advantage, and the proof slot says whether the term is assumed or
@@ -1010,28 +1012,20 @@ pending obligation, and a bound is read off it by projection.
 \begin{definition}[A label and the claim it stands for]
   \label{def:claim}
   \rocq{infotheo.computational_security.epshop.claim,
-       infotheo.computational_security.epshop.claim_cost,
-       infotheo.computational_security.epshop.hop_src,
-       infotheo.computational_security.epshop.hop_tgt,
-       infotheo.computational_security.epshop.plus_game,
-       infotheo.computational_security.epshop.hop_obligation,
-       infotheo.computational_security.epshop.plus_obligation}
+       infotheo.computational_security.epshop.hop_obligation}
   \rocqok
   A label is an element of a type the client chooses, and a claim function
-  sends it to what it asserts. A hop claim $\mathrm{Hop}(s, t, e)$ names a
-  source game, a target game and a cost and asserts that the two games lie
-  within that cost of each other; a terminal claim $\mathrm{Plus}(g, e)$ names
-  a game and a cost and asserts that the game lies below the cost.
-  \[ \mathrm{obl}_{\mathrm{h}}(\mathrm{Hop}(s,t,e))
-       = \big(\lvert s - t \rvert \le e\big), \qquad
-     \mathrm{obl}_{\mathrm{p}}(\mathrm{Plus}(g,e)) = \big(g \le e\big) \]
-  \[ \mathrm{obl}_{\mathrm{h}}(\mathrm{Plus}(g,e)) = \bot, \qquad
-     \mathrm{obl}_{\mathrm{p}}(\mathrm{Hop}(s,t,e)) = \bot \]
-  The cost of either claim is $e$, and the source, the target and the game are
-  read off by projections returning $0$ on the other constructor. The claim is
-  the whole content of a label: it is what a step written under that label is
-  checked against, so a step cannot record a call to an assumption it did not
-  make, and a label meant for the terminal statement cannot be spent on a hop.
+  sends it to what it asserts. A claim $\mathrm{Claim}(s, t, e)$ names a
+  source game, a target game and a cost, and asserts that the two games lie
+  within that cost of each other.
+  \[ \mathrm{obl}(\mathrm{Claim}(s,t,e))
+       = \big(\lvert s - t \rvert \le e\big) \]
+  The three components are read off by the projections $\mathrm{src}$,
+  $\mathrm{tgt}$ and $\mathrm{cost}$. The claim is the whole content of a
+  label: it is what a step written under that label is checked against, so a
+  step cannot record a call to an assumption it did not make. A label whose
+  target is the zero game is what a bound on one game is written under, that
+  game's distance from zero being the game itself.
 \end{definition}
 
 \begin{definition}[A loss and the labels it is a list of]
@@ -1074,10 +1068,12 @@ pending obligation, and a bound is read off it by projection.
        infotheo.computational_security.epshop.chain_hop,
        infotheo.computational_security.epshop.chain_same,
        infotheo.computational_security.epshop.chain_then,
-       infotheo.computational_security.epshop.le_of_eq}
+       infotheo.computational_security.epshop.le_of_eq,
+       infotheo.computational_security.epshop.plus_le,
+       infotheo.computational_security.epshop.advantage0}
   \rocqok
   \uses{def:loss}
-  A chain is a first endpoint $a$, a current endpoint $b$, a loss $s$, and a
+  A chain is a head endpoint $a$, a last endpoint $b$, a loss $s$, and a
   proof that the total of the loss bounds the distance between the endpoints.
   The endpoints are acceptance probabilities.
   \[ \lvert a - b \rvert \le \mathrm{ev}(s) \]
@@ -1086,7 +1082,7 @@ pending obligation, and a bound is read off it by projection.
   three data $(a, b, s)$ they carry.
   \[ \mathrm{start}(g) = \big(g,\; g,\; [\,]\big), \qquad
      \mathrm{hop}(l, e, g', H) = \big(\mathrm{src}(l),\; g',\; [l]\big)
-       \quad\text{for } H : \mathrm{obl}_{\mathrm{h}}(l) \]
+       \quad\text{for } H : \mathrm{obl}(l) \]
   \[ \mathrm{same}(g', H) = \big(x,\; g',\; [\,]\big)
        \quad\text{for } H : x = g', \qquad
      \mathrm{then}(m, f, H_b) = \big(a_m,\; b_f,\;
@@ -1100,7 +1096,9 @@ pending obligation, and a bound is read off it by projection.
   information-theoretic identity between two games takes, and it leaves the
   loss as it stands; \texttt{le\_of\_eq} turns such an identity into the
   inequality a $\mathrm{hop}$ asks for, which is what a hop whose gap is an
-  equality of advantages rather than an assumed bound is justified by. In
+  equality of advantages rather than an assumed bound is justified by, and
+  \texttt{plus\_le} does the same for a hop whose target is the zero game,
+  \texttt{advantage0} reading the distance from zero back as the game. In
   $\mathrm{hop}$ the source endpoint is the source of the label's claim and in
   $\mathrm{same}$ it is read off the type of the justification, so neither
   writes it. Composition $\mathrm{then}$ is partial, sound
@@ -1117,36 +1115,27 @@ pending obligation, and a bound is read off it by projection.
   \label{def:chain_result}
   \rocq{infotheo.computational_security.epshop.chain_result,
        infotheo.computational_security.epshop.chain_result_of_chain,
-       infotheo.computational_security.epshop.chain_plus,
        infotheo.computational_security.epshop.chain_bound}
   \rocqok
   \uses{def:chain}
-  A result is a quantity $a$, a loss $s$, a bound $c$, a proof that $c$ bounds
-  $a$, and a proof that $c$ is the total of $s$.
+  A result is an advantage $a$, a loss $s$, a bound $c$, a proof that $c$
+  bounds $a$, and a proof that $c$ is the total of $s$.
   \[ a \le c, \qquad \mathrm{tot}(s) = c \]
-  A chain returns one on its own, on the gap between its endpoints, at the
-  total of its loss; $\mathrm{plus}$ returns one on the first endpoint, having
-  added the external term $c$ under the label $l$ for
-  $H : \mathrm{obl}_{\mathrm{p}}(l)$ together with the two equations
-  $c = \mathrm{cost}(l)$ and $\mathrm{game}(l) = b_m$, so the term written and
-  the game the chain stopped at are both what the label claims; and
-  $\mathrm{bound}$ republishes a result at an explicit $c$ for
-  $H : \mathrm{tot}(s) = c$.
+  A chain returns one on its own, on the distance between its endpoints, at
+  the total of its loss; $\mathrm{bound}$ republishes a result at an explicit
+  $c$ for $H : \mathrm{tot}(s) = c$.
   \[ m = \big(\lvert a_m - b_m \rvert,\; s_m,\; \mathrm{tot}(s_m)\big),
      \qquad
-     \mathrm{plus}(m, l, c, H) = \big(a_m,\;
-       s_m \mathbin{+\!\!+} [l],\;
-       \mathrm{tot}(s_m \mathbin{+\!\!+} [l])\big) \]
-  \[ \mathrm{bound}(b, c, H) = \big(a_b,\; s_b,\; c\big) \]
-  $\mathrm{plus}$ is where a statement changes sort, from a comparison of two
-  acceptance probabilities to a bound on one. A secrecy theorem has the second
-  shape, so a hybrid reaches its published form there, and the terminal label
-  $l$ is the one summand of such a bound that comes from the endpoint rather
-  than from a step. $\mathrm{bound}$ is where the published number is written
+     \mathrm{bound}(b, c, H) = \big(a_b,\; s_b,\; c\big) \]
+  A chain whose last game is the zero game therefore returns a bound on the
+  probability of the game it opened at, which is the shape a secrecy theorem
+  has, and the label of that last step is the one summand of such a bound that
+  comes from the endpoint rather than from a ciphertext replacement.
+  $\mathrm{bound}$ is where the published number is written
   down: since $\mathrm{tot}$ converts to a plain sum on a list of literal
   labels, $H$ is an algebraic identity between that sum and the number the
   client's theorem states, and no vocabulary of the language appears in it.
-  Both are written after the double semicolon because they return a result
+  It is written after the double semicolon because it returns a result
   where every other statement returns a chain. The last field is what keeps
   the label list, rather than the number written at $\mathrm{bound}$, the
   source of a published bound: republishing composes $H$ with the identity
@@ -1268,24 +1257,24 @@ pending obligation, and a bound is read off it by projection.
   the acceptance probabilities of a predictor's distinguisher at the three
   hops, joined by the fragment of Definition~\ref{def:alice_hops}, which enters
   the program through a let-bound name. Each hop logs the advantage
-  of the reduction its label names, at Bob's key and then at Charlie's, and the
-  terminal statement bounds the all-zero endpoint under a third label, so the
-  program is a chain bound on $\gamma_0(D_g)$. \texttt{alice\_claim} fixes what
+  of the reduction its label names, at Bob's key and then at Charlie's, and a
+  third step hops from the all-zero endpoint to the zero game, so the program
+  is a chain bound on $\gamma_0(D_g)$. \texttt{alice\_claim} fixes what
   each of the three labels claims: the games a hop label joins and the
-  advantage it costs, and the all-zero game the terminal label bounds.
+  advantage it costs, and the all-zero game against the zero game.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_g} \]
   The chain accumulates the two hop terms before the endpoint term, so the
   return statement reorders, which is what \texttt{alice\_totalE} proves.
   This loss has two kinds of term and the labels separate them. The two hop terms
   are the advantages of the reductions $\hopred{0}{D_g}$ and $\hopred{1}{D_g}$,
   each of which becomes conditional on a computational assumption only where a
-  later statement requires it to be small. The terminal term
+  later statement requires it to be small. The term
   $\mathsf{uniform\_plain}$ is information-theoretic and unconditional, the
   residue the leaked output leaves along the solution fiber. The two hops are
   those of Definition~\ref{def:alice_hops}, justified by
   Lemma~\ref{lem:alice_view_advantage}, which makes each gap
   exactly the term it logs, read as an inequality through
-  \texttt{le\_of\_eq}; the terminal statement is justified by
+  \texttt{le\_of\_eq}; the step to the zero game is justified by
   \texttt{all\_zero\_game\_V2\_le\_invm}, which is
   Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
   the fiber enters. Theorem~\ref{thm:alice_guess_real} states the bound this
@@ -1312,8 +1301,9 @@ pending obligation, and a bound is read off it by projection.
   $\tau$, so a test on the trace accepts as often as its lift on the tuple.
   The two hops are the fragment of Definition~\ref{def:alice_hops} at the
   lifted test $D_{g \circ \tau}$, entering through a let-bound name, and the
-  terminal statement is that of Definition~\ref{def:alice_chain}, so
-  the loss and the bound are the same three terms.
+  step to the zero game and the terminal statement are those of
+  Definition~\ref{def:alice_chain}, so the loss and the bound are the same
+  three terms.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
   The trace bound of Theorem~\ref{thm:alice_trace_bounds} is the soundness
   field of this result.
@@ -1366,7 +1356,7 @@ pending obligation, and a bound is read off it by projection.
   The two class memberships are parameters of the program and are spent inside
   the fragment \texttt{alice\_hops\_assumed} of
   Definition~\ref{def:alice_hops}, one in the justification of each hop, which
-  is the shape Definition~\ref{def:paillier_chain} has. The terminal label costs the same
+  is the shape Definition~\ref{def:paillier_chain} has. The zero-game label costs the same
   unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
   total adds one unconditional term to two assumption-conditional ones, and
   \texttt{alice\_assumed\_totalE} is the reordering that states it.
@@ -1379,7 +1369,7 @@ pending obligation, and a bound is read off it by projection.
   \label{def:alice_trace_sim_chain_assumed}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain_assumed,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_firstE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantageE}
   \rocqok
   \uses{def:alice_trace_sim_chain,def:alice_trace_chain_assumed}
   The chain of Definition~\ref{def:alice_trace_sim_chain} over the dictionary
@@ -1442,17 +1432,17 @@ single member of it can carry.
   type.
 \end{lemma}
 
-\begin{theorem}[A sequence of programs opens at a negligible quantity]
-  \label{thm:first_negligible}
-  \rocq{infotheo.computational_security.epshop_family.first_negligible}
+\begin{theorem}[A sequence of programs has a negligible advantage]
+  \label{thm:advantage_negligible}
+  \rocq{infotheo.computational_security.epshop_family.advantage_negligible}
   \rocqok
   \uses{def:negligible_claims,def:chain_result,def:negligible_fun,lem:loss_eval_negligible}
   Let $P$ be a program at every security parameter, over a dictionary all of
   whose labels are negligible, and let its loss be the same at every parameter.
-  Then any $f$ identified with the game $P$ opens at is negligible.
+  Then any $f$ identified with the advantage $P$ bounds is negligible.
   \[ \big(\forall k,\ s_{P_k} = s_{P_0}\big) \implies
      \big(\forall k,\ f(k) = a_{P_k}\big) \implies \mathrm{negl}(f) \]
-  The program supplies the two facts the argument runs on: its first game is
+  The program supplies the two facts the argument runs on: its advantage is
   below its published bound, and that bound is the total of its labels. So the
   asymptotic reading of a multi-hop bound is a reading of the label list, and
   the hypothesis that the loss does not vary with the parameter is what makes
@@ -1582,7 +1572,7 @@ single member of it can carry.
   \label{thm:alice_guess_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible}
   \rocqok
-  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible,def:alice_trace_chain_assumed,def:negligible_claims,thm:first_negligible}
+  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible,def:alice_trace_chain_assumed,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances and a sequence of predictors
   $g_k$, if both reduction adversaries of $g_k$ are admissible for
   $\mathcal{A}_k$ at every $k$, then the guessing probabilities are negligible.
@@ -1591,12 +1581,12 @@ single member of it can carry.
      \big(\forall k,\ \mathrm{adm}_{\mathcal{A}_k}(\hopred{1}{D_{g_k}})\big)
      \implies \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
-  It is Theorem~\ref{thm:first_negligible} read over the program of
+  It is Theorem~\ref{thm:advantage_negligible} read over the program of
   Definition~\ref{def:alice_trace_chain_assumed} at the $k$-th instance. That
   program spends the same three labels at every $k$, and the cost of each of
   them along the sequence is one of the two negligibility fields of
   $\mathcal{Q}$: both hop labels cost $\mathrm{negl}(k \mapsto
-  \varepsilon_{\mathrm{cpa},k})$ and the terminal label costs
+  \varepsilon_{\mathrm{cpa},k})$ and the zero-game label costs
   $\mathrm{negl}(k \mapsto 1/m_k)$. Those two facts are attached to the
   dictionary once, as the negligibleClaims of
   Definition~\ref{def:negligible_claims}, and the theorem names no label.
@@ -1633,7 +1623,7 @@ single member of it can carry.
   \label{thm:alice_trace_sim_advantage_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_sim_advantage_negligible}
   \rocqok
-  \uses{def:alice_trace_sim_chain_assumed,def:negligible_claims,thm:first_negligible}
+  \uses{def:alice_trace_sim_chain_assumed,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances and a family $D_k$ of tests
   of Alice's executed trace, if both reduction adversaries of $D_k$ are
   admissible for $\mathcal{A}_k$ at every $k$, then the distances between that
@@ -1644,7 +1634,7 @@ single member of it can carry.
      \implies \mathrm{negl}\big(k \mapsto \mathrm{adv}^\tau_k(D_k)\big) \]
   This is computational indistinguishability of Alice's view from the
   simulation, the form a simulation-based secrecy claim takes once the
-  parameter is free to grow. It is Theorem~\ref{thm:first_negligible} read
+  parameter is free to grow. It is Theorem~\ref{thm:advantage_negligible} read
   over the program of Definition~\ref{def:alice_trace_sim_chain_assumed} at
   the $k$-th instance, the second statement that program carries. That program
   spends the two hop labels alone, so the whole distance is
