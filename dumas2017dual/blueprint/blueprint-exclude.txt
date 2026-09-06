@@ -74,7 +74,6 @@ dsdp_alice_hop_secrecy:spectator_pre_uniformE
 # under the two conditional-entropy transfers.
 dsdp_alice_trace_link:AliceCombineRand
 dsdp_alice_trace_link:AliceSampleRest
-dsdp_alice_trace_link:alice_hop_tuple_of_viewE
 dsdp_alice_trace_link:alice_hop_tuple_rand_traceE
 dsdp_alice_trace_link:alice_sample_restT
 dsdp_alice_trace_link:combine_rand_rest_indep

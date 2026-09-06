@@ -445,9 +445,11 @@ have := trace_guess_V2_admissible_pq_le paillier_security a.
 by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
 Qed.
 
-(* The Bob-key half alone already reaches that value.
-   Naming: restricts [decrypt_epsilon_sum_ge] to Bob's key, the [bob] token
-   marking which of the two summands is bounded. *)
+(* The decrypting predictor's Bob-key reduction adversary has advantage at
+   least one minus the inverse plaintext count: the advantage this class
+   restriction has to exclude is essentially the whole probability.
+   Naming: [decrypt] names the predictor, [bob] the key its reduction
+   adversary attacks, [epsilon_ge] the lower bound on that advantage. *)
 Corollary paillier_decrypt_bob_epsilon_ge k :
   1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at paillier_setting k
@@ -835,9 +837,11 @@ have := trace_guess_V2_admissible_pq_le benaloh_security a.
 by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
 Qed.
 
-(* The Bob-key half alone already reaches that value.
-   Naming: restricts [decrypt_epsilon_sum_ge] to Bob's key, the [bob] token
-   marking which of the two summands is bounded. *)
+(* The decrypting predictor's Bob-key reduction adversary has advantage at
+   least one minus the inverse plaintext count: the advantage this class
+   restriction has to exclude is essentially the whole probability.
+   Naming: [decrypt] names the predictor, [bob] the key its reduction
+   adversary attacks, [epsilon_ge] the lower bound on that advantage. *)
 Corollary benaloh_decrypt_bob_epsilon_ge k :
   1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at benaloh_setting k
@@ -1139,9 +1143,11 @@ exact: (trace_guess_V2_admissible_pq_le idealized_security
           (idealized_admissible k)).
 Qed.
 
-(* The Bob-key half alone already reaches that value.
-   Naming: restricts [decrypt_epsilon_sum_ge] to Bob's key, the [bob] token
-   marking which of the two summands is bounded. *)
+(* The decrypting predictor's Bob-key reduction adversary has advantage at
+   least one minus the inverse plaintext count: the advantage this class
+   restriction has to exclude is essentially the whole probability.
+   Naming: [decrypt] names the predictor, [bob] the key its reduction
+   adversary attacks, [epsilon_ge] the lower bound on that advantage. *)
 Corollary idealized_decrypt_bob_epsilon_ge k :
   1 - (#|plain (AHE_at IS k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at IS k

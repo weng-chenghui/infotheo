@@ -32,14 +32,13 @@ Require Import epshop.
 (* language of computational_security/epshop.v, whose accumulated loss is     *)
 (* the list of labels whose costs alice_tuple_guess_V2_le sums.               *)
 (*                                                                            *)
-(* Headline results: alice_tuple_guess_V2_le bounds the probability that a    *)
-(* predictor reading Alice's real view returns Bob's input;                   *)
-(* alice_unpredictability_ge is its negative-logarithm form;                  *)
-(* alice_predictor_unpredictability_ge restates that bound through the named  *)
-(* quantity alice_predictor_unpredictability; alice_sim_advantage_le bounds   *)
-(* the gap between the real joint law and the ideal-world joint law built     *)
-(* from alice_simulator; alice_view_guess_V2_le transfers the first bound to  *)
-(* Alice's view.                                                              *)
+(* Headline results: alice_sim_advantage_le bounds the gap between the real   *)
+(* joint law and the ideal-world joint law built from alice_simulator, and    *)
+(* alice_tuple_guess_V2_le bounds the probability that a predictor reading    *)
+(* Alice's real tuple returns Bob's input.  The second is the first plus one  *)
+(* term: alice_idealE identifies the ideal law with the all-zero experiment,  *)
+(* where all_zero_guess_V2_le_invm confines a predictor to the fiber the      *)
+(* leaked output leaves.                                                      *)
 (*                                                                            *)
 (* ## Game vocabulary                                                         *)
 (*                                                                            *)
@@ -189,13 +188,6 @@ Require Import epshop.
 (* distinguisher_of_predictor predict ==                                      *)
 (*                              accepts exactly when the predictor            *)
 (*                              recovers Bob's input                          *)
-(* alice_predictor_unpredictability predict == the negative logarithm of      *)
-(*                              the predictor's success probability           *)
-(*         bob_predictor_epsilon == the advantage against Bob's key that one  *)
-(*                              predictor buys, what the hop-0 replacement    *)
-(*                              costs                                         *)
-(*     charlie_predictor_epsilon == the Charlie-key counterpart, what the     *)
-(*                              hop-1 replacement costs                       *)
 (*             fdistmap_prod == applying separate functions to independent    *)
 (*                              factors preserves their product form          *)
 (*            fdistmap_prodr == changing only the second factor leaves the    *)
@@ -253,37 +245,7 @@ Require Import epshop.
 (*                              uncertainty, so the Shannon statement is      *)
 (*                              non-degenerate at that endpoint               *)
 (*               alice_ideal == samples the honest inputs and then simulates  *)
-(*                              Alice's view from their leaked output         *)
-(*                                                                            *)
-(* Alice's complete view                                                      *)
-(*                                                                            *)
-(*   alice_view_of_hop_tuple == reconstructs Alice's complete view from the   *)
-(*                              hopping tuple                                 *)
-(*           AliceCombineBob == Alice's outgoing ciphertext under Bob's key   *)
-(*       AliceCombineCharlie == Alice's outgoing ciphertext under Charlie's   *)
-(*                              key                                           *)
-(*            AliceRecvPlain == the plaintext Alice obtains in her final      *)
-(*                              receive step                                  *)
-(*               alice_viewT == the carrier of Alice's complete view: the     *)
-(*                              hopping tuple beside the values derived from  *)
-(*                              it                                            *)
-(*                 AliceView == the hopping tuple and the values derived      *)
-(*                              from it                                       *)
-(*        bob_view_adversary == the Bob-key adversary a view predictor        *)
-(*                              induces, reading the view through             *)
-(*                              alice_view_of_hop_tuple                       *)
-(*    charlie_view_adversary == the Charlie-key counterpart of                *)
-(*                              bob_view_adversary                            *)
-(*  alice_view_of_hop_tupleE == Alice's complete view is a deterministic      *)
-(*                              function of the hopping tuple, so the bound   *)
-(*                              transfers without another error term          *)
-(*                                                                            *)
-(* Public setup                                                               *)
-(*                                                                            *)
-(* alice_simulator_pub pk_b pk_c s == the simulator with Bob's and Charlie's  *)
-(*                              public keys given explicitly                  *)
-(*      alice_simulator_pubE == selecting those keys from the party key table *)
-(*                              gives the original simulator                  *)
+(*                              Alice's tuple from their leaked output        *)
 (*                                                                            *)
 (* Separate facts about encryption distributions                              *)
 (*                                                                            *)
@@ -1280,16 +1242,18 @@ Definition alice_hops
               by le_of_eq (hop1_advantageE D) }.
 
 (* The computational-security argument of this file written as one program:
-   the two ciphertext replacements, and then the all-zero endpoint bounded.
-   Its distinguisher is the predictor scored against Bob's input, so the
-   advantage the program bounds is
-   |accept (distinguisher_of_predictor predict)
-      `p_[% V2, V3, alice_tuple_real] - 0|,
-   the probability that predict returns V2 from the real hopping tuple.  The
-   two hops are written where they are taken, at the advantages the two
-   reductions actually show, and what the terminal statement adds is the
-   turn from a comparison of two acceptance probabilities into a bound on
-   the real-view game, the shape a secrecy statement takes. *)
+   the two ciphertext replacements, then the all-zero endpoint bounded.  The
+   bound the program returns is the statement of alice_tuple_guess_V2_le,
+   and its distinguisher is the predictor scored against Bob's input, so the
+   game the bound is about is the probability that predict returns V2 from
+   the real hopping tuple.
+   Each of the two hops carries the key its advantage is charged to, which is
+   what the class-conditional reading of dsdp_alice_trace_link.v and the
+   family reading of dsdp_instance_sequence.v read off a label.  The last
+   line, the term labelled uniform_fiber, is what that theorem adds to the
+   simulation bound: the mass the leaked output leaves along the DSDP
+   solution fiber, unconditional where the two hop terms are conditional on
+   the IND-CPA assumption at one key each. *)
 Definition alice_chain (predict : predictor alice_hop_tupleT) :=
   \epsilon[ alice_claim (distinguisher_of_predictor predict) ]{
             (* the real view, both ciphertext slots carrying their
@@ -1315,107 +1279,6 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) :=
                    + eps_bob (distinguisher_of_predictor predict)
                    + eps_charlie (distinguisher_of_predictor predict))
               by alice_totalE (distinguisher_of_predictor predict) }.
-
-(* A predictor reading Alice's real view returns Bob's input with probability at
-   most the inverse plaintext-space cardinality plus the advantages of the two
-   hop reductions.  The first term is the information-theoretic residue of the
-   leaked output along the DSDP solution fiber; each of the two advantages is
-   what zeroing one ciphertext slot costs, conditional on the IND-CPA
-   assumption at that slot's key.  The right-hand side is the bound the chain
-   returns, the loss it accumulated in the order this statement reads it.
-   Naming: [tuple] names the real-tuple conditioner, [V2] the input bounded,
-   and [le] the direction of the bound. *)
-Theorem alice_tuple_guess_V2_le
-    (predict : predictor alice_hop_tupleT) :
-  Pr alice_sample_fdist [set t | (predict `o alice_tuple_real) t == V2 t]
-    <= #|plain AHE|%:R^-1
-       + indcpa_epsilon bob_pkey
-           (bob_challenge_adversary (distinguisher_of_predictor predict))
-       + indcpa_epsilon charlie_pkey
-           (charlie_challenge_adversary (distinguisher_of_predictor predict)).
-Proof.
-rewrite guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
-exact: result_sound (alice_chain predict).
-Qed.
-
-(* The IND-CPA advantage against Bob's key that one predictor buys: the
-   predictor is scored by distinguisher_of_predictor and that test is
-   embedded in bob_challenge_adversary.  It is what the hop-0 ciphertext
-   replacement costs, and it is assumption-conditional at Bob's key. *)
-Definition bob_predictor_epsilon
-    (predict : predictor alice_hop_tupleT) : R :=
-  indcpa_epsilon bob_pkey
-    (bob_challenge_adversary (distinguisher_of_predictor predict)).
-
-(* The Charlie-key counterpart of bob_predictor_epsilon: what the hop-1
-   ciphertext replacement costs, assumption-conditional at Charlie's key. *)
-Definition charlie_predictor_epsilon
-    (predict : predictor alice_hop_tupleT) : R :=
-  indcpa_epsilon charlie_pkey
-    (charlie_challenge_adversary (distinguisher_of_predictor predict)).
-
-(* The negative logarithm of the probability that the predictor recovers
-   Bob's input from Alice's real hopping tuple.
-   Naming: after [Hunp_leak_S] of the sdistr axis (dsdp_guess_fiber.v),
-   with the fixed predictor explicit. *)
-Definition alice_predictor_unpredictability
-    (predict : predictor alice_hop_tupleT) : R :=
-  - log (Pr alice_sample_fdist
-           [set t | (predict `o alice_tuple_real) t == V2 t]).
-
-Local Notation "'`H_unp^{' g '}'" :=
-  (alice_predictor_unpredictability g)
-  (at level 0, g at level 200,
-   format "'`H_unp^{' g '}'").
-
-(* The negative logarithm of a predictor's success probability on Alice's real
-   view is bounded below by the log of the plaintext-space cardinality minus a
-   correction term in the two hop advantages.  When the two advantages are
-   small the correction term is small, and what remains is the value the left
-   side would take if Alice were guessing uniformly at random over the
-   plaintext space.
-   Naming: [unpredictability] marks the negative-logarithm form, [ge] the
-   direction of the bound. *)
-Theorem alice_unpredictability_ge
-    (predict : predictor alice_hop_tupleT)
-    (Hpos : 0 < Pr alice_sample_fdist
-                  [set t | (predict `o alice_tuple_real) t == V2 t]) :
-  log (#|plain AHE|%:R)
-    - log (1 + #|plain AHE|%:R
-               * (bob_predictor_epsilon predict
-                  + charlie_predictor_epsilon predict))
-  <= - log (Pr alice_sample_fdist
-              [set t | (predict `o alice_tuple_real) t == V2 t]).
-Proof.
-have Hcard_pos : (0 < #|plain AHE|%:R :> R) by rewrite ltr0n card_plain_gt0.
-have Hnum_pos : (0 < 1 + #|plain AHE|%:R
-                        * (bob_predictor_epsilon predict
-                           + charlie_predictor_epsilon predict) :> R).
-  apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
-  by rewrite addr_ge0 // /bob_predictor_epsilon /charlie_predictor_epsilon
-             /indcpa_epsilon normr_ge0.
-rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
-rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: alice_tuple_guess_V2_le.
-Qed.
-
-(* The same bound stated through alice_predictor_unpredictability: the log of
-   the plaintext-space cardinality minus the correction term in the two hop
-   advantages lower-bounds the named unpredictability quantity.
-   Naming: after [alice_unpredictability_ge], whose right-hand
-   side this theorem folds into the named quantity. *)
-Theorem alice_predictor_unpredictability_ge
-    (predict : predictor alice_hop_tupleT)
-    (Hpos : 0 < Pr alice_sample_fdist
-                  [set t | (predict `o alice_tuple_real) t == V2 t]) :
-  log (#|plain AHE|%:R)
-    - log (1 + #|plain AHE|%:R
-               * (bob_predictor_epsilon predict
-                  + charlie_predictor_epsilon predict))
-  <= `H_unp^{predict}.
-Proof.
-exact: alice_unpredictability_ge.
-Qed.
 
 (* The pushforward of a product distribution along a pair of coordinate maps is
    the product of the pushforwards. *)
@@ -1633,25 +1496,6 @@ rewrite /alice_spectator_of_hop_tuple /alice_simulator
 by ring.
 Qed.
 
-(* Conditioned on the leaked output, Alice's all-zero view follows the simulator
-   law fed that output. *)
-Corollary dsdp_alice_hop_tuple_cond_sim_S (v : alice_hop_tupleT)
-    (s : plain AHE) :
-  `Pr[ Sout = s ] != 0 ->
-  `Pr[ alice_tuple_all_zero = v | Sout = s ] = alice_simulator s v.
-Proof.
-move=> Hs.
-have Hind : alice_sample_fdist |= AliceSpectator _|_ Sout.
-  exact: (inde_RV_comp idfun (uncurry (dsdp_output v1 u1 u2 u3))
-            alice_spectator_indep).
-rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v (fun=> id)) (Hind _ _).
-rewrite mulrA mulfK // -dist_of_RVE alice_spectator_law.
-case: v => [[[[m ra] sv] c2] c3].
-rewrite /alice_spectator_of_hop_tuple /alice_simulator
-        !fdist_prodE fdist1E /=.
-by ring.
-Qed.
-
 (* The ideal-world joint law of the two secret inputs and a simulated view: the
    honest input law bound to the simulator fed the leaked output. *)
 Definition alice_ideal :
@@ -1700,140 +1544,52 @@ rewrite alice_idealE -!acceptE.
 exact: result_sound (alice_hops D).
 Qed.
 
-(* Alice's view rebuilt from a value of her hopping tuple: that
-   value, Alice's two outgoing combines, and the plaintext of her final
-   decrypt-on-receive.
-   Naming: [_of_] after the repository's total-conversion family, paired with
-   the [alice_view_of_hop_tupleE] rewrite lemma below. *)
-Definition alice_view_of_hop_tuple (v : alice_hop_tupleT) :
-    alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE :=
-  let c_bob := v.1.2 in
-  let c_charlie := v.2 in
-  let r2 := v.1.1.1.1.1 in
-  let r3 := v.1.1.1.1.2 in
-  let ra1 := v.1.1.1.2.1 in
-  let ra2 := v.1.1.1.2.2 in
-  let s := v.1.1.2 in
-  let combine_bob :=
-    Emul (Epow c_bob u2)
-         (enc bob_pkey r2 (rand_of_renc ra1)) in
-  let combine_charlie :=
-    Emul (Epow c_charlie u3)
-         (enc charlie_pkey r3 (rand_of_renc ra2)) in
-  let recv_plain := s - u1 * v1 + r2 + r3 in
-  (v, combine_bob, combine_charlie, recv_plain).
-
-(* The carrier of Alice's full view: her hopping tuple, her two outgoing
-   combines, and the plaintext of her final decrypt-on-receive. *)
-Definition alice_viewT : finType :=
-  (alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE)%type.
-
-(* The IND-CPA adversary against Bob's key induced by a view predictor: it
-   embeds the challenge in the ciphertext of Bob's input V2, rebuilds Alice's
-   view around it, and guesses with the predictor. *)
-Definition bob_view_adversary (predict : predictor alice_viewT) :
-    indcpa_adversary :=
-  bob_challenge_adversary
-    (distinguisher_of_predictor (predict \o alice_view_of_hop_tuple)).
-
-(* The Charlie-key counterpart of bob_view_adversary. *)
-Definition charlie_view_adversary (predict : predictor alice_viewT) :
-    indcpa_adversary :=
-  charlie_challenge_adversary
-    (distinguisher_of_predictor (predict \o alice_view_of_hop_tuple)).
-
-(* Alice's outgoing combine toward Bob's key, replaying her real protocol step:
-   the ciphertext she received from Bob raised to her second weight, times an
-   encryption of her first mask. *)
-Definition AliceCombineBob : {RV alice_sample_fdist -> cipher AHE} :=
-  fun t => Emul
-    (Epow (enc bob_pkey (V2 t) (rand_of_renc (Rho2 t))) u2)
-    (enc bob_pkey (R2 t) (rand_of_renc (RA1 t))).
-
-(* Alice's outgoing combine toward Charlie's key, the symmetric counterpart of
-   AliceCombineBob: the ciphertext she received from Charlie raised to her
-   third weight, times an encryption of her second mask. *)
-Definition AliceCombineCharlie : {RV alice_sample_fdist -> cipher AHE} :=
-  fun t => Emul
-    (Epow (enc charlie_pkey (V3 t) (rand_of_renc (Rho3 t))) u3)
-    (enc charlie_pkey (R3 t) (rand_of_renc (RA2 t))).
-
-(* The plaintext Alice recovers at her final decrypt-on-receive step: the two
-   weighted inputs of the other parties plus her two masks.  Its value is
-   determined by the hopping tuple through alice_view_of_hop_tuple.
-   Naming: Owner-Verb-Noun, parallel to AliceCombineBob and
-   AliceCombineCharlie; [Plain] is the AHE plaintext carrier. *)
-Definition AliceRecvPlain : {RV alice_sample_fdist -> plain AHE} :=
-  fun t => u2 * V2 t + u3 * V3 t + R2 t + R3 t.
-
-(* Alice's four real observables: her hopping tuple, her two outgoing combines,
-   and the plaintext of her final decrypt-on-receive. *)
-Definition AliceView : {RV alice_sample_fdist -> alice_viewT} :=
-  [% alice_tuple_real, AliceCombineBob, AliceCombineCharlie, AliceRecvPlain].
-
-(* AliceView is alice_view_of_hop_tuple composed with alice_tuple_real.
-   Her combine addressed to Bob's key, her combine addressed to Charlie's key,
-   and the plaintext of her final decrypt-on-receive are each a deterministic
-   function of the hopping tuple, so a bound on the tuple transfers to her
-   whole view with no extra term.
-   Naming: [E] marks the equation unfolding [AliceView] into
-   [alice_view_of_hop_tuple] composed with [alice_tuple_real]. *)
-Lemma alice_view_of_hop_tupleE :
-  AliceView = alice_view_of_hop_tuple \o alice_tuple_real.
-Proof.
-apply/boolp.funext => t.
-rewrite /AliceView /alice_tuple_real /alice_view_of_hop_tuple /AliceCombineBob
-        /AliceCombineCharlie /AliceRecvPlain /=.
-by congr (_, _, _, _); rewrite /Sout /comp_RV /dsdp_output /=; ring.
-Qed.
-
-(* A predictor reading Alice's view matches Bob's input with
-   probability at most 1/#|plain AHE| plus the advantages of the two hop
-   reductions.
-   Naming: [guess_V2_le] as in the hopping-tuple headline
-   [alice_tuple_guess_V2_le], with [view] naming the observation read. *)
-Corollary alice_view_guess_V2_le
-    (predict : predictor alice_viewT) :
-  Pr alice_sample_fdist [set t | (predict `o AliceView) t == V2 t]
+(* A predictor reading Alice's real view returns Bob's input with probability at
+   most the inverse plaintext-space cardinality plus the advantages of the two
+   hop reductions.  It is the simulation bound of alice_sim_advantage_le with
+   one term added: the ideal side of that bound is the all-zero experiment by
+   alice_idealE, and a predictor scored there is confined to the fiber the
+   leaked output leaves, of mass at most the inverse cardinality.  So the first
+   term is information-theoretic and each of the two advantages is what zeroing
+   one ciphertext slot costs, conditional on the IND-CPA assumption at that
+   slot's key.  The right-hand side is the bound alice_chain returns, the loss
+   it accumulated in the order this statement reads it.
+   Naming: [tuple] names the real-tuple conditioner, [V2] the input bounded,
+   and [le] the direction of the bound. *)
+Theorem alice_tuple_guess_V2_le
+    (predict : predictor alice_hop_tupleT) :
+  Pr alice_sample_fdist [set t | (predict `o alice_tuple_real) t == V2 t]
     <= #|plain AHE|%:R^-1
-       + indcpa_epsilon bob_pkey (bob_view_adversary predict)
-       + indcpa_epsilon charlie_pkey (charlie_view_adversary predict).
+       + indcpa_epsilon bob_pkey
+           (bob_challenge_adversary (distinguisher_of_predictor predict))
+       + indcpa_epsilon charlie_pkey
+           (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
-by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
+(* The real game is the all-zero game plus the distance between them, and the
+   two are bounded separately. *)
+have step (x y u v : R) : y <= u -> `|x - y| <= v -> x <= u + v.
+  move=> Hy Hv.
+  have -> : x = y + (x - y) by ring.
+  by apply: lerD => //; exact: le_trans (ler_norm _) Hv.
+have Hsim : `| accept (distinguisher_of_predictor predict)
+                 (`p_ [% V2, V3, alice_tuple_real])
+               - accept (distinguisher_of_predictor predict)
+                   (`p_ [% V2, V3, alice_tuple_all_zero]) |
+             <= indcpa_epsilon bob_pkey
+                  (bob_challenge_adversary
+                     (distinguisher_of_predictor predict))
+                + indcpa_epsilon charlie_pkey
+                    (charlie_challenge_adversary
+                       (distinguisher_of_predictor predict)).
+  by rewrite -alice_idealE 2!acceptE; exact: alice_sim_advantage_le.
+rewrite guess_V2_acceptE -addrA.
+apply: (step _ (accept (distinguisher_of_predictor predict)
+                  (`p_ [% V2, V3, alice_tuple_all_zero]))).
+  exact: all_zero_game_V2_le_invm.
+exact: Hsim.
 Qed.
 
 End dsdp_alice_hop_secrecy.
-
-Section dsdp_alice_simulator_pub.
-Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-
-(* The two uniform factors below reuse the card constants the main section
-   discharges.  Those [_subproof] names are generated from the [Let] names
-   [card_plain_pair] and [card_renc_pair] of Section dsdp_alice_hop_secrecy,
-   so renaming either [Let] breaks this section. *)
-
-(* The simulated view law with its cryptographic setup passed as the two
-   public keys it encrypts under. *)
-Definition alice_simulator_pub (pk_b pk_c : pub_key AHE)
-    (s : plain AHE) : R.-fdist (alice_hop_tupleT AHE Renc) :=
-  ((((fdist_uniform (card_plain_pair_subproof AHE))
-       `x (fdist_uniform (card_renc_pair_subproof card_renc)))
-      `x (fdist1 s))
-     `x (enc_fdist card_renc rand_of_renc pk_b 0))
-    `x (enc_fdist card_renc rand_of_renc pk_c 0).
-
-(* Instantiating the public keys as any party-indexed key table yields the
-   existing simulator. *)
-Lemma alice_simulator_pubE (pkey_of_party : party_id -> pub_key AHE)
-    (s : plain AHE) :
-  alice_simulator_pub (pkey_of_party Bob) (pkey_of_party Charlie) s
-  = alice_simulator card_renc rand_of_renc pkey_of_party s.
-Proof. by []. Qed.
-
-End dsdp_alice_simulator_pub.
 
 Section dsdp_alice_enc_uniform_img.
 Context {R : realType}.

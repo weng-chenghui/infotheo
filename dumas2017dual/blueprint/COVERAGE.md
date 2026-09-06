@@ -52,18 +52,15 @@ rename is caught the moment its `\rocq{}` target goes dangling. Shrink the
 exclude-list as blueprint prose grows. Delete an entry once it gets a real
 node.
 
-At this commit the checker exits 1. It reports 68 UNCOVERED declarations
+At this commit the checker exits 1. It reports 40 UNCOVERED declarations
 across the scoped modules and 0 DANGLING refs. The UNCOVERED list is known
 debt, not a regression to fix before the next commit.
 
-`dsdp_instance_sequence.v` holds one declaration per scheme for the same
-theorem, the per-instance trace-guessing bound. The Paillier one,
-`alice_trace_guess_V2_paillier_le`, has a node in security.tex around line
-945. Its Benaloh twin, `alice_trace_guess_V2_benaloh_le`, has none. Neither
-fact shows up in the checker's output, because `dsdp_instance_sequence.v` is
-not in MODULES: the checker never scans the file, so it neither counts the
-existing node as coverage nor flags the missing one as UNCOVERED. A node for
-the Benaloh twin becomes due once `dsdp_instance_sequence.v` enters MODULES.
+The per-instance scheme bounds are stated once, in `dsdp_main.v`
+(`paillier_trace_guess_V2_admissible_pq_le` with `paillier_epsilon_at_dcrE`,
+and the Benaloh pair), with the nodes `cor:alice_guess_paillier` and
+`cor:alice_guess_benaloh` pointing at them; `dsdp_instance_sequence.v`
+carries no per-scheme restatement of them.
 
 ## Pre-commit hook (optional, opt-in)
 

@@ -403,65 +403,33 @@ $V_3$.
   \label{thm:alice_guess_real}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_guess_V2_le}
   \rocqok
-  \uses{def:dsdp_setting,lem:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_predictor}
+  \uses{def:dsdp_setting,thm:alice_simulation_secure,lem:simulator_factorization,lem:guess_all_zero,def:distinguisher_of_predictor}
   When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
   real tuple matches Bob's input with probability at most $1/m$ plus the
   advantages of the two hop reductions of its distinguisher.
   \[ \Pr[\,g(\hoptuple{0}) = V_2\,]
        \le \tfrac{1}{m} + \epshopsum{D_g} \]
+  The bound is the simulation bound of
+  Theorem~\ref{thm:alice_simulation_secure} at the predictor's own
+  distinguisher $D_g$, which accepts exactly when $g$ returns Bob's input, plus
+  what the simulator's output reveals: on the ideal-world law $g$ succeeds
+  with probability at most $1/m$, the mass of the fiber of the leaked output
+  (Lemma~\ref{lem:guess_all_zero}), and the real law is within the two hop
+  advantages of it. The epsHop program \texttt{alice\_chain} returns the same
+  bound, its last line adding that fiber term to the two hops.
   Proved in \texttt{dsdp\_alice\_hop\_secrecy.v}, the bound is field
   \texttt{tuple\_guess\_V2\_le} of \texttt{dsdp\_security}, read off at each
   instance of \texttt{dsdp\_main.v}, at the scheme that setting's sequence
   supplies at $k$ rather than at an instance supplied on its own.
 \end{theorem}
 \begin{proof}
-  \uses{lem:alice_view_advantage,lem:guess_all_zero}
+  \uses{thm:alice_simulation_secure,lem:simulator_factorization,lem:guess_all_zero}
   \rocqok
-  The endpoint probability is at most $1/m$, and the triangle inequality along
-  the two hops adds the two reduction advantages.
+  $\Pr_{\mathrm{real}}[D_g] \le \Pr_{\mathrm{ideal}}[D_g]
+   + |\Pr_{\mathrm{real}}[D_g] - \Pr_{\mathrm{ideal}}[D_g]|$; the first term
+  is the all-zero endpoint probability, at most $1/m$, and the second is the
+  simulation bound.
 \end{proof}
-
-\begin{theorem}[Unpredictability entropy]
-  \label{thm:alice_unpredictability}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_predictor_unpredictability,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_unpredictability_ge,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_predictor_unpredictability_ge}
-  \rocqok
-  \uses{def:dsdp_setting,thm:alice_guess_real}
-  For a predictor whose success probability on Alice's real tuple is positive,
-  and with $u_3$ a unit of the plaintext ring, the negative logarithm of that
-  probability is at least $\log m$ less the logarithm of one plus $m$ times the
-  two hop advantages.
-  \[ \Hunp(g) = -\log \Pr[\,g(\hoptuple{0}) = V_2\,]
-       \ge \log m - \log\!\big(1 + m\,(\epshopsum{D_g})\big) \]
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v}, the two forms are fields
-  \texttt{unpredictability\_ge} and \texttt{predictor\_unpredictability\_ge} of
-  \texttt{dsdp\_security}, read off at each instance of \texttt{dsdp\_main.v},
-  at the scheme that setting's sequence supplies there.
-\end{theorem}
-
-\begin{corollary}[The same bound at Alice's full view]
-  \label{cor:alice_guess_view}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceCombineBob,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceCombineCharlie,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceRecvPlain,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceView,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_view_of_hop_tuple,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_view_of_hop_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_view_guess_V2_le}
-  \rocqok
-  \uses{def:dsdp_setting,thm:alice_guess_real,def:party_views}
-  Alice's four real observables are her hop-$0$ tuple, her two outgoing combines,
-  and the plaintext of her final decryption. Each of the last three is a function
-  of the tuple, so the view is the image of the tuple under a map $\nu$, and
-  every predictor $g'$ of Bob's input reading the whole view obeys the tuple
-  bound at $g' \circ \nu$.
-  \[ \Pr[\,g'(\mathrm{AliceView}) = V_2\,]
-       \le \tfrac{1}{m} + \epshopsum{D_{g' \circ \nu}} \]
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v}, the corollary is field
-  \texttt{view\_guess\_V2\_le} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}.
-\end{corollary}
 
 \chapter{Simulation-based security}
 \label{ch:simulation}
@@ -493,14 +461,13 @@ functionality on the other, rather than quantified over all input vectors.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_law,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tuple_all_zero_pfwd1E,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim_S,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_idealE}
   \rocqok
   \uses{def:alice_simulator}
   Conditioned on any honest input pair of positive probability, Alice's all-zero
-  tuple has exactly the simulator law fed the output of that pair, and the same
-  holds conditioned on the output alone. The ideal-world law is therefore the
-  joint law of the honest inputs and the all-zero tuple, with no error term.
+  tuple has exactly the simulator law fed the output of that pair. The
+  ideal-world law is therefore the joint law of the honest inputs and the
+  all-zero tuple, with no error term.
   \[ \Pr[\,\hoptuple{2} = t \mid (V_2,V_3) = (v_2,v_3)\,] = \Sim(S(v_2,v_3))(t),
      \qquad \Ideal = \mathrm{law}(V_2, V_3, \hoptuple{2}) \]
 \end{lemma}
@@ -583,30 +550,29 @@ carries the three bounds above to the executed protocol.
   \[ \mathrm{AliceTrace} = \tau \circ \hoptuple{0} \]
 \end{lemma}
 
-\begin{theorem}[The three bounds at the trace]
+\begin{theorem}[The two bounds at the trace]
   \label{thm:alice_trace_bounds}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_unpredictability,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_unpredictability_ge,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_simulator,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_le}
   \rocqok
-  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
+  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
-  executed trace obeys the guessing bound and its negative-logarithm form at
-  $g \circ \tau$. For all weights, every distinguisher separates the real trace
-  law from the trace-level ideal law by at most the two hop advantages.
+  executed trace obeys the guessing bound at $g \circ \tau$. For all weights,
+  every distinguisher separates the real trace law from the trace-level ideal
+  law by at most the two hop advantages.
   \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
        \le \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
-  The guessing bound is the soundness field of
-  Definition~\ref{def:alice_trace_chain} and the simulation bound the gap
-  result of Definition~\ref{def:alice_trace_sim_chain}.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the three bounds are fields
-  \texttt{trace\_guess\_V2\_le}, \texttt{trace\_unpredictability\_ge} and
-  \texttt{trace\_sim\_advantage\_le} of \texttt{dsdp\_security}, read off at
-  each instance of \texttt{dsdp\_main.v}, at the scheme that setting's sequence
-  supplies there.
+  The simulation bound is the gap result of
+  Definition~\ref{def:alice_trace_sim_chain}, and the guessing bound is that
+  simulation bound at the predictor's distinguisher plus the fiber term of the
+  ideal trace, as at the tuple; the program of
+  Definition~\ref{def:alice_trace_chain} returns the same bound.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}. The record
+  \texttt{dsdp\_security} carries both bounds at the raw trace,
+  Theorems~\ref{thm:raw_trace_guess} and~\ref{thm:raw_trace_simulation}, the
+  two bounds read through the decoding of Lemma~\ref{lem:raw_trace_decode}.
 \end{theorem}
 
 \begin{lemma}[Decoding Alice's trace at her own key]
@@ -668,25 +634,20 @@ carries the three bounds above to the executed protocol.
   off at each instance of \texttt{dsdp\_main.v}.
 \end{theorem}
 
-\begin{theorem}[Trace, view, and tuple leave the same uncertainty]
-
+\begin{theorem}[Trace and tuple leave the same uncertainty]
   \label{thm:centropy_trace_tuple}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTraceTuple,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_view_tupleE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_trace_tupleE}
   \rocqok
-  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,cor:alice_guess_view}
-  Conditioning on Alice's executed trace, and conditioning on her full view,
-  leave the same uncertainty about Bob's input as conditioning on her hop-$0$
-  tuple. The equalities hold for all weights.
-  \[ \HH(V_2 \mid \mathrm{AliceTrace}) = \HH(V_2 \mid \hoptuple{0})
-       = \HH(V_2 \mid \mathrm{AliceView}) \]
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two equalities are fields
-  \texttt{centropy\_V2\_trace\_tupleE} and \texttt{centropy\_V2\_view\_tupleE}
-  of \texttt{dsdp\_security}, read off at each instance of
-  \texttt{dsdp\_main.v}.
+  \uses{def:dsdp_setting,lem:trace_of_hop_tuple}
+  Conditioning on Alice's executed trace leaves the same uncertainty about
+  Bob's input as conditioning on her hop-$0$ tuple. The equality holds for all
+  weights.
+  \[ \HH(V_2 \mid \mathrm{AliceTrace}) = \HH(V_2 \mid \hoptuple{0}) \]
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}; with
+  Theorem~\ref{thm:centropy_trace_eq0} it puts the zero at the tuple as well.
 \end{theorem}
 
 \chapter{The bound conditional on an adversary class}
@@ -1005,26 +966,47 @@ $e$-th residuosity assumption.
   class at the residuosity record of advantage zero.
 \end{definition}
 
-\begin{corollary}[The bound at the Paillier scheme]
+\begin{corollary}[The bound at the Paillier setting]
   \label{cor:alice_guess_paillier}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_paillier_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_admissible_pq_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.paillier_epsilon_at_dcrE}
   \rocqok
-  \uses{thm:alice_guess_admissible,def:dcr_assumption,def:paillier_indcpa_assumption}
-  At the Paillier packaging with modulus $pq$, a trace predictor whose two
-  reduction adversaries the class induced by $\mathcal{B}$ admits matches Bob's
-  input with probability at most $1/(pq)$ plus four times the assumed
-  residuosity advantage.
-  \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
-       \le \tfrac{1}{pq} + 4\,\varepsilon_{\mathrm{dcr}} \]
+  \uses{thm:alice_guess_admissible,def:paillier_setting,def:dcr_assumption,def:paillier_indcpa_assumption}
+  At the $k$-th instance of the Paillier setting, with modulus $p_k q_k$, a
+  trace predictor whose two reduction adversaries the class induced by
+  $\mathcal{B}_k$ admits matches Bob's input with probability at most
+  $1/(p_k q_k)$ plus four times the assumed residuosity advantage.
+  \[ \Pr[\,g(\mathrm{AliceTrace}_k) = V_2\,]
+       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathrm{dcr},k} \]
   Both sides are discharged at this scheme. The information-theoretic side
   reads the plaintext count off the packaging, whose plaintext space has
-  exactly $pq$ elements, and the coin plumbing the abstract bound quantifies
-  over is supplied by the scheme's own randomness. The computational side is
-  decisional composite residuosity and nothing further, at the cost
-  Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is two
-  keys, Bob's and Charlie's, times two residuosity calls per key. What is
-  assumed here is $\mathcal{B}$, and the class premises restrict which
-  predictors the bound covers.
+  exactly $p_k q_k$ elements, and the coin plumbing the abstract bound
+  quantifies over is supplied by the scheme's own randomness. The
+  computational side is decisional composite residuosity and nothing further,
+  at the cost Definition~\ref{def:paillier_indcpa_assumption} fixes: the
+  factor four is two keys, Bob's and Charlie's, times two residuosity calls
+  per key, the identity \texttt{paillier\_epsilon\_at\_dcrE}. What is assumed
+  here is $\mathcal{B}_k$, and the class premises restrict which predictors
+  the bound covers.
+\end{corollary}
+
+\begin{corollary}[The bound at the Benaloh setting]
+  \label{cor:alice_guess_benaloh}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_admissible_pq_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_epsilon_at_residuosityE}
+  \rocqok
+  \uses{thm:alice_guess_admissible,def:benaloh_setting,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
+  At the $k$-th instance of the Benaloh setting, whose plaintext space has
+  $r_k = p_k q_k$ elements, a trace predictor whose two reduction adversaries
+  the class induced by $\mathcal{B}_k$ admits matches Bob's input with
+  probability at most $1/(p_k q_k)$ plus four times the assumed residuosity
+  advantage.
+  \[ \Pr[\,g(\mathrm{AliceTrace}_k) = V_2\,]
+       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathrm{res},k} \]
+  The computational side is $r$-th residuosity at the cost
+  Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor four again
+  two keys times two residuosity calls per key, the identity
+  \texttt{benaloh\_epsilon\_at\_residuosityE}.
 \end{corollary}
 
 \section{epsHop, the language a multi-hop bound is written in}
@@ -1524,15 +1506,12 @@ single member of it can carry.
 
 \begin{theorem}[The class cannot admit every adversary]
   \label{thm:decrypt_lower_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_bob_epsilon_ge,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_epsilon_sum_ge}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_bob_epsilon_ge}
   \rocqok
   \uses{def:dsdp_setting,def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
   With $u_3$ a unit of the plaintext ring, the hop-$0$ advantage the decrypting
-  predictor buys is at least $1 - 1/m$, and so is the sum of its two hop
-  advantages.
-  \[ 1 - \tfrac{1}{m} \le \epsror{\pk_B}{\hopred{0}{D_\delta}},\qquad
-     1 - \tfrac{1}{m} \le \epshopsum{D_\delta} \]
+  predictor buys is at least $1 - 1/m$.
+  \[ 1 - \tfrac{1}{m} \le \epsror{\pk_B}{\hopred{0}{D_\delta}} \]
   At the real bit the challenge ciphertext decrypts to Bob's input and $\delta$
   is right always; at the zero bit it decrypts to zero and $\delta$ is right
   only on the fiber the leaked output leaves, of mass at most $1/m$. An
@@ -1540,10 +1519,9 @@ single member of it can carry.
   $2\varepsilon_{\mathrm{cpa}} \ge 1 - 1/m$, so the premises of
   Theorem~\ref{thm:alice_guess_admissible} are what make that bound say
   anything.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two lower bounds are
-  fields \texttt{decrypt\_epsilon\_sum\_ge} and \texttt{decrypt\_bob\_epsilon\_ge}
-  of \texttt{dsdp\_security}, read off at each instance of
-  \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the lower bound is field
+  \texttt{decrypt\_bob\_epsilon\_ge} of \texttt{dsdp\_security}, read off at
+  each instance of \texttt{dsdp\_main.v}.
 \end{theorem}
 
 \begin{corollary}[A small-epsilon assumption must reject the decryptor]
@@ -1827,7 +1805,7 @@ single member of it can carry.
   \label{thm:dsdp_securityP}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_security.dsdp_securityP}
   \rocqok
-  \uses{def:dsdp_security,def:dsdp_setting,thm:dsdp_centropy_uniform,thm:US_e1_centropy_V2_eq0,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2,thm:alice_guess_real,thm:alice_unpredictability,cor:alice_guess_view,thm:alice_simulation_secure,thm:centropy_endpoints,thm:alice_trace_bounds,thm:raw_trace_guess,thm:raw_trace_simulation,lem:guess_all_zero,thm:centropy_trace_tuple,thm:centropy_trace_eq0,thm:alice_guess_admissible,thm:decrypt_lower_bound,cor:decrypt_not_admissible,cor:admissible_premise_free,cor:decrypt_sequence_not_admissible,thm:alice_guess_negligible}
+  \uses{def:dsdp_security,def:dsdp_setting,thm:dsdp_centropy_uniform,thm:US_e1_centropy_V2_eq0,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2,thm:alice_guess_real,thm:alice_simulation_secure,thm:centropy_endpoints,thm:alice_trace_bounds,thm:raw_trace_guess,thm:raw_trace_simulation,lem:guess_all_zero,thm:centropy_trace_tuple,thm:centropy_trace_eq0,thm:alice_guess_admissible,thm:decrypt_lower_bound,cor:decrypt_not_admissible,cor:admissible_premise_free,cor:decrypt_sequence_not_admissible,thm:alice_guess_negligible}
   Every setting proves the twenty-one, after du2002's pair
   \texttt{scalar\_product\_is\_leakage\_free} and
   \texttt{scalar\_product\_is\_leakage\_freeP}.

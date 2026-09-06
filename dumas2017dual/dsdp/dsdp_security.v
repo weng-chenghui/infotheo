@@ -158,8 +158,8 @@ Local Open Scope entropy_scope.
 (* Each declaration below names an object of the hopping axis at the k-th
    instance of the sequence X carries, on the side of that axis which
    mentions an adversary: the advantage functional, the four reduction
-   adversaries a distinguisher or a predictor induces, the advantages and
-   unpredictability quantities they buy, and the predictor that decrypts.
+   adversaries a distinguisher or a predictor induces, the advantages they
+   buy, and the predictor that decrypts.
    The adversary-free objects of the same instance are in dsdp_setting.v. *)
 Section dsdp_hopping_adversaries.
 Local Unset Implicit Arguments.

@@ -147,10 +147,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_trace_guess_V2_idealized_negligible ==                               *)
 (*                               the witness discharges every hypothesis of   *)
 (*                               the headline                                 *)
-(* alice_trace_guess_V2_paillier_le ==                                        *)
-(*                               the class-conditional trace guessing bound   *)
-(*                               at Paillier, 1/(p * q) plus four times the   *)
-(*                               decisional composite residuosity epsilon     *)
 (* paillier_bob_decide_constant_admissible ==                                 *)
 (*                               at the challenge-ignoring residuosity        *)
 (*                               record the constant predictor's Bob-key      *)
@@ -170,10 +166,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               the asymptotic form of that bound, under     *)
 (*                               modulus growth and a negligible residuosity  *)
 (*                               advantage sequence                           *)
-(* alice_trace_guess_V2_benaloh_le ==                                         *)
-(*                               the class-conditional trace guessing bound   *)
-(*                               at Benaloh, 1/r plus four times the r-th     *)
-(*                               residuosity epsilon                          *)
 (* benaloh_bob_decide_constant_admissible ==                                  *)
 (*                               at the challenge-ignoring residuosity        *)
 (*                               record the constant predictor's Bob-key      *)
@@ -800,31 +792,6 @@ Local Notation alice_trace_guess_V2_pr :=
   (alice_trace_guess_V2_pr (R:=R) card_renc_paillier rand_of_renc_paillier
      v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
 
-(* A predictor reading Alice's executed DSDP trace at the Paillier
-   instantiation returns Bob's input with probability at most 1/(p * q) plus
-   four times the residuosity epsilon.
-
-   The 1/(p * q) is unconditional.  It comes from Sout, the output Alice
-   knows by design.  The 4 eps is conditional on dcr, and is the product of two
-   twos: the trace bound replaces a ciphertext at Bob's key and one at
-   Charlie's, and the reduction of paillier_indcpa_scheme.v spends two
-   residuosity calls at each key, one moving the real experiment to the unit
-   challenge and one moving the zero experiment back. *)
-Corollary alice_trace_guess_V2_paillier_le
-    (predict : predictor AHE (alice_traceT AHE)) :
-  paillier_dcr_admissible dcr
-    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
-  paillier_dcr_admissible dcr
-    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
-  alice_trace_guess_V2_pr predict
-    <= ((p%:R : R) * q%:R)^-1 + 4 * dcr_epsilon dcr.
-Proof.
-move=> Hb Hc.
-have := alice_trace_guess_V2_admissible_pq_le u3_unit rb2 card_plain_pq
-          (assumption := paillier_indcpa_assumption p_gt1 q_gt1 dcr) Hb Hc.
-by rewrite mulrA -(natrM R 2 2).
-Qed.
-
 (* The class premises of the bound above are satisfiable at a residuosity
    record that exists: at the challenge-ignoring assumption of
    residuosity_game.v, whose epsilon is zero and proved, the constant
@@ -1027,32 +994,6 @@ Local Notation alice_trace_guess_V2_pr :=
 (* The inverse plaintext cardinality at the Benaloh block size. *)
 Let inv_r_cardE : (r%:R : R)^-1 = (#|plain AHE|%:R : R)^-1.
 Proof. by rewrite card_plain_r. Qed.
-
-(* A predictor reading Alice's executed DSDP trace at the Benaloh
-   instantiation returns Bob's input with probability at most 1/r plus four
-   times the residuosity epsilon.
-
-   The 1/r is unconditional.  It comes from Sout, the output Alice knows by
-   design.  The 4 eps is conditional on residuosity, and is the product of
-   two twos: the trace bound replaces a ciphertext at Bob's key and one at
-   Charlie's,
-   and the reduction of benaloh_indcpa_scheme.v spends two residuosity calls
-   at each key, one moving the real experiment to the unit challenge and one
-   moving the zero experiment back. *)
-Corollary alice_trace_guess_V2_benaloh_le
-    (predict : predictor AHE (alice_traceT AHE)) :
-  benaloh_residuosity_admissible residuosity
-    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
-  benaloh_residuosity_admissible residuosity
-    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
-  alice_trace_guess_V2_pr predict
-    <= (r%:R : R)^-1 + 4 * benaloh_residuosity_epsilon residuosity.
-Proof.
-move=> Hb Hc; rewrite inv_r_cardE.
-have := alice_trace_guess_V2_admissible_le u3_unit rb2
-          (assumption := benaloh_indcpa_assumption r_gt1 residuosity) Hb Hc.
-by rewrite mulrA -(natrM R 2 2).
-Qed.
 
 (* The class premises of the bound above are satisfiable at a residuosity
    record that exists: at the challenge-ignoring assumption of
