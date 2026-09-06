@@ -9,6 +9,7 @@ Require Import extra_proba extra_entropy.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
 Require Import epshop.
+Require Import dsdp_instance.
 Require Import dsdp_alice_hop_secrecy.
 
 (**md**************************************************************************)
@@ -44,8 +45,6 @@ Require Import dsdp_alice_hop_secrecy.
 (* ```                                                                        *)
 (* Execution and trace construction                                           *)
 (*                                                                            *)
-(*                pkey_of_dk == associates each party with the public key of  *)
-(*                              its private key                               *)
 (*               trace_dataT == the finite observation type for traces, which *)
 (*                              keeps messages and ciphertexts but hides key  *)
 (*                              values behind marks                           *)
@@ -257,15 +256,10 @@ Variables (dk_a dk_b dk_c : priv_key AHE).
    and ra2 below are rand AHE values, these two are indices. *)
 Variables (w_rb2 w_rc2 : Renc).
 
-(* Every party's public key is the one associated with its private key, so
-   dec_correct fires by conversion and no key hypothesis is needed. *)
-Definition pkey_of_dk (p : party_id) : pub_key AHE :=
-  match p with
-  | Alice => pub_of_priv dk_a
-  | Bob => pub_of_priv dk_b
-  | Charlie => pub_of_priv dk_c
-  | NoParty => pub_of_priv dk_a
-  end.
+(* The key table of dsdp_instance.v pinned at this section's three keys,
+   under the name it abbreviates; the shadowing is not recursive, since the
+   right-hand side resolves against the constant. *)
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 
 Let DI := Standard_DSDP_Interface AHE.
 

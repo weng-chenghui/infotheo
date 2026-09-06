@@ -82,7 +82,6 @@ dsdp_alice_trace_link:combine_rand_trace_indep
 dsdp_alice_trace_link:combine_rand_uniformE
 dsdp_alice_trace_link:hop_tuple_of_rand_trace
 dsdp_alice_trace_link:hop_tuple_of_rand_traceK
-dsdp_alice_trace_link:pkey_of_dk
 dsdp_alice_trace_link:rand_trace_of_hop_tuple
 dsdp_alice_trace_link:sample_rest_uniformE
 dsdp_alice_trace_link:trace_data_cipher
@@ -110,6 +109,17 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
+# dsdp_instance: the key table read off three private keys, the two summand
+# sequences a bound along an instance sequence is written from, and the
+# superpolynomial-growth helpers the witness sequence discharges its
+# negligibility field with; the blueprint cites the three records.
+dsdp_instance:expnn_gt_monomial
+dsdp_instance:f_adv
+dsdp_instance:f_size
+dsdp_instance:inst_pkey_of_party
+dsdp_instance:negligible_fun_inv_expnn
+dsdp_instance:negligible_fun_inv_ge_expnn
+dsdp_instance:pkey_of_dk
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.
 entropy_fiber_zpq:Pr_cond_fiber_marginE

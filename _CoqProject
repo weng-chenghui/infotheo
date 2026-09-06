@@ -149,6 +149,7 @@ computational_security/epshop.v
 computational_security/epshop_family.v
 computational_security/paillier_indcpa_scheme.v
 computational_security/benaloh_indcpa_scheme.v
+dumas2017dual/dsdp/hopping/dsdp_instance.v
 dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
 dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
 dumas2017dual/dsdp/hopping/dsdp_instance_sequence.v

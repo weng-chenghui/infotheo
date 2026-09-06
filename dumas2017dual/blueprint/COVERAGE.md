@@ -6,7 +6,7 @@ declaration in scope, and that no `\rocq{}` ref dangles.
 ## Scope
 
 The `.v` files listed in `make_blueprint.sh`'s `MODULES` array, the exact set
-the blueprint claims to document. At this commit that is eleven files, in the
+the blueprint claims to document. At this commit that is twelve files, in the
 order MODULES lists them:
 
 - `dumas2017dual/dsdp/counting/dsdp_entropy.v`
@@ -16,6 +16,7 @@ order MODULES lists them:
 - `computational_security/indcpa_game.v`
 - `computational_security/epshop.v`
 - `computational_security/epshop_family.v`
+- `dumas2017dual/dsdp/hopping/dsdp_instance.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v`
 - `computational_security/paillier_indcpa_scheme.v`

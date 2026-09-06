@@ -28,6 +28,9 @@ MODULES=(
   # all cost a negligible sequence, and the terminal that reads a program's
   # first game off as negligible.
   computational_security/epshop_family.v
+  # The data every corrupted-Alice bound is stated over: one instance, a
+  # sequence of instances, and the two negligibility facts about a sequence.
+  dumas2017dual/dsdp/hopping/dsdp_instance.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
   # bounds, and their transfer to the executed piSMC trace.
