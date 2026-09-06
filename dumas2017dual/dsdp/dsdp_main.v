@@ -91,9 +91,9 @@ Require Import dsdp_setting dsdp_security.
 (*                                                                            *)
 (* Three restrictions hold at all three instances, and dsdp_setting.v's       *)
 (* header states them: the counting fields hold in the honest-sampling        *)
-(* setting, card_plain together with sequence_size_negligible forces the      *)
-(* modulus to grow superpolynomially, and the two axes share one cardinality  *)
-(* and not one execution.                                                     *)
+(* setting, card_plain together with a dsdp_asymptotic value for the sequence *)
+(* forces the modulus to grow superpolynomially, and the two axes share one   *)
+(* cardinality and not one execution.                                         *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*             paillier_dsdp == the Paillier instance, its parameters, its    *)
@@ -196,19 +196,8 @@ Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
    and every epsilon below is twice the residuosity epsilon dcr k assumes. *)
 Variable dcr : forall k, dcr_assumption (R:=R) (p k) (q k).
 
-(* The inverse modulus falls below every inverse polynomial.  It is the
-   unconditional half of the asymptotic bound, the residue the leaked output
-   concedes at every k. *)
-Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
-
-(* The assumed residuosity advantage falls below every inverse polynomial:
-   the asymptotic form of decisional composite residuosity along the moduli
-   p k q k. *)
-Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier dcr).
-
 Local Notation PQ :=
-  (paillier_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
-     f_pq_negligible f_dcr_negligible).
+  (paillier_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2 dcr).
 
 (* Two distinct primes are coprime, which is what makes the solution fiber of
    the DSDP constraint have exactly p k * q k points. *)
@@ -561,13 +550,29 @@ move=> ? heps.
 exact: (decrypt_guess_V2_premise_free_lt paillier_security heps).
 Qed.
 
+(* The inverse modulus falls below every inverse polynomial.  It is the
+   unconditional half of the asymptotic bound, the residue the leaked output
+   concedes at every k. *)
+Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
+
+(* The assumed residuosity advantage falls below every inverse polynomial:
+   the asymptotic form of decisional composite residuosity along the moduli
+   p k q k. *)
+Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier dcr).
+
 (* Along the Paillier sequence, an admissible predictor at every k makes the
-   trace guessing probability a negligible sequence. *)
+   trace guessing probability a negligible sequence.  It is the only
+   statement of this section that reads the two hypotheses above: the
+   twenty-five before them are made at one security parameter. *)
 Corollary paillier_trace_guess_V2_negligible
     (adv : forall k, dsdp_admissible_predictor paillier_setting k) :
   negligible_fun
     (f_guess_V2 (R:=R) (Q:=PQ) (fun k => predict (adv k))).
-Proof. exact: (trace_guess_V2_negligible paillier_security adv). Qed.
+Proof.
+exact: (trace_guess_V2_negligible paillier_security
+          (paillier_asymptotic v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
+             f_pq_negligible f_dcr_negligible) adv).
+Qed.
 End paillier_dsdp.
 
 (* =================================================================          *)
@@ -623,19 +628,9 @@ Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 Variable residuosity :
   forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
 
-(* The inverse block size falls below every inverse polynomial.  It is the
-   unconditional half of the asymptotic bound, the residue the leaked output
-   concedes at every k. *)
-Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
-
-(* The assumed residuosity advantage falls below every inverse polynomial:
-   the asymptotic form of r-th residuosity along the moduli n k. *)
-Hypothesis f_residuosity_negligible :
-  negligible_fun (f_residuosity_benaloh residuosity).
-
 Local Notation BQ :=
   (benaloh_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
-     f_r_negligible f_residuosity_negligible).
+     residuosity).
 
 (* Two distinct primes are coprime, which is what makes the solution fiber of
    the DSDP constraint have exactly p k * q k points. *)
@@ -990,13 +985,29 @@ move=> ? heps.
 exact: (decrypt_guess_V2_premise_free_lt benaloh_security heps).
 Qed.
 
+(* The inverse block size falls below every inverse polynomial.  It is the
+   unconditional half of the asymptotic bound, the residue the leaked output
+   concedes at every k. *)
+Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
+
+(* The assumed residuosity advantage falls below every inverse polynomial:
+   the asymptotic form of r-th residuosity along the moduli n k. *)
+Hypothesis f_residuosity_negligible :
+  negligible_fun (f_residuosity_benaloh residuosity).
+
 (* Along the Benaloh sequence, an admissible predictor at every k makes the
-   trace guessing probability a negligible sequence. *)
+   trace guessing probability a negligible sequence.  It is the only
+   statement of this section that reads the two hypotheses above: the
+   twenty-five before them are made at one security parameter. *)
 Corollary benaloh_trace_guess_V2_negligible
     (adv : forall k, dsdp_admissible_predictor benaloh_setting k) :
   negligible_fun
     (f_guess_V2 (R:=R) (Q:=BQ) (fun k => predict (adv k))).
-Proof. exact: (trace_guess_V2_negligible benaloh_security adv). Qed.
+Proof.
+exact: (trace_guess_V2_negligible benaloh_security
+          (benaloh_asymptotic v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
+             f_r_negligible f_residuosity_negligible) adv).
+Qed.
 End benaloh_dsdp.
 
 (* =================================================================          *)
@@ -1329,6 +1340,7 @@ Corollary idealized_trace_guess_V2_negligible :
     (f_guess_V2 (R:=R) (Q:=idealized_pq_sequence)
        (fun k => predict (idealized_admissible k))).
 Proof.
-exact: (trace_guess_V2_negligible idealized_security idealized_admissible).
+exact: (trace_guess_V2_negligible idealized_security idealized_pq_asymptotic
+          idealized_admissible).
 Qed.
 End idealized_dsdp.

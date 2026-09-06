@@ -1544,31 +1544,44 @@ single member of it can carry.
   \label{def:dsdp_instance_sequence}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.dsdp_instance_sequence}
   \rocqok
-  \uses{def:dsdp_instance,def:indcpa_assumption,def:negligible_fun}
+  \uses{def:dsdp_instance,def:indcpa_assumption}
   A sequence is a map $k \mapsto \mathcal{I}_k$ from the security parameter to
-  instances, an assumption $\mathcal{A}_k$ made at each $k$, and two
-  negligibility facts.
-  \[ \mathcal{Q} = \Big(k \mapsto \mathcal{I}_k,\ k \mapsto \mathcal{A}_k,\
-       \mathrm{negl}\big(k \mapsto \tfrac{1}{m_k}\big),\
+  instances together with an assumption $\mathcal{A}_k$ made at each $k$.
+  \[ \mathcal{Q} = \Big(k \mapsto \mathcal{I}_k,\
+       k \mapsto \mathcal{A}_k\Big) \]
+  The record fixes no relation between consecutive $k$: each instance is
+  supplied on its own, and the asymptotic content of a bound along the sequence
+  comes from a value of Definition~\ref{def:dsdp_asymptotic} rather than from a
+  recurrence between the instances.
+\end{definition}
+
+\begin{definition}[The asymptotic content of a sequence]
+  \label{def:dsdp_asymptotic}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.dsdp_asymptotic}
+  \rocqok
+  \uses{def:dsdp_instance_sequence,def:negligible_fun}
+  An asymptotic value for a sequence $\mathcal{Q}$ is the pair of negligibility
+  facts about the two terms of every bound read off along $\mathcal{Q}$.
+  \[ \mathcal{N} = \Big(\mathrm{negl}\big(k \mapsto \tfrac{1}{m_k}\big),\
        \mathrm{negl}\big(k \mapsto \varepsilon_{\mathrm{cpa},k}\big)\Big) \]
-  The two facts are the two terms of the class-conditional bound, and the
-  record keeps them apart. The first is unconditional. The inverse plaintext
-  cardinality $1/m_k$ is the guessing residue the leaked output concedes, it is
-  measured in the plaintext space alone, and it holds against an adversary of any
-  running time. The second is conditional on the assumption. It is the
-  advantage each $\mathcal{A}_k$ assumes, and it is the only place a
-  computational hypothesis enters. The record fixes no relation between
-  consecutive $k$: each instance is supplied on its own, and the asymptotic
-  content comes from the two negligibility fields rather than from a recurrence
-  between the instances.
+  The record keeps the two terms apart. The first is unconditional. The inverse
+  plaintext cardinality $1/m_k$ is the guessing residue the leaked output
+  concedes, it is measured in the plaintext space alone, and it holds against an
+  adversary of any running time. The second is conditional on the assumption. It
+  is the advantage each $\mathcal{A}_k$ assumes, and it is the only place a
+  computational hypothesis enters. The two facts stand apart from $\mathcal{Q}$
+  because a statement made at one security parameter needs the instance and the
+  assumption there and neither of them, so only the statements that let the
+  parameter grow carry an asymptotic value.
 \end{definition}
 
 \begin{theorem}[The trace guessing sequence is negligible]
   \label{thm:alice_guess_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible}
   \rocqok
-  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible,def:alice_trace_chain_admissible,def:negligible_claims,thm:advantage_negligible}
-  Along a sequence $\mathcal{Q}$ of DSDP instances and a sequence of predictors
+  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,def:dsdp_asymptotic,thm:alice_guess_admissible,def:alice_trace_chain_admissible,def:negligible_claims,thm:advantage_negligible}
+  Along a sequence $\mathcal{Q}$ of DSDP instances, an asymptotic value
+  $\mathcal{N}$ for $\mathcal{Q}$, and a sequence of predictors
   $g_k$, if both reduction adversaries of $g_k$ are admissible for
   $\mathcal{A}_k$ at every $k$, then the guessing probabilities are negligible.
   \[ \big(\forall k,\ \mathrm{adm}_{\mathcal{A}_k}(\hopred{0}{D_{g_k}})\big)
@@ -1579,8 +1592,8 @@ single member of it can carry.
   It is Theorem~\ref{thm:advantage_negligible} read over the program of
   Definition~\ref{def:alice_trace_chain_admissible} at the $k$-th instance. That
   program spends the same three labels at every $k$, and the cost of each of
-  them along the sequence is one of the two negligibility fields of
-  $\mathcal{Q}$: both hop labels cost $\mathrm{negl}(k \mapsto
+  them along the sequence is one of the two fields of
+  $\mathcal{N}$: both hop labels cost $\mathrm{negl}(k \mapsto
   \varepsilon_{\mathrm{cpa},k})$ and the zero-game label costs
   $\mathrm{negl}(k \mapsto 1/m_k)$. Those two facts are attached to the
   dictionary once, as the negligibleClaims of
@@ -1590,7 +1603,7 @@ single member of it can carry.
   rather than about the sequence. That is what separates this statement from
   the decrypting predictor $\delta$, whose guessing probability is $1$ at every
   $k$, and Corollary~\ref{cor:decrypt_sequence_not_admissible} shows that the
-  same two fields of $\mathcal{Q}$ eventually reject $\delta$'s reduction
+  same two fields of $\mathcal{N}$ eventually reject $\delta$'s reduction
   adversary.
 \end{theorem}
 
@@ -1598,15 +1611,16 @@ single member of it can carry.
   \label{cor:decrypt_sequence_not_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.decrypt_reduction_admissible_eventuallyF}
   \rocqok
-  \uses{def:dsdp_instance_sequence,def:negligible_fun,cor:decrypt_not_admissible}
-  Along a sequence $\mathcal{Q}$ there is a threshold past which the classifier
+  \uses{def:dsdp_instance_sequence,def:dsdp_asymptotic,def:negligible_fun,cor:decrypt_not_admissible}
+  Along a sequence $\mathcal{Q}$ with an asymptotic value $\mathcal{N}$ there is
+  a threshold past which the classifier
   at each $k$ answers false on the reduction adversary $\delta$ induces at Bob's
   key.
   \[ \exists K,\ \forall k > K,\
      \mathrm{adm}_{\mathcal{A}_k}\big(\hopred{0}{D_\delta}\big)
        = \mathsf{false} \]
-  The statement carries no hypothesis beyond $\mathcal{Q}$, since the two
-  negligibility fields supply what the argument needs. At $c = 1$ both fields
+  The statement carries no hypothesis beyond $\mathcal{N}$, since its two
+  fields supply what the argument needs. At $c = 1$ both fields
   put their sequences below $1/k$, and from $k \ge 2$ that leaves
   $\varepsilon_{\mathrm{cpa},k} < 1 - 1/m_k$, which is the premise of
   Corollary~\ref{cor:decrypt_not_admissible}. The parallel-track reading of
@@ -1618,8 +1632,9 @@ single member of it can carry.
   \label{thm:alice_trace_sim_advantage_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_sim_advantage_negligible}
   \rocqok
-  \uses{def:alice_trace_sim_chain_admissible,def:negligible_claims,thm:advantage_negligible}
-  Along a sequence $\mathcal{Q}$ of DSDP instances and a family $D_k$ of tests
+  \uses{def:alice_trace_sim_chain_admissible,def:dsdp_asymptotic,def:negligible_claims,thm:advantage_negligible}
+  Along a sequence $\mathcal{Q}$ of DSDP instances with an asymptotic value
+  $\mathcal{N}$, and a family $D_k$ of tests
   of Alice's executed trace, if both reduction adversaries of $D_k$ are
   admissible for $\mathcal{A}_k$ at every $k$, then the distances between that
   trace and the simulation are negligible.
@@ -1679,7 +1694,8 @@ single member of it can carry.
   the record. And the output $S$, which is a function of the inputs and so
   enters as a definition with the linear DSDP relation proved, rather than as a
   field with that relation assumed.
-  Read with $\mathcal{Q}$'s unconditional negligibility field, the link field
+  Read with the unconditional field of an asymptotic value for $\mathcal{Q}$,
+  the link field
   forces $m_k$ to grow faster than every polynomial, so no value of this record
   carries a fixed modulus, although each counting equality is exact at every
   fixed composite modulus.
@@ -1709,14 +1725,16 @@ single member of it can carry.
   \label{def:dsdp_security}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_security.dsdp_security}
   \rocqok
-  \uses{def:dsdp_setting,def:indcpa_assumption,def:negligible_fun}
+  \uses{def:dsdp_setting,def:indcpa_assumption,def:dsdp_asymptotic,def:negligible_fun}
   A value of the results record at a setting $\mathcal{X}$ is the twenty-six
   statements of the two axes read at $\mathcal{X}$, each with one proof. Six are
   counting statements about the relay pair and the two relay views, thirteen
   are hopping bounds at Alice's tuple, at her whole view and at her executed
   trace, six are the class-conditional bound and the obstructions that force
   its class restriction, and one is negligibility along $\mathcal{X}$'s
-  sequence.
+  sequence, read at an asymptotic value supplied with that statement rather
+  than carried by $\mathcal{X}$: the other twenty-five are made at one security
+  parameter and do not read it.
   A value asserts nothing wider than those twenty-six. Eight of them are
   leakage or obstruction results rather than secrecy, and each is read at the
   conditioner that makes it one: Alice's corrupted-query view and her executed
@@ -1760,10 +1778,10 @@ single member of it can carry.
   \uses{def:dsdp_setting,def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption}
   The parameters fed are the plaintext modulus at $k$ as its two factors $p_k$
   and $q_k$, Alice's four query weights with $u_3$ a unit of the plaintext
-  ring, the three private keys, the two encryption coins, one decisional
-  composite residuosity record $\mathcal{B}_k$ at each $k$, and two
-  negligibility facts, one on the inverse modulus and one on the assumed
-  residuosity advantage. The counting side is the uniform law on five
+  ring, the three private keys, the two encryption coins, and one decisional
+  composite residuosity record $\mathcal{B}_k$ at each $k$. The two
+  negligibility facts stay outside the setting and enter with the one
+  asymptotic statement read at it. The counting side is the uniform law on five
   coordinates of $\mathbb{Z}_{p_k q_k}$ at Alice's own weights, so the two axes
   read one query at every $k$.
   \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k \]
@@ -1774,8 +1792,8 @@ single member of it can carry.
   composite residuosity starts from. The counting axis spends them on its fiber
   count, and the hopping axis needs only $1 < p_k, q_k$. The three private keys
   are assumed values, no Paillier key being constructed anywhere. What is
-  assumed on the computational side is the sequence $\mathcal{B}_k$ and the
-  negligibility of its advantage; the IND-CPA assumption at $k$ is the value
+  assumed on the computational side is the sequence $\mathcal{B}_k$; the
+  IND-CPA assumption at $k$ is the value
   Definition~\ref{def:paillier_indcpa_assumption} builds from
   $\mathcal{B}_k$, so every $\varepsilon_{\mathrm{cpa}}$ read off at this
   setting is $2\varepsilon_{\mathrm{dcr},k}$.
@@ -1790,7 +1808,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_admissible_pq_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_paillier_negligible}
   \rocqok
-  \uses{def:paillier_setting,thm:dsdp_securityP,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dcr_assumption,def:paillier_indcpa_assumption}
+  \uses{def:paillier_setting,thm:dsdp_securityP,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dsdp_asymptotic,def:dcr_assumption,def:paillier_indcpa_assumption}
   All twenty-six statements hold at the Paillier setting, each written out at
   the instance and proved by projecting the value that every setting has. The
   asymptotic one reads: along the Paillier sequence, a predictor admissible at
@@ -1829,7 +1847,8 @@ single member of it can carry.
   plaintext space, and not at $n_k$, which sizes the ciphertext space. Keys are
   assumed as at Paillier. What is assumed on the computational side is one
   higher residuosity record $\mathcal{B}_k$ at each $k$, made at the ciphertext
-  modulus $n_k$ and the exponent $r_k$, and the negligibility of its advantage;
+  modulus $n_k$ and the exponent $r_k$; the two negligibility facts stay
+  outside the setting, as at Paillier, and
   the IND-CPA assumption at $k$ is the value
   Definition~\ref{def:benaloh_indcpa_assumption} builds from $\mathcal{B}_k$,
   so every $\varepsilon_{\mathrm{cpa}}$ read off at this setting is
@@ -1845,7 +1864,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_admissible_pq_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_benaloh_negligible}
   \rocqok
-  \uses{def:benaloh_setting,thm:dsdp_securityP,thm:alice_guess_negligible,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
+  \uses{def:benaloh_setting,thm:dsdp_securityP,thm:alice_guess_negligible,def:dsdp_asymptotic,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   All twenty-six statements hold at the Benaloh setting, and the asymptotic one
   reads along the Benaloh sequence. The two class-conditional trace bounds are
   restated in residuosity epsilons.

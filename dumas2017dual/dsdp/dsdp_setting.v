@@ -62,10 +62,10 @@ Require Import dsdp_instance_sequence.
 (* covers the honest-sampling setting, where her weights are independent of   *)
 (* her input and of one another; the general form, assuming nothing about     *)
 (* their joint law, stays at dsdp_centropy_uniform_direct of                  *)
-(* counting/dsdp_entropy.v.  And card_plain together with the hopping side's  *)
-(* sequence_size_negligible forces p k * q k to grow superpolynomially, so no *)
-(* value of this record carries a fixed modulus, although each counting       *)
-(* equality is exact at every fixed composite modulus.                        *)
+(* counting/dsdp_entropy.v.  And card_plain together with the unconditional   *)
+(* field of a dsdp_asymptotic value for the sequence forces p k * q k to grow *)
+(* superpolynomially, so no value of this record carries a fixed modulus,     *)
+(* although each counting equality is exact at every fixed composite modulus. *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*        dsdp_random_inputs == the counting side of a 3-party run at one     *)
@@ -171,6 +171,8 @@ Require Import dsdp_instance_sequence.
 (*                              negligible sequence                           *)
 (*     idealized_pq_sequence == the sequence of those instances under the     *)
 (*                              cipher-constant assumption                    *)
+(*   idealized_pq_asymptotic == its two negligibility facts, discharged       *)
+(*                              rather than assumed                           *)
 (*              val_Zp_pq1 == the unit residue of the composite modulus has   *)
 (*                              natural number value one                      *)
 (*         idealized_setting == the value of dsdp_setting the two sides below *)
@@ -1220,18 +1222,21 @@ apply: leq_trans (ltnW (idealized_p_gt k)) _.
 by rewrite leq_pmulr // prime_gt0 // idealized_q_prime.
 Qed.
 
-(* The sequence: the composite-modulus idealized instances, the
-   cipher-constant assumption at each k, and the two negligibility facts
-   discharged rather than assumed.  Its assumed advantage is zero at every
-   k, which is what leaves each hopping bound along it with only its
-   information-theoretic term. *)
+(* The sequence: the composite-modulus idealized instances, under the
+   cipher-constant assumption at each k. *)
 Definition idealized_pq_sequence : dsdp_instance_sequence R := {|
   sequence_instance := idealized_pq_instance ;
   sequence_assumption := fun k =>
     cipher_constant_assumption (inst_card_renc (idealized_pq_instance k))
-      (@inst_rand_of_renc (idealized_pq_instance k)) ;
-  sequence_size_negligible := idealized_size_negligible ;
-  sequence_adv_negligible := negligible_fun_cst0 |}.
+      (@inst_rand_of_renc (idealized_pq_instance k)) |}.
+
+(* The two negligibility facts about that sequence, discharged rather than
+   assumed.  Its assumed advantage is zero at every k, which is what leaves
+   each hopping bound along it with only its information-theoretic term. *)
+Definition idealized_pq_asymptotic :
+    dsdp_asymptotic idealized_pq_sequence :=
+  @Build_dsdp_asymptotic R idealized_pq_sequence
+    idealized_size_negligible negligible_fun_cst0.
 
 (* The unit residue of the composite modulus has natural number value one,
    the modulus being written as a double successor in both factors.  It is

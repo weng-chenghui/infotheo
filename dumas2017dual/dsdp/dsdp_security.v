@@ -56,7 +56,8 @@ Require Import dsdp_setting.
 (* Three restrictions come from the setting and are stated in dsdp_setting.v: *)
 (* the counting fields hold in the honest-sampling setting, the two axes      *)
 (* share one cardinality and not one execution, and card_plain together with  *)
-(* sequence_size_negligible forces the modulus to grow superpolynomially.     *)
+(* a dsdp_asymptotic value for the sequence forces the modulus to grow        *)
+(* superpolynomially.                                                         *)
 (*                                                                            *)
 (* At a Benaloh instance the fields prime_p, prime_q and coprime_pq factor    *)
 (* the block size rather than a hardness modulus; they are there for the      *)
@@ -126,7 +127,8 @@ Require Import dsdp_setting.
 (* decrypt_guess_V2_premise_free_lt == the bound without its class premises   *)
 (*                              is false                                      *)
 (* trace_guess_V2_negligible == the trace guessing probability is negligible  *)
-(*                              along the sequence                            *)
+(*                              along the sequence, at an asymptotic value    *)
+(*                              supplied with the statement                   *)
 (*            dsdp_securityP == the value of dsdp_security every setting has  *)
 (* idealized_bob_admissible, idealized_charlie_admissible == the two class    *)
 (*                              premises at the idealized sequence and the    *)
@@ -530,10 +532,13 @@ Record dsdp_security (X : dsdp_setting R) := {
 
   (* Along the sequence, an admissible predictor at every k makes the trace
      guessing probability a negligible sequence.  This is the asymptotic
-     form, spending the sequence's own assumption at each k together with its
-     negligible plaintext size sequence. *)
+     form, spending the sequence's own assumption at each k together with the
+     two negligibility facts, which are supplied with the statement rather
+     than carried by the setting: the twenty-five fields above are made at one
+     security parameter and do not read them. *)
   trace_guess_V2_negligible :
-    forall adv : forall k, dsdp_admissible_predictor X k,
+    forall (N : dsdp_asymptotic (instance_sequence X))
+           (adv : forall k, dsdp_admissible_predictor X k),
     negligible_fun
       (f_guess_V2 (R:=R) (Q:=instance_sequence X)
          (fun k => predict (adv k))) }.
@@ -876,12 +881,13 @@ exact: (dsdp_alice_trace_link.decrypt_guess_V2_premise_free_lt (v1 k)
 Qed.
 
 Let trace_guess_V2_negligible_holds :
-  forall adv : forall k, dsdp_admissible_predictor X k,
+  forall (N : dsdp_asymptotic (instance_sequence X))
+         (adv : forall k, dsdp_admissible_predictor X k),
   negligible_fun
     (f_guess_V2 (R:=R) (Q:=instance_sequence X) (fun k => predict (adv k))).
 Proof.
-move=> adv.
-exact: (alice_trace_guess_V2_negligible (fun k => bob_admissible (adv k))
+move=> N adv.
+exact: (alice_trace_guess_V2_negligible N (fun k => bob_admissible (adv k))
           (fun k => charlie_admissible (adv k))).
 Qed.
 

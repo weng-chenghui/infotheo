@@ -15,20 +15,21 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* Every corrupted-Alice bound of dsdp_alice_trace_link.v is stated at one    *)
 (* fixed instance: one IND-CPA scheme, three private keys, four weights, one  *)
 (* real epsilon.  negligible_fun of indcpa_game.v speaks about sequences      *)
-(* indexed by a security parameter.  This file supplies the two objects that  *)
-(* join them, a record holding one indcpa_scheme and the remaining section    *)
-(* variables of that development, and a record packing a sequence of those    *)
-(* with the assumption made at each k and the two negligibility facts, and    *)
-(* reads the concrete class-conditional guessing bound off along such a       *)
-(* sequence.  A second statement is read off the same way, the distance a     *)
-(* test sees between Alice's executed trace and the simulation, which is      *)
+(* indexed by a security parameter.  This file supplies the three objects     *)
+(* that join them, a record holding one indcpa_scheme and the remaining       *)
+(* section variables of that development, a record packing a sequence of      *)
+(* those with the assumption made at each k, and a record carrying the two    *)
+(* negligibility facts about such a sequence, and reads the concrete          *)
+(* class-conditional guessing bound off along a sequence and an asymptotic    *)
+(* value for it.  A second statement is read off the same way, the distance   *)
+(* a test sees between Alice's executed trace and the simulation, which is    *)
 (* computational indistinguishability of her view from the simulation.        *)
 (*                                                                            *)
 (* The class restriction lands on the two reduction adversaries a predictor   *)
 (* induces, never on the predictor itself.  That is what separates the        *)
 (* headline from the predictor that decrypts Bob's ciphertext off the trace,  *)
 (* whose guessing probability is 1: the companion corollary shows that the    *)
-(* same two negligibility facts eventually reject that predictor's reduction  *)
+(* same asymptotic value eventually rejects that predictor's reduction        *)
 (* adversary.  The witness section answers the vacuity question from the      *)
 (* other side, discharging every hypothesis of the headline at once on the    *)
 (* idealized scheme of idealized_ahe.v.                                       *)
@@ -65,17 +66,20 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*         inst_pkey_of_party == the public-key table of its three private    *)
 (*                               keys                                         *)
 (*     dsdp_instance_sequence == a sequence of instances indexed by the       *)
-(*                               security parameter, the assumption made at   *)
-(*                               each k, and the two negligibility facts that *)
-(*                               give the sequence its asymptotic content     *)
+(*                               security parameter, with the assumption      *)
+(*                               made at each k                               *)
 (*          sequence_instance == the instance at k                            *)
 (*        sequence_assumption == the IND-CPA assumption made at k             *)
-(*   sequence_size_negligible == the inverse plaintext cardinalities are a    *)
-(*                               negligible sequence, the unconditional       *)
-(*                               term of every bound along it                 *)
-(*    sequence_adv_negligible == the class epsilons are a negligible          *)
-(*                               sequence, the assumption-conditional         *)
-(*                               term of every bound along it                 *)
+(*                     f_size == the inverse plaintext-cardinality sequence   *)
+(*                      f_adv == the class-epsilon sequence                   *)
+(*            dsdp_asymptotic == the two negligibility facts about a          *)
+(*                               sequence, its asymptotic content             *)
+(*            size_negligible == f_size is a negligible sequence, the         *)
+(*                               unconditional term of every bound along      *)
+(*                               the sequence                                 *)
+(*             adv_negligible == f_adv is a negligible sequence, the          *)
+(*                               assumption-conditional term of every         *)
+(*                               bound along the sequence                     *)
 (*          expnn_gt_monomial == (k+2)^(k+2) exceeds every monomial k^c past  *)
 (*                               c                                            *)
 (*   negligible_fun_inv_expnn == the inverse of (k+2)^(k+2) is negligible     *)
@@ -84,8 +88,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*     bob_trace_adversary_at == the Bob-key reduction adversary at k         *)
 (* charlie_trace_adversary_at == the Charlie-key reduction adversary at k     *)
 (* alice_trace_guess_V2_pr_at == the trace guessing probability at k          *)
-(*                     f_size == the inverse plaintext-cardinality sequence   *)
-(*                      f_adv == the class-epsilon sequence                   *)
 (*                 f_guess_V2 == the trace guessing-probability sequence      *)
 (* alice_claims_admissible_at k ==                                            *)
 (*                               the dictionary of the class-conditional      *)
@@ -104,8 +106,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               the trace guessing sequence is negligible    *)
 (*                               under the two class premises                 *)
 (* decrypt_reduction_admissible_eventuallyF ==                                *)
-(*                               the sequence's own negligibility fields      *)
-(*                               eventually reject the decrypting             *)
+(*                               an asymptotic value for the sequence         *)
+(*                               eventually rejects the decrypting            *)
 (*                               predictor's reduction adversary              *)
 (*      alice_sim_claims_at k == the dictionary of the trace simulation       *)
 (*                               argument at the k-th instance                *)
@@ -135,6 +137,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* idealized_instance_sequence ==                                             *)
 (*                               the witness sequence, with the               *)
 (*                               cipher-constant assumption at each k         *)
+(*       idealized_asymptotic == the two negligibility facts about that       *)
+(*                               sequence, discharged rather than assumed     *)
 (* idealized_bob_cipher_constant ==                                           *)
 (*                               the witness Bob reduction ignores the        *)
 (*                               challenge ciphertext                         *)
@@ -157,8 +161,11 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               sequence of Paillier moduli                  *)
 (* paillier_instance_sequence == that instance sequence with the IND-CPA      *)
 (*                               assumption derived at each k from a          *)
-(*                               residuosity record, and its two              *)
-(*                               negligibility facts                          *)
+(*                               residuosity record                           *)
+(*        paillier_asymptotic == its two negligibility facts, the             *)
+(*                               unconditional one at the modulus and the     *)
+(*                               assumption-conditional one at the            *)
+(*                               residuosity hypothesis                       *)
 (* alice_trace_guess_V2_paillier_negligible ==                                *)
 (*                               the asymptotic form of that bound, under     *)
 (*                               modulus growth and a negligible residuosity  *)
@@ -177,8 +184,11 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               sequence of Benaloh block sizes              *)
 (*  benaloh_instance_sequence == that instance sequence with the IND-CPA      *)
 (*                               assumption derived at each k from a          *)
-(*                               residuosity record, and its two              *)
-(*                               negligibility facts                          *)
+(*                               residuosity record                           *)
+(*         benaloh_asymptotic == its two negligibility facts, the             *)
+(*                               unconditional one at the block size and      *)
+(*                               the assumption-conditional one at the        *)
+(*                               residuosity hypothesis                       *)
 (* alice_trace_guess_V2_benaloh_negligible ==                                 *)
 (*                               the asymptotic form of that bound, under     *)
 (*                               block-size growth and a negligible           *)
@@ -242,30 +252,45 @@ Definition inst_rand_of_renc (I : dsdp_instance) :=
 Definition inst_pkey_of_party (I : dsdp_instance) :=
   pkey_of_dk (inst_dk_a I) (inst_dk_b I) (inst_dk_c I).
 
-(* A sequence of DSDP instances indexed by the security parameter, the
-   IND-CPA assumption made at each k, and the two facts that give the
-   sequence its asymptotic content.
-   The two facts are the two terms of the bound, and the record keeps
-   them apart.  sequence_size_negligible is the unconditional one: the
-   inverse plaintext cardinality is the guessing residue the leaked output
-   concedes, it is measured in the plaintext space alone, and it holds against
-   an adversary of any running time.  sequence_adv_negligible is the
-   assumption-conditional one: it is the advantage each assumption record
-   assumes, and it is the only place a computational hypothesis enters.
+(* A sequence of DSDP instances indexed by the security parameter, with the
+   IND-CPA assumption made at each k.
    The record fixes no relation between consecutive k: each instance is
-   supplied on its own, and the asymptotic statement comes from the two
-   negligibility fields rather than from a recurrence between them. *)
+   supplied on its own, and an asymptotic statement along the sequence reads
+   its content off a dsdp_asymptotic value below rather than off a recurrence
+   between the instances. *)
 Record dsdp_instance_sequence (R : realType) := {
   sequence_instance : nat -> dsdp_instance ;
   sequence_assumption : forall k,
     indcpa_epsilon_assumption (R:=R) (inst_card_renc (sequence_instance k))
-      (@inst_rand_of_renc (sequence_instance k)) ;
-  sequence_size_negligible :
-    negligible_fun
-      (fun k => (#|plain (inst_AHE (sequence_instance k))|%:R : R)^-1) ;
-  sequence_adv_negligible :
-    negligible_fun
-      (fun k => indcpa_assumption_epsilon (sequence_assumption k)) }.
+      (@inst_rand_of_renc (sequence_instance k)) }.
+
+(* The inverse plaintext cardinality at k along Q.  It counts the DSDP
+   solution fiber the leaked output confines Bob's input to, and it is the
+   summand every trace guessing bound along Q carries for that output. *)
+Definition f_size {R : realType} (Q : dsdp_instance_sequence R) (k : nat)
+    : R := (#|plain (inst_AHE (sequence_instance Q k))|%:R : R)^-1.
+
+(* The advantage the IND-CPA assumption at k assumes.  It is the summand
+   every bound along Q carries once per hop of the ladder. *)
+Definition f_adv {R : realType} (Q : dsdp_instance_sequence R) (k : nat)
+    : R := indcpa_assumption_epsilon (sequence_assumption Q k).
+
+(* The two negligibility facts about a sequence Q, the asymptotic content of
+   every bound read off along it.
+   The two facts are the two terms of the bound, and the record keeps them
+   apart.  size_negligible is the unconditional one: the inverse plaintext
+   cardinality is the guessing residue the leaked output concedes, it is
+   measured in the plaintext space alone, and it holds against an adversary of
+   any running time.  adv_negligible is the assumption-conditional one: it is
+   the advantage each assumption record assumes, and it is the only place a
+   computational hypothesis enters.
+   They are a record of their own and not fields of Q because a statement made
+   at one security parameter needs the instance and the assumption there and
+   neither of these two facts, so only the statements that let the parameter
+   grow carry them. *)
+Record dsdp_asymptotic (R : realType) (Q : dsdp_instance_sequence R) := {
+  size_negligible : negligible_fun (f_size Q) ;
+  adv_negligible : negligible_fun (f_adv Q) }.
 
 (* Superpolynomial growth of (k+2)^(k+2): past c the sequence dominates
    every monomial k^c, by base and exponent monotonicity alone. *)
@@ -313,6 +338,11 @@ End negligible_helpers.
 Section dsdp_instance_sequence_bounds.
 Context {R : realType}.
 Variable Q : dsdp_instance_sequence R.
+
+(* The asymptotic content the negligibility statements of this section spend;
+   the per-k bounds below hold without it. *)
+Variable N : dsdp_asymptotic Q.
+
 Local Notation I := (sequence_instance Q).
 Local Notation assumption := (sequence_assumption Q).
 Variable predict : forall k,
@@ -363,12 +393,6 @@ Definition alice_trace_guess_V2_pr_at k
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
     (inst_rb2 (I k)) (inst_rc2 (I k)) p.
 
-(* The inverse plaintext-cardinality function used in the sequence theorem. *)
-Definition f_size k : R := (#|plain (inst_AHE (I k))|%:R : R)^-1.
-
-(* The class IND-CPA epsilon function used in the sequence theorem. *)
-Definition f_adv k : R := indcpa_assumption_epsilon (assumption k).
-
 (* The trace guessing-probability function used in the sequence theorem. *)
 Definition f_guess_V2 k : R := alice_trace_guess_V2_pr_at (predict k).
 
@@ -388,17 +412,20 @@ Definition alice_claims_admissible_at (k : nat) : alice_label -> claim R :=
 
 (* Every label of that dictionary costs a negligible family along the
    sequence: both hop labels cost the epsilon the assumption at k assumes,
-   which is the sequence's class-epsilon field read directly, and the
+   which is the assumption-conditional field of N read directly, and the
    terminal label costs the inverse plaintext cardinality, its unconditional
    field.  This is the whole asymptotic content of the argument, stated once
-   for the dictionary rather than once per statement proved over it. *)
+   for the dictionary rather than once per statement proved over it.
+   Naming: intentional; [_negligible] is this development's suffix for a
+   negligible_fun conclusion, and [_at] names the instance the family is read
+   at, as at [alice_claims_admissible_at]. *)
 Lemma alice_label_negligible_at (l : alice_label) :
   negligible_fun (fun k => claim_cost (alice_claims_admissible_at k l)).
 Proof.
 case: l.
-- exact: sequence_adv_negligible Q.
-- exact: sequence_adv_negligible Q.
-- exact: sequence_size_negligible Q.
+- exact: adv_negligible N.
+- exact: adv_negligible N.
+- exact: size_negligible N.
 Qed.
 
 Canonical alice_claims_admissible_negligible :=
@@ -431,8 +458,8 @@ Local Open Scope epshop_scope.
    the two class premises of this section.  It is the terminal of the family
    monad read over the class-conditional program: the program spends the same
    three labels at every security parameter, and the cost of each of them
-   along the sequence is one of the two negligibility fields of Q, supplied
-   once through the registered instance rather than summed by hand at each
+   along the sequence is one of the two fields of N, supplied once through
+   the registered instance rather than summed by hand at each
    statement.  Two of the three summands are assumption-conditional, the
    class epsilon at Bob's key and at Charlie's, and the third is
    unconditional, the residue the leaked output leaves along the DSDP
@@ -440,19 +467,19 @@ Local Open Scope epshop_scope.
    That is also what separates this statement from the decrypting
    counterexample: decrypt_guess_prE puts the guessing probability at 1 for
    the predictor that decrypts Bob's ciphertext off the trace, and
-   decrypt_reduction_admissible_eventuallyF below shows the same two
-   negligibility fields eventually force that predictor's reduction adversary
-   out of the class. *)
+   decrypt_reduction_admissible_eventuallyF below shows the same two fields
+   of N eventually force that predictor's reduction adversary out of the
+   class. *)
 Theorem alice_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
 exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]
           alice_trace_chain_admissible_at).
 Qed.
 
-(* Under the two negligibility fields Q carries, the decrypting predictor's
-   Bob-side reduction adversary is eventually outside the class: the
-   parallel-track counterexample is excluded by the sequence's own fields,
-   not by the information-theoretic term. *)
+(* Under the two fields of N, the decrypting predictor's Bob-side reduction
+   adversary is eventually outside the class: the parallel-track
+   counterexample is excluded by the asymptotic value the headline is stated
+   at, not by the information-theoretic term. *)
 Corollary decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (assumption k)
@@ -461,9 +488,7 @@ Corollary decrypt_reduction_admissible_eventuallyF :
             (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
             (inst_rc2 (I k))))) = false.
 Proof.
-have size_negligible := sequence_size_negligible Q.
-have adv_negligible := sequence_adv_negligible Q.
-have [N1 HN1] := size_negligible 1%N; have [N2 HN2] := adv_negligible 1%N.
+have [N1 HN1] := size_negligible N 1%N; have [N2 HN2] := adv_negligible N 1%N.
 exists (maxn (maxn N1 N2) 1) => k.
 rewrite !gtn_max => /andP[/andP[Hk1 Hk2] Hk3].
 have Hk0 : (0 < k%:R :> R) by rewrite ltr0n ltnW.
@@ -527,14 +552,16 @@ Definition alice_sim_claims_at (k : nat) : alice_label -> claim R :=
    sequence, the two hop labels the class epsilon and the terminal label
    the inverse plaintext cardinality.  The terminal branch is owed although
    the program below never spends that label, the condition quantifying over
-   the whole label type rather than over the labels one program names. *)
+   the whole label type rather than over the labels one program names.
+   Naming: intentional; mirrors [alice_label_negligible_at], with [sim] naming
+   the argument the dictionary is read for. *)
 Lemma alice_sim_label_negligible_at (l : alice_label) :
   negligible_fun (fun k => claim_cost (alice_sim_claims_at k l)).
 Proof.
 case: l.
-- exact: sequence_adv_negligible Q.
-- exact: sequence_adv_negligible Q.
-- exact: sequence_size_negligible Q.
+- exact: adv_negligible N.
+- exact: adv_negligible N.
+- exact: size_negligible N.
 Qed.
 
 Canonical alice_sim_claims_negligible :=
@@ -655,18 +682,21 @@ apply: negligible_fun_le negligible_fun_inv_expnn => k.
 by rewrite card_plain_idealized.
 Qed.
 
-(* The witness sequence: the idealized instances above, the cipher-constant
-   assumption of indcpa_game.v at each k, and the two negligibility facts
-   discharged rather than assumed.  Its assumed advantage is zero at every
-   k, so the whole content of the bound along it is the unconditional
-   1/#|plain| term. *)
+(* The witness sequence: the idealized instances above, under the
+   cipher-constant assumption of indcpa_game.v at each k. *)
 Definition idealized_instance_sequence : dsdp_instance_sequence R := {|
   sequence_instance := idealized_instance ;
   sequence_assumption := fun k =>
     cipher_constant_assumption (inst_card_renc (idealized_instance k))
-      (@inst_rand_of_renc (idealized_instance k)) ;
-  sequence_size_negligible := idealized_size_negligible ;
-  sequence_adv_negligible := negligible_fun_cst0 |}.
+      (@inst_rand_of_renc (idealized_instance k)) |}.
+
+(* The two negligibility facts about the witness sequence, discharged rather
+   than assumed.  Its assumed advantage is zero at every k, so the whole
+   content of a bound along it is the unconditional 1/#|plain| term. *)
+Definition idealized_asymptotic :
+    dsdp_asymptotic idealized_instance_sequence :=
+  @Build_dsdp_asymptotic R idealized_instance_sequence
+    idealized_size_negligible negligible_fun_cst0.
 
 (* The constant predictor's distinguisher reads only the state slot, so the
    Bob-key reduction adversary ignores the challenge ciphertext and the
@@ -705,8 +735,8 @@ by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
 (* The headline's hypotheses hold together at least once: the witness
-   sequence carries both negligibility fields, and the constant predictor's
-   two reduction adversaries are in the cipher-constant class at every k. *)
+   sequence has an asymptotic value, and the constant predictor's two
+   reduction adversaries are in the cipher-constant class at every k. *)
 Corollary alice_trace_guess_V2_idealized_negligible :
   negligible_fun (fun k =>
     alice_trace_guess_V2_pr (R:=R) (inst_card_renc (idealized_instance k))
@@ -717,8 +747,7 @@ Corollary alice_trace_guess_V2_idealized_negligible :
       (inst_dk_c (idealized_instance k)) (inst_rb2 (idealized_instance k))
       (inst_rc2 (idealized_instance k)) (fun _ => 0)).
 Proof.
-apply: (alice_trace_guess_V2_negligible
-          (Q := idealized_instance_sequence)
+apply: (alice_trace_guess_V2_negligible idealized_asymptotic
           (predict := fun k => fun _ => 0)).
 - exact: idealized_bob_cipher_constant.
 - exact: idealized_charlie_cipher_constant.
@@ -866,6 +895,14 @@ Definition paillier_instance (k : nat) : dsdp_instance := {|
    sequence below carries no assumed advantage. *)
 Variable dcr : forall k, dcr_assumption (R:=R) (p k) (q k).
 
+(* The Paillier instance sequence: the instances above, with the IND-CPA
+   assumption derived at each k from dcr k.  It is the value the sequence
+   headline is applied at below. *)
+Definition paillier_instance_sequence : dsdp_instance_sequence R := {|
+  sequence_instance := paillier_instance ;
+  sequence_assumption := fun k =>
+    paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k) |}.
+
 (* Supplies the unconditional summand of the bound
    Pr_k <= 1/(p k * q k) + 2 * eps k, through f_size_paillier_negligible,
    which reads the plaintext cardinality at k as the modulus p k * q k.
@@ -884,19 +921,14 @@ Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
    p k q k, and the only computational hypothesis the sequence makes. *)
 Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier dcr).
 
-(* The Paillier instance sequence: the instances above, the IND-CPA
-   assumption derived at each k from dcr k, and the two negligibility facts,
-   the unconditional one read at the modulus and the assumption-conditional
-   one derived from the residuosity hypothesis by doubling.  It is the value
-   the sequence headline is applied at below. *)
-Definition paillier_instance_sequence : dsdp_instance_sequence R := {|
-  sequence_instance := paillier_instance ;
-  sequence_assumption := fun k =>
-    paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k) ;
-  sequence_size_negligible :=
-    f_size_paillier_negligible p_gt1 q_gt1 f_pq_negligible ;
-  sequence_adv_negligible :=
-    f_adv_paillier_negligible p_gt1 q_gt1 f_dcr_negligible |}.
+(* The two negligibility facts about the Paillier sequence, the unconditional
+   one read at the modulus and the assumption-conditional one derived from
+   the residuosity hypothesis by doubling. *)
+Definition paillier_asymptotic :
+    dsdp_asymptotic paillier_instance_sequence :=
+  @Build_dsdp_asymptotic R paillier_instance_sequence
+    (f_size_paillier_negligible p_gt1 q_gt1 f_pq_negligible)
+    (f_adv_paillier_negligible p_gt1 q_gt1 f_dcr_negligible).
 
 Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
     (alice_traceT (inst_AHE (paillier_instance k))).
@@ -926,8 +958,8 @@ Hypothesis charlie_reduction_admissible : forall k,
 
    It follows in three steps.  At each k the two class premises yield the
    bound of alice_trace_guess_V2_admissible_le, Pr_k <= 1/(p k * q k) +
-   2 * eps k, with eps k the advantage dcr k assumes.  The two negligibility
-   fields of paillier_instance_sequence make f_size and f_adv negligible,
+   2 * eps k, with eps k the advantage dcr k assumes.  The two fields of
+   paillier_asymptotic make f_size and f_adv negligible,
    f_size through the scheme-side reading of modulus growth as plaintext
    growth.  Those two are the costs the three labels of the program carry, so
    the terminal of the family monad reads the bound off the label list and
@@ -938,7 +970,7 @@ Hypothesis charlie_reduction_admissible : forall k,
    is decisional composite residuosity along the moduli p k q k. *)
 Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (alice_trace_guess_V2_negligible (Q:=paillier_instance_sequence)
+exact: (alice_trace_guess_V2_negligible paillier_asymptotic
           bob_reduction_admissible charlie_reduction_admissible).
 Qed.
 
@@ -1092,6 +1124,14 @@ Definition benaloh_instance (k : nat) : dsdp_instance := {|
 Variable residuosity :
   forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
 
+(* The Benaloh instance sequence: the instances above, with the IND-CPA
+   assumption derived at each k from residuosity k.  It is the value the
+   sequence headline is applied at below. *)
+Definition benaloh_instance_sequence : dsdp_instance_sequence R := {|
+  sequence_instance := benaloh_instance ;
+  sequence_assumption := fun k =>
+    benaloh_indcpa_assumption (r_gt1 k) (residuosity k) |}.
+
 (* Supplies the unconditional summand of the bound
    Pr_k <= 1/(r k) + 2 * eps k, through f_size_benaloh_negligible, which
    reads the plaintext cardinality at k as the block size r k.
@@ -1111,19 +1151,14 @@ Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 Hypothesis f_residuosity_negligible :
   negligible_fun (f_residuosity_benaloh residuosity).
 
-(* The Benaloh instance sequence: the instances above, the IND-CPA assumption
-   derived at each k from residuosity k, and the two negligibility facts, the
-   unconditional one read at the block size and the assumption-conditional
-   one derived from the residuosity hypothesis by doubling.  It is the value
-   the sequence headline is applied at below. *)
-Definition benaloh_instance_sequence : dsdp_instance_sequence R := {|
-  sequence_instance := benaloh_instance ;
-  sequence_assumption := fun k =>
-    benaloh_indcpa_assumption (r_gt1 k) (residuosity k) ;
-  sequence_size_negligible :=
-    f_size_benaloh_negligible n r_gt1 f_r_negligible ;
-  sequence_adv_negligible :=
-    f_adv_benaloh_negligible r_gt1 f_residuosity_negligible |}.
+(* The two negligibility facts about the Benaloh sequence, the unconditional
+   one read at the block size and the assumption-conditional one derived from
+   the residuosity hypothesis by doubling. *)
+Definition benaloh_asymptotic :
+    dsdp_asymptotic benaloh_instance_sequence :=
+  @Build_dsdp_asymptotic R benaloh_instance_sequence
+    (f_size_benaloh_negligible n r_gt1 f_r_negligible)
+    (f_adv_benaloh_negligible r_gt1 f_residuosity_negligible).
 
 Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
     (alice_traceT (inst_AHE (benaloh_instance k))).
@@ -1153,8 +1188,8 @@ Hypothesis charlie_reduction_admissible : forall k,
 
    It follows in three steps.  At each k the two class premises yield the
    bound of alice_trace_guess_V2_admissible_le, Pr_k <= 1/(r k) + 2 * eps k,
-   with eps k the advantage residuosity k assumes.  The two negligibility
-   fields of benaloh_instance_sequence make f_size and f_adv negligible, f_size
+   with eps k the advantage residuosity k assumes.  The two fields of
+   benaloh_asymptotic make f_size and f_adv negligible, f_size
    through the scheme-side reading of block-size growth as plaintext growth.
    Those two are the costs the three labels of the program carry, so the
    terminal of the family monad reads the bound off the label list and
@@ -1165,7 +1200,7 @@ Hypothesis charlie_reduction_admissible : forall k,
    is r-th residuosity along the moduli n k. *)
 Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (alice_trace_guess_V2_negligible (Q:=benaloh_instance_sequence)
+exact: (alice_trace_guess_V2_negligible benaloh_asymptotic
           bob_reduction_admissible charlie_reduction_admissible).
 Qed.
 
