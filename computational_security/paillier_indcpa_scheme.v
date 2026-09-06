@@ -73,8 +73,8 @@ Require Import negligible indcpa_game epshop.
 (* for each label the two experiments its call moves between and the epsilon  *)
 (* it assumes.  The chain returns twice the residuosity epsilon as its        *)
 (* bound, which is the number in paillier_dcr_epsilon_le.  The two class      *)
-(* memberships are parameters of the chain, so paillier_dcr_epsilon_le        *)
-(* assumes exactly what building the chain spends.                            *)
+(* memberships are variables of the section the chain sits in, so             *)
+(* paillier_dcr_epsilon_le assumes exactly what building the chain spends.    *)
 (*                                                                            *)
 (* The one number-theoretic input is g ^+ (p q) = 1, the order condition the  *)
 (* private key record already carries.  The statement proved here is          *)
@@ -105,7 +105,7 @@ Require Import negligible indcpa_game epshop.
 (*                              unit-group randomness                         *)
 (*            dcr_assumption == decisional composite residuosity at           *)
 (*                              modulus p q                                   *)
-(*             dcr_epsilon A == the advantage that record assumes, the        *)
+(*           dcr_epsilon dcr == the advantage that record assumes, the        *)
 (*                              epsilon every Paillier bound is a multiple of *)
 (*    dcr_of_adversary g adv == the residuosity distinguisher that hands      *)
 (*                              adv the challenge multiplied by g raised      *)
@@ -121,12 +121,13 @@ Require Import negligible indcpa_game epshop.
 (*            paillier_label == the two labels of the reduction, dcr_g for    *)
 (*                              the hop that runs the multiplying reduction   *)
 (*                              and dcr_0 for the hop that runs the plain one *)
-(*   paillier_claim A dk adv == what each label claims: the two acceptance    *)
+(* paillier_claim dcr dk adv == what each label claims: the two acceptance    *)
 (*                              probabilities its residuosity call moves      *)
 (*                              between, and the epsilon it assumes           *)
-(*              dcr_totalE A == the closed form of the two-call loss, twice   *)
+(*            dcr_totalE dcr == the closed form of the two-call loss, twice   *)
 (*                              the residuosity epsilon                       *)
-(*      paillier_chain Hg Hz == the two hops and the identity between them    *)
+(* paillier_chain admissible_g admissible_0 ==                                *)
+(*                              the two hops and the identity between them    *)
 (*                              as one chain over acceptance probabilities,   *)
 (*                              at the two class memberships it spends,       *)
 (*                              returning twice the residuosity epsilon as    *)
@@ -263,8 +264,8 @@ Definition dcr_assumption : Type :=
    ciphertext at two keys is four times it.
    Naming: [dcr] names the game the epsilon belongs to, distinguishing it
    from the IND-CPA epsilon derived from it. *)
-Definition dcr_epsilon (A : dcr_assumption) : R :=
-  residuosity_assumption_epsilon A.
+Definition dcr_epsilon (dcr : dcr_assumption) : R :=
+  residuosity_assumption_epsilon dcr.
 
 (* The first of the two reductions: an IND-CPA adversary run on the
    residuosity challenge multiplied by g raised to the adversary's own
@@ -367,17 +368,17 @@ Variant paillier_label := dcr_g | dcr_0.
    a step check: the cost, the target and the justification of a hop are each
    compared with the claim of the label the hop stands under, so no step can
    record a residuosity call it did not make. *)
-Definition paillier_claim (A : dcr_assumption) (dk : priv_key AHE)
+Definition paillier_claim (dcr : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE) (l : paillier_label) : claim R :=
   let D_g := dcr_of_adversary (priv_gen dk) adv in
   let D_0 := dcr_of_adversary_zero adv in
   match l with
   | dcr_g =>
       Claim (accept D_g residue_fdist) (accept D_g unit_fdist)
-        (dcr_epsilon A)
+        (dcr_epsilon dcr)
   | dcr_0 =>
       Claim (accept D_0 unit_fdist) (accept D_0 residue_fdist)
-        (dcr_epsilon A)
+        (dcr_epsilon dcr)
   end.
 
 Local Open Scope epshop_scope.
@@ -386,8 +387,8 @@ Local Open Scope epshop_scope.
    epsilon per hop, twice the assumed epsilon.  It is the identity the return
    statement of that chain is proved by, and the factor two in every Paillier
    IND-CPA bound of this file comes from here. *)
-Lemma dcr_totalE (A : dcr_assumption) :
-  dcr_epsilon A + dcr_epsilon A = 2 * dcr_epsilon A.
+Lemma dcr_totalE (dcr : dcr_assumption) :
+  dcr_epsilon dcr + dcr_epsilon dcr = 2 * dcr_epsilon dcr.
 Proof. by rewrite mulr_natl mulr2n. Qed.
 
 (* The two-step hybrid as one chain over acceptance probabilities.  It starts
@@ -399,32 +400,45 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
    which is the zero experiment.  Its two endpoints are the acceptance
    probabilities the IND-CPA advantage compares, and its loss names the two
    residuosity calls that comparison spends.  The two class memberships are
-   parameters of the chain, so a chain that exists has already spent them and
-   leaves nothing to discharge. *)
-Definition paillier_chain (A : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE)
-    (Hg : residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv))
-    (Hz : residuosity_admissible A (dcr_of_adversary_zero adv)) :=
-  let D_g := dcr_of_adversary (priv_gen dk) adv in
-  let D_0 := dcr_of_adversary_zero adv in
-  let eps_dcr := dcr_epsilon A in
-  \epsilon[ paillier_claim A dk adv ]{
+   variables of the section, spent in the justification of the hop each one
+   licenses, so a chain that exists has already spent them and leaves nothing
+   to discharge.
+   Naming: admissible_g and admissible_0 name the labels dcr_g and dcr_0 the
+   two memberships license. *)
+Section paillier_chain.
+Variable dcr : dcr_assumption.
+Variable dk : priv_key AHE.
+Variable adv : indcpa_adversary (R:=R) AHE.
+Hypothesis admissible_g :
+  residuosity_admissible dcr (dcr_of_adversary (priv_gen dk) adv).
+Hypothesis admissible_0 :
+  residuosity_admissible dcr (dcr_of_adversary_zero adv).
+
+(* The two reductions the chain moves between, under the short names its
+   steps read at: the multiplying one at the key's generator, and the one
+   that hands the challenge over unchanged. *)
+Local Notation D_g := (dcr_of_adversary (priv_gen dk) adv).
+Local Notation D_0 := (dcr_of_adversary_zero adv).
+Local Notation eps := (dcr_epsilon dcr).
+
+Definition paillier_chain :=
+  \epsilon[ paillier_claim dcr dk adv ]{
             (* the real experiment *)
             start (accept D_g residue_fdist) ;
             (* the first residuosity call, through D_g *)
-            hop dcr_g eps_dcr to (accept D_g unit_fdist)
-              by residuosity_admissible_epsilon_le _ _ Hg ;
+            hop dcr_g eps to (accept D_g unit_fdist)
+              by residuosity_admissible_epsilon_le _ _ admissible_g ;
             (* the free step: at the unit challenge the multiplier erases the
                plaintext, Katz and Lindell 2015 Lemma 11.15 *)
             same to (accept D_0 unit_fdist)
               by unit_accept_dcrE (priv_gen_order dk) adv ;
             (* the second residuosity call, through D_0 run backwards, and
                the zero experiment *)
-            hop dcr_0 eps_dcr to (accept D_0 residue_fdist)
-              by residuosity_admissible_epsilon_leC _ _ Hz ;;
+            hop dcr_0 eps to (accept D_0 residue_fdist)
+              by residuosity_admissible_epsilon_leC _ _ admissible_0 ;;
             (* the gap between the two experiments, at the two calls it
                spent *)
-            bound (2 * dcr_epsilon A) by dcr_totalE A }.
+            bound (2 * eps) by dcr_totalE dcr }.
 
 (* The reduction and its loss.  An adversary whose two residuosity reductions
    the residuosity class admits has IND-CPA advantage at most 2 eps_DCR at
@@ -435,56 +449,56 @@ Definition paillier_chain (A : dcr_assumption) (dk : priv_key AHE)
    assumption-conditional, so the whole bound is computational.  This is Katz
    and Lindell 2015 Theorem 13.13, read at any generator whose order divides
    p q. *)
-Lemma paillier_dcr_epsilon_le (A : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) :
-  residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv) ->
-  residuosity_admissible A (dcr_of_adversary_zero adv) ->
+Lemma paillier_dcr_epsilon_le :
   indcpa_epsilon (R:=R) card_renc_paillier rand_of_renc_paillier
     (pub_of_priv dk) adv
-  <= 2 * dcr_epsilon A.
+  <= 2 * dcr_epsilon dcr.
 Proof.
-move=> Hg Hz.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_paillierE /= real_accept_dcrE zero_accept_dcrE.
-exact: result_sound (paillier_chain Hg Hz).
+exact: result_sound paillier_chain.
 Qed.
+
+End paillier_chain.
 
 (* The IND-CPA class a residuosity assumption induces: the adversaries whose
    multiplying reduction is classified at every generator and whose plain
    reduction is classified.  The quantification is over every ring element
    because the bound above is read at an arbitrary private key, whose
    generator the class leaves free. *)
-Definition paillier_dcr_admissible (A : dcr_assumption)
+Definition paillier_dcr_admissible (dcr : dcr_assumption)
     (adv : indcpa_adversary (R:=R) AHE) : bool :=
-  [forall g, residuosity_admissible A (dcr_of_adversary g adv)]
-  && residuosity_admissible A (dcr_of_adversary_zero adv).
+  [forall g, residuosity_admissible dcr (dcr_of_adversary g adv)]
+  && residuosity_admissible dcr (dcr_of_adversary_zero adv).
 
 (* The same 2 eps_DCR bound with the two premises read off that one Boolean,
    which is the shape the assumption record's proof field takes.
    Naming: paillier_dcr_admissible_epsilon_le mirrors the field it
    discharges, indcpa_admissible_epsilon_le of indcpa_game.v, with the
    scheme and the problem in front. *)
-Lemma paillier_dcr_admissible_epsilon_le (A : dcr_assumption)
+Lemma paillier_dcr_admissible_epsilon_le (dcr : dcr_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
-  paillier_dcr_admissible A adv ->
+  paillier_dcr_admissible dcr adv ->
   indcpa_epsilon (R:=R) card_renc_paillier rand_of_renc_paillier
     (pub_of_priv dk) adv
-  <= 2 * dcr_epsilon A.
+  <= 2 * dcr_epsilon dcr.
 Proof.
-by move=> /andP[/forallP Hg Hz]; apply: paillier_dcr_epsilon_le (Hg _) Hz.
+move=> /andP[/forallP admissible_g admissible_0].
+exact: paillier_dcr_epsilon_le (admissible_g _) admissible_0.
 Qed.
 
 (* The IND-CPA assumption of Paillier at this modulus, derived rather than
-   assumed: the class induced by A, the epsilon 2 eps_DCR the two hops cost,
-   and the lemma above in place of a hypothesis.  Every Paillier bound the
-   DSDP files read off is read at a record of this form, so the computational
-   premise those bounds carry is decisional composite residuosity. *)
-Definition paillier_indcpa_assumption (A : dcr_assumption) :
+   assumed: the class induced by dcr, the epsilon 2 eps_DCR the two hops
+   cost, and the lemma above in place of a hypothesis.  Every Paillier bound
+   the DSDP files read off is read at a record of this form, so the
+   computational premise those bounds carry is decisional composite
+   residuosity. *)
+Definition paillier_indcpa_assumption (dcr : dcr_assumption) :
     indcpa_epsilon_assumption (R:=R) card_renc_paillier
       rand_of_renc_paillier :=
-  {| indcpa_admissible := paillier_dcr_admissible A ;
-     indcpa_assumption_epsilon := 2 * dcr_epsilon A ;
-     indcpa_admissible_epsilon_le := @paillier_dcr_admissible_epsilon_le A |}.
+  {| indcpa_admissible := paillier_dcr_admissible dcr ;
+     indcpa_assumption_epsilon := 2 * dcr_epsilon dcr ;
+     indcpa_admissible_epsilon_le := @paillier_dcr_admissible_epsilon_le dcr |}.
 
 (* At the zero-epsilon residuosity witness the induced class admits every
    adversary whose decision ignores the ciphertext: such an adversary ignores
@@ -515,9 +529,9 @@ Qed.
    PaillierPrivKey record, so the bound is universal over keys rather than
    averaged over a key-generation law, and the adversary holds the public key
    alone. *)
-Lemma paillier_indcpa_epsilon_le (A : dcr_assumption) (dk : priv_key AHE)
+Lemma paillier_indcpa_epsilon_le (dcr : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE) :
-  paillier_dcr_admissible A adv ->
+  paillier_dcr_admissible dcr adv ->
   `| Pr (c <- adv_choose adv ;
          fdistmap (adv_decide c)
            (fdistmap (paillier_enc (priv_gen dk) (adv_plain c))
@@ -526,7 +540,7 @@ Lemma paillier_indcpa_epsilon_le (A : dcr_assumption) (dk : priv_key AHE)
          fdistmap (adv_decide c)
            (fdistmap (paillier_enc (priv_gen dk) 0)
               (fdist_uniform card_renc_paillier))) [set true] |
-  <= 2 * dcr_epsilon A.
+  <= 2 * dcr_epsilon dcr.
 Proof.
 move/(paillier_dcr_admissible_epsilon_le dk).
 by rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE
@@ -550,7 +564,7 @@ Hypothesis q_gt1 : forall k, (1 < q k)%N.
    composite residuosity records at those moduli is the per-k form of the
    single computational premise the scheme carries; the IND-CPA assumption at
    each k is derived from it by paillier_indcpa_assumption. *)
-Variable D : forall k, dcr_assumption (R:=R) (p k) (q k).
+Variable dcr : forall k, dcr_assumption (R:=R) (p k) (q k).
 
 (* The inverse modulus sequence 1/(p k * q k), the form a growth condition on
    the moduli is stated in. *)
@@ -562,15 +576,15 @@ Definition f_pq k : R := (((p k * q k)%N)%:R : R)^-1.
 Definition f_size_paillier k : R :=
   (#|plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))|%:R : R)^-1.
 
-(* The assumed residuosity-advantage sequence: the epsilon D k assumes at
+(* The assumed residuosity-advantage sequence: the epsilon dcr k assumes at
    each k, the asymptotic form of decisional composite residuosity. *)
-Definition f_dcr_paillier k : R := dcr_epsilon (D k).
+Definition f_dcr_paillier k : R := dcr_epsilon (dcr k).
 
 (* The derived IND-CPA advantage sequence: twice f_dcr_paillier, the two hops
    of the reduction charged once each at the key of parameter k. *)
 Definition f_adv_paillier k : R :=
   indcpa_assumption_epsilon
-    (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (D k)).
+    (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k)).
 
 (* The moduli outgrow every polynomial in k.  At Paillier the modulus is the
    plaintext cardinality, so this is the growth of the plaintext space, and

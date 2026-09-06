@@ -65,7 +65,7 @@ Require Import dsdp_setting dsdp_security.
 (*                              the bound an IND-CPA record assumes of its    *)
 (*                              class, spent at one ciphertext hop and twice  *)
 (*                              in a trace bound                              *)
-(* dcr_epsilon A, benaloh_residuosity_epsilon A ==                            *)
+(* dcr_epsilon dcr, benaloh_residuosity_epsilon residuosity ==                *)
 (*                              the bound a residuosity record assumes of     *)
 (*                              its class, each IND-CPA epsilon above being   *)
 (*                              twice one of them, so the trace bounds read   *)
@@ -102,7 +102,7 @@ Require Import dsdp_setting dsdp_security.
 (*         paillier_security == the twenty-six statements at it               *)
 (* paillier_assumption_at_dcrE ==                                             *)
 (*                              the assumption those statements are read at   *)
-(*                              is the record derived from A k                *)
+(*                              is the record derived from dcr k              *)
 (*  paillier_epsilon_at_dcrE == its epsilon is twice the decisional           *)
 (*                              composite residuosity epsilon at k            *)
 (*              benaloh_dsdp == the same at Benaloh with block size p * q     *)
@@ -193,8 +193,8 @@ Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
 (* Decisional composite residuosity at the k-th modulus, the section's only
    computational hypothesis: the IND-CPA assumption at k is derived from it,
-   and every epsilon below is twice the residuosity epsilon A k assumes. *)
-Variable A : forall k, dcr_assumption (R:=R) (p k) (q k).
+   and every epsilon below is twice the residuosity epsilon dcr k assumes. *)
+Variable dcr : forall k, dcr_assumption (R:=R) (p k) (q k).
 
 (* The inverse modulus falls below every inverse polynomial.  It is the
    unconditional half of the asymptotic bound, the residue the leaked output
@@ -204,7 +204,7 @@ Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
 (* The assumed residuosity advantage falls below every inverse polynomial:
    the asymptotic form of decisional composite residuosity along the moduli
    p k q k. *)
-Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier A).
+Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier dcr).
 
 Local Notation PQ :=
   (paillier_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
@@ -244,12 +244,12 @@ Definition paillier_security : dsdp_security paillier_setting :=
   dsdp_securityP paillier_setting.
 
 (* The record every assumption-conditional field of paillier_security is read
-   at is the one paillier_indcpa_scheme.v derives from A k, and at no other
+   at is the one paillier_indcpa_scheme.v derives from dcr k, and at no other
    record.  The equation holds by unfolding, so the identification is a
    conversion and not a rewrite a later statement could route around. *)
 Lemma paillier_assumption_at_dcrE k :
   assumption_at paillier_setting k
-  = paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (A k).
+  = paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k).
 Proof. by []. Qed.
 
 (* The epsilon those fields are stated at is twice the residuosity epsilon at
@@ -258,7 +258,7 @@ Proof. by []. Qed.
    decisional composite residuosity epsilons. *)
 Lemma paillier_epsilon_at_dcrE k :
   indcpa_assumption_epsilon (assumption_at paillier_setting k)
-  = 2 * dcr_epsilon (A k).
+  = 2 * dcr_epsilon (dcr k).
 Proof. by []. Qed.
 
 (* Alice's uncertainty about the relay pair, given her own inputs and the
@@ -489,7 +489,7 @@ Corollary paillier_trace_guess_V2_admissible_le k
     (a : dsdp_admissible_predictor paillier_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
   <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
-     + 4 * dcr_epsilon (A k).
+     + 4 * dcr_epsilon (dcr k).
 Proof.
 have := trace_guess_V2_admissible_le paillier_security a.
 by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
@@ -501,7 +501,7 @@ Corollary paillier_trace_guess_V2_admissible_pq_le k
     (a : dsdp_admissible_predictor paillier_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
   <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
-     + 4 * dcr_epsilon (A k).
+     + 4 * dcr_epsilon (dcr k).
 Proof.
 have := trace_guess_V2_admissible_pq_le paillier_security a.
 by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
@@ -617,9 +617,11 @@ Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 (* r-th residuosity at the k-th ciphertext modulus n k and exponent r k, the
    section's only computational hypothesis: the IND-CPA assumption at k is
    derived from it, and every epsilon below is twice the residuosity epsilon
-   A k assumes.  The assumption is made at n k while the counting axis and
-   the 1/r term read the block size r k; the two numbers are unrelated. *)
-Variable A : forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
+   residuosity k assumes.  The assumption is made at n k while the counting
+   axis and the 1/r term read the block size r k; the two numbers are
+   unrelated. *)
+Variable residuosity :
+  forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
 
 (* The inverse block size falls below every inverse polynomial.  It is the
    unconditional half of the asymptotic bound, the residue the leaked output
@@ -629,7 +631,7 @@ Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 (* The assumed residuosity advantage falls below every inverse polynomial:
    the asymptotic form of r-th residuosity along the moduli n k. *)
 Hypothesis f_residuosity_negligible :
-  negligible_fun (f_residuosity_benaloh A).
+  negligible_fun (f_residuosity_benaloh residuosity).
 
 Local Notation BQ :=
   (benaloh_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
@@ -671,11 +673,12 @@ Definition benaloh_security : dsdp_security benaloh_setting :=
   dsdp_securityP benaloh_setting.
 
 (* The record every assumption-conditional field of benaloh_security is read
-   at is the one benaloh_indcpa_scheme.v derives from A k, and at no other
-   record.  The equation holds by unfolding, so the identification is a
+   at is the one benaloh_indcpa_scheme.v derives from residuosity k, and at no
+   other record.  The equation holds by unfolding, so the identification is a
    conversion and not a rewrite a later statement could route around. *)
 Lemma benaloh_assumption_at_residuosityE k :
-  assumption_at benaloh_setting k = benaloh_indcpa_assumption (r_gt1 k) (A k).
+  assumption_at benaloh_setting k
+  = benaloh_indcpa_assumption (r_gt1 k) (residuosity k).
 Proof. by []. Qed.
 
 (* The epsilon those fields are stated at is twice the residuosity epsilon at
@@ -684,7 +687,7 @@ Proof. by []. Qed.
    residuosity epsilons. *)
 Lemma benaloh_epsilon_at_residuosityE k :
   indcpa_assumption_epsilon (assumption_at benaloh_setting k)
-  = 2 * benaloh_residuosity_epsilon (A k).
+  = 2 * benaloh_residuosity_epsilon (residuosity k).
 Proof. by []. Qed.
 
 (* Alice's uncertainty about the relay pair, given her own inputs and the
@@ -915,7 +918,7 @@ Corollary benaloh_trace_guess_V2_admissible_le k
     (a : dsdp_admissible_predictor benaloh_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
   <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
-     + 4 * benaloh_residuosity_epsilon (A k).
+     + 4 * benaloh_residuosity_epsilon (residuosity k).
 Proof.
 have := trace_guess_V2_admissible_le benaloh_security a.
 by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
@@ -927,7 +930,7 @@ Corollary benaloh_trace_guess_V2_admissible_pq_le k
     (a : dsdp_admissible_predictor benaloh_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
   <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
-     + 4 * benaloh_residuosity_epsilon (A k).
+     + 4 * benaloh_residuosity_epsilon (residuosity k).
 Proof.
 have := trace_guess_V2_admissible_pq_le benaloh_security a.
 by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
