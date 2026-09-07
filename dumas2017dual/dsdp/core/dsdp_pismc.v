@@ -67,6 +67,7 @@ Arguments sproc dtype data party {_} {_}.
 Let PSend {party n env} := @DSend DI party n env.
 Let Recv_dec {party n env} := @DRecv_dec DI decode party n env.
 Let Recv_enc {party n env} := @DRecv_enc DI party n env.
+Let Sample_coin {party n env} := @DSample DI party n env.
 
 (** * Data wrapper shorthand notations *)
 
@@ -83,6 +84,12 @@ Local Notation "$ x" := (e x) (at level 0, x at level 0) : pismc_scope.
 
 Notation "'Send<' p '>' x ; P" := (PSend p x P)
   (in custom pismc at level 85, p constr at level 0, x constr at level 0,
+   P custom pismc at level 85, right associativity).
+
+(* Draw one encryption coin from this party's own seed stream.  It shadows
+   the raw Sample of pismc.v, which hands the program an undecoded datum. *)
+Local Notation "'Sample' r '=>' P" := (Sample_coin (fun r => P))
+  (in custom pismc at level 85, r name,
    P custom pismc at level 85, right associativity).
 
 (* Protocol-specific Recv notations *)
@@ -113,30 +120,36 @@ Local Notation "'E<' r '>' p m" := (enc_pub_key p m r)
    format "'E<' r '>'  p  m").
 
 (* Bob's protocol - using concrete indices for session type duality *)
-Definition pbob (dk : priv_keyT)(v2 : msgT)(rb1 rb2 : randT)
+Definition pbob (dk : priv_keyT)(v2 : msgT)
     : sproc dsdp_dtype data bob_idx :=
   \pi{ Init (#dk, &v2) ;
+     Sample rb1 =>
      Send<alice_idx> $(E<rb1> bob_idx v2);
      Recv<alice_idx> #dk d2 =>
      Recv<alice_idx> a3 =>
+     Sample rb2 =>
      Send<charlie_idx> $(a3 *h (E<rb2> charlie_idx d2)) ;
      Finish }.
 
 (* Charlie's protocol *)
-Definition pcharlie (dk : priv_keyT)(v3 : msgT)(rc1 rc2 : randT)
+Definition pcharlie (dk : priv_keyT)(v3 : msgT)
     : sproc dsdp_dtype data charlie_idx :=
   \pi{ Init (#dk, &v3) ;
+     Sample rc1 =>
      Send<alice_idx> $(E<rc1> charlie_idx v3) ;
      Recv<bob_idx> #dk d3 =>
+     Sample rc2 =>
      Send<alice_idx> $(E<rc2> alice_idx d3) ;
      Finish }.
 
 (* Alice's protocol *)
-Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)(ra1 ra2 : randT)
+Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)
     : sproc dsdp_dtype data alice_idx :=
   \pi{ Init (#dk, &v1, &u1, &u2, &u3, &r2, &r3) ;
      Recv<bob_idx> c2 =>
      Recv<charlie_idx> c3 =>
+     Sample ra1 =>
+     Sample ra2 =>
      Send<bob_idx> $(c2 ^h u2 *h (E<ra1> bob_idx r2)) ;
      Send<bob_idx> $(c3 ^h u3 *h (E<ra2> charlie_idx r3)) ;
      Recv<charlie_idx> #dk g =>
@@ -147,13 +160,12 @@ Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)(ra1 ra2 : randT)
 (** * Session Type Duality Verification                                       *)
 (******************************************************************************)
 
-Variables (dk : priv_keyT) (v1 u1 u2 u3 r2 r3 v2 v3 : msgT)
-(ra1 ra2 rb1 rb2 rc1 rc2 : randT).
+Variables (dk : priv_keyT) (v1 u1 u2 u3 r2 r3 v2 v3 : msgT).
 
 (* Wrap in aproc for duality checking *)
-Definition aproc_alice := mk_aproc (palice dk v1 u1 u2 u3 r2 r3 ra1 ra2).
-Definition aproc_bob := mk_aproc (pbob dk v2 rb1 rb2).
-Definition aproc_charlie := mk_aproc (pcharlie dk v3 rc1 rc2).
+Definition aproc_alice := mk_aproc (palice dk v1 u1 u2 u3 r2 r3).
+Definition aproc_bob := mk_aproc (pbob dk v2).
+Definition aproc_charlie := mk_aproc (pcharlie dk v3).
 
 (* Three-party duality verification *)
 Lemma dsdp_compat : aprocs_compat [:: aproc_alice; aproc_bob; aproc_charlie].
@@ -165,52 +177,56 @@ Proof. by []. Qed.
 
 (* P₂: first relay party — recv_dec + recv_enc from P₁ *)
 Definition DParty_first (self downstream : nat)
-    (dk : priv_keyT) (v : msgT) (r1 r2 : randT)
+    (dk : priv_keyT) (v : msgT)
     : sproc dsdp_dtype data self :=
   \pi{ Init (#dk, &v) ;
+       Sample r1 =>
        Send<alice_idx> $(E<r1> self v) ;
        Recv<alice_idx> #dk d_val =>
        Recv<alice_idx> a_next =>
+       Sample r2 =>
        Send<downstream> $(a_next *h (E<r2> downstream d_val)) ;
        Finish }.
 
 (* Pᵢ (3≤i≤n-1): intermediate relay — recv_enc from P₁ + recv_dec from upstream *)
 Definition DParty_intermediate (self alice_src upstream downstream : nat)
-    (dk : priv_keyT) (v : msgT) (r1 r2 : randT)
+    (dk : priv_keyT) (v : msgT)
     : sproc dsdp_dtype data self :=
   \pi{ Init (#dk, &v) ;
+       Sample r1 =>
        Send<alice_src> $(E<r1> self v) ;
        Recv<alice_src> a_next =>
        Recv<upstream> #dk d_val =>
+       Sample r2 =>
        Send<downstream> $(a_next *h (E<r2> downstream d_val)) ;
        Finish }.
 
 (* Pₙ: last party — recv_dec from upstream, re-encrypt, send to P₁ *)
 Definition DParty_last (self upstream : nat)
-    (dk : priv_keyT) (v : msgT) (r1 r2 : randT)
+    (dk : priv_keyT) (v : msgT)
     : sproc dsdp_dtype data self :=
   \pi{ Init (#dk, &v) ;
+       Sample r1 =>
        Send<alice_idx> $(E<r1> self v) ;
        Recv<upstream> #dk d_val =>
+       Sample r2 =>
        Send<alice_idx> $(E<r2> alice_idx d_val) ;
        Finish }.
 
 (* Cross-equality: existing 3-party definitions are instances of templates *)
-Lemma pbob_is_first dk' v2' rb1' rb2' :
-  pbob dk' v2' rb1' rb2' =
-  DParty_first bob_idx charlie_idx dk' v2' rb1' rb2'.
+Lemma pbob_is_first dk' v2' :
+  pbob dk' v2' = DParty_first bob_idx charlie_idx dk' v2'.
 Proof. reflexivity. Qed.
 
-Lemma pcharlie_is_last dk' v3' rc1' rc2' :
-  pcharlie dk' v3' rc1' rc2' =
-  DParty_last charlie_idx bob_idx dk' v3' rc1' rc2'.
+Lemma pcharlie_is_last dk' v3' :
+  pcharlie dk' v3' = DParty_last charlie_idx bob_idx dk' v3'.
 Proof. reflexivity. Qed.
 
 (* Duality verification on templated protocols *)
 Definition aproc_bob_tmpl :=
-  mk_aproc (DParty_first bob_idx charlie_idx dk v2 rb1 rb2).
+  mk_aproc (DParty_first bob_idx charlie_idx dk v2).
 Definition aproc_charlie_tmpl :=
-  mk_aproc (DParty_last charlie_idx bob_idx dk v3 rc1 rc2).
+  mk_aproc (DParty_last charlie_idx bob_idx dk v3).
 
 Lemma dsdp_compat_tmpl :
   aprocs_compat [:: aproc_alice; aproc_bob_tmpl; aproc_charlie_tmpl].
@@ -239,13 +255,13 @@ Definition palice_n
     (dk : priv_keyT) (v0 : msgT)
     (u : 'I_n_relay.+2 -> msgT)
     (r : 'I_n_relay.+1 -> msgT)
-    (rand_a : 'I_n_relay.+1 -> randT)
     : sproc dsdp_dtype data alice_idx :=
   \pi{ Init (#dk, &v0) ;
-     ForList relays step (fun k => k.+2) enstep alice_env_step as j cont k =>
+     ForList relays step (fun k => k.+3) enstep alice_env_step as j cont k =>
        Recv<(j.+1)> c =>
+       Sample rand_a =>
        Send<(alice_send_dest j)>
-         $(c ^h (u (lift ord0 j)) *h (enc_pub_key j.+1 (r j) (rand_a j))) ;
+         $(c ^h (u (lift ord0 j)) *h (enc_pub_key j.+1 (r j) rand_a)) ;
        k
      end ;
      Recv<(n_relay.+1)> #dk g =>
@@ -256,14 +272,14 @@ Definition palice_n
 (* Map relay index j to the appropriate relay template (first/intermediate/last).
    Requires n_relay >= 1 (at least 3 parties). *)
 Definition relay_aproc (j : nat)
-    (dk_j : priv_keyT) (v_j : msgT) (r1_j r2_j : randT)
+    (dk_j : priv_keyT) (v_j : msgT)
     : aproc dsdp_dtype data :=
   if j == 0 then
-    mk_aproc (DParty_first j.+1 j.+2 dk_j v_j r1_j r2_j)
+    mk_aproc (DParty_first j.+1 j.+2 dk_j v_j)
   else if j == n_relay then
-    mk_aproc (DParty_last j.+1 j dk_j v_j r1_j r2_j)
+    mk_aproc (DParty_last j.+1 j dk_j v_j)
   else
-    mk_aproc (DParty_intermediate j.+1 alice_idx j j.+2 dk_j v_j r1_j r2_j).
+    mk_aproc (DParty_intermediate j.+1 alice_idx j j.+2 dk_j v_j).
 
 (* Build the full N-party aproc list: Alice + n_relay.+1 relay parties.
    Assumes n_relay >= 1 (at least 3 total parties). *)
@@ -271,26 +287,21 @@ Definition dsdp_n_saprocs
     (relays : seq 'I_n_relay.+1)
     (dk : priv_keyT) (v0 : msgT)
     (u : 'I_n_relay.+2 -> msgT) (r : 'I_n_relay.+1 -> msgT)
-    (rand_a : 'I_n_relay.+1 -> randT)
     (dk_relay : 'I_n_relay.+1 -> priv_keyT)
     (v_relay : 'I_n_relay.+1 -> msgT)
-    (r1_relay r2_relay : 'I_n_relay.+1 -> randT)
     : seq (aproc dsdp_dtype data) :=
-  mk_aproc (palice_n relays dk v0 u r rand_a) ::
-  map (fun j : 'I_n_relay.+1 =>
-    relay_aproc j (dk_relay j) (v_relay j) (r1_relay j) (r2_relay j))
+  mk_aproc (palice_n relays dk v0 u r) ::
+  map (fun j : 'I_n_relay.+1 => relay_aproc j (dk_relay j) (v_relay j))
     relays.
 
 Definition dsdp_n_procs
     (relays : seq 'I_n_relay.+1)
     (dk : priv_keyT) (v0 : msgT)
     (u : 'I_n_relay.+2 -> msgT) (r : 'I_n_relay.+1 -> msgT)
-    (rand_a : 'I_n_relay.+1 -> randT)
     (dk_relay : 'I_n_relay.+1 -> priv_keyT)
     (v_relay : 'I_n_relay.+1 -> msgT)
-    (r1_relay r2_relay : 'I_n_relay.+1 -> randT)
     : seq (proc data) :=
-  erase_aprocs (dsdp_n_saprocs relays dk v0 u r rand_a dk_relay v_relay r1_relay r2_relay).
+  erase_aprocs (dsdp_n_saprocs relays dk v0 u r dk_relay v_relay).
 
 End dsdp_n_party.
 
@@ -303,18 +314,20 @@ Local Open Scope proc_scope.
 
 (* Session-typed processes for duality checking and fuel computation *)
 Definition dsdp_saprocs : seq (aproc dsdp_dtype data) :=
-  [aprocs palice dk v1 u1 u2 u3 r2 r3 ra1 ra2; pbob dk v2 rb1 rb2; pcharlie dk v3 rc1 rc2].
+  [aprocs palice dk v1 u1 u2 u3 r2 r3; pbob dk v2; pcharlie dk v3].
 
 (* Erased processes for interpreter (strips session type indices) *)
 Definition dsdp_procs : seq (proc data) :=
   erase_aprocs dsdp_saprocs.
 
 (* Fuel bound computed from program structure:
-   - palice: 14 (7*Init + 2*Recv_enc + 2*Send + Recv_dec + Ret=2)
-   - pbob: 7 (2*Init + Send + Recv_dec + Recv_enc + Send + Finish=1)
-   - pcharlie: 6 (2*Init + Send + Recv_dec + Send + Finish=1)
-   Total: 14 + 7 + 6 = 27 *)
-Lemma dsdp_max_fuel_ok : [> dsdp_saprocs] = 27.
+   - palice: 16 (7*Init + 2*Recv_enc + 2*Sample + 2*Send + Recv_dec + Ret=2)
+   - pbob: 9 (2*Init + Sample + Send + Recv_dec + Recv_enc + Sample + Send
+     + Finish=1)
+   - pcharlie: 8 (2*Init + Sample + Send + Recv_dec + Sample + Send
+     + Finish=1)
+   Total: 16 + 9 + 8 = 33 *)
+Lemma dsdp_max_fuel_ok : [> dsdp_saprocs] = 33.
 Proof. reflexivity. Qed.
 
 End smc_dsdp_program.
@@ -363,9 +376,9 @@ Let pcharlie_orig := @dsdp_program.pcharlie AHE alice bob charlie pn ek.
 
 (* Erased processes agree although their sproc types differ in session env
    indices.  The equality holds when pn maps parties to the expected indices. *)
-Lemma alice_cross_eq dk' v1' u1' u2' u3' r2' r3' ra1' ra2' :
-  erase (palice_std dk' v1' u1' u2' u3' r2' r3' ra1' ra2') =
-  erase (palice_orig dk' v1' u1' u2' u3' r2' r3' ra1' ra2').
+Lemma alice_cross_eq dk' v1' u1' u2' u3' r2' r3' :
+  erase (palice_std dk' v1' u1' u2' u3' r2' r3') =
+  erase (palice_orig dk' v1' u1' u2' u3' r2' r3').
 Proof.
 by rewrite /palice_std /palice_orig /palice /dsdp_program.palice
            pn_bob pn_charlie
@@ -374,9 +387,8 @@ Qed.
 
 (* bob_cross_eq: the session-typed [pbob] at the Standard interface erases to
    the same [proc] as the reference [dsdp_program.pbob]. *)
-Lemma bob_cross_eq dk' v2' rb1' rb2' :
-  erase (pbob_std dk' v2' rb1' rb2') =
-  erase (pbob_orig dk' v2' rb1' rb2').
+Lemma bob_cross_eq dk' v2' :
+  erase (pbob_std dk' v2') = erase (pbob_orig dk' v2').
 Proof.
 by rewrite /pbob_std /pbob_orig /pbob /dsdp_program.pbob
            pn_alice pn_charlie
@@ -385,9 +397,8 @@ Qed.
 
 (* charlie_cross_eq: the session-typed [pcharlie] at the Standard interface
    erases to the same [proc] as the reference [dsdp_program.pcharlie]. *)
-Lemma charlie_cross_eq dk' v3' rc1' rc2' :
-  erase (pcharlie_std dk' v3' rc1' rc2') =
-  erase (pcharlie_orig dk' v3' rc1' rc2').
+Lemma charlie_cross_eq dk' v3' :
+  erase (pcharlie_std dk' v3') = erase (pcharlie_orig dk' v3').
 Proof.
 by rewrite /pcharlie_std /pcharlie_orig /pcharlie /dsdp_program.pcharlie
            pn_alice pn_bob

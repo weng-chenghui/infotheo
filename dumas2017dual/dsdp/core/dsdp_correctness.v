@@ -98,6 +98,7 @@ Let data := di_data DI.
 Let d := di_data_of_plain DI.
 Let e := di_data_of_cipher DI.
 Let k := di_data_of_priv_key DI.
+Let rd := di_data_of_rand DI.
 
 (* Party definitions *)
 Definition alice : party_id := Alice.
@@ -134,9 +135,9 @@ Let ek (p : party_id) : pub_key AHE :=
 (* The three DSDP programs of dsdp_program.v at this instance.  Each is
    applied to the parties its own body names, which is what the section
    discharge left explicit. *)
-Let palice_inst := @palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3 runit runit.
-Let pbob_inst := @pbob AHE alice bob charlie pn ek dk_b v2 runit runit.
-Let pcharlie_inst := @pcharlie AHE alice bob charlie pn ek dk_c v3 runit runit.
+Let palice_inst := @palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3.
+Let pbob_inst := @pbob AHE alice bob charlie pn ek dk_b v2.
+Let pcharlie_inst := @pcharlie AHE alice bob charlie pn ek dk_c v3.
 
 (* Session-typed processes packed via [aprocs ...].
    See dsdp_program.v for detailed explanation of why this pattern is needed. *)
@@ -145,14 +146,20 @@ Let dsdp_saprocs : seq (aproc dsdp_dtype data) :=
 
 Let dsdp_procs : seq (proc data) := erase_aprocs dsdp_saprocs.
 
+(* The seed streams of one run, two coins per party in the order alice, bob,
+   charlie.  The idealized scheme ignores a coin's value. *)
+Let dsdp_seeds : seq (seq data) :=
+  [:: [:: rd runit; rd runit]; [:: rd runit; rd runit];
+      [:: rd runit; rd runit]].
+
 (* Protocol definition using interp directly with explicit traces *)
-Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] [::[::];[::];[::]].
+Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] dsdp_seeds.
 
 (* Protocol execution result: running dsdp for 15 steps produces the expected
    final state with all parties finished and their respective traces.
    In the idealized scheme, enc(pk, m, r) = m, so ciphertexts are just messages. *)
 Lemma dsdp_ok :
-  dsdp 15 =
+  dsdp 18 =
   ([:: Finish; Finish; Finish],
    [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
            e (v3 * u3 + r3 + (v2 * u2 + r2));
@@ -167,11 +174,11 @@ Lemma dsdp_ok :
 Proof. reflexivity. Qed.
 
 (* Trace types for bounded sequences *)
-Notation dsdp_traceT := (15.-bseq data).
+Notation dsdp_traceT := (18.-bseq data).
 Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 
 Definition dsdp_traces : dsdp_tracesT :=
-  interp_traces 15 dsdp_procs (nseq (size dsdp_procs) [::]).
+  interp_traces 18 dsdp_procs dsdp_seeds.
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
   let '(s, u3, u2, u1, v1) :=

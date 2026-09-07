@@ -143,10 +143,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_raw_trace_sim_advantage_le == the simulation bound at the raw        *)
 (*                              interpreter trace                             *)
 (* alice_raw_trace_guess_V2_le == the guessing bound there                    *)
-(* alice_raw_trace_real_experiment_avg == the raw-trace experiment at a       *)
-(*                              sampled re-encryption coin                    *)
-(* alice_raw_trace_ideal_experiment_avg == its simulated counterpart          *)
-(* alice_raw_trace_sim_advantage_avg_le == the simulation bound at that coin  *)
 (*                                                                            *)
 (* Along a sequence of instances                                              *)
 (*                                                                            *)
@@ -241,8 +237,8 @@ Local Notation alice_sample_fdist := (alice_sample_fdist (R:=R) I).
 Local Notation alice_hop_tupleT := (alice_hop_tupleT I).
 Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
 Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
-Local Notation Rho2 := (Rho2 (R:=R) (I:=I)).
-Local Notation Rho3 := (Rho3 (R:=R) (I:=I)).
+Local Notation RB1 := (RB1 (R:=R) (I:=I)).
+Local Notation RC1 := (RC1 (R:=R) (I:=I)).
 Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
 Local Notation alice_tuple_bob_zero := (alice_tuple_bob_zero (R:=R) (I:=I)).
 Local Notation alice_tuple_all_zero := (alice_tuple_all_zero (R:=R) (I:=I)).
@@ -266,7 +262,6 @@ Local Notation trace_dataT := (trace_dataT I).
 Local Notation alice_traceT := (alice_traceT I).
 Local Notation alice_trace_of_hop_tuple := (alice_trace_of_hop_tuple (I:=I)).
 Local Notation dsdp_protocol := (dsdp_protocol (R:=R) (I:=I)).
-Local Notation trace_of_run := (trace_of_run (R:=R) (I:=I)).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 Local Notation alice_trace_realE := (alice_trace_realE (R:=R) I).
 Local Notation alice_trace_ideal := (alice_trace_ideal (R:=R) I).
@@ -285,15 +280,16 @@ Local Notation alice_trace_idealE := (alice_trace_idealE (R:=R) I).
 
    bob_challenge_adversary D packages the following procedure:
 
-     1. Sample (V2, V3, R2, R3, RA1, RA2, Rho3).
+     1. Sample (V2, V3, R2, R3, RA1, RA2, RC1, RB2, RC2).
      2. Select V2 as the real challenge plaintext.  The experiment returns a
         challenge ciphertext ch encrypting either V2 or zero under Bob's key.
-     3. Compute Sout, use ch as Bob's ciphertext, and use Rho3 to construct
-        Charlie's ciphertext.
+     3. Compute Sout, use ch as Bob's ciphertext, and use RC1 and RC2 to
+        construct Charlie's ciphertext and his re-encryption.
      4. Call D on the resulting joint value, shown flattened as
 
           (V2, V3, R2, R3, RA1, RA2, Sout, ch,
-           enc charlie_pkey V3 (rand_of_renc Rho3)),
+           enc charlie_pkey V3 (rand_of_renc RC1),
+           enc alice_pkey (Sout - u1 * v1 + R2 + R3) (rand_of_renc RC2)),
 
         and return its Boolean result.
 
@@ -420,7 +416,7 @@ Definition charlie_challenge_adversary
     indcpa_adversary :=
   {| adv_state := hop1_stateT ;
      adv_choose := `p_ Hop1State ;
-     adv_plain := fun c => c.1.1.1.2 ;
+     adv_plain := fun c => c.1.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
 (* D's acceptance probability on the real experiment equals the real-bit
@@ -432,10 +428,10 @@ Lemma hop0_real_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_real]
-        = `p_ (protocol_RV Hop0State Rho2 bob_pkey
+        = `p_ (protocol_RV Hop0State RB1 bob_pkey
                  (fun c : hop0_stateT => c.1.1.1.1) hop0_assemble).
   rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
 rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
@@ -449,10 +445,10 @@ Lemma hop0_zero_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
-        = `p_ (protocol_RV Hop0State Rho2 bob_pkey
+        = `p_ (protocol_RV Hop0State RB1 bob_pkey
                  (fun _ : hop0_stateT => 0) hop0_assemble).
   rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
 rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
@@ -479,10 +475,10 @@ Lemma hop1_real_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
-        = `p_ (protocol_RV Hop1State Rho3 charlie_pkey
-                 (fun c : hop1_stateT => c.1.1.1.2) hop1_assemble).
+        = `p_ (protocol_RV Hop1State RC1 charlie_pkey
+                 (fun c : hop1_stateT => c.1.1.1.1.2) hop1_assemble).
   rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
 rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
@@ -497,10 +493,10 @@ Lemma hop1_zero_challengeE
 Proof.
 rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_all_zero]
-        = `p_ (protocol_RV Hop1State Rho3 charlie_pkey
+        = `p_ (protocol_RV Hop1State RC1 charlie_pkey
                  (fun _ : hop1_stateT => 0) hop1_assemble).
   rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
 rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
@@ -554,12 +550,13 @@ rewrite [X in _ * X]fdistmapE (big_pred1 v); last first.
 rewrite !dist_of_RVE [RHS]pfwd1_pairC /unstable.swap /=.
 case: (eqVneq `Pr[ [% V2, V3] = (v2, v3) ] 0) => [H0|H0].
   by rewrite H0 mul0r pfwd1_domin_RV1.
-by rewrite -[RHS]cpr_eqE_mul (dsdp_alice_hop_tuple_cond_sim v H0) mulrC.
+rewrite -[RHS]cpr_eqE_mul (dsdp_alice_hop_tuple_cond_sim v H0).
+by rewrite mulrC /alice_simulator dist_of_RVE.
 Qed.
 
 (* A trace test D lifted to Alice's hopping tuple by alice_trace_of_hop_tuple.
    The lift is what lets the two ciphertext hops bound the trace distance.
-     |accept D `p_[% V2, V3, trace_of_run dsdp_protocol Alice]
+     |accept D `p_[% V2, V3, AliceTrace]
       - accept D alice_trace_ideal| *)
 Definition hop_tuple_distinguisher
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
@@ -714,7 +711,7 @@ Definition alice_trace_chain :=
   \epsilon[ alice_claim tuple_distinguisher ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept (distinguisher_of_predictor predict)
-             (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
+             (`p_ [% V2, V3, AliceTrace])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept tuple_distinguisher G0) by accept_trace_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
@@ -760,7 +757,7 @@ Local Notation tuple_distinguisher := (hop_tuple_distinguisher D).
 Definition alice_trace_sim_chain :=
   \epsilon[ alice_claim tuple_distinguisher ]{
     (* the trace of a run of the protocol by the interpreter *)
-    start (accept D (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
+    start (accept D (`p_ [% V2, V3, AliceTrace])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept tuple_distinguisher G0) by accept_trace_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
@@ -1033,7 +1030,7 @@ Qed.
    Alice's fixed key context.  The binder is annotated because the
    bounded-sequence coercion is inserted only at a known domain. *)
 Local Notation encoded_predictor g_raw :=
-  (fun b : 15.-bseq trace_dataT =>
+  (fun b : 18.-bseq trace_dataT =>
      g_raw (map decode_a b)).
 
 (* The guessing bound restated at the raw interpreter trace, before any
@@ -1061,96 +1058,6 @@ Qed.
 
 End dsdp_alice_raw_trace_bounds.
 
-Section dsdp_alice_raw_trace_avg.
-Context {R : realType}.
-Variable I : dsdp_instance.
-(* The instance's fields under the names this development gives them.  They
-   are the scheme data, the weights, the three keys and the two second-hop
-   coins. *)
-Local Notation AHE := (scheme_AHE I).
-Local Notation Renc := (scheme_renc I).
-Local Notation card_renc := (scheme_card_renc I).
-Local Notation rand_of_renc := (@scheme_rand_of_renc I).
-Local Notation dk_a := (inst_dk_a I).
-
-(* Each abbreviation reads the instance, except the per-coin ones, which
-   replace Charlie's second-hop coin by w.  The two reduction adversaries are
-   among them, so the summand at w names them there. *)
-Local Notation DI := (Standard_DSDP_Interface AHE).
-Local Notation trace_dataT := (trace_dataT I).
-Local Notation pkey_of_dk := (inst_pkey_of_party I).
-Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
-Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
-Local Notation AliceRawTrace_coin w :=
-  (alice_raw_trace (R:=R) (I:=inst_with_rc2 I w)).
-Local Notation ideal_avg := (alice_trace_ideal_avg (R:=R) I).
-Local Notation alice_trace_of_hop_tuple_coin w :=
-  (alice_trace_of_hop_tuple (I:=inst_with_rc2 I w)).
-Local Notation indcpa_epsilon := (indcpa_epsilon (R:=R) (S:=I)).
-Local Notation bob_challenge_adversary_coin w :=
-  (bob_challenge_adversary (R:=R) (I:=inst_with_rc2 I w)).
-Local Notation charlie_challenge_adversary_coin w :=
-  (charlie_challenge_adversary (R:=R) (I:=inst_with_rc2 I w)).
-
-(* Decoding at Alice's own key pair, the only setting in which the encoding
-   is inverted.  [alice_raw_trace_decodeE] keeps the general two-key form
-   because Alice's trace holds no public-key mark to constrain. *)
-Local Notation decode_a := (di_data_of_trace_data dk_a (pub_of_priv dk_a)).
-
-(* The encoded-trace test a raw-trace test induces, decoding with Alice's
-   fixed key context.  The binder is annotated because the bounded-sequence
-   coercion is inserted only at a known domain. *)
-Local Notation encoded_distinguisher D_raw :=
-  (fun x : plain AHE * plain AHE * 15.-bseq trace_dataT =>
-     D_raw (x.1.1, x.1.2,
-            map decode_a x.2)).
-
-(* The Boolean real raw-trace experiment, at a uniformly sampled re-encryption
-   coin.  The test reads the two honest inputs and Alice's raw trace at that
-   coin. *)
-Definition alice_raw_trace_real_experiment_avg
-    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
-    R.-fdist bool :=
-  fdist_uniform card_renc >>= (fun w =>
-    fdistmap (fun t => D_raw (V2 t, V3 t, AliceRawTrace_coin w t))
-      (alice_sample_fdist (R:=R) (inst_with_rc2 I w))).
-
-(* The Boolean ideal raw-trace experiment: the averaged ideal trace law read
-   through the decoded test. *)
-Definition alice_raw_trace_ideal_experiment_avg
-    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
-    R.-fdist bool :=
-  fdistmap (encoded_distinguisher D_raw) ideal_avg.
-
-(* The averaged gap between the real and the ideal raw-trace experiment.  It
-   is at most the average of the two per-coin hop advantages of the decoded
-   test. *)
-Theorem alice_raw_trace_sim_advantage_avg_le
-    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
-  `| Pr (alice_raw_trace_real_experiment_avg D_raw) [set true]
-     - Pr (alice_raw_trace_ideal_experiment_avg D_raw) [set true] |
-  <= \sum_(w in Renc)
-       (fdist_uniform card_renc : R.-fdist Renc) w
-       * (indcpa_epsilon (pkey_of_dk Bob)
-            (bob_challenge_adversary_coin w (fun x =>
-               D_raw (x.1.1, x.1.2,
-                      map decode_a (alice_trace_of_hop_tuple_coin w x.2))))
-          + indcpa_epsilon (pkey_of_dk Charlie)
-            (charlie_challenge_adversary_coin w (fun x =>
-               D_raw (x.1.1, x.1.2,
-                      map decode_a (alice_trace_of_hop_tuple_coin w x.2))))).
-Proof.
-(* Push the decoded test through the outer coin bind; each branch is then
-   the per-coin corollary, which consumes the round trip of
-   alice_raw_trace_decodeE. *)
-rewrite /alice_raw_trace_real_experiment_avg
-  /alice_raw_trace_ideal_experiment_avg.
-rewrite /alice_trace_ideal_avg fdistmap_bind.
-apply: fdist_mixture_advantage_le => w; rewrite 2!Pr_fdistmap_bool.
-exact: (alice_raw_trace_sim_advantage_le (I:=inst_with_rc2 I w) D_raw).
-Qed.
-
-End dsdp_alice_raw_trace_avg.
 
 (* The class-conditional argument along a sequence of DSDP instances: one
    instance at each security parameter, the IND-CPA assumption made there, and
@@ -1219,7 +1126,7 @@ Lemma f_guess_V2_advantageE k :
   f_guess_V2 k
   = `| accept (distinguisher_of_predictor (predict k))
          (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])
+                AliceTrace (R:=R) (I:=I k)])
        - 0 |.
 Proof.
 by rewrite /f_guess_V2 /alice_trace_guess_V2_pr guess_V2_acceptE
@@ -1257,8 +1164,7 @@ exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]{ fun k =>
     (* the trace of a run of the protocol by the interpreter *)
     start (accept (distinguisher_of_predictor (predict k))
              (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
-                      Alice])) ;
+                    AliceTrace (R:=R) (I:=I k)])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (tuple_distinguisher k) (G0 k))
       by accept_trace_tupleE _ ;
@@ -1299,8 +1205,7 @@ exact: (result_sound (\epsilon[ alice_claims_admissible_at k ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept (distinguisher_of_predictor (predict k))
              (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
-                      Alice])) ;
+                    AliceTrace (R:=R) (I:=I k)])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (tuple_distinguisher k) (G0 k))
       by accept_trace_tupleE _ ;
@@ -1409,7 +1314,7 @@ Lemma f_sim_advantageE k :
   f_sim_advantage k
   = `| accept (trace_distinguishers k)
          (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])
+                AliceTrace (R:=R) (I:=I k)])
        - accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)) |.
 Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
 
@@ -1417,7 +1322,7 @@ Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
    simulation advantage.  The class admits its two reduction adversaries at
    every k.
      |accept (trace_distinguishers k)
-        `p_[% V2, V3, trace_of_run dsdp_protocol Alice]
+        `p_[% V2, V3, AliceTrace]
       - accept (trace_distinguishers k) (alice_trace_ideal (I k))| *)
 Theorem alice_trace_sim_advantage_negligible :
   negligible_fun f_sim_advantage.
@@ -1427,8 +1332,7 @@ exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]{ fun k =>
     (* the trace of a run of the protocol by the interpreter *)
     start (accept (trace_distinguishers k)
              (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
-                      Alice])) ;
+                    AliceTrace (R:=R) (I:=I k)])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G0 k))
       by accept_trace_tupleE _ ;

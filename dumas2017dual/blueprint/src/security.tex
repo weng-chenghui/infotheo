@@ -233,8 +233,9 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.sample_V3,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.sample_R2,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.sample_R3,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Rho2,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Rho3,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.EncCoins,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RB1,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RC1,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA1,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA2,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Sout,
@@ -367,9 +368,8 @@ $V_3$.
 
 \begin{lemma}[Guessing at the all-zero endpoint]
   \label{lem:guess_all_zero}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceSpectator,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_of,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_indep,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceSpectatorPre,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.spectator_pre_indep,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_cinde,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_VarRV_cond_uniform,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_V2_cond_Sout,
@@ -610,22 +610,22 @@ carries the three bounds above to the executed protocol.
   \texttt{alice\_raw\_trace\_guess\_V2\_le}.
 \end{theorem}
 
-\begin{theorem}[Simulation at the raw trace, averaged over the coin]
+\begin{theorem}[Simulation at the raw trace]
   \label{thm:raw_trace_simulation}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_raw_trace_sim_advantage_avg_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_raw_trace_sim_advantage_le}
   \rocqok
   \uses{thm:alice_trace_bounds,lem:raw_trace_decode}
-  With the re-encryption coin drawn uniformly, a Boolean test tells the real
-  raw trace from the simulated one, on average over that coin, no more often
-  than the average of the two per-coin hop advantages of its decoded lift.
-  \[ \big| \Pr[\,D(\mathrm{Real}^{\mathrm{avg}})\,]
-       - \Pr[\,D(\mathrm{Ideal}^{\mathrm{avg}})\,] \big|
-     \le \textstyle\sum_w \mathcal{U}(w)\,\epshopsum{D_w} \]
-  Drawing the coin makes the statement one about the protocol rather than about
-  one of its executions, and both terms of the bound are conditional on the
-  IND-CPA assumption, one at Bob's key and one at Charlie's.
+  A Boolean test tells the real raw trace from the simulated one no more often
+  than the two hop advantages of its decoded lift.
+  \[ \big| \Pr[\,D(\mathrm{Real})\,]
+       - \Pr[\,D(\mathrm{Ideal})\,] \big|
+     \le \epshopsum{D} \]
+  The programs draw the re-encryption coin, so the statement is one about the
+  protocol rather than about one of its executions, and both terms of the
+  bound are conditional on the IND-CPA assumption, one at Bob's key and one at
+  Charlie's.
   Proved in \texttt{dsdp\_alice\_main.v} as
-  \texttt{alice\_raw\_trace\_sim\_advantage\_avg\_le}.
+  \texttt{alice\_raw\_trace\_sim\_advantage\_le}.
 \end{theorem}
 
 \begin{theorem}[Trace and tuple leave the same uncertainty]

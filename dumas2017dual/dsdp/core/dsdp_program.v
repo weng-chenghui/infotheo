@@ -66,6 +66,7 @@ Let data := di_data DI.
 Let d := di_data_of_plain DI.
 Let e := di_data_of_cipher DI.
 Let k := di_data_of_priv_key DI.
+Let rd := di_data_of_rand DI.
 
 (* Per-instance decoder for recv-and-decrypt: at the Standard interface this is
    the scheme's [dec].  Typed through the interface carriers so DRecv_dec can
@@ -101,26 +102,30 @@ Definition enc_pk (p : party_id) (m : msgT) (r : randT) : encT :=
   di_encrypt DI (ek p) m r.
 Local Notation E := enc_pk.
 
-Definition pbob (dk : priv_keyT)(v2 : msgT)(rb1 rb2 : randT) :
+Definition pbob (dk : priv_keyT)(v2 : msgT) :
   @sproc dsdp_dtype data bob_idx _ _ :=
   DInit (k dk) (
   DInit (d v2) (
+  @DSample DI _ _ _ (fun rb1 =>
   DSend (pn alice) (e (E bob v2 rb1)) (
   DRecv_dec decode (pn alice) dk (fun d2 =>
   DRecv_enc (pn alice) (fun a3 =>
+  @DSample DI _ _ _ (fun rb2 =>
     DSend (pn charlie) (e (a3 *h (E charlie d2 rb2))) (
-  DFinish)))))).
+  DFinish)))))))).
 
-Definition pcharlie (dk : priv_keyT)(v3 : msgT)(rc1 rc2 : randT) :
+Definition pcharlie (dk : priv_keyT)(v3 : msgT) :
   @sproc dsdp_dtype data charlie_idx _ _ :=
   DInit (k dk) (
   DInit (d v3) (
+  @DSample DI _ _ _ (fun rc1 =>
   DSend (pn alice) (e (E charlie v3 rc1)) (
-  DRecv_dec decode (pn bob) dk (fun d3 => (
+  DRecv_dec decode (pn bob) dk (fun d3 =>
+  @DSample DI _ _ _ (fun rc2 =>
     DSend (pn alice) (e (E alice d3 rc2))
-  DFinish))))).
+  DFinish)))))).
 
-Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)(ra1 ra2 : randT) :
+Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT) :
   @sproc dsdp_dtype data alice_idx _ _ :=
   DInit (k dk) (
   DInit (d v1) (
@@ -131,12 +136,14 @@ Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)(ra1 ra2 : randT) :
   DInit (d r3) (
   DRecv_enc (pn bob) (fun c2 =>
   DRecv_enc (pn charlie) (fun c3 =>
+  @DSample DI _ _ _ (fun ra1 =>
+  @DSample DI _ _ _ (fun ra2 =>
   let a2 := (c2 ^h u2 *h (E bob r2 ra1)) in
   let a3 := (c3 ^h u3 *h (E charlie r3 ra2)) in
     DSend (pn bob) (e a2) (
     DSend (pn bob) (e a3) (
     DRecv_dec decode (pn charlie) dk (fun g =>
-    DRet (d (dadd (dsub (dsub g r2) r3) (dmul u1 v1))))))))))))))).
+    DRet (d (dadd (dsub (dsub g r2) r3) (dmul u1 v1))))))))))))))))).
   
 (* Randomness variables for each party's encryptions *)
 Variables (rb1 rb2 rc1 rc2 ra1 ra2 : randT).
@@ -146,23 +153,30 @@ Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msgT).
 (* The three DSDP programs packed as aprocs, which hides their differing
    fuel and session-type indices. *)
 Definition dsdp_saprocs : seq (aproc dsdp_dtype data) :=
-  [aprocs palice dk_a v1 u1 u2 u3 r2 r3 ra1 ra2; 
-          pbob dk_b v2 rb1 rb2; 
-          pcharlie dk_c v3 rc1 rc2].
+  [aprocs palice dk_a v1 u1 u2 u3 r2 r3;
+          pbob dk_b v2;
+          pcharlie dk_c v3].
 
 (* Erased processes for interpreter (strips session type indices) *)
 Definition dsdp_procs : seq (proc data) :=
   erase_aprocs dsdp_saprocs.
 
+(* The seed streams of one run, in the party order alice, bob, charlie.  Each
+   party's stream lists the coins its program draws, in program order. *)
+Definition dsdp_seeds : seq (seq data) :=
+  [:: [:: rd ra1; rd ra2]; [:: rd rb1; rd rb2]; [:: rd rc1; rd rc2]].
+
 Definition dsdp h :=
-  interp h dsdp_procs (nseq 3 [::]) (nseq 3 [::]).
+  interp h dsdp_procs (nseq 3 [::]) dsdp_seeds.
 
 (* Fuel bound computed from program structure:
-   - palice: 14 (Init*7 + Recv_enc*2 + Send*2 + Recv_dec + Ret=2)
-   - pbob: 7 (Init*2 + Send + Recv_dec + Recv_enc + Send + Finish=1)
-   - pcharlie: 6 (Init*2 + Send + Recv_dec + Send + Finish=1)
-   Total: 14 + 7 + 6 = 27 *)
-Definition dsdp_max_fuel : nat := 27.
+   - palice: 16 (Init*7 + Recv_enc*2 + Sample*2 + Send*2 + Recv_dec + Ret=2)
+   - pbob: 9 (Init*2 + Sample + Send + Recv_dec + Recv_enc + Sample + Send
+     + Finish=1)
+   - pcharlie: 8 (Init*2 + Sample + Send + Recv_dec + Sample + Send
+     + Finish=1)
+   Total: 16 + 9 + 8 = 33 *)
+Definition dsdp_max_fuel : nat := 33.
 
 (* ========================================================================== *)
 (* Algebraic correctness proof using homomorphic properties                    *)

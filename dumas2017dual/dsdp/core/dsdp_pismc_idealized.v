@@ -77,11 +77,17 @@ Let ek (p : party_id) : pub_key AHE :=
 
 (* Instantiate programs from dsdp_program.v *)
 Let palice_inst :=
-  @dsdp_program.palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3 runit runit.
-Let pbob_inst :=
-  @dsdp_program.pbob AHE alice bob charlie pn ek dk_b v2 runit runit.
+  @dsdp_program.palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3.
+Let pbob_inst := @dsdp_program.pbob AHE alice bob charlie pn ek dk_b v2.
 Let pcharlie_inst :=
-  @dsdp_program.pcharlie AHE alice bob charlie pn ek dk_c v3 runit runit.
+  @dsdp_program.pcharlie AHE alice bob charlie pn ek dk_c v3.
+
+(* The seed streams of one run, in the party order alice, bob, charlie.  Each
+   party draws two coins, and the idealized scheme ignores their values. *)
+Let rd := di_data_of_rand DI.
+Let dsdp_ideal_seeds : seq (seq data) :=
+  [:: [:: rd runit; rd runit]; [:: rd runit; rd runit];
+      [:: rd runit; rd runit]].
 
 Local Open Scope sproc_scope.
 Local Open Scope proc_scope.
@@ -94,30 +100,35 @@ Definition dsdp_ideal_procs : seq (proc data) :=
   erase_aprocs dsdp_ideal_saprocs.
 
 (* Fuel bound *)
-Lemma dsdp_ideal_max_fuel_ok : [> dsdp_ideal_saprocs] = 27.
+Lemma dsdp_ideal_max_fuel_ok : [> dsdp_ideal_saprocs] = 33.
 Proof. reflexivity. Qed.
 
-(* DSDP (Idealized): after interpretation, all processes are terminal. *)
-Lemma dsdp_ideal_terminates traces seeds :
+(* DSDP (Idealized): after interpretation, all processes are terminal.  The
+   seed streams hold the six coins the three programs draw. *)
+Lemma dsdp_ideal_terminates traces :
   all_terminated
-    (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces seeds).1.1.
+    (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces
+       dsdp_ideal_seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* DSDP (Idealized): after interpretation, no process is Fail. *)
-Lemma dsdp_ideal_no_fail traces seeds :
-  all_nonfail (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces seeds).1.1.
+Lemma dsdp_ideal_no_fail traces :
+  all_nonfail
+    (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces
+       dsdp_ideal_seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* Main theorem: DSDP (Idealized) session environment converges to empty. *)
-Theorem dsdp_ideal_senv_zero traces seeds :
+Theorem dsdp_ideal_senv_zero traces :
   exists aps' : seq (aproc dsdp_dtype data),
     erase_aprocs aps' =
-      (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces seeds).1.1 /\
+      (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces
+         dsdp_ideal_seeds).1.1 /\
     aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
   @senv_bounded _ _ [:: 0; 1; 2] [> dsdp_ideal_saprocs]
-    dsdp_ideal_saprocs traces seeds (leqnn _).
+    dsdp_ideal_saprocs traces dsdp_ideal_seeds (leqnn _).
 exists aps'.
 split; first exact: Herase.
 apply: terminated_nonfail_senv_zero.
@@ -189,15 +200,20 @@ Let u4 : 'I_4 -> msg := fun i =>
   match val i with 0 => u0' | 1 => u1' | 2 => u2' | _ => u3' end.
 Let r4_3 : 'I_3 -> msg := fun i =>
   match val i with 0 => r0' | 1 => r1' | _ => r2' end.
-Let rand4_3 : 'I_3 -> rand AHE := fun _ => runit.
-
 (* 4-party programs: Alice + first relay + intermediate + last relay *)
 Let palice_4 := @palice_n DI decode ek4 2
   [:: @Ordinal 3 0 isT; @Ordinal 3 1 isT; @Ordinal 3 2 isT]
-  dk0 v0 u4 r4_3 rand4_3.
-Let pfirst_4 := @DParty_first DI decode ek4 1 2 dk1 v1 runit runit.
-Let pinter_4 := @DParty_intermediate DI decode ek4 2 0 1 3 dk2 v2 runit runit.
-Let plast_4 := @DParty_last DI decode ek4 3 2 dk3 v3 runit runit.
+  dk0 v0 u4 r4_3.
+Let pfirst_4 := @DParty_first DI decode ek4 1 2 dk1 v1.
+Let pinter_4 := @DParty_intermediate DI decode ek4 2 0 1 3 dk2 v2.
+Let plast_4 := @DParty_last DI decode ek4 3 2 dk3 v3.
+
+(* The seed streams of one run: Alice draws one coin per relay, each relay
+   draws two. *)
+Let rd := di_data_of_rand DI.
+Let dsdp_n4_seeds : seq (seq data) :=
+  [:: [:: rd runit; rd runit; rd runit]; [:: rd runit; rd runit];
+      [:: rd runit; rd runit]; [:: rd runit; rd runit]].
 
 Local Open Scope sproc_scope.
 Local Open Scope proc_scope.
@@ -218,13 +234,10 @@ Let dk_relay_4 : 'I_3 -> priv_key AHE := fun i =>
   match val i with 0 => dk1 | 1 => dk2 | _ => dk3 end.
 Let v_relay_4 : 'I_3 -> plain AHE := fun i =>
   match val i with 0 => v1 | 1 => v2 | _ => v3 end.
-Let r1_relay_4 : 'I_3 -> rand AHE := fun _ => runit.
-Let r2_relay_4 : 'I_3 -> rand AHE := fun _ => runit.
-
 Lemma dsdp_n4_builder_correct :
   @dsdp_n_procs DI decode ek4 2
     [:: @Ordinal 3 0 isT; @Ordinal 3 1 isT; @Ordinal 3 2 isT]
-    dk0 v0 u4 r4_3 rand4_3 dk_relay_4 v_relay_4 r1_relay_4 r2_relay_4 =
+    dk0 v0 u4 r4_3 dk_relay_4 v_relay_4 =
   erase_aprocs [aprocs palice_4; pfirst_4; pinter_4; plast_4].
 Proof. by native_compute. Qed.
 
@@ -235,29 +248,31 @@ Definition dsdp_n4_saprocs : seq (aproc dsdp_dtype data) :=
 Definition dsdp_n4_procs : seq (proc data) :=
   erase_aprocs dsdp_n4_saprocs.
 
-Lemma dsdp_n4_max_fuel_ok : [> dsdp_n4_saprocs] = 31.
+Lemma dsdp_n4_max_fuel_ok : [> dsdp_n4_saprocs] = 40.
 Proof. reflexivity. Qed.
 
 (* 4-party termination: after interpretation, all processes are terminal *)
-Lemma dsdp_n4_terminates traces seeds :
-  all_terminated (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces seeds).1.1.
+Lemma dsdp_n4_terminates traces :
+  all_terminated
+    (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces dsdp_n4_seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* 4-party no-fail: after interpretation, no process is Fail *)
-Lemma dsdp_n4_no_fail traces seeds :
-  all_nonfail (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces seeds).1.1.
+Lemma dsdp_n4_no_fail traces :
+  all_nonfail
+    (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces dsdp_n4_seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* 4-party session environment convergence *)
-Theorem dsdp_n4_senv_zero traces seeds :
+Theorem dsdp_n4_senv_zero traces :
   exists aps' : seq (aproc dsdp_dtype data),
     erase_aprocs aps' =
-      (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces seeds).1.1 /\
+      (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces dsdp_n4_seeds).1.1 /\
     aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
   @senv_bounded _ _ [:: 0; 1; 2; 3] [> dsdp_n4_saprocs]
-    dsdp_n4_saprocs traces seeds (leqnn _).
+    dsdp_n4_saprocs traces dsdp_n4_seeds (leqnn _).
 exists aps'.
 split; first exact: Herase.
 apply: terminated_nonfail_senv_zero.
@@ -319,16 +334,22 @@ Let u5 : 'I_5 -> msg := fun i =>
   match val i with 0 => u0' | 1 => u1' | 2 => u2' | 3 => u3' | _ => u4' end.
 Let r5_4 : 'I_4 -> msg := fun i =>
   match val i with 0 => r0' | 1 => r1' | 2 => r2' | _ => r3' end.
-Let rand5_4 : 'I_4 -> rand AHE := fun _ => runit.
-
 (* 5-party programs *)
 Let palice_5 := @palice_n DI decode ek5 3
   [:: @Ordinal 4 0 isT; @Ordinal 4 1 isT; @Ordinal 4 2 isT; @Ordinal 4 3 isT]
-  dk0 v0 u5 r5_4 rand5_4.
-Let pfirst_5 := @DParty_first DI decode ek5 1 2 dk1 v1 runit runit.
-Let pinter2_5 := @DParty_intermediate DI decode ek5 2 0 1 3 dk2 v2 runit runit.
-Let pinter3_5 := @DParty_intermediate DI decode ek5 3 0 2 4 dk3 v3 runit runit.
-Let plast_5 := @DParty_last DI decode ek5 4 3 dk4 v4 runit runit.
+  dk0 v0 u5 r5_4.
+Let pfirst_5 := @DParty_first DI decode ek5 1 2 dk1 v1.
+Let pinter2_5 := @DParty_intermediate DI decode ek5 2 0 1 3 dk2 v2.
+Let pinter3_5 := @DParty_intermediate DI decode ek5 3 0 2 4 dk3 v3.
+Let plast_5 := @DParty_last DI decode ek5 4 3 dk4 v4.
+
+(* The seed streams of one run: Alice draws one coin per relay, each relay
+   draws two. *)
+Let rd := di_data_of_rand DI.
+Let dsdp_n5_seeds : seq (seq data) :=
+  [:: [:: rd runit; rd runit; rd runit; rd runit];
+      [:: rd runit; rd runit]; [:: rd runit; rd runit];
+      [:: rd runit; rd runit]; [:: rd runit; rd runit]].
 
 Local Open Scope sproc_scope.
 Local Open Scope proc_scope.
@@ -351,12 +372,14 @@ Definition dsdp_n5_saprocs : seq (aproc dsdp_dtype data) :=
 Definition dsdp_n5_procs : seq (proc data) :=
   erase_aprocs dsdp_n5_saprocs.
 
-Lemma dsdp_n5_terminates traces seeds :
-  all_terminated (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces seeds).1.1.
+Lemma dsdp_n5_terminates traces :
+  all_terminated
+    (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces dsdp_n5_seeds).1.1.
 Proof. by native_compute. Qed.
 
-Lemma dsdp_n5_no_fail traces seeds :
-  all_nonfail (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces seeds).1.1.
+Lemma dsdp_n5_no_fail traces :
+  all_nonfail
+    (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces dsdp_n5_seeds).1.1.
 Proof. by native_compute. Qed.
 
 End dsdp_n5_idealized_duality.

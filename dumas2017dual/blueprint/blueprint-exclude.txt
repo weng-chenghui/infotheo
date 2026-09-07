@@ -34,28 +34,25 @@ benaloh_indcpa_scheme:f_adv_benaloh
 # dsdp_alice_hop_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, and the constant-weight random variables.
 dsdp_alice_hop_secrecy:AliceSpectatorPre
-dsdp_alice_hop_secrecy:AliceSpectatorPre2
 dsdp_alice_hop_secrecy:U1c
 dsdp_alice_hop_secrecy:U2c
 dsdp_alice_hop_secrecy:U3c
 dsdp_alice_hop_secrecy:V1c
 dsdp_alice_hop_secrecy:alice_constraint_holds
-dsdp_alice_hop_secrecy:alice_hop_tuple_of_spectatorK
 dsdp_alice_hop_secrecy:alice_inputs_constE
-dsdp_alice_hop_secrecy:alice_spectator_of_hop_tuple
-dsdp_alice_hop_secrecy:alice_spectator_pre2T
 dsdp_alice_hop_secrecy:alice_spectator_preT
-dsdp_alice_hop_secrecy:alice_spectator_prod
-dsdp_alice_hop_secrecy:alice_spectator_prodE
-dsdp_alice_hop_secrecy:alice_spectator_regroup
 dsdp_alice_hop_secrecy:alice_var_uniform
+dsdp_alice_hop_secrecy:RB2
+dsdp_alice_hop_secrecy:RC2
+dsdp_alice_hop_secrecy:alice_pkey
+dsdp_alice_hop_secrecy:alice_tuple_all_zeroE
+dsdp_alice_hop_secrecy:charlie_reenc_cipher
+dsdp_alice_hop_secrecy:rc1_uniformE
 dsdp_alice_hop_secrecy:fdistmap_prod
 dsdp_alice_hop_secrecy:fdistmap_prodr
 dsdp_alice_hop_secrecy:hop0_pair_uniformE
 dsdp_alice_hop_secrecy:hop1_state_of
 dsdp_alice_hop_secrecy:inde_RV_of_prod
-dsdp_alice_hop_secrecy:rho3_uniformE
-dsdp_alice_hop_secrecy:spectator_pre2_uniformE
 dsdp_alice_hop_secrecy:spectator_pre_indep
 dsdp_alice_hop_secrecy:spectator_pre_pair_uniformE
 dsdp_alice_hop_secrecy:spectator_pre_uniformE
@@ -71,6 +68,9 @@ dsdp_alice_trace_link:combine_rand_rest_indep
 dsdp_alice_trace_link:combine_rand_rest_uniformE
 dsdp_alice_trace_link:combine_rand_trace_indep
 dsdp_alice_trace_link:combine_rand_uniformE
+dsdp_alice_trace_link:dsdp_seeds
+dsdp_alice_trace_link:trace_priv_keys
+dsdp_alice_trace_link:alice_raw_trace_priv_keysE
 dsdp_alice_trace_link:hop_tuple_of_rand_trace
 dsdp_alice_trace_link:hop_tuple_of_rand_traceK
 dsdp_alice_trace_link:rand_trace_of_hop_tuple
@@ -98,6 +98,9 @@ dsdp_alice_main:hop1_zero_challengeE
 # generic eventually-false corollary.
 idealized_indcpa_scheme:card_renc_ord1
 dsdp_alice_instances:idealized_asymptotic
+dsdp_alice_instances:idealized_alice_data
+dsdp_alice_instances:paillier_alice_data
+dsdp_alice_instances:benaloh_alice_data
 dsdp_alice_instances:idealized_bob_cipher_constant
 dsdp_alice_instances:idealized_charlie_cipher_constant
 dsdp_alice_instances:paillier_asymptotic
@@ -179,13 +182,17 @@ dsdp_random_inputs:uniform_view_mask
 # bound along an instance sequence is written from, and the
 # superpolynomial-growth helpers the witness sequence discharges its
 # negligibility field with; the blueprint cites the three records.
-dsdp_instance:expnn_gt_monomial
 dsdp_instance:f_adv
+dsdp_instance:dsdp_enc_coins
+dsdp_instance:enc_coinsT
+dsdp_instance:tuple_of_enc_coins
+dsdp_instance:enc_coins_of_tuple
+dsdp_instance:tuple_of_enc_coinsK
+dsdp_instance:card_dsdp_enc_coins
+dsdp_instance:dsdp_enc_coins_fdist
+dsdp_instance:dsdp_alice_data
 dsdp_instance:f_size
 dsdp_instance:inst_pkey_of_party
-dsdp_instance:inst_with_rc2
-dsdp_instance:negligible_fun_inv_expnn
-dsdp_instance:negligible_fun_inv_ge_expnn
 dsdp_instance:pkey_of_dk
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.

@@ -45,12 +45,19 @@ Local Open Scope sproc_scope.
 Section idealized.
 Variable R : realType.
 
-(* The idealized sequence: the schemes of idealized_indcpa_scheme.v, zero
-   weights with a unit on Charlie's input, and one seed per key space. *)
-Definition idealized_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (idealized_scheme_sequence R)
+(* Alice's data on the idealized sequence: zero weights with a unit on
+   Charlie's input, and one seed per key space. *)
+Definition idealized_alice_data :
+    dsdp_alice_data (idealized_scheme_sequence R) :=
+  @Build_dsdp_alice_data R (idealized_scheme_sequence R)
     (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
-    (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
+    (fun _ => GRing.unitr1 _)
+    (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
+
+(* The idealized sequence: the schemes of idealized_indcpa_scheme.v with that
+   data. *)
+Definition idealized_instance_sequence : dsdp_instance_sequence R :=
+  mk_dsdp_instance_sequence (idealized_scheme_sequence R) idealized_alice_data.
 
 (* The idealized instance at k, over a plaintext space of cardinality
    (k+2)^(k+2).  Its guessing probability is 1/#|plain| rather than 0, so the
@@ -63,9 +70,7 @@ Definition idealized_instance (k : nat) : dsdp_instance :=
    1/#|plain| term. *)
 Definition idealized_asymptotic :
     dsdp_asymptotic idealized_instance_sequence :=
-  mk_dsdp_asymptotic (idealized_scheme_sequence R)
-    (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
-    (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
+  mk_dsdp_asymptotic (idealized_scheme_sequence R) idealized_alice_data.
 
 (* The constant predictor's distinguisher reads only the state slot.  Its
    Bob-key reduction ignores the challenge ciphertext, so the cipher-constant
@@ -77,7 +82,7 @@ Lemma idealized_bob_cipher_constant (k : nat) :
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] rho3].
+by case: c => [[[vv ms] ra] coins].
 Qed.
 
 (* The Charlie-key counterpart of idealized_bob_cipher_constant. *)
@@ -88,7 +93,7 @@ Lemma idealized_charlie_cipher_constant (k : nat) :
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] c2zero].
+by case: c => [[[[vv ms] ra] rc2] c2zero].
 Qed.
 
 (* The hypotheses of alice_trace_guess_V2_negligible hold together at least
@@ -150,9 +155,13 @@ Proof. by rewrite card_plain_pq. Qed.
 (* The Paillier instance sequence: the Paillier scheme sequence of
    paillier_indcpa_scheme.v with Alice's weights and the three key seeds.  It
    is the sequence alice_trace_guess_V2_negligible is applied at below. *)
-Definition paillier_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (paillier_scheme_sequence P)
+Definition paillier_alice_data :
+    dsdp_alice_data (paillier_scheme_sequence P) :=
+  @Build_dsdp_alice_data R (paillier_scheme_sequence P)
     v1 u1 u2 u3 u3_unit sa sb sc.
+
+Definition paillier_instance_sequence : dsdp_instance_sequence R :=
+  mk_dsdp_instance_sequence (paillier_scheme_sequence P) paillier_alice_data.
 
 (* The DSDP instance at k on the Paillier IND-CPA scheme.  Everything
    number-theoretic about the moduli beyond the fields of P stays assumed. *)
@@ -180,8 +189,7 @@ Proof. by []. Qed.
    from the asymptotic form of residuosity. *)
 Definition paillier_asymptotic :
     dsdp_asymptotic paillier_instance_sequence :=
-  mk_dsdp_asymptotic (paillier_scheme_sequence P)
-    v1 u1 u2 u3 u3_unit sa sb sc.
+  mk_dsdp_asymptotic (paillier_scheme_sequence P) paillier_alice_data.
 
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter, with the two class premises every trace bound below is
@@ -241,7 +249,7 @@ Lemma paillier_bob_decide_constant_admissible k :
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] rho3].
+by case: c => [[[vv ms] ra] coins].
 Qed.
 
 (* The Charlie-key counterpart of paillier_bob_decide_constant_admissible, so
@@ -258,7 +266,7 @@ Lemma paillier_charlie_decide_constant_admissible k :
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] c2zero].
+by case: c => [[[[vv ms] ra] rc2] c2zero].
 Qed.
 
 (* Past some security parameter the derived class admits the decrypting
@@ -336,9 +344,13 @@ Proof. by rewrite card_plain_r. Qed.
 (* The Benaloh instance sequence: the Benaloh scheme sequence of
    benaloh_indcpa_scheme.v with Alice's weights and the three key seeds.  It
    is the sequence alice_trace_guess_V2_negligible is applied at below. *)
-Definition benaloh_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (benaloh_scheme_sequence B)
+Definition benaloh_alice_data :
+    dsdp_alice_data (benaloh_scheme_sequence B) :=
+  @Build_dsdp_alice_data R (benaloh_scheme_sequence B)
     v1 u1 u2 u3 u3_unit sa sb sc.
+
+Definition benaloh_instance_sequence : dsdp_instance_sequence R :=
+  mk_dsdp_instance_sequence (benaloh_scheme_sequence B) benaloh_alice_data.
 
 (* The DSDP instance at k on the Benaloh IND-CPA scheme.  Everything
    number-theoretic about the modulus and the block size beyond the fields of
@@ -366,8 +378,7 @@ Proof. by []. Qed.
    from the asymptotic form of residuosity. *)
 Definition benaloh_asymptotic :
     dsdp_asymptotic benaloh_instance_sequence :=
-  mk_dsdp_asymptotic (benaloh_scheme_sequence B)
-    v1 u1 u2 u3 u3_unit sa sb sc.
+  mk_dsdp_asymptotic (benaloh_scheme_sequence B) benaloh_alice_data.
 
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter, with the two class premises every trace bound below is
@@ -426,7 +437,7 @@ Lemma benaloh_bob_decide_constant_admissible k :
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] rho3].
+by case: c => [[[vv ms] ra] coins].
 Qed.
 
 (* The Charlie-key counterpart of benaloh_bob_decide_constant_admissible, so
@@ -440,7 +451,7 @@ Lemma benaloh_charlie_decide_constant_admissible k :
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] c2zero].
+by case: c => [[[[vv ms] ra] rc2] c2zero].
 Qed.
 
 (* Past some security parameter the derived class admits the decrypting
