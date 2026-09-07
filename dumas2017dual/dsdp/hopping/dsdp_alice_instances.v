@@ -325,8 +325,8 @@ Proof.
    with eps k the advantage dcr k assumes.  The two fields of
    paillier_asymptotic make f_size and f_adv negligible, f_size through the
    scheme-side reading of modulus growth as plaintext growth.  Those two are
-   the costs the three labels of the program carry, so the terminal of the
-   family monad reads the bound off the label list and transfers
+   the loss terms the three labels of the program carry, so the terminal over
+   the security parameter reads the bound off the label list and transfers
    negligibility to f_guess_V2. *)
 exact: (alice_trace_guess_V2_negligible (Q := paillier_instance_sequence)
           bob_admissible charlie_admissible paillier_asymptotic).
@@ -542,8 +542,8 @@ Proof.
    eps k the advantage residuosity k assumes.  The two fields of
    benaloh_asymptotic make f_size and f_adv negligible, f_size through the
    scheme-side reading of block-size growth as plaintext growth.  Those two
-   are the costs the three labels of the program carry, so the terminal of
-   the family monad reads the bound off the label list and transfers
+   are the loss terms the three labels of the program carry, so the terminal
+   over the security parameter reads the bound off the label list and transfers
    negligibility to f_guess_V2. *)
 exact: (alice_trace_guess_V2_negligible (Q := benaloh_instance_sequence)
           bob_admissible charlie_admissible benaloh_asymptotic).

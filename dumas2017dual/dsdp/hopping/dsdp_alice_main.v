@@ -154,8 +154,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_claims_admissible_at k ==                                            *)
 (*                              the dictionary of the class-conditional       *)
 (*                              guessing argument at the k-th instance        *)
-(* alice_label_negligible_at == every label of that dictionary costs a        *)
-(*                              negligible family along the sequence          *)
+(* alice_label_negligible_at == every label of that dictionary has a loss     *)
+(*                              negligible along the sequence                 *)
 (* alice_claims_admissible_negligible ==                                      *)
 (*                              that dictionary registered as a               *)
 (*                              negligibleClaims                              *)
@@ -172,8 +172,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*      alice_sim_claims_at k == the dictionary of the trace simulation       *)
 (*                              argument at the k-th instance                 *)
 (* alice_sim_label_negligible_at ==                                           *)
-(*                              every label of that dictionary costs a        *)
-(*                              negligible family along the sequence          *)
+(*                              every label of that dictionary has a loss     *)
+(*                              negligible along the sequence                 *)
 (* alice_sim_claims_negligible ==                                             *)
 (*                              that dictionary registered as a               *)
 (*                              negligibleClaims                              *)
@@ -459,7 +459,7 @@ Qed.
 
 (* The gap D shows between the real and the Bob-zero experiment equals the
    advantage of bob_challenge_adversary D against Bob's key.  Zeroing Bob's
-   slot costs exactly one IND-CPA advantage. *)
+   slot loses exactly one IND-CPA advantage. *)
 Lemma hop0_advantageE
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
   `| accept D (`p_ [% V2, V3, alice_tuple_real])
@@ -507,7 +507,7 @@ Qed.
 
 (* The gap D shows between the Bob-zero and the all-zero experiment equals the
    advantage of charlie_challenge_adversary D against Charlie's key.  Zeroing
-   Charlie's slot costs exactly one IND-CPA advantage. *)
+   Charlie's slot loses exactly one IND-CPA advantage. *)
 Lemma hop1_advantageE
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
   `| accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
@@ -584,7 +584,7 @@ Definition charlie_trace_adversary
   charlie_challenge_adversary (hop_tuple_distinguisher D).
 
 (* A trace test accepts as often as its lift on the hopping tuple.  The step
-   costs nothing, so the interpreter's own run stands as the first game. *)
+   loses nothing, so the interpreter's own run stands as the first game. *)
 Lemma accept_trace_tupleE
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   accept D (`p_ [% V2, V3, AliceTrace])
@@ -594,7 +594,7 @@ by rewrite /accept /hop_tuple_distinguisher alice_trace_realE fdistmap_comp.
 Qed.
 
 (* A trace test accepts the simulated trace as often as its lift accepts the
-   all-zero tuple.  The step costs nothing at the simulator end, as
+   all-zero tuple.  The step loses nothing at the simulator end, as
    accept_trace_tupleE does at the protocol end. *)
 Lemma accept_trace_ideal_tupleE
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
@@ -644,7 +644,7 @@ Local Open Scope epshop_scope.
 Variant alice_label := cpa_bob | cpa_charlie | uniform_fiber.
 
 (* What each label claims: the two games a hop moves between, and the
-   advantage it costs.  A step is checked against its label, so each advantage
+   advantage it loses.  A step is checked against its label, so each advantage
    is charged to the key its reduction comes from. *)
 Definition alice_claim
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
@@ -693,10 +693,10 @@ Proof. by rewrite mulr_natl mulr2n addrC. Qed.
    itself rather than a tuple of values standing for it.  The bound the
    program returns is the statement of alice_trace_guess_V2_le.
    The trace is a deterministic image of the hopping tuple, so the step to
-   the tuple costs nothing.  Each of the two ciphertext replacements carries
+   the tuple loses nothing.  Each of the two ciphertext replacements carries
    the key its advantage is charged to, which is what the class-conditional
-   reading and the family reading below read off a label.  The last line, the
-   term labelled uniform_fiber, is what that theorem adds to the simulation
+   reading and the sequence reading below read off a label.  The last line,
+   the term labelled uniform_fiber, is what that theorem adds to the simulation
    bound: the mass the leaked output leaves along the DSDP solution fiber,
    unconditional where the two hop terms are conditional on the IND-CPA
    assumption at one key each. *)
@@ -742,7 +742,7 @@ End alice_trace_chain.
    at the trace the interpreter hands Alice when it runs the DSDP protocol at
    a sample, steps to her hopping tuple at no loss, replaces the two
    ciphertext slots, and steps to the simulated trace at no loss.  The two
-   steps that cost nothing are accept_trace_tupleE and its simulator-side
+   steps that lose nothing are accept_trace_tupleE and its simulator-side
    twin, so the loss is the two hop labels and nothing else, and the gap
    result the chain returns on its own is the trace-level simulation bound: a
    test told the executed protocol apart from the simulation only as often as
@@ -776,7 +776,7 @@ Definition alice_trace_sim_chain :=
       by esym (accept_trace_ideal_tupleE D) }.
 
 (* A trace test separates the real and simulated laws by at most the two hop
-   advantages.  The steps at either end cost nothing, so only the two
+   advantages.  The steps at either end lose nothing, so only the two
    ciphertext replacements enter. *)
 Theorem alice_trace_sim_advantage_le :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
@@ -1159,7 +1159,7 @@ End dsdp_alice_raw_trace_avg.
    and that is what the statements of this section settle: they hold the
    argument fixed and let the instance vary, so the two class-conditional
    programs are written here and nowhere else. *)
-Section dsdp_alice_family.
+Section dsdp_alice_sequence.
 Context {R : realType}.
 Variable Q : dsdp_instance_sequence R.
 
@@ -1169,7 +1169,7 @@ Local Notation assumption := (sequence_assumption Q).
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter.  The [clear implicits] directive keeps the parameter an
    explicit argument, which is what makes predict k the predictor at k rather
-   than the family read at a trace. *)
+   than the sequence read at a trace. *)
 Variable predict : forall k, predictor (I k) (alice_traceT (I k)).
 Arguments predict : clear implicits.
 
@@ -1192,7 +1192,7 @@ Definition f_guess_V2 k : R := alice_trace_guess_V2_pr (predict k).
 
 (* The dictionary the guessing program below is written at, one at each
    security parameter.  It is a named constant rather than a lambda because
-   canonical inference keys on the head constant of the family. *)
+   canonical inference keys on the head constant of the sequence. *)
 Definition alice_claims_admissible_at (k : nat) : alice_label -> claim R :=
   alice_claim_admissible (assumption k)
     (hop_tuple_distinguisher (distinguisher_of_predictor (predict k))).
@@ -1230,11 +1230,11 @@ Qed.
    the per-k bounds below hold without it. *)
 Variable N : dsdp_asymptotic Q.
 
-(* Every label of the guessing dictionary costs a negligible family along the
+(* Every label of the guessing dictionary has a loss negligible along the
    sequence.  This is the whole asymptotic content, stated once for the
    dictionary. *)
 Lemma alice_label_negligible_at (l : alice_label) :
-  negligible_fun (fun k => claim_cost (alice_claims_admissible_at k l)).
+  negligible_fun (fun k => claim_loss (alice_claims_admissible_at k l)).
 Proof.
 case: l.
 - exact: adv_negligible N.
@@ -1349,14 +1349,14 @@ apply: lt_le_trans Heps' _; apply: le_trans Hhalf _.
 by rewrite lerD2l lerN2 ltW.
 Qed.
 
-(* A family of Boolean tests of Alice's executed trace, one at each security
+(* A sequence of Boolean tests of Alice's executed trace, one at each security
    parameter.  A test is what an indistinguishability statement quantifies
-   over, where the predictor family above is what a guessing statement
-   quantifies over, so the family declared here is a second observer of the
+   over, where the predictor sequence above is what a guessing statement
+   quantifies over, so the sequence declared here is a second observer of the
    same sequence and not a specialisation of the first.  The [clear implicits]
    directive keeps the security parameter an explicit argument, which is what
-   makes trace_distinguishers k the test at k rather than the family read at
-   an input. *)
+   makes trace_distinguishers k the test at k rather than the sequence read
+   at an input. *)
 Variable trace_distinguishers : forall k,
   distinguisher (plain (scheme_AHE (I k)) * plain (scheme_AHE (I k))
                  * alice_traceT (I k))%type.
@@ -1382,11 +1382,11 @@ Definition alice_sim_claims_at (k : nat) : alice_label -> claim R :=
   alice_claim_admissible (assumption k)
     (hop_tuple_distinguisher (trace_distinguishers k)).
 
-(* Every label of that dictionary costs a negligible family along the
+(* Every label of that dictionary has a loss negligible along the
    sequence.  The terminal branch is owed because the condition quantifies
    over the whole label type. *)
 Lemma alice_sim_label_negligible_at (l : alice_label) :
-  negligible_fun (fun k => claim_cost (alice_sim_claims_at k l)).
+  negligible_fun (fun k => claim_loss (alice_sim_claims_at k l)).
 Proof.
 case: l.
 - exact: adv_negligible N.
@@ -1413,7 +1413,7 @@ Lemma f_sim_advantageE k :
        - accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)) |.
 Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
 
-(* Along a sequence of instances, a family of trace tests has negligible
+(* Along a sequence of instances, a sequence of trace tests has negligible
    simulation advantage.  The class admits its two reduction adversaries at
    every k.
      |accept (trace_distinguishers k)
@@ -1451,10 +1451,10 @@ exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]{ fun k =>
       by esym (accept_trace_ideal_tupleE _) } }).
 Qed.
 
-End dsdp_alice_family.
+End dsdp_alice_sequence.
 
-(* The class-conditional guessing bound at one instance, the family bound of
-   f_guess_V2_le read along the sequence that repeats that instance.  The two
+(* The class-conditional guessing bound at one instance, the sequence bound
+   of f_guess_V2_le read along the sequence that repeats that instance.  The two
    class premises are the same restriction on the adversaries the predictor
    induces, made at a single security parameter. *)
 Section dsdp_alice_admissible.

@@ -23,7 +23,7 @@ Require Import dsdp_alice_hop_secrecy.
 (* proof. Therefore, a predictor or Boolean test on the trace can be turned   *)
 (* into one on the hopping tuple.                                             *)
 (*                                                                            *)
-(* alice_trace_of_hop_tupleE is what makes the trace level cost nothing: it   *)
+(* alice_trace_of_hop_tupleE is what makes the trace level lose nothing: it   *)
 (* lets the run the interpreter performs stand as the first game of a hopping *)
 (* argument whose remaining games live at the tuple, so what an adversary is  *)
 (* shown is the executed protocol rather than a tuple standing for it.        *)

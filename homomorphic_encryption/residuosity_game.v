@@ -205,7 +205,7 @@ Record residuosity_assumption := {
 (* The same bound with the two challenge laws exchanged.  A hybrid that
    returns from the unit law to the residue law spans the gap in this
    direction, and the absolute value is symmetric, so the reverse step of a
-   reduction costs the one assumption its forward step costs and no more. *)
+   reduction spends the one assumption its forward step spends and no more. *)
 Lemma residuosity_admissible_epsilon_leC (A : residuosity_assumption)
     (D : residuosity_distinguisher) :
   residuosity_admissible A D ->

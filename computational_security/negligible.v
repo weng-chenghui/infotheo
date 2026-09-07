@@ -131,7 +131,7 @@ Lemma negligible_fun_cst0 : negligible_fun (fun _ : nat => 0 : R).
 Proof. by move=> c; exists 0 => n Hn; rewrite invr_gt0 exprn_gt0 // ltr0n. Qed.
 
 (* A finite sum of negligible families is negligible.  A total over a list of
-   hop labels sums the cost family of each label, so this is the closure the
+   hop labels sums the loss family of each label, so this is the closure the
    asymptotic reading of such a total needs, one summand per label. *)
 Lemma negligible_fun_sum (I : Type) (s : seq I) (F : I -> nat -> R) :
   (forall i, negligible_fun (F i)) ->

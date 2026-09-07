@@ -345,7 +345,7 @@ Local Notation accept := (residuosity_accept (R:=R)).
 Variant benaloh_label := residuosity_y | residuosity_0.
 
 (* What each label claims: the two acceptance probabilities its residuosity
-   call moves between, and the epsilon that call assumes.  Each hop's cost,
+   call moves between, and the epsilon that call assumes.  Each hop's loss,
    target and justification is checked against its label's claim, so no step
    invents a call. *)
 Definition benaloh_claim (residuosity : benaloh_residuosity_assumption)
@@ -377,7 +377,7 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
    at the real arm, which is the multiplying reduction accepting under the
    residue law; one residuosity call moves that reduction to the unit law,
    where the generator power cancels; the middle equality replaces the
-   multiplying reduction by the plain one at no cost; and a second call moves
+   multiplying reduction by the plain one at no loss; and a second call moves
    the plain reduction back to the residue law, where its acceptance is the
    zero arm.  Each call logs its own labelled term, so what the chain carries
    is the list of the two assumptions the derived bound rests on.  Those two

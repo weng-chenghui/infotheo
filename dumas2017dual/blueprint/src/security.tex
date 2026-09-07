@@ -218,7 +218,7 @@ variables. They are recorded here as leaves.
 
 The two ciphertexts Alice receives are bounded by a ladder of two hops over one
 explicit distribution. Hop $i$ replaces the $i$-th received ciphertext by an
-encryption of zero, and the distinguishing gap it costs is exactly the
+encryption of zero, and the loss it incurs is exactly the
 real-or-zero advantage of a single-query adversary constructed in the same file.
 At the end of the ladder both slots encrypt zero and the fiber bound applies.
 Throughout, $m$ is the size of the plaintext space and the plaintext carrier is a
@@ -350,7 +350,7 @@ distinguishing gaps are equal. The second reduction applies the same
 construction to hops $1$ and $2$, using Charlie's key and challenge plaintext
 $V_3$.
 
-\begin{lemma}[One hop costs one reduction advantage]
+\begin{lemma}[One hop loses one reduction advantage]
   \label{lem:alice_view_advantage}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop0_advantageE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop1_advantageE}
@@ -586,7 +586,7 @@ carries the three bounds above to the executed protocol.
   public-key mark to constrain.
   \[ \mathrm{map}\ \delta_{\mathrm{dk}_A}\ (\mathrm{AliceTrace}(s))
        = \mathrm{AliceRawTrace}(s) \]
-  The encoding therefore costs Alice nothing and withholds nothing from her: a
+  The encoding therefore takes nothing from Alice and withholds nothing from her: a
   predictor reading either format succeeds on exactly the same samples, so a
   bound at the encoded trace is a bound at the trace the protocol produces.
 \end{lemma}
@@ -648,7 +648,7 @@ carries the three bounds above to the executed protocol.
 \label{ch:adversary_class}
 
 The bounds above quantify over every predictor and every distinguisher, and
-each hop costs the advantage of one reduction. This chapter adds the two
+each hop loses the advantage of one reduction. This chapter adds the two
 notions a computational reading of such a bound needs, an asymptotic one and an
 adversary class, records what forces the class to leave something out, and
 derives the class and its advantage, at Paillier and at Benaloh, from the
@@ -679,8 +679,8 @@ $e$-th residuosity assumption.
      \mathrm{negl}\Big(k \mapsto \sum_{i \in s} F_i(k)\Big) \]
   The negligible sequences are an additive submonoid of the sequences of
   reals, and a sum over a list lands in it as soon as each entry does. A
-  chain totals one cost per label of its loss, so a bound read off such a
-  total is negligible as soon as each label's cost sequence is.
+  chain totals one loss term per label of its loss, so a bound read off such
+  a total is negligible as soon as each label's loss sequence is.
 \end{lemma}
 
 \begin{definition}[An adversary class and the advantage it assumes]
@@ -862,7 +862,7 @@ $e$-th residuosity assumption.
   plaintext; the other passes the challenge through unchanged. Under
   $\mathsf{res}_{pq}$ they are the real and the zero arm of the IND-CPA
   experiment, by unfolding. The hybrid has three steps and the factor two is
-  what they cost: one call to $\mathcal{B}$ carries the real arm from
+  their loss: one call to $\mathcal{B}$ carries the real arm from
   $\mathsf{res}_{pq}$ to $\mathsf{unit}$, the middle step is free by
   Lemma~\ref{lem:unit_fdist_translateE}, and a second call carries the zero arm
   back. Both summands are conditional on $\mathcal{B}$, so no part of this
@@ -976,7 +976,7 @@ $e$-th residuosity assumption.
   reads the plaintext count off the packaging, whose plaintext space has
   exactly $p q$ elements, and the coin plumbing the abstract bound quantifies
   over is supplied by the scheme's own randomness. The computational side is
-  decisional composite residuosity and nothing further, at the cost
+  decisional composite residuosity and nothing further, at the loss
   Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is
   two keys, Bob's and Charlie's, times two residuosity calls per key, the
   identity \texttt{paillier\_epsilon\_at\_dcrE}. What is assumed here is
@@ -1001,7 +1001,7 @@ $e$-th residuosity assumption.
   The block size is where the unconditional term is read, so the factored
   form $r = p q$ enters as a premise of this reading and not of the scheme,
   which asks only $1 < r$. The computational side is $r$-th residuosity at
-  the cost Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor
+  the loss Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor
   four again two keys times two residuosity calls per key, the identity
   \texttt{benaloh\_epsilon\_at\_residuosityE}.
 \end{corollary}
@@ -1016,7 +1016,7 @@ a list of labels rather than a single real, so a finished derivation carries the
 assumptions its bound rests on alongside their numeric total. epsHop
 is the dual of the piSMC language of \texttt{smc/pismc.v}: piSMC writes what the
 parties of a protocol do, epsHop writes what a security argument about them
-costs. The three programs of the section are the Paillier hybrid, the Benaloh
+loses. The three programs of the section are the Paillier hybrid, the Benaloh
 hybrid, and Alice's two-hop ladder, each written in it, and the section closes
 with the reading of such a program along a sequence of security parameters.
 
@@ -1027,7 +1027,7 @@ are separated by a semicolon and read as follows.
   \item \texttt{hop l e to g' by H} invokes the assumption named $l$, loses
     $e$, and reaches the game $g'$, guaranteed by
     $H : \lvert \mathrm{current} - g' \rvert \le e$. The label $l$ fixes the
-    source game, the target and the cost through its claim, and $e$, $g'$ and
+    source game, the target and the loss through its claim, and $e$, $g'$ and
     $H$ are each checked against it.
   \item \texttt{same to g' by H} rewrites the game to $g'$ at no loss,
     guaranteed by $H : \mathrm{current} = g'$.
@@ -1041,7 +1041,7 @@ are separated by a semicolon and read as follows.
     chain, the distance between the game it opened at and the game it stopped
     at, is at most $c$.
 \end{itemize}
-The label slot names the assumption invoked and where, the cost slot is that
+The label slot names the assumption invoked and where, the loss slot is that
 assumption's advantage, and the proof slot says whether the term is assumed or
 exact. All three are compared with what the label claims. Each proof slot is
 mandatory: a statement is ill-formed without it, and a proof about the wrong
@@ -1054,13 +1054,14 @@ pending obligation, and a bound is read off it by projection.
        infotheo.computational_security.epshop.hop_obligation}
   \rocqok
   A label is an element of a type the client chooses, and a claim function
-  sends it to what it asserts. A claim $\mathrm{Claim}(s, t, e)$ names a
-  source game, a target game and a cost, and asserts that the two games lie
-  within that cost of each other.
+  $C$ sends it to what it asserts. A claim $\mathrm{Claim}(s, t, e)$ names a
+  source game, a target game and a loss term, and asserts that the two games
+  lie within that loss of each other.
   \[ \mathrm{obl}(\mathrm{Claim}(s,t,e))
        = \big(\lvert s - t \rvert \le e\big) \]
   The three components are read off by the projections $\mathrm{src}$,
-  $\mathrm{tgt}$ and $\mathrm{cost}$. The claim is the whole content of a
+  $\mathrm{tgt}$ and $\mathrm{loss}$, so the loss term of a label $l$ is
+  $\mathrm{loss}(C(l))$. The claim is the whole content of a
   label: it is what a step written under that label is checked against, so a
   step cannot record a call to an assumption it did not make. A label whose
   target is the zero game is what a bound on one game is written under, that
@@ -1079,19 +1080,20 @@ pending obligation, and a bound is read off it by projection.
   \rocqok
   \uses{def:claim}
   A loss is a list of labels, the free monoid on them, and its total
-  $\mathrm{ev}$ sums the cost each label's claim names, a monoid morphism to
+  $\mathrm{ev}$ sums the loss term each label's claim names, a monoid morphism to
   the additive reals.
-  \[ \mathrm{ev}(s) = \sum_{l \in s} \mathrm{cost}(l), \qquad
-     \mathrm{ev}[\,] = 0, \qquad \mathrm{ev}[l] = \mathrm{cost}(l) \]
+  \[ \mathrm{ev}(s) = \sum_{l \in s} \mathrm{loss}(C(l)), \qquad
+     \mathrm{ev}[\,] = 0, \qquad \mathrm{ev}[l] = \mathrm{loss}(C(l)) \]
   \[ \mathrm{ev}(s_1 \mathbin{+\!\!+} s_2)
        = \mathrm{ev}(s_1) + \mathrm{ev}(s_2) \]
   The same total is also written as a left fold seeded at the first label's
-  cost, and the two agree. On a list of literal labels the fold reduces to a
-  left-associated sum of the costs those labels claim, with no summation and
+  loss term, and the two agree. On a list of literal labels the fold reduces to
+  a left-associated sum of the loss terms those labels claim, with no summation and
   no list left in it.
   \[ \mathrm{tot}(s) = \mathrm{ev}(s), \qquad
      \mathrm{tot}[l_1, l_2, l_3]
-       = \big(\mathrm{cost}(l_1) + \mathrm{cost}(l_2)\big) + \mathrm{cost}(l_3) \]
+       = \big(\mathrm{loss}(C(l_1)) + \mathrm{loss}(C(l_2))\big)
+         + \mathrm{loss}(C(l_3)) \]
   A label names the assumption and the reduction that one step invokes, and the
   total forgets it. The two readings answer different questions about the same
   bound: the list says of each summand whether it is information-theoretic or
@@ -1120,8 +1122,8 @@ pending obligation, and a bound is read off it by projection.
   taking its own justification as an argument, and are written below as the
   three data $(a, b, s)$ they carry.
   \[ \mathrm{start}(g) = \big(g,\; g,\; [\,]\big), \qquad
-     \mathrm{hop}(l, e, g', H) = \big(\mathrm{src}(l),\; g',\; [l]\big)
-       \quad\text{for } H : \mathrm{obl}(l) \]
+     \mathrm{hop}(l, e, g', H) = \big(\mathrm{src}(C(l)),\; g',\; [l]\big)
+       \quad\text{for } H : \mathrm{obl}(C(l)) \]
   \[ \mathrm{same}(g', H) = \big(x,\; g',\; [\,]\big)
        \quad\text{for } H : x = g', \qquad
      \mathrm{then}(m, f, H_b) = \big(a_m,\; b_f,\;
@@ -1129,8 +1131,8 @@ pending obligation, and a bound is read off it by projection.
   An assumption enters a derivation at $\mathrm{hop}$ and nowhere else, which
   is why the loss of a finished chain is the complete list of what its bound
   rests on. A $\mathrm{hop}$ takes two further arguments, the equations
-  $e = \mathrm{cost}(l)$ and $g' = \mathrm{tgt}(l)$, each discharged by
-  reflexivity, so the cost and the target written at a step are the cost and
+  $e = \mathrm{loss}(C(l))$ and $g' = \mathrm{tgt}(C(l))$, each discharged by
+  reflexivity, so the loss and the target written at a step are the loss and
   the target the label claims. $\mathrm{same}$ is the step an
   information-theoretic identity between two games takes, and it leaves the
   loss as it stands; \texttt{le\_of\_eq} turns such an identity into the
@@ -1200,7 +1202,7 @@ pending obligation, and a bound is read off it by projection.
        = \mathrm{then}(m_1, \mathrm{then}(m_2, m_3)) \]
   The fourth field of a chain is a proof of a Boolean, whose uniqueness is a
   lemma of the library and not an axiom, so \texttt{chain\_observable\_eq}
-  costs nothing classical and the three laws are equalities rather than
+  uses nothing classical and the three laws are equalities rather than
   statements up to an equivalence. Their content for a program is that the
   regrouping and unit rearrangements the semicolon performs leave the loss, and
   therefore every bound of the three programs below, as it stands.
@@ -1289,7 +1291,7 @@ pending obligation, and a bound is read off it by projection.
   label names, at Bob's key and then at Charlie's, and a third step hops from
   the all-zero endpoint to the zero game, so the program is a chain bound on
   $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what each of the three labels
-  claims: the games a hop label joins and the advantage it costs, and the
+  claims: the games a hop label joins and the advantage it loses, and the
   all-zero game against the zero game.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
   The chain accumulates the two hop terms before the endpoint term, so the
@@ -1355,7 +1357,7 @@ pending obligation, and a bound is read off it by projection.
        = \big(\gamma_1(D),\ \gamma_2(D),\ \varepsilon_{\mathrm{cpa}}\big) \]
   The two class memberships are premises of the statements the program is
   written under, and are spent in the justification of the hop each one
-  licenses, which is the shape Definition~\ref{def:paillier_chain} has. The zero-game label costs the same
+  licenses, which is the shape Definition~\ref{def:paillier_chain} has. The zero-game label loses the same
   unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
   total adds one unconditional term to two class-conditional ones, and
   \texttt{alice\_admissible\_totalE} is the reordering that states it.
@@ -1399,15 +1401,15 @@ form a computational claim finally takes. A program indexed by the parameter is
 a sequence of results, and negligibility is a property of that sequence that no
 single member of it can carry.
 
-\begin{definition}[A dictionary all of whose labels cost a negligible sequence]
+\begin{definition}[A dictionary all of whose labels lose a negligible sequence]
   \label{def:negligible_claims}
   \rocq{infotheo.computational_security.epshop_family.negligibleClaims}
   \rocqok
   \uses{def:claim,def:negligible_fun}
   A sequence of dictionaries $C_k$ indexed by the security parameter, together
-  with the negligibility of the cost of every label of the label type, read
+  with the negligibility of the loss term of every label of the label type, read
   along that parameter.
-  \[ \forall l,\ \mathrm{negl}\big(k \mapsto \mathrm{cost}(C_k(l))\big) \]
+  \[ \forall l,\ \mathrm{negl}\big(k \mapsto \mathrm{loss}(C_k(l))\big) \]
   The condition quantifies over the label type and not over the labels one
   program spends, so whatever a chain over $C$ names is covered by it. It is
   attached to the dictionary once, and a theorem about any program written at
@@ -1594,10 +1596,10 @@ single member of it can carry.
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
   It is Theorem~\ref{thm:advantage_negligible} read over the program of
   Definition~\ref{def:alice_trace_chain_admissible} at the $k$-th instance. That
-  program spends the same three labels at every $k$, and the cost of each of
+  program spends the same three labels at every $k$, and the loss of each of
   them along the sequence is one of the two fields of
-  $\mathcal{N}$: both hop labels cost $\mathrm{negl}(k \mapsto
-  \varepsilon_{\mathrm{cpa},k})$ and the zero-game label costs
+  $\mathcal{N}$: both hop labels lose $\mathrm{negl}(k \mapsto
+  \varepsilon_{\mathrm{cpa},k})$ and the zero-game label loses
   $\mathrm{negl}(k \mapsto 1/m_k)$. Those two facts are attached to the
   dictionary once, as the negligibleClaims of
   Definition~\ref{def:negligible_claims}, and the theorem names no label.

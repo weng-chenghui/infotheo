@@ -68,12 +68,12 @@ Require Import negligible indcpa_game epshop.
 (* hybrid: the first hop moves the real experiment from the residue           *)
 (* challenge to the unit challenge, the second moves the zero experiment      *)
 (* back.  Between them the multiplier erases the plaintext, so the middle     *)
-(* step is an identity and costs nothing.                                     *)
+(* step is an identity and loses nothing.                                     *)
 (*                                                                            *)
 (* The two hops and the identity between them are written in the epsHop       *)
 (* language of computational_security/epshop.v: paillier_chain starts at the  *)
 (* real experiment, hops to the unit challenge, crosses the middle identity   *)
-(* at no cost, and hops back to the zero experiment.  Its loss is the list    *)
+(* at no loss, and hops back to the zero experiment.  Its loss is the list    *)
 (* of the two labels the bound rests on, one per residuosity call, and        *)
 (* paillier_claim, the dictionary written on the program's delimiter, fixes   *)
 (* for each label the two experiments its call moves between and the epsilon  *)
@@ -339,7 +339,7 @@ Local Notation accept := (residuosity_accept (R:=R)).
 Variant paillier_label := dcr_g | dcr_0.
 
 (* What each label claims: the two acceptance probabilities its residuosity
-   call moves between, and the epsilon that call assumes.  Each hop's cost,
+   call moves between, and the epsilon that call assumes.  Each hop's loss,
    target and justification is checked against its label's claim, so no step
    invents a call. *)
 Definition paillier_claim (dcr : dcr_assumption) (dk : priv_key AHE)

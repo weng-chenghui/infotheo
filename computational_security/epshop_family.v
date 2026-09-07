@@ -15,7 +15,7 @@ Require Import negligible epshop.
 (* single member of it can carry.                                             *)
 (*                                                                            *)
 (* A family program whose label list is the same at every k has a negligible  *)
-(* advantage as soon as every label's cost family is negligible.              *)
+(* advantage as soon as every label's loss family is negligible.              *)
 (* The negligible families form a submonoid of the additive families, closed  *)
 (* under addition and containing the zero family (negligible_fun_add,         *)
 (* negligible_fun_cst0, negligible_fun_sum) and downward closed               *)
@@ -29,10 +29,10 @@ Require Import negligible epshop.
 (* dictionary as a negligibleClaims.  A theorem about a program written at    *)
 (* that dictionary then names no label at all: canonical inference supplies   *)
 (* the negligibility of every label the program can spend, and the            *)
-(* asymptotic reading of a bound costs the client one hypothesis per          *)
+(* asymptotic reading of a bound asks the client one hypothesis per           *)
 (* quantity rather than one per hop.                                          *)
 (*                                                                            *)
-(* ## What the syntax costs                                                   *)
+(* ## What the syntax spends                                                  *)
 (*                                                                            *)
 (* \negligible[ and ]{ are new symbol tokens, and fun, => and by are          *)
 (* keywords already.  The second surface, the one taking a named family       *)
@@ -43,11 +43,11 @@ Require Import negligible epshop.
 (* ```                                                                        *)
 (*      negligibleClaims L R == a family of dictionaries indexed by the       *)
 (*                              security parameter, together with the         *)
-(*                              negligibility of the cost family of every     *)
+(*                              negligibility of the loss family of every     *)
 (*                              label                                         *)
 (*                  claims C == the dictionary a negligibleClaims carries, a  *)
 (*                              coercion to Funclass                          *)
-(*       claims_negligible C == every label of C costs a negligible family    *)
+(*       claims_negligible C == every label of C has a negligible loss family *)
 (*    loss_eval_negligible s == the total of a fixed label list, read along   *)
 (*                              the security parameter, is negligible         *)
 (*      advantage_negligible == a family program with a k-independent loss    *)
@@ -65,7 +65,7 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 
 (* A family of dictionaries indexed by the security parameter, together with
-   the fact that every label of the label type costs a negligible family.
+   the fact that every label of the label type has a negligible loss family.
    The field is quantified over the label type rather than over the labels of
    one program, so whatever a chain over this dictionary spends is covered,
    and a client registers the structure once beside its dictionary.
@@ -75,7 +75,7 @@ Local Open Scope ring_scope.
 Structure negligibleClaims (L : Type) (R : realType) := NegligibleClaims {
   claims :> nat -> L -> claim R ;
   claims_negligible :
-    forall l, negligible_fun (fun k => claim_cost (claims k l)) }.
+    forall l, negligible_fun (fun k => claim_loss (claims k l)) }.
 
 (* Set Implicit Arguments makes the carrier field implicit in the
    constructor, it being inferable from the type of the proof field; the
