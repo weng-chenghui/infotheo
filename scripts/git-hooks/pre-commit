@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# The repository's pre-commit hook.  Activate with
+#   git config core.hooksPath scripts/git-hooks
+# (this repository's core.hooksPath otherwise points at a directory of
+# sample hooks, so no git-level check runs).  Each step is a standalone
+# script with its own bypass variable; the Claude-side rocq-audit gate runs
+# separately and is not affected.
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# Statement comments: at most two prose sentences of at most twenty words.
+# Bypass once with COMMENT_SENTENCES_BYPASS=1.
+if [ -x "$ROOT/scripts/pre-commit-comment-sentences" ]; then
+  "$ROOT/scripts/pre-commit-comment-sentences"
+fi
