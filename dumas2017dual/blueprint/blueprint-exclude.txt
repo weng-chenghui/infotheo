@@ -40,6 +40,12 @@ dsdp_alice_hop_secrecy:V1c
 dsdp_alice_hop_secrecy:alice_constraint_holds
 dsdp_alice_hop_secrecy:alice_inputs_constE
 dsdp_alice_hop_secrecy:alice_spectator_preT
+# The eight-fold product the hopping-tuple record borrows its finite
+# structure from; the blueprint cites the record at def:alice_hop_ladder.
+dsdp_alice_hop_secrecy:alice_hop_prodT
+dsdp_alice_hop_secrecy:prod_of_alice_hop_tuple
+dsdp_alice_hop_secrecy:alice_hop_tuple_of_prod
+dsdp_alice_hop_secrecy:prod_of_alice_hop_tupleK
 dsdp_alice_hop_secrecy:alice_var_uniform
 dsdp_alice_hop_secrecy:alice_pkey
 dsdp_alice_hop_secrecy:alice_tuple_all_zeroE
@@ -70,6 +76,10 @@ dsdp_alice_trace_link:AliceCombineCoins
 dsdp_alice_trace_link:AliceSampleRest
 dsdp_alice_trace_link:alice_hop_tuple_coins_traceE
 dsdp_alice_trace_link:alice_sample_restT
+dsdp_alice_trace_link:alice_trace_prodT
+dsdp_alice_trace_link:prod_of_alice_trace_tuple
+dsdp_alice_trace_link:alice_trace_tuple_of_prod
+dsdp_alice_trace_link:prod_of_alice_trace_tupleK
 dsdp_alice_trace_link:combine_coins_rest_indep
 dsdp_alice_trace_link:combine_coins_rest_uniformE
 dsdp_alice_trace_link:combine_coins_trace_indep

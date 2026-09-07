@@ -149,8 +149,8 @@ Require Import epshop.
 (*                              input and carrying zero, under one coin       *)
 (* charlie_real_cipher, charlie_zero_cipher == the same two slots at          *)
 (*                              Charlie's key and coin                        *)
-(*          alice_hop_tupleT == the core information used to study Alice's    *)
-(*                              secrecy                                       *)
+(*           alice_hop_tuple == the record of the core information used       *)
+(*                              to study Alice's secrecy, read by field name  *)
 (*         alice_tuple_real == Alice's tuple as her protocol run produces it, *)
 (*                              both ciphertext slots real                    *)
 (*     alice_tuple_bob_zero == the same tuple with Bob's slot carrying zero   *)
@@ -251,6 +251,67 @@ Local Open Scope ring_scope.
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
+
+(* Alice's hopping tuple: two masks, two combine coins, the leaked output,
+   two received ciphertexts, and a re-encryption.  It is the observation the
+   Alice axis conditions every secrecy bound on. *)
+Record alice_hop_tuple (S : indcpa_scheme) := {
+  (* Alice's first mask *)
+  hop_mask2 : plain (scheme_AHE S) ;
+  (* Alice's second mask *)
+  hop_mask3 : plain (scheme_AHE S) ;
+  (* the coin of Alice's first combine *)
+  hop_coin_a1 : scheme_renc S ;
+  (* the coin of Alice's second combine *)
+  hop_coin_a2 : scheme_renc S ;
+  (* the weighted output Alice is allowed to learn *)
+  hop_output : plain (scheme_AHE S) ;
+  (* Bob's ciphertext to Alice *)
+  hop_bob_cipher : cipher (scheme_AHE S) ;
+  (* Charlie's ciphertext to Alice *)
+  hop_charlie_cipher : cipher (scheme_AHE S) ;
+  (* Charlie's re-encryption of the aggregate under Alice's key *)
+  hop_reenc_cipher : cipher (scheme_AHE S) }.
+
+Section alice_hop_tuple_finite.
+Variable S : indcpa_scheme.
+Local Notation AHE := (scheme_AHE S).
+Local Notation Renc := (scheme_renc S).
+
+(* The eight-fold product the hopping tuple is in bijection with.  The finite
+   structure lives on the product and the record borrows it. *)
+Definition alice_hop_prodT :=
+  (plain AHE * plain AHE * Renc * Renc * plain AHE
+   * cipher AHE * cipher AHE * cipher AHE)%type.
+
+(* The eight slots read off the record, in the order the record lists them. *)
+Definition prod_of_alice_hop_tuple (v : alice_hop_tuple S) : alice_hop_prodT :=
+  (hop_mask2 v, hop_mask3 v, hop_coin_a1 v, hop_coin_a2 v, hop_output v,
+   hop_bob_cipher v, hop_charlie_cipher v, hop_reenc_cipher v).
+
+(* The record rebuilt from those eight slots. *)
+Definition alice_hop_tuple_of_prod (t : alice_hop_prodT) : alice_hop_tuple S :=
+  let: (m2, m3, a1, a2, s, c2, c3, c4) := t in
+  {| hop_mask2 := m2 ; hop_mask3 := m3 ;
+     hop_coin_a1 := a1 ; hop_coin_a2 := a2 ; hop_output := s ;
+     hop_bob_cipher := c2 ; hop_charlie_cipher := c3 ;
+     hop_reenc_cipher := c4 |}.
+
+(* Reading the eight slots off the record and rebuilding it loses nothing. *)
+Lemma prod_of_alice_hop_tupleK :
+  cancel prod_of_alice_hop_tuple alice_hop_tuple_of_prod.
+Proof. by case. Qed.
+
+HB.instance Definition _ :=
+  Equality.copy (alice_hop_tuple S) (can_type prod_of_alice_hop_tupleK).
+HB.instance Definition _ :=
+  Choice.copy (alice_hop_tuple S) (can_type prod_of_alice_hop_tupleK).
+HB.instance Definition _ :=
+  Countable.copy (alice_hop_tuple S) (can_type prod_of_alice_hop_tupleK).
+HB.instance Definition _ : isFinite (alice_hop_tuple S) :=
+  CanIsFinite prod_of_alice_hop_tupleK.
+
+End alice_hop_tuple_finite.
 
 Section dsdp_alice_hop_secrecy.
 Context {R : realType}.
@@ -407,34 +468,40 @@ Definition charlie_reenc_cipher : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => enc alice_pkey (Sout t - u1 * v1 + R2 t + R3 t)
              (rand_of_renc (RC2 t)).
 
-(* The type of Alice's hopping tuple: two masks, two combine randomnesses,
-   the leaked output, two received ciphertexts, and Charlie's re-encryption. *)
-Definition alice_hop_tupleT : finType :=
-  ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
-   * cipher AHE * cipher AHE * cipher AHE)%type.
-
 (* Alice's hopping tuple with both ciphertext slots carrying their real
    plaintexts.  Her protocol run produces this tuple, and every bound of this
    file conditions on it. *)
 Definition alice_tuple_real :
-    {RV alice_sample_fdist -> alice_hop_tupleT} :=
-  [% [% R2, R3], [% RA1, RA2], Sout, bob_real_cipher, charlie_real_cipher,
-     charlie_reenc_cipher].
+    {RV alice_sample_fdist -> alice_hop_tuple I} :=
+  fun t => {| hop_mask2 := R2 t ; hop_mask3 := R3 t ;
+              hop_coin_a1 := RA1 t ; hop_coin_a2 := RA2 t ;
+              hop_output := Sout t ;
+              hop_bob_cipher := bob_real_cipher t ;
+              hop_charlie_cipher := charlie_real_cipher t ;
+              hop_reenc_cipher := charlie_reenc_cipher t |}.
 
 (* The same tuple with Bob's slot carrying zero and Charlie's still real.  It
    is the zero side of the challenge at Bob's key and the real side at
    Charlie's. *)
 Definition alice_tuple_bob_zero :
-    {RV alice_sample_fdist -> alice_hop_tupleT} :=
-  [% [% R2, R3], [% RA1, RA2], Sout, bob_zero_cipher, charlie_real_cipher,
-     charlie_reenc_cipher].
+    {RV alice_sample_fdist -> alice_hop_tuple I} :=
+  fun t => {| hop_mask2 := R2 t ; hop_mask3 := R3 t ;
+              hop_coin_a1 := RA1 t ; hop_coin_a2 := RA2 t ;
+              hop_output := Sout t ;
+              hop_bob_cipher := bob_zero_cipher t ;
+              hop_charlie_cipher := charlie_real_cipher t ;
+              hop_reenc_cipher := charlie_reenc_cipher t |}.
 
 (* The tuple with both ciphertext slots carrying zero.  Here the leaked output
    is the only channel from the honest inputs into Alice's view. *)
 Definition alice_tuple_all_zero :
-    {RV alice_sample_fdist -> alice_hop_tupleT} :=
-  [% [% R2, R3], [% RA1, RA2], Sout, bob_zero_cipher, charlie_zero_cipher,
-     charlie_reenc_cipher].
+    {RV alice_sample_fdist -> alice_hop_tuple I} :=
+  fun t => {| hop_mask2 := R2 t ; hop_mask3 := R3 t ;
+              hop_coin_a1 := RA1 t ; hop_coin_a2 := RA2 t ;
+              hop_output := Sout t ;
+              hop_bob_cipher := bob_zero_cipher t ;
+              hop_charlie_cipher := charlie_zero_cipher t ;
+              hop_reenc_cipher := charlie_reenc_cipher t |}.
 
 Let card_sample : #|alice_sampleT| = #|alice_sampleT|.-1.+1.
 Proof. exact: fdist_card_prednK alice_sample_fdist. Qed.
@@ -575,7 +642,7 @@ Qed.
    real ciphertext and Charlie's re-encryption from the stored coins.
    Here bob_challenge_adversary rebuilds D's input. *)
 Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
-    plain AHE * plain AHE * alice_hop_tupleT :=
+    plain AHE * plain AHE * alice_hop_tuple I :=
   (* bob_challenge_adversary D is the procedure that adapts D to the
      encryption experiment, hop0_assemble is the function that procedure uses
      to rebuild D's input, and D is the Boolean test on the rebuilt input.
@@ -583,20 +650,29 @@ Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
   let: (vv, masks, ra, coins) := c in
   let s := dsdp_output v1 u1 u2 u3 vv.1 vv.2 in
   (vv.1, vv.2,
-   (masks, ra, s, ch,
-    enc charlie_pkey vv.2 (rand_of_renc coins.1.1),
-    enc alice_pkey (s - u1 * v1 + masks.1 + masks.2)
-      (rand_of_renc coins.2))).
+   {| hop_mask2 := masks.1 ; hop_mask3 := masks.2 ;
+      hop_coin_a1 := ra.1 ; hop_coin_a2 := ra.2 ;
+      hop_output := s ; hop_bob_cipher := ch ;
+      hop_charlie_cipher :=
+        enc charlie_pkey vv.2 (rand_of_renc coins.1.1) ;
+      hop_reenc_cipher :=
+        enc alice_pkey (s - u1 * v1 + masks.1 + masks.2)
+          (rand_of_renc coins.2) |}).
 
 (* The tested hop-1 joint value formed by retaining Bob's stored zero
    ciphertext and placing ch in Charlie's ciphertext slot. *)
 Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
-    plain AHE * plain AHE * alice_hop_tupleT :=
+    plain AHE * plain AHE * alice_hop_tuple I :=
   let: (vv, masks, ra, rc2, c2zero) := c in
   let s := dsdp_output v1 u1 u2 u3 vv.1 vv.2 in
   (vv.1, vv.2,
-   (masks, ra, s, c2zero, ch,
-    enc alice_pkey (s - u1 * v1 + masks.1 + masks.2) (rand_of_renc rc2))).
+   {| hop_mask2 := masks.1 ; hop_mask3 := masks.2 ;
+      hop_coin_a1 := ra.1 ; hop_coin_a2 := ra.2 ;
+      hop_output := s ; hop_bob_cipher := c2zero ;
+      hop_charlie_cipher := ch ;
+      hop_reenc_cipher :=
+        enc alice_pkey (s - u1 * v1 + masks.1 + masks.2)
+          (rand_of_renc rc2) |}).
 
 (* Alice's own input as a constant random variable. *)
 Definition V1c : {RV alice_sample_fdist -> plain AHE} := const_RV _ v1.
@@ -773,12 +849,16 @@ Qed.
    leaked output.  Both ciphertext slots encrypt zero, and the re-encryption
    slot is built from the output, the two masks and Charlie's coin. *)
 Definition alice_hop_tuple_of_spectator
-    (p : alice_spectator_preT * plain AHE) : alice_hop_tupleT :=
-  (p.1.1, (coin_ra1 p.1.2, coin_ra2 p.1.2), p.2,
-   enc bob_pkey 0 (rand_of_renc (coin_rb1 p.1.2)),
-   enc charlie_pkey 0 (rand_of_renc (coin_rc1 p.1.2)),
-   enc alice_pkey (p.2 - u1 * v1 + p.1.1.1 + p.1.1.2)
-     (rand_of_renc (coin_rc2 p.1.2))).
+    (p : alice_spectator_preT * plain AHE) : alice_hop_tuple I :=
+  {| hop_mask2 := p.1.1.1 ; hop_mask3 := p.1.1.2 ;
+     hop_coin_a1 := coin_ra1 p.1.2 ; hop_coin_a2 := coin_ra2 p.1.2 ;
+     hop_output := p.2 ;
+     hop_bob_cipher := enc bob_pkey 0 (rand_of_renc (coin_rb1 p.1.2)) ;
+     hop_charlie_cipher :=
+       enc charlie_pkey 0 (rand_of_renc (coin_rc1 p.1.2)) ;
+     hop_reenc_cipher :=
+       enc alice_pkey (p.2 - u1 * v1 + p.1.1.1 + p.1.1.2)
+         (rand_of_renc (coin_rc2 p.1.2)) |}.
 
 (* Alice's all-zero view is that assembly at the sampled coordinates. *)
 Lemma alice_tuple_all_zeroE :
@@ -788,7 +868,7 @@ Proof. by []. Qed.
 
 (* A predictor reading Alice's all-zero view matches Bob's input with
    probability at most 1/#|plain AHE|. *)
-Lemma all_zero_guess_V2_le_invm (predict : predictor alice_hop_tupleT) :
+Lemma all_zero_guess_V2_le_invm (predict : predictor (alice_hop_tuple I)) :
   Pr alice_sample_fdist [set t | (predict `o alice_tuple_all_zero) t == V2 t]
     <= #|plain AHE|%:R^-1.
 Proof.
@@ -814,7 +894,7 @@ Qed.
    assembled into the all-zero view.  It reads only the output value, the
    weights and the three public keys. *)
 Definition alice_simulator (s : plain AHE) :
-    R.-fdist alice_hop_tupleT :=
+    R.-fdist (alice_hop_tuple I) :=
   fdistmap (fun c : alice_spectator_preT =>
               alice_hop_tuple_of_spectator (c, s))
     ((fdist_uniform card_plain_pair) `x (dsdp_enc_coins_fdist I R)).
@@ -825,7 +905,7 @@ Definition alice_simulator (s : plain AHE) :
 Lemma centropy_V2_all_zero_logm :
   `H( V2 | alice_tuple_all_zero ) = log (#|plain AHE|%:R : R).
 Proof.
-rewrite -(can_centropy_eq (g := fun v : alice_hop_tupleT => (v, v.1.1.1.2))
+rewrite -(can_centropy_eq (g := fun v : alice_hop_tuple I => (v, hop_output v))
             (h := fst) (fun=> erefl) V2 alice_tuple_all_zero)
         -centropy_V2_Sout_logm alice_tuple_all_zeroE.
 exact: (cinde_centropy_eq (cinde_RV_comp
@@ -837,7 +917,7 @@ Section alice_hop_tuple_all_zero_mass.
 
 Variable BT : finType.
 Variable W : {RV alice_sample_fdist -> BT}.
-Variable v : alice_hop_tupleT.
+Variable v : alice_hop_tuple I.
 Variables (w : BT) (s : plain AHE).
 
 (* On the event W = w, the leaked output equals s. *)
@@ -854,11 +934,11 @@ Lemma alice_hop_tuple_all_zero_pfwd1E :
       (v, w).
 Proof.
 (* The unfolding is spelled out: a [simpl] here would expand the finType
-   structures under the six tuple slots. *)
+   structures under the record's eight fields. *)
 apply: pfwd1_congr_preim => t.
 rewrite /RV2 /comp_RV !xpair_eqE.
 (* The mismatched branch is closed by the two implications rather than by
-   rewriting andbF, whose match against a six-slot tuple equality is
+   rewriting andbF.  That rewrite's match against the record equality is
    pathological. *)
 case: (W t =P w) => [Ew|_]; last by apply/idP/idP => /andP[].
 by rewrite -(Sout_determinedE Ew).
@@ -868,7 +948,7 @@ End alice_hop_tuple_all_zero_mass.
 
 (* Conditioned on the two secret inputs, Alice's all-zero view follows the
    simulator law fed the leaked output of those inputs. *)
-Lemma dsdp_alice_hop_tuple_cond_sim (v : alice_hop_tupleT)
+Lemma dsdp_alice_hop_tuple_cond_sim (v : alice_hop_tuple I)
     (v2 v3 : plain AHE) :
   `Pr[ [% V2, V3] = (v2, v3) ] != 0 ->
   `Pr[ alice_tuple_all_zero = v | [% V2, V3] = (v2, v3) ]
@@ -889,7 +969,7 @@ Qed.
 (* The ideal-world joint law of the two secret inputs and a simulated view.
    The honest input law is bound to the simulator fed the leaked output. *)
 Definition alice_ideal :
-    R.-fdist (plain AHE * plain AHE * alice_hop_tupleT) :=
+    R.-fdist (plain AHE * plain AHE * alice_hop_tuple I) :=
   vv <- `p_ [% V2, V3] ;
   fdistmap (fun v => (vv.1, vv.2, v))
     (alice_simulator (dsdp_output v1 u1 u2 u3 vv.1 vv.2)).

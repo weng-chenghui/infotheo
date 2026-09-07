@@ -234,7 +234,7 @@ Local Notation predictor := (predictor I).
    the shadowing is not recursive. *)
 Local Notation alice_sampleT := (alice_sampleT I).
 Local Notation alice_sample_fdist := (alice_sample_fdist (R:=R) I).
-Local Notation alice_hop_tupleT := (alice_hop_tupleT I).
+Local Notation alice_hop_tuple := (alice_hop_tuple I).
 Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
 Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
 Local Notation RB1 := (RB1 (R:=R) (I:=I)).
@@ -401,7 +401,7 @@ Local Notation alice_trace_idealE := (alice_trace_idealE (R:=R) I).
    the real bit it runs the real experiment, at the zero bit the Bob-zero
    one. *)
 Definition bob_challenge_adversary
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
     indcpa_adversary :=
   {| adv_state := hop0_stateT ;
      adv_choose := `p_ Hop0State ;
@@ -412,7 +412,7 @@ Definition bob_challenge_adversary
    At the real bit it runs the Bob-zero experiment, at the zero bit the
    all-zero one. *)
 Definition charlie_challenge_adversary
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
     indcpa_adversary :=
   {| adv_state := hop1_stateT ;
      adv_choose := `p_ Hop1State ;
@@ -422,7 +422,7 @@ Definition charlie_challenge_adversary
 (* D's acceptance probability on the real experiment equals the real-bit
    success probability of bob_challenge_adversary D against Bob's key. *)
 Lemma hop0_real_challengeE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   accept D (`p_ [% V2, V3, alice_tuple_real])
     = indcpa_success_real bob_pkey (bob_challenge_adversary D).
 Proof.
@@ -430,8 +430,7 @@ rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_real]
         = `p_ (protocol_RV Hop0State RB1 bob_pkey
                  (fun c : hop0_stateT => c.1.1.1.1) hop0_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
+  by rewrite /dist_of_RV; congr fdistmap.
 rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
@@ -439,7 +438,7 @@ Qed.
 (* D accepts the Bob-zero experiment as often as bob_challenge_adversary D
    succeeds at the zero bit. *)
 Lemma hop0_zero_challengeE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
     = indcpa_success_zero bob_pkey (bob_challenge_adversary D).
 Proof.
@@ -447,8 +446,7 @@ rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
         = `p_ (protocol_RV Hop0State RB1 bob_pkey
                  (fun _ : hop0_stateT => 0) hop0_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
+  by rewrite /dist_of_RV; congr fdistmap.
 rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
@@ -457,7 +455,7 @@ Qed.
    advantage of bob_challenge_adversary D against Bob's key.  Zeroing Bob's
    slot loses exactly one IND-CPA advantage. *)
 Lemma hop0_advantageE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   `| accept D (`p_ [% V2, V3, alice_tuple_real])
      - accept D (`p_ [% V2, V3, alice_tuple_bob_zero]) |
   = indcpa_epsilon bob_pkey (bob_challenge_adversary D).
@@ -469,7 +467,7 @@ Qed.
    succeeds at the real bit.  That experiment is the zero side for Bob's key
    and the real side for Charlie's. *)
 Lemma hop1_real_challengeE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
     = indcpa_success_real charlie_pkey (charlie_challenge_adversary D).
 Proof.
@@ -477,8 +475,7 @@ rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
         = `p_ (protocol_RV Hop1State RC1 charlie_pkey
                  (fun c : hop1_stateT => c.1.1.1.1.2) hop1_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
+  by rewrite /dist_of_RV; congr fdistmap.
 rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
@@ -487,7 +484,7 @@ Qed.
    success probability of charlie_challenge_adversary D against Charlie's
    key. *)
 Lemma hop1_zero_challengeE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   accept D (`p_ [% V2, V3, alice_tuple_all_zero])
     = indcpa_success_zero charlie_pkey (charlie_challenge_adversary D).
 Proof.
@@ -495,8 +492,7 @@ rewrite acceptE.
 have -> : `p_ [% V2, V3, alice_tuple_all_zero]
         = `p_ (protocol_RV Hop1State RC1 charlie_pkey
                  (fun _ : hop1_stateT => 0) hop1_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[v2 v3] [r2 r3]] [rb1 rc1 ra1 ra2 rb2 rc2]].
+  by rewrite /dist_of_RV; congr fdistmap.
 rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
@@ -505,7 +501,7 @@ Qed.
    advantage of charlie_challenge_adversary D against Charlie's key.  Zeroing
    Charlie's slot loses exactly one IND-CPA advantage. *)
 Lemma hop1_advantageE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   `| accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
      - accept D (`p_ [% V2, V3, alice_tuple_all_zero]) |
   = indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
@@ -529,7 +525,7 @@ Qed.
 (* The all-zero game is at most 1/#|plain AHE|, the mass left along the DSDP
    solution fiber.  It is the one term of every total below resting on no
    computational assumption. *)
-Lemma all_zero_game_V2_le_invm (predict : predictor alice_hop_tupleT) :
+Lemma all_zero_game_V2_le_invm (predict : predictor alice_hop_tuple) :
   accept (distinguisher_of_predictor predict)
          (`p_ [% V2, V3, alice_tuple_all_zero])
     <= #|plain AHE|%:R^-1.
@@ -644,7 +640,7 @@ Variant alice_label := cpa_bob | cpa_charlie | uniform_fiber.
    advantage it loses.  A step is checked against its label, so each advantage
    is charged to the key its reduction comes from. *)
 Definition alice_claim
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type)
     (l : alice_label) : claim R :=
   match l with
   | cpa_bob => Claim (accept D G0) (accept D G1) (eps_bob D)
@@ -656,7 +652,7 @@ Definition alice_claim
    epsilon the class assumption promises.  A hop here is conditional on the
    class admitting its reduction adversary. *)
 Definition alice_claim_admissible (A : indcpa_epsilon_assumption)
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type)
     (l : alice_label) : claim R :=
   match l with
   | cpa_bob =>
@@ -670,7 +666,7 @@ Definition alice_claim_admissible (A : indcpa_epsilon_assumption)
    alice_tuple_guess_V2_le states it.  The chain spends the two hops before
    the endpoint, so the bound reorders the three terms. *)
 Lemma alice_totalE
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   eps_bob D + eps_charlie D + #|plain AHE|%:R^-1
   = #|plain AHE|%:R^-1 + eps_bob D + eps_charlie D.
 Proof. by rewrite addrAC [X in X + _]addrC. Qed.
@@ -799,7 +795,7 @@ End alice_trace_sim_chain.
    splits at G1.
      |accept D G0 - accept D G2| *)
 Theorem alice_sim_advantage_le
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tuple)%type) :
   `| Pr (`p_ [% V2, V3, alice_tuple_real]) [set x | D x]
      - Pr alice_ideal [set x | D x] |
   <= indcpa_epsilon bob_pkey (bob_challenge_adversary D)
@@ -815,7 +811,7 @@ Qed.
    residue at G2 to the simulation bound.
      |accept D G0 - accept D G2| <= eps_bob D + eps_charlie D *)
 Theorem alice_tuple_guess_V2_le
-    (predict : predictor alice_hop_tupleT) :
+    (predict : predictor alice_hop_tuple) :
   Pr alice_sample_fdist [set t | (predict `o alice_tuple_real) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_epsilon bob_pkey

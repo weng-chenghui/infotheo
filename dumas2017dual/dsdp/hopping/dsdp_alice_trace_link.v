@@ -98,8 +98,8 @@ Require Import dsdp_alice_hop_secrecy.
 (*                                                                            *)
 (* Why the trace preserves the relevant information                           *)
 (*                                                                            *)
-(*        alice_trace_tupleT == the part of the hopping tuple that Alice's    *)
-(*                              trace reveals                                 *)
+(*         alice_trace_tuple == the record of the part of the hopping         *)
+(*                              tuple that Alice's trace reveals              *)
 (*           AliceTraceTuple == that trace-visible information in the real    *)
 (*                              experiment                                    *)
 (*        alice_sample_restT == the sampled data other than Alice's private   *)
@@ -403,14 +403,14 @@ Local Notation alice_ideal := (alice_ideal (R:=R) I).
    leaked output, Charlie's re-encryption, two ciphertexts, two masks, four
    weights, and the key mark. *)
 Definition alice_trace_of_hop_tuple
-    (v : alice_hop_tupleT I) :
+    (v : alice_hop_tuple I) :
     18.-bseq trace_dataT :=
-  [bseq inl (inl (inl v.1.1.1.2));
-        inl (inl (inr v.2));
-        inl (inl (inr v.1.2));
-        inl (inl (inr v.1.1.2));
-        inl (inl (inl v.1.1.1.1.1.2));
-        inl (inl (inl v.1.1.1.1.1.1));
+  [bseq inl (inl (inl (hop_output v)));
+        inl (inl (inr (hop_reenc_cipher v)));
+        inl (inl (inr (hop_charlie_cipher v)));
+        inl (inl (inr (hop_bob_cipher v)));
+        inl (inl (inl (hop_mask3 v)));
+        inl (inl (inl (hop_mask2 v)));
         inl (inl (inl u3)); inl (inl (inl u2));
         inl (inl (inl u1)); inl (inl (inl v1));
         inl (inr tt)].
@@ -509,10 +509,67 @@ Lemma alice_trace_idealE :
 Proof.
 rewrite /alice_trace_ideal /alice_ideal fdistmap_bind.
 congr (_ >>= _); apply: boolp.funext => vv.
-by rewrite /alice_trace_simulator 2!fdistmap_comp.
+by rewrite /alice_trace_simulator !fdistmap_comp.
 Qed.
 
 End dsdp_alice_trace_rv.
+
+(* The part of Alice's hopping tuple her trace shows: two masks, the leaked
+   output, two received ciphertexts, and a re-encryption.  It is the hopping
+   tuple without the two combine coins she keeps to herself. *)
+Record alice_trace_tuple (S : indcpa_scheme) := {
+  (* Alice's first mask *)
+  trace_mask2 : plain (scheme_AHE S) ;
+  (* Alice's second mask *)
+  trace_mask3 : plain (scheme_AHE S) ;
+  (* the weighted output Alice is allowed to learn *)
+  trace_output : plain (scheme_AHE S) ;
+  (* Bob's ciphertext to Alice *)
+  trace_bob_cipher : cipher (scheme_AHE S) ;
+  (* Charlie's ciphertext to Alice *)
+  trace_charlie_cipher : cipher (scheme_AHE S) ;
+  (* Charlie's re-encryption of the aggregate under Alice's key *)
+  trace_reenc_cipher : cipher (scheme_AHE S) }.
+
+Section alice_trace_tuple_finite.
+Variable S : indcpa_scheme.
+Local Notation AHE := (scheme_AHE S).
+
+(* The six-fold product the trace-visible tuple is in bijection with.  The
+   finite structure lives on the product and the record borrows it. *)
+Definition alice_trace_prodT :=
+  (plain AHE * plain AHE * plain AHE
+   * cipher AHE * cipher AHE * cipher AHE)%type.
+
+(* The six slots read off the record, in the order the record lists them. *)
+Definition prod_of_alice_trace_tuple (q : alice_trace_tuple S) :
+    alice_trace_prodT :=
+  (trace_mask2 q, trace_mask3 q, trace_output q,
+   trace_bob_cipher q, trace_charlie_cipher q, trace_reenc_cipher q).
+
+(* The record rebuilt from those six slots. *)
+Definition alice_trace_tuple_of_prod (t : alice_trace_prodT) :
+    alice_trace_tuple S :=
+  let: (m2, m3, s, c2, c3, c4) := t in
+  {| trace_mask2 := m2 ; trace_mask3 := m3 ; trace_output := s ;
+     trace_bob_cipher := c2 ; trace_charlie_cipher := c3 ;
+     trace_reenc_cipher := c4 |}.
+
+(* Reading the six slots off the record and rebuilding it loses nothing. *)
+Lemma prod_of_alice_trace_tupleK :
+  cancel prod_of_alice_trace_tuple alice_trace_tuple_of_prod.
+Proof. by case. Qed.
+
+HB.instance Definition _ :=
+  Equality.copy (alice_trace_tuple S) (can_type prod_of_alice_trace_tupleK).
+HB.instance Definition _ :=
+  Choice.copy (alice_trace_tuple S) (can_type prod_of_alice_trace_tupleK).
+HB.instance Definition _ :=
+  Countable.copy (alice_trace_tuple S) (can_type prod_of_alice_trace_tupleK).
+HB.instance Definition _ : isFinite (alice_trace_tuple S) :=
+  CanIsFinite prod_of_alice_trace_tupleK.
+
+End alice_trace_tuple_finite.
 
 Section dsdp_alice_trace_centropy.
 Context {R : realType}.
@@ -551,17 +608,14 @@ Local Notation charlie_reenc_cipher := (charlie_reenc_cipher (R:=R) (I:=I)).
 Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 
-(* The part of Alice's hopping tuple her trace shows: two masks, the leaked
-   output, two received ciphertexts, Charlie's re-encryption. *)
-Definition alice_trace_tupleT : finType :=
-  ((plain AHE * plain AHE) * plain AHE
-   * cipher AHE * cipher AHE * cipher AHE)%type.
-
 (* The trace-visible part of Alice's hopping tuple as a random variable.  All
    three ciphertext slots carry real encryptions. *)
-Definition AliceTraceTuple : {RV P -> alice_trace_tupleT} :=
-  [% [% R2, R3], Sout, bob_real_cipher, charlie_real_cipher,
-     charlie_reenc_cipher].
+Definition AliceTraceTuple : {RV P -> alice_trace_tuple I} :=
+  fun t => {| trace_mask2 := R2 t ; trace_mask3 := R3 t ;
+              trace_output := Sout t ;
+              trace_bob_cipher := bob_real_cipher t ;
+              trace_charlie_cipher := charlie_real_cipher t ;
+              trace_reenc_cipher := charlie_reenc_cipher t |}.
 
 (* The sample coordinates besides Alice's two combine coins: two inputs, two
    masks, and the four coins she does not draw. *)
@@ -638,20 +692,23 @@ Qed.
 (* Bob's input and the trace-visible tuple, rebuilt from the sample
    coordinates other than Alice's combine coins. *)
 Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
-    (plain AHE * alice_trace_tupleT) :=
+    (plain AHE * alice_trace_tuple I) :=
   (* The output slot is written with uncurry applied to an explicit pair
      because Sout is itself uncurry (dsdp_output ...) composed with
      [% V2, V3].  The curried spelling is not convertible and breaks the
      proof below. *)
   (u.1.1.1,
-   ((u.1.2.1, u.1.2.2),
-    uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2),
-    enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1.1.1),
-    enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.1.1.2),
-    enc (pkey_of_dk Alice)
-      (uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2)
-         - u1 * v1 + u.1.2.1 + u.1.2.2)
-      (rand_of_renc u.2.2))).
+   {| trace_mask2 := u.1.2.1 ; trace_mask3 := u.1.2.2 ;
+      trace_output := uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2) ;
+      trace_bob_cipher :=
+        enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1.1.1) ;
+      trace_charlie_cipher :=
+        enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.1.1.2) ;
+      trace_reenc_cipher :=
+        enc (pkey_of_dk Alice)
+          (uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2)
+             - u1 * v1 + u.1.2.1 + u.1.2.2)
+          (rand_of_renc u.2.2) |}).
 
 (* Alice's two combine coins are independent of Bob's input taken
    jointly with everything her executed trace shows. *)
@@ -667,21 +724,31 @@ Qed.
 (* Alice's hopping tuple rebuilt from her combine coins and the
    trace-visible tuple. *)
 Definition hop_tuple_of_coins_trace
-    (p : ((Renc * Renc) * alice_trace_tupleT)) :
-    alice_hop_tupleT I :=
-  (p.2.1.1.1.1, p.1, p.2.1.1.1.2, p.2.1.1.2, p.2.1.2, p.2.2).
+    (p : ((Renc * Renc) * alice_trace_tuple I)) :
+    alice_hop_tuple I :=
+  {| hop_mask2 := trace_mask2 p.2 ; hop_mask3 := trace_mask3 p.2 ;
+     hop_coin_a1 := p.1.1 ; hop_coin_a2 := p.1.2 ;
+     hop_output := trace_output p.2 ;
+     hop_bob_cipher := trace_bob_cipher p.2 ;
+     hop_charlie_cipher := trace_charlie_cipher p.2 ;
+     hop_reenc_cipher := trace_reenc_cipher p.2 |}.
 
 (* The combine coins and the trace-visible tuple read back off a
    hopping tuple. *)
 Definition coins_trace_of_hop_tuple
-    (v : alice_hop_tupleT I) :
-    ((Renc * Renc) * alice_trace_tupleT) :=
-  (v.1.1.1.1.2, (v.1.1.1.1.1, v.1.1.1.2, v.1.1.2, v.1.2, v.2)).
+    (v : alice_hop_tuple I) :
+    ((Renc * Renc) * alice_trace_tuple I) :=
+  ((hop_coin_a1 v, hop_coin_a2 v),
+   {| trace_mask2 := hop_mask2 v ; trace_mask3 := hop_mask3 v ;
+      trace_output := hop_output v ;
+      trace_bob_cipher := hop_bob_cipher v ;
+      trace_charlie_cipher := hop_charlie_cipher v ;
+      trace_reenc_cipher := hop_reenc_cipher v |}).
 
 (* The two relabellings are mutually inverse. *)
 Lemma hop_tuple_of_coins_traceK :
   cancel hop_tuple_of_coins_trace coins_trace_of_hop_tuple.
-Proof. by case=> ra [[[[m s] c0] c1] c2]. Qed.
+Proof. by case=> [[ra1 ra2] [m2 m3 s c2 c3 c4]]. Qed.
 
 (* Alice's hopping tuple is her combine coins together with the
    trace-visible tuple. *)
@@ -689,23 +756,23 @@ Lemma alice_hop_tuple_coins_traceE :
   alice_tuple_real
   = hop_tuple_of_coins_trace `o [% [% RA1, RA2], AliceTraceTuple].
 Proof.
-(* The combine coins stay eta-expanded as [% RA1, RA2]: [prod] has no
-   definitional eta, so [AliceCombineCoins] is not convertible with the pair
-   the hopping tuple carries. *)
+(* The combine coins are spelled as the pair combine_coins_trace_indep is
+   stated at.  The record keeps its two coin fields apart, so
+   [AliceCombineCoins] is convertible with that pair here as well. *)
 by [].
 Qed.
 
 (* Alice's executed trace read off the trace-visible tuple.  It holds the
    leaked output, Charlie's re-encryption, two ciphertexts, two masks, four
    weights, and the key mark. *)
-Definition trace_of_trace_tuple (q : alice_trace_tupleT) :
+Definition trace_of_trace_tuple (q : alice_trace_tuple I) :
     18.-bseq (trace_dataT I) :=
-  [bseq inl (inl (inl q.1.1.1.2));
-        inl (inl (inr q.2));
-        inl (inl (inr q.1.2));
-        inl (inl (inr q.1.1.2));
-        inl (inl (inl q.1.1.1.1.2));
-        inl (inl (inl q.1.1.1.1.1));
+  [bseq inl (inl (inl (trace_output q)));
+        inl (inl (inr (trace_reenc_cipher q)));
+        inl (inl (inr (trace_charlie_cipher q)));
+        inl (inl (inr (trace_bob_cipher q)));
+        inl (inl (inl (trace_mask3 q)));
+        inl (inl (inl (trace_mask2 q)));
         inl (inl (inl u3)); inl (inl (inl u2));
         inl (inl (inl u1)); inl (inl (inl v1));
         inl (inr tt)].
@@ -726,20 +793,20 @@ Definition trace_data_cipher (x : trace_dataT I) :
    positions the encoding writes it to. *)
 Definition trace_tuple_of_trace
     (b : 18.-bseq (trace_dataT I)) :
-    alice_trace_tupleT :=
+    alice_trace_tuple I :=
   let s := bseqval b in
-  ((trace_data_plain (nth (inr tt) s 5),
-    trace_data_plain (nth (inr tt) s 4)),
-   trace_data_plain (nth (inr tt) s 0),
-   trace_data_cipher (nth (inr tt) s 3),
-   trace_data_cipher (nth (inr tt) s 2),
-   trace_data_cipher (nth (inr tt) s 1)).
+  {| trace_mask2 := trace_data_plain (nth (inr tt) s 5) ;
+     trace_mask3 := trace_data_plain (nth (inr tt) s 4) ;
+     trace_output := trace_data_plain (nth (inr tt) s 0) ;
+     trace_bob_cipher := trace_data_cipher (nth (inr tt) s 3) ;
+     trace_charlie_cipher := trace_data_cipher (nth (inr tt) s 2) ;
+     trace_reenc_cipher := trace_data_cipher (nth (inr tt) s 1) |}.
 
 (* Encoding the trace-visible tuple into a trace is left-invertible: every
    slot of that tuple appears literally in the trace. *)
 Lemma trace_of_trace_tupleK :
   cancel trace_of_trace_tuple trace_tuple_of_trace.
-Proof. by case=> [[[[m s] c0] c1] c2]; case: m => r2 r3. Qed.
+Proof. by case. Qed.
 
 (* Alice's executed trace is the image of the trace-visible tuple. *)
 Lemma alice_trace_tupleE :
