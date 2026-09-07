@@ -106,11 +106,11 @@ Definition pbob (dk : priv_keyT)(v2 : msgT) :
   @sproc dsdp_dtype data bob_idx _ _ :=
   DInit (k dk) (
   DInit (d v2) (
-  @DSample DI _ _ _ (fun rb1 =>
+  DSample (DI:=DI) (fun rb1 =>
   DSend (pn alice) (e (E bob v2 rb1)) (
   DRecv_dec decode (pn alice) dk (fun d2 =>
   DRecv_enc (pn alice) (fun a3 =>
-  @DSample DI _ _ _ (fun rb2 =>
+  DSample (DI:=DI) (fun rb2 =>
     DSend (pn charlie) (e (a3 *h (E charlie d2 rb2))) (
   DFinish)))))))).
 
@@ -118,10 +118,10 @@ Definition pcharlie (dk : priv_keyT)(v3 : msgT) :
   @sproc dsdp_dtype data charlie_idx _ _ :=
   DInit (k dk) (
   DInit (d v3) (
-  @DSample DI _ _ _ (fun rc1 =>
+  DSample (DI:=DI) (fun rc1 =>
   DSend (pn alice) (e (E charlie v3 rc1)) (
   DRecv_dec decode (pn bob) dk (fun d3 =>
-  @DSample DI _ _ _ (fun rc2 =>
+  DSample (DI:=DI) (fun rc2 =>
     DSend (pn alice) (e (E alice d3 rc2))
   DFinish)))))).
 
@@ -136,15 +136,15 @@ Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT) :
   DInit (d r3) (
   DRecv_enc (pn bob) (fun c2 =>
   DRecv_enc (pn charlie) (fun c3 =>
-  @DSample DI _ _ _ (fun ra1 =>
-  @DSample DI _ _ _ (fun ra2 =>
+  DSample (DI:=DI) (fun ra1 =>
+  DSample (DI:=DI) (fun ra2 =>
   let a2 := (c2 ^h u2 *h (E bob r2 ra1)) in
   let a3 := (c3 ^h u3 *h (E charlie r3 ra2)) in
     DSend (pn bob) (e a2) (
     DSend (pn bob) (e a3) (
     DRecv_dec decode (pn charlie) dk (fun g =>
     DRet (d (dadd (dsub (dsub g r2) r3) (dmul u1 v1))))))))))))))))).
-  
+
 (* Randomness variables for each party's encryptions *)
 Variables (rb1 rb2 rc1 rc2 ra1 ra2 : randT).
 Variables (dk_a dk_b dk_c : priv_keyT).
@@ -163,11 +163,11 @@ Definition dsdp_procs : seq (proc data) :=
 
 (* The seed streams of one run, in the party order alice, bob, charlie.  Each
    party's stream lists the coins its program draws, in program order. *)
-Definition dsdp_seeds : seq (seq data) :=
+Definition dsdp_run_seeds : seq (seq data) :=
   [:: [:: rd ra1; rd ra2]; [:: rd rb1; rd rb2]; [:: rd rc1; rd rc2]].
 
 Definition dsdp h :=
-  interp h dsdp_procs (nseq 3 [::]) dsdp_seeds.
+  interp h dsdp_procs (nseq 3 [::]) dsdp_run_seeds.
 
 (* Fuel bound computed from program structure:
    - palice: 16 (Init*7 + Recv_enc*2 + Sample*2 + Send*2 + Recv_dec + Ret=2)

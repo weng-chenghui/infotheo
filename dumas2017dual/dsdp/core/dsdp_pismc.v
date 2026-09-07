@@ -67,7 +67,7 @@ Arguments sproc dtype data party {_} {_}.
 Let PSend {party n env} := @DSend DI party n env.
 Let Recv_dec {party n env} := @DRecv_dec DI decode party n env.
 Let Recv_enc {party n env} := @DRecv_enc DI party n env.
-Let Sample_coin {party n env} := @DSample DI party n env.
+Let PSample {party n env} := @DSample DI party n env.
 
 (** * Data wrapper shorthand notations *)
 
@@ -86,9 +86,10 @@ Notation "'Send<' p '>' x ; P" := (PSend p x P)
   (in custom pismc at level 85, p constr at level 0, x constr at level 0,
    P custom pismc at level 85, right associativity).
 
-(* Draw one encryption coin from this party's own seed stream.  It shadows
-   the raw Sample of pismc.v, which hands the program an undecoded datum. *)
-Local Notation "'Sample' r '=>' P" := (Sample_coin (fun r => P))
+(* Draw one encryption coin from this party's own seed stream.  The token
+   differs from the raw Sample of pismc.v, which hands the program an
+   undecoded datum. *)
+Local Notation "'SampleCoin' r '=>' P" := (PSample (fun r => P))
   (in custom pismc at level 85, r name,
    P custom pismc at level 85, right associativity).
 
@@ -123,11 +124,11 @@ Local Notation "'E<' r '>' p m" := (enc_pub_key p m r)
 Definition pbob (dk : priv_keyT)(v2 : msgT)
     : sproc dsdp_dtype data bob_idx :=
   \pi{ Init (#dk, &v2) ;
-     Sample rb1 =>
+     SampleCoin rb1 =>
      Send<alice_idx> $(E<rb1> bob_idx v2);
      Recv<alice_idx> #dk d2 =>
      Recv<alice_idx> a3 =>
-     Sample rb2 =>
+     SampleCoin rb2 =>
      Send<charlie_idx> $(a3 *h (E<rb2> charlie_idx d2)) ;
      Finish }.
 
@@ -135,10 +136,10 @@ Definition pbob (dk : priv_keyT)(v2 : msgT)
 Definition pcharlie (dk : priv_keyT)(v3 : msgT)
     : sproc dsdp_dtype data charlie_idx :=
   \pi{ Init (#dk, &v3) ;
-     Sample rc1 =>
+     SampleCoin rc1 =>
      Send<alice_idx> $(E<rc1> charlie_idx v3) ;
      Recv<bob_idx> #dk d3 =>
-     Sample rc2 =>
+     SampleCoin rc2 =>
      Send<alice_idx> $(E<rc2> alice_idx d3) ;
      Finish }.
 
@@ -148,8 +149,8 @@ Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)
   \pi{ Init (#dk, &v1, &u1, &u2, &u3, &r2, &r3) ;
      Recv<bob_idx> c2 =>
      Recv<charlie_idx> c3 =>
-     Sample ra1 =>
-     Sample ra2 =>
+     SampleCoin ra1 =>
+     SampleCoin ra2 =>
      Send<bob_idx> $(c2 ^h u2 *h (E<ra1> bob_idx r2)) ;
      Send<bob_idx> $(c3 ^h u3 *h (E<ra2> charlie_idx r3)) ;
      Recv<charlie_idx> #dk g =>
@@ -180,11 +181,11 @@ Definition DParty_first (self downstream : nat)
     (dk : priv_keyT) (v : msgT)
     : sproc dsdp_dtype data self :=
   \pi{ Init (#dk, &v) ;
-       Sample r1 =>
+       SampleCoin r1 =>
        Send<alice_idx> $(E<r1> self v) ;
        Recv<alice_idx> #dk d_val =>
        Recv<alice_idx> a_next =>
-       Sample r2 =>
+       SampleCoin r2 =>
        Send<downstream> $(a_next *h (E<r2> downstream d_val)) ;
        Finish }.
 
@@ -193,11 +194,11 @@ Definition DParty_intermediate (self alice_src upstream downstream : nat)
     (dk : priv_keyT) (v : msgT)
     : sproc dsdp_dtype data self :=
   \pi{ Init (#dk, &v) ;
-       Sample r1 =>
+       SampleCoin r1 =>
        Send<alice_src> $(E<r1> self v) ;
        Recv<alice_src> a_next =>
        Recv<upstream> #dk d_val =>
-       Sample r2 =>
+       SampleCoin r2 =>
        Send<downstream> $(a_next *h (E<r2> downstream d_val)) ;
        Finish }.
 
@@ -206,10 +207,10 @@ Definition DParty_last (self upstream : nat)
     (dk : priv_keyT) (v : msgT)
     : sproc dsdp_dtype data self :=
   \pi{ Init (#dk, &v) ;
-       Sample r1 =>
+       SampleCoin r1 =>
        Send<alice_idx> $(E<r1> self v) ;
        Recv<upstream> #dk d_val =>
-       Sample r2 =>
+       SampleCoin r2 =>
        Send<alice_idx> $(E<r2> alice_idx d_val) ;
        Finish }.
 
@@ -259,7 +260,7 @@ Definition palice_n
   \pi{ Init (#dk, &v0) ;
      ForList relays step (fun k => k.+3) enstep alice_env_step as j cont k =>
        Recv<(j.+1)> c =>
-       Sample rand_a =>
+       SampleCoin rand_a =>
        Send<(alice_send_dest j)>
          $(c ^h (u (lift ord0 j)) *h (enc_pub_key j.+1 (r j) rand_a)) ;
        k

@@ -320,7 +320,7 @@ Definition alice_sampleT : finType :=
 (* The uniform product distribution on the sample space. *)
 Definition alice_sample_fdist : R.-fdist alice_sampleT :=
   ((fdist_uniform card_plain_pair) `x (fdist_uniform card_plain_pair))
-    `x (@dsdp_enc_coins_fdist I R).
+    `x (dsdp_enc_coins_fdist I R).
 
 (* Bob's honest input, the first plaintext coordinate of the sample.  Every
    bound in this file is stated about it. *)
@@ -352,18 +352,24 @@ Definition EncCoins : {RV alice_sample_fdist -> dsdp_enc_coins I} :=
 
 (* The randomness of the ciphertext Alice receives from Bob, and the randomness
    the hop-0 challenger takes over. *)
-Definition RB1 : {RV alice_sample_fdist -> Renc} := fun t => coin_rb1 (EncCoins t).
+Definition RB1 : {RV alice_sample_fdist -> Renc} :=
+  fun t => coin_rb1 (EncCoins t).
 (* The randomness of the ciphertext Alice receives from Charlie, and the
    randomness the hop-1 challenger takes over. *)
-Definition RC1 : {RV alice_sample_fdist -> Renc} := fun t => coin_rc1 (EncCoins t).
+Definition RC1 : {RV alice_sample_fdist -> Renc} :=
+  fun t => coin_rc1 (EncCoins t).
 (* The randomness of Alice's first combine. *)
-Definition RA1 : {RV alice_sample_fdist -> Renc} := fun t => coin_ra1 (EncCoins t).
+Definition RA1 : {RV alice_sample_fdist -> Renc} :=
+  fun t => coin_ra1 (EncCoins t).
 (* The randomness of Alice's second combine. *)
-Definition RA2 : {RV alice_sample_fdist -> Renc} := fun t => coin_ra2 (EncCoins t).
+Definition RA2 : {RV alice_sample_fdist -> Renc} :=
+  fun t => coin_ra2 (EncCoins t).
 (* The randomness of Bob's encryption to Charlie. *)
-Definition RB2 : {RV alice_sample_fdist -> Renc} := fun t => coin_rb2 (EncCoins t).
+Definition RB2 : {RV alice_sample_fdist -> Renc} :=
+  fun t => coin_rb2 (EncCoins t).
 (* The randomness of Charlie's re-encryption to Alice. *)
-Definition RC2 : {RV alice_sample_fdist -> Renc} := fun t => coin_rc2 (EncCoins t).
+Definition RC2 : {RV alice_sample_fdist -> Renc} :=
+  fun t => coin_rc2 (EncCoins t).
 
 (* The protocol output Alice legitimately learns, the weighted scalar product
    of her weights with the two honest inputs. *)
@@ -475,8 +481,9 @@ rewrite /dist_of_RV alice_sample_fdistE.
 apply: (fdistmap_bij_uniform card_sample card_hop0_pair).
 exists (fun p : (hop0_stateT * Renc)%type =>
           (p.1.1.1.1, p.1.1.1.2,
-           Build_dsdp_enc_coins p.2 p.1.2.1.1 p.1.1.2.1 p.1.1.2.2
-             p.1.2.1.2 p.1.2.2)).
+           {| coin_rb1 := p.2 ; coin_rc1 := p.1.2.1.1 ;
+              coin_ra1 := p.1.1.2.1 ; coin_ra2 := p.1.1.2.2 ;
+              coin_rb2 := p.1.2.1.2 ; coin_rc2 := p.1.2.2 |})).
   by move=> [[vv ms] [rb1 rc1 ra1 ra2 rb2 rc2]].
 by move=> [[[[vv ms] [ra1 ra2]] [[rc1 rb2] rc2]] rb1].
 Qed.
@@ -528,8 +535,9 @@ rewrite /dist_of_RV alice_sample_fdistE.
 apply: (fdistmap_bij_uniform card_sample card_hop0_pair).
 exists (fun p : (hop0_stateT * Renc)%type =>
           (p.1.1.1.1, p.1.1.1.2,
-           Build_dsdp_enc_coins p.1.2.1.1 p.2 p.1.1.2.1 p.1.1.2.2
-             p.1.2.1.2 p.1.2.2)).
+           {| coin_rb1 := p.1.2.1.1 ; coin_rc1 := p.2 ;
+              coin_ra1 := p.1.1.2.1 ; coin_ra2 := p.1.1.2.2 ;
+              coin_rb2 := p.1.2.1.2 ; coin_rc2 := p.1.2.2 |})).
   by move=> [[vv ms] [rb1 rc1 ra1 ra2 rb2 rc2]].
 by move=> [[[[vv ms] [ra1 ra2]] [[rb1 rb2] rc2]] rc1].
 Qed.
@@ -793,13 +801,13 @@ Qed.
    coin law.  It is the randomness a simulator draws on its own. *)
 Lemma alice_spectator_law :
   `p_ AliceSpectatorPre
-  = (fdist_uniform card_plain_pair) `x (@dsdp_enc_coins_fdist I R).
+  = (fdist_uniform card_plain_pair) `x (dsdp_enc_coins_fdist I R).
 Proof.
 rewrite spectator_pre_uniformE
         (fdist_uniform_prod card_plain_pair (card_dsdp_enc_coins I)
            card_spectator_pre).
 by congr (_ `x _); rewrite /dsdp_enc_coins_fdist; congr fdist_uniform;
-   exact: eq_irrelevance.
+   apply: eq_irrelevance.
 Qed.
 
 (* The simulator law at one leaked output: uniform masks and uniform coins
@@ -809,7 +817,7 @@ Definition alice_simulator (s : plain AHE) :
     R.-fdist alice_hop_tupleT :=
   fdistmap (fun c : alice_spectator_preT =>
               alice_hop_tuple_of_spectator (c, s))
-    ((fdist_uniform card_plain_pair) `x (@dsdp_enc_coins_fdist I R)).
+    ((fdist_uniform card_plain_pair) `x (dsdp_enc_coins_fdist I R)).
 
 (* Given Alice's all-zero view, Bob's input still carries log #|plain AHE|
    bits.  Both ciphertext slots encrypt zero and the re-encryption slot reads
@@ -817,15 +825,15 @@ Definition alice_simulator (s : plain AHE) :
 Lemma centropy_V2_all_zero_logm :
   `H( V2 | alice_tuple_all_zero ) = log (#|plain AHE|%:R : R).
 Proof.
-have Hcinde := cinde_RV_comp (fun sp s => alice_hop_tuple_of_spectator (sp, s))
+have cinde_assemble := cinde_RV_comp (fun sp s => alice_hop_tuple_of_spectator (sp, s))
                  alice_spectator_cinde.
-rewrite -alice_tuple_all_zeroE in Hcinde.
-have Hcan : cancel (fun v : alice_hop_tupleT => (v, v.1.1.1.2))
-                   (fun p : alice_hop_tupleT * plain AHE => p.1) by [].
-rewrite -(can_centropy_eq Hcan V2 alice_tuple_all_zero).
+rewrite -alice_tuple_all_zeroE in cinde_assemble.
+have pair_selfK : cancel (fun v : alice_hop_tupleT => (v, v.1.1.1.2))
+                          (fun p : alice_hop_tupleT * plain AHE => p.1) by [].
+rewrite -(can_centropy_eq pair_selfK V2 alice_tuple_all_zero).
 have -> : (fun v : alice_hop_tupleT => (v, v.1.1.1.2)) `o alice_tuple_all_zero
         = [% alice_tuple_all_zero, Sout] by [].
-by rewrite (cinde_centropy_eq Hcinde) centropy_V2_Sout_logm.
+by rewrite (cinde_centropy_eq cinde_assemble) centropy_V2_Sout_logm.
 Qed.
 
 Section alice_hop_tuple_all_zero_mass.
@@ -875,12 +883,12 @@ move=> Hvv.
 have HW t : [% V2, V3] t = (v2, v3) ->
     Sout t = dsdp_output v1 u1 u2 u3 v2 v3.
   by rewrite /Sout /comp_RV => ->.
-have Hind : alice_sample_fdist
+have assemble_indep : alice_sample_fdist
     |= ((fun c : alice_spectator_preT =>
            alice_hop_tuple_of_spectator (c, dsdp_output v1 u1 u2 u3 v2 v3))
         `o AliceSpectatorPre) _|_ [% V2, V3].
   exact: (inde_RV_comp _ idfun spectator_pre_indep).
-rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v HW) (Hind v (v2, v3)).
+rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v HW) (assemble_indep v (v2, v3)).
 rewrite mulfK // -dist_of_RVE /alice_simulator -alice_spectator_law.
 by rewrite /dist_of_RV fdistmap_comp.
 Qed.

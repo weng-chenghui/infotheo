@@ -213,7 +213,8 @@ Definition trace_data_of_di_data (x : di_data DI) : trace_dataT :=
   | inl (inl (inl m)) => inl (inl (inl m))
   | inl (inl (inr c)) => inl (inl (inr c))
   | inl (inr _) => inl (inr tt)
-  | inr _ => inr tt
+  | inr (inl _) => inr tt
+  | inr (inr _) => inr tt
   end.
 
 (* Alice's executed-trace carrier: the eighteen-round bounded sequence of
@@ -602,8 +603,9 @@ rewrite -(fdist_uniform_prod card_combine_rand card_sample_rest
 apply: fdistmap_bij_uniform.
 exists (fun p : (Renc * Renc) * alice_sample_restT =>
           (p.2.1.1, p.2.1.2,
-           Build_dsdp_enc_coins p.2.2.1.1.1 p.2.2.1.1.2 p.1.1 p.1.2
-             p.2.2.1.2 p.2.2.2)).
+           {| coin_rb1 := p.2.2.1.1.1 ; coin_rc1 := p.2.2.1.1.2 ;
+              coin_ra1 := p.1.1 ; coin_ra2 := p.1.2 ;
+              coin_rb2 := p.2.2.1.2 ; coin_rc2 := p.2.2.2 |})).
   by move=> [[vv ms] [rb1 rc1 ra1 ra2 rb2 rc2]].
 by move=> [[ra1 ra2] [[vv ms] [[[rb1 rc1] rb2] rc2]]].
 Qed.
@@ -849,10 +851,9 @@ Definition trace_priv_keys (tr : seq (di_data DI)) : seq (priv_key AHE) :=
    erasure of trace_dataT discards exactly that constant, so a keygen argument
    needs no further hypothesis. *)
 Lemma alice_raw_trace_priv_keysE (s : alice_sampleT I) :
-  trace_priv_keys (alice_raw_trace s) = [:: inst_dk_a I].
+  trace_priv_keys (alice_raw_trace s) = [:: dk_a].
 Proof.
-rewrite /trace_priv_keys /alice_raw_trace /dsdp_protocol.
-by rewrite dsdp_run_tracesE.
+by rewrite /trace_priv_keys /alice_raw_trace /dsdp_protocol dsdp_run_tracesE.
 Qed.
 
 End dsdp_alice_raw_trace.

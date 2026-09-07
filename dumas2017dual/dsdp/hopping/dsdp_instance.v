@@ -131,12 +131,12 @@ Local Notation Renc := (scheme_renc S).
 
 (* The six-fold product the coin record is in bijection with.  The finite
    structure lives on the product and the record borrows it. *)
-Definition enc_coinsT := (Renc * Renc * Renc * Renc * Renc * Renc)%type.
+Definition enc_coins_tupleT := (Renc * Renc * Renc * Renc * Renc * Renc)%type.
 
-Definition tuple_of_enc_coins (c : dsdp_enc_coins S) : enc_coinsT :=
+Definition tuple_of_enc_coins (c : dsdp_enc_coins S) : enc_coins_tupleT :=
   (coin_rb1 c, coin_rc1 c, coin_ra1 c, coin_ra2 c, coin_rb2 c, coin_rc2 c).
 
-Definition enc_coins_of_tuple (t : enc_coinsT) : dsdp_enc_coins S :=
+Definition enc_coins_of_tuple (t : enc_coins_tupleT) : dsdp_enc_coins S :=
   {| coin_rb1 := t.1.1.1.1.1 ; coin_rc1 := t.1.1.1.1.2 ;
      coin_ra1 := t.1.1.1.2 ; coin_ra2 := t.1.1.2 ;
      coin_rb2 := t.1.2 ; coin_rc2 := t.2 |}.
@@ -166,10 +166,11 @@ Qed.
 (* The law of one execution's encryption randomness: the uniform product on
    the six coordinates.  Every coin is uniform, independent of the others, and
    fresh, which is what the IND-CPA reductions read off. *)
-Definition dsdp_enc_coins_fdist {R : realType} : R.-fdist (dsdp_enc_coins S) :=
+Definition dsdp_enc_coins_fdist (R : realType) : R.-fdist (dsdp_enc_coins S) :=
   fdist_uniform card_dsdp_enc_coins.
 
 End dsdp_enc_coins_finite.
+
 
 (* One DSDP execution as a record: the IND-CPA scheme, Alice's input and three
    weights, and three private keys.  The weight on Charlie's input is a
@@ -229,9 +230,6 @@ Record dsdp_asymptotic (R : realType) (Q : dsdp_instance_sequence R) := {
   (* the assumption-conditional term: the assumed advantage vanishes *)
   adv_negligible : negligible_fun (f_adv Q) }.
 
-(* The corrupted-Alice data read off one scheme sequence.  The schemes, the
-   assumptions and the private keys come from that record, and the weights and
-   the key seeds are the only data supplied alongside it. *)
 (* The corrupted-Alice data along a scheme sequence: Alice's input, her three
    weights with Charlie's invertible, and the three key seeds.  It is what the
    DSDP side supplies beside the scheme sequence, at every k at once. *)
@@ -278,6 +276,8 @@ Definition mk_dsdp_instance_sequence : dsdp_instance_sequence R := {|
 (* The asymptotic content of that sequence, both facts read off Q.  What a
    protocol file used to carry as two negligibility hypotheses beside its
    scheme variables is discharged here. *)
+(* The record literal cannot solve the ascribed sequence index, so the
+   constructor is applied to it. *)
 Definition mk_dsdp_asymptotic : dsdp_asymptotic mk_dsdp_instance_sequence :=
   @Build_dsdp_asymptotic R mk_dsdp_instance_sequence
     (scheme_size_negligible Q) (scheme_adv_negligible Q).

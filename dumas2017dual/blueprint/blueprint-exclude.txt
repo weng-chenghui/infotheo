@@ -184,7 +184,7 @@ dsdp_random_inputs:uniform_view_mask
 # negligibility field with; the blueprint cites the three records.
 dsdp_instance:f_adv
 dsdp_instance:dsdp_enc_coins
-dsdp_instance:enc_coinsT
+dsdp_instance:enc_coins_tupleT
 dsdp_instance:tuple_of_enc_coins
 dsdp_instance:enc_coins_of_tuple
 dsdp_instance:tuple_of_enc_coinsK

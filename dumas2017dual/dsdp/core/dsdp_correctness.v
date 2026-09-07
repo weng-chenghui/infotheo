@@ -148,12 +148,12 @@ Let dsdp_procs : seq (proc data) := erase_aprocs dsdp_saprocs.
 
 (* The seed streams of one run, two coins per party in the order alice, bob,
    charlie.  The idealized scheme ignores a coin's value. *)
-Let dsdp_seeds : seq (seq data) :=
+Let dsdp_run_seeds : seq (seq data) :=
   [:: [:: rd runit; rd runit]; [:: rd runit; rd runit];
       [:: rd runit; rd runit]].
 
 (* Protocol definition using interp directly with explicit traces *)
-Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] dsdp_seeds.
+Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] dsdp_run_seeds.
 
 (* Protocol execution result: running dsdp for 18 steps produces the expected
    final state with all parties finished and their respective traces.
@@ -178,7 +178,7 @@ Notation dsdp_traceT := (18.-bseq data).
 Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 
 Definition dsdp_traces : dsdp_tracesT :=
-  interp_traces 18 dsdp_procs dsdp_seeds.
+  interp_traces 18 dsdp_procs dsdp_run_seeds.
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
   let '(s, u3, u2, u1, v1) :=
