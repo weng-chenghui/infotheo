@@ -104,6 +104,8 @@ Record DSDP_Interface := MkDSDP_Interface {
     (* the ciphertext a carrier holds, when it holds one *)
   di_get_rand : di_data -> option di_randT ;
     (* the encryption coin a carrier holds, when it holds one *)
+  di_get_priv_key : di_data -> option di_priv_keyT ;
+    (* the private key a carrier holds, when it holds one *)
 
   (* Encryption and homomorphic operations *)
   di_encrypt : di_pub_keyT -> di_msgT -> di_randT -> di_cipherT ;
@@ -143,6 +145,7 @@ Arguments di_data_of_pub_key : clear implicits.
 Arguments di_data_of_rand : clear implicits.
 Arguments di_get_cipher : clear implicits.
 Arguments di_get_rand : clear implicits.
+Arguments di_get_priv_key : clear implicits.
 Arguments di_encrypt : clear implicits.
 Arguments di_emul : clear implicits.
 Arguments di_epow : clear implicits.
@@ -182,6 +185,8 @@ Definition std_get_cipher (x : std_data) : option encT :=
   if x is inl (inl (inr v)) then Some v else None.
 Definition std_get_rand (x : std_data) : option randT :=
   if x is inr (inr r) then Some r else None.
+Definition std_get_priv_key (x : std_data) : option priv_keyT :=
+  if x is inl (inr k) then Some k else None.
 
 (* Recv-and-decrypt: extract ciphertext, decrypt, continue with plaintext *)
 Definition std_Recv_dec (frm : nat) (dk : priv_keyT)
@@ -212,6 +217,7 @@ Definition Standard_DSDP_Interface : DSDP_Interface := {|
   di_data_of_rand := std_data_of_rand ;
   di_get_cipher := std_get_cipher ;
   di_get_rand := std_get_rand ;
+  di_get_priv_key := std_get_priv_key ;
   di_encrypt := @enc AHE ;
   di_emul := @Emul AHE ;
   di_epow := @Epow AHE ;

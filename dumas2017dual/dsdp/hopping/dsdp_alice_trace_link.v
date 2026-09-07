@@ -106,20 +106,20 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              combine coins                                 *)
 (*           AliceSampleRest == those remaining sample values as one random   *)
 (*                              observation                                   *)
-(*          AliceCombineRand == Alice's two private combine coins as one      *)
+(*          AliceCombineCoins == Alice's two private combine coins as one     *)
 (*                              random observation                            *)
-(* combine_rand_rest_uniformE ==                                              *)
+(* combine_coins_rest_uniformE ==                                             *)
 (*                              separates the uniform sample into Alice's     *)
 (*                              combine coins and all remaining data          *)
-(*     combine_rand_uniformE == Alice's combine coins are uniformly sampled   *)
+(*     combine_coins_uniformE == Alice's combine coins are uniformly sampled  *)
 (*      sample_rest_uniformE == all remaining sample data is uniformly        *)
 (*                              sampled                                       *)
-(*   combine_rand_rest_indep == Alice's combine coins carry no information    *)
+(*   combine_coins_rest_indep == Alice's combine coins carry no information   *)
 (*                              about the remaining sampled data              *)
 (* v2_trace_tuple_of_sample_rest ==                                           *)
 (*                              reconstructs Bob's input and the visible      *)
 (*                              trace information without the combine coins   *)
-(*  combine_rand_trace_indep == Alice's combine coins carry no information    *)
+(*  combine_coins_trace_indep == Alice's combine coins carry no information   *)
 (*                              about Bob's input together with the visible   *)
 (*                              trace information                             *)
 (*   hop_tuple_of_rand_trace == rebuilds the hopping tuple from the private   *)
@@ -573,13 +573,13 @@ Definition alice_sample_restT : finType :=
 Definition AliceSampleRest : {RV P -> alice_sample_restT} :=
   fun t => (t.1.1, t.1.2, (RB1 t, RC1 t, RB2 t, RC2 t)).
 
-(* The random variable of Alice's two combine randomnesses. *)
-Definition AliceCombineRand : {RV P -> (Renc * Renc)} :=
+(* The random variable of Alice's two combine coins. *)
+Definition AliceCombineCoins : {RV P -> (Renc * Renc)} :=
   fun t => (RA1 t, RA2 t).
 
-Let card_combine_rand : #|((Renc * Renc)%type : finType)|
+Let card_combine_coins : #|((Renc * Renc)%type : finType)|
             = #|((Renc * Renc)%type : finType)|.-1.+1.
-Proof. exact: fdist_card_prednK (`p_ AliceCombineRand). Qed.
+Proof. exact: fdist_card_prednK (`p_ AliceCombineCoins). Qed.
 
 Let card_sample_rest : #|alice_sample_restT| = #|alice_sample_restT|.-1.+1.
 Proof. exact: fdist_card_prednK (`p_ AliceSampleRest). Qed.
@@ -588,16 +588,16 @@ Let card_combine_rand_rest :
   #|(((Renc * Renc) * alice_sample_restT)%type : finType)|
   = #|(((Renc * Renc) * alice_sample_restT)%type : finType)|.-1.+1.
 Proof.
-exact: fdist_card_prednK (`p_ [% AliceCombineRand, AliceSampleRest]).
+exact: fdist_card_prednK (`p_ [% AliceCombineCoins, AliceSampleRest]).
 Qed.
 
-(* Alice's combine randomnesses and the other sample coordinates are jointly
+(* Alice's combine coins and the other sample coordinates are jointly
    uniform. *)
-Lemma combine_rand_rest_uniformE :
-  `p_ [% AliceCombineRand, AliceSampleRest]
-  = (fdist_uniform card_combine_rand) `x (fdist_uniform card_sample_rest).
+Lemma combine_coins_rest_uniformE :
+  `p_ [% AliceCombineCoins, AliceSampleRest]
+  = (fdist_uniform card_combine_coins) `x (fdist_uniform card_sample_rest).
 Proof.
-rewrite -(fdist_uniform_prod card_combine_rand card_sample_rest
+rewrite -(fdist_uniform_prod card_combine_coins card_sample_rest
            card_combine_rand_rest)
         /dist_of_RV alice_sample_fdistE.
 apply: fdistmap_bij_uniform.
@@ -610,33 +610,33 @@ exists (fun p : (Renc * Renc) * alice_sample_restT =>
 by move=> [[ra1 ra2] [[vv ms] [[[rb1 rc1] rb2] rc2]]].
 Qed.
 
-(* Alice's combine randomnesses are uniform. *)
-Lemma combine_rand_uniformE :
-  `p_ AliceCombineRand = fdist_uniform card_combine_rand.
+(* Alice's combine coins are uniform. *)
+Lemma combine_coins_uniformE :
+  `p_ AliceCombineCoins = fdist_uniform card_combine_coins.
 Proof.
-by rewrite -(fst_RV2 AliceCombineRand AliceSampleRest)
-   combine_rand_rest_uniformE fdist_prod1.
+by rewrite -(fst_RV2 AliceCombineCoins AliceSampleRest)
+   combine_coins_rest_uniformE fdist_prod1.
 Qed.
 
 (* The other sample coordinates are uniform. *)
 Lemma sample_rest_uniformE :
   `p_ AliceSampleRest = fdist_uniform card_sample_rest.
 Proof.
-by rewrite -(snd_RV2 AliceCombineRand AliceSampleRest)
-   combine_rand_rest_uniformE fdist_prod2.
+by rewrite -(snd_RV2 AliceCombineCoins AliceSampleRest)
+   combine_coins_rest_uniformE fdist_prod2.
 Qed.
 
-(* Alice's combine randomnesses are independent of the other sample
+(* Alice's combine coins are independent of the other sample
    coordinates. *)
-Lemma combine_rand_rest_indep : P |= AliceCombineRand _|_ AliceSampleRest.
+Lemma combine_coins_rest_indep : P |= AliceCombineCoins _|_ AliceSampleRest.
 Proof.
 by apply: inde_RV_of_prod;
-   rewrite combine_rand_rest_uniformE combine_rand_uniformE
+   rewrite combine_coins_rest_uniformE combine_coins_uniformE
            sample_rest_uniformE.
 Qed.
 
 (* Bob's input and the trace-visible tuple, rebuilt from the sample
-   coordinates other than Alice's combine randomnesses. *)
+   coordinates other than Alice's combine coins. *)
 Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
     (plain AHE * alice_trace_tupleT) :=
   (* The output slot is written with uncurry applied to an explicit pair
@@ -653,25 +653,25 @@ Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
          - u1 * v1 + u.1.2.1 + u.1.2.2)
       (rand_of_renc u.2.2))).
 
-(* Alice's two combine randomnesses are independent of Bob's input taken
+(* Alice's two combine coins are independent of Bob's input taken
    jointly with everything her executed trace shows. *)
-Lemma combine_rand_trace_indep :
+Lemma combine_coins_trace_indep :
   P |= [% RA1, RA2] _|_ [% V2, AliceTraceTuple].
 Proof.
 (* The pair function must stay eta-expanded: [prod] has no definitional eta,
    so [idfun] does not typecheck here. *)
 exact: (inde_RV_comp (fun p : Renc * Renc => (p.1, p.2))
-          v2_trace_tuple_of_sample_rest combine_rand_rest_indep).
+          v2_trace_tuple_of_sample_rest combine_coins_rest_indep).
 Qed.
 
-(* Alice's hopping tuple rebuilt from her combine randomnesses and the
+(* Alice's hopping tuple rebuilt from her combine coins and the
    trace-visible tuple. *)
 Definition hop_tuple_of_rand_trace
     (p : ((Renc * Renc) * alice_trace_tupleT)) :
     alice_hop_tupleT I :=
   (p.2.1.1.1.1, p.1, p.2.1.1.1.2, p.2.1.1.2, p.2.1.2, p.2.2).
 
-(* The combine randomnesses and the trace-visible tuple read back off a
+(* The combine coins and the trace-visible tuple read back off a
    hopping tuple. *)
 Definition rand_trace_of_hop_tuple
     (v : alice_hop_tupleT I) :
@@ -683,14 +683,14 @@ Lemma hop_tuple_of_rand_traceK :
   cancel hop_tuple_of_rand_trace rand_trace_of_hop_tuple.
 Proof. by case=> ra [[[[m s] c0] c1] c2]. Qed.
 
-(* Alice's hopping tuple is her combine randomnesses together with the
+(* Alice's hopping tuple is her combine coins together with the
    trace-visible tuple. *)
 Lemma alice_hop_tuple_rand_traceE :
   alice_tuple_real
   = hop_tuple_of_rand_trace `o [% [% RA1, RA2], AliceTraceTuple].
 Proof.
-(* The combine randomnesses stay eta-expanded as [% RA1, RA2]: [prod] has no
-   definitional eta, so [AliceCombineRand] is not convertible with the pair
+(* The combine coins stay eta-expanded as [% RA1, RA2]: [prod] has no
+   definitional eta, so [AliceCombineCoins] is not convertible with the pair
    the hopping tuple carries. *)
 by [].
 Qed.
@@ -754,7 +754,7 @@ Proof.
 rewrite alice_trace_tupleE (can_centropy_eq trace_of_trace_tupleK).
 rewrite alice_hop_tuple_rand_traceE
         (can_centropy_eq hop_tuple_of_rand_traceK).
-by rewrite (inde_centropy_eq combine_rand_trace_indep).
+by rewrite (inde_centropy_eq combine_coins_trace_indep).
 Qed.
 
 (* Bob's ciphertext slot of Alice's executed trace, decrypted with Bob's own
@@ -844,8 +844,7 @@ Qed.
    records them.  Everything that is not a key mark is dropped, so the result
    is the key content of a party's view. *)
 Definition trace_priv_keys (tr : seq (di_data DI)) : seq (priv_key AHE) :=
-  pmap (fun x : di_data DI =>
-          match x with inl (inr sk) => Some sk | _ => None end) tr.
+  pmap (di_get_priv_key DI) tr.
 
 (* Alice's executed trace holds her own private key and no other.  The key
    erasure of trace_dataT discards exactly that constant, so a keygen argument

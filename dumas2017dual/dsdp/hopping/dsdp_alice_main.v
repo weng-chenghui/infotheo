@@ -1421,7 +1421,7 @@ Local Notation alice_trace_guess_V2_pr :=
   (alice_trace_guess_V2_pr (R:=R) (I:=I)).
 
 (* The inverse plaintext cardinality at the composite modulus. *)
-Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
+Let card_plain_pq_invE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
 Proof. by rewrite card_plain_pq natrM. Qed.
 
 (* The class-conditional trace guessing bound with its unconditional term
@@ -1437,7 +1437,7 @@ Corollary alice_trace_guess_V2_admissible_pq_le
   alice_trace_guess_V2_pr predict
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon assumption.
 Proof.
-rewrite inv_pq_cardE.
+rewrite card_plain_pq_invE.
 exact: alice_trace_guess_V2_admissible_le.
 Qed.
 
