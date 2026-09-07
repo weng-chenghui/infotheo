@@ -108,6 +108,18 @@ Require Import fdist_extra proba.
 (*                              whose bound is proved rather than assumed     *)
 (* ```                                                                        *)
 (*                                                                            *)
+(* ## Notes on the encoding and the proofs                                    *)
+(*                                                                            *)
+(* [#|{unit T}|] does not elaborate, unit_of carrying no predArgType, so      *)
+(* every cardinality statement about the units passes through the name        *)
+(* ring_units.  Two proofs of the nonemptiness equation card_ring_units are   *)
+(* propositionally equal and not convertible, and the uniform law is indexed  *)
+(* by the proof, so a scheme that fixes its own proof passes that one.        *)
+(* In unit_fdist_translateE, the one fact a reduction rests on, every other   *)
+(* step of the reduction is an identity by unfolding or an appeal to the      *)
+(* assumption; the pointwise count Pr[a * x = y] = Pr[x = a^-1 * y]           *)
+(* = 1/#|units| is done once, inside fdistmap_bij_uniform.                    *)
+(*                                                                            *)
 (******************************************************************************)
 
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
@@ -119,18 +131,14 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
-(* The unit group of a finite unit ring, named as a finite type.  [#|{unit T}|]
-   does not elaborate, unit_of carrying no predArgType, so every cardinality
-   statement about the units passes through this name.  It is the space both
-   challenges of the residuosity problem are drawn from, and at an encryption
-   scheme it is the space of encryption coins. *)
+(* The unit group of a finite unit ring as a finite type, the space both
+   residuosity challenges are drawn from.  At an encryption scheme it is the
+   space of coins. *)
 Definition ring_units (T : finUnitRingType) : finType := {unit T}.
 
 (* The unit group is nonempty, in the successor form the uniform law takes.
-   This is the cardinality term a user with none of its own passes to the
-   game.  A scheme that already fixes one passes that one instead: two proofs
-   of this equation are propositionally equal and not convertible, and the
-   uniform law is indexed by the proof. *)
+   A scheme with its own cardinality proof passes that one, the uniform law
+   being indexed by the proof. *)
 Lemma card_ring_units (T : finUnitRingType) :
   #|ring_units T| = #|ring_units T|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
@@ -147,17 +155,16 @@ Definition unit_fdist : R.-fdist T :=
 
 Arguments unit_fdist : simpl never.
 
-(* The second challenge law: the e-th power of a uniform unit.  At a
-   residue-class encryption scheme whose coins are the units and whose
-   plaintext count divides e, this is the law of a ciphertext of zero. *)
+(* The second challenge law, the e-th power of a uniform unit.  At a
+   residue-class scheme with unit coins and plaintext count dividing e, it is
+   the law of a zero ciphertext. *)
 Definition residue_fdist : R.-fdist T :=
   fdistmap (fun u : ring_units T => val u ^+ e)
     (fdist_uniform (R := R) card_units).
 
 (* A distinguisher of the two challenge laws: a finite state, its law, and a
-   Boolean verdict read off the state and the challenge ring element.  It is
-   the IND-CPA adversary of indcpa_game.v with the plaintext choice removed,
-   the residuosity problem handing the adversary no message to choose. *)
+   Boolean verdict on state and challenge.  It is the IND-CPA adversary of
+   indcpa_game.v with the plaintext choice removed. *)
 Record residuosity_distinguisher := {
   state : finType ;
   state_fdist : R.-fdist state ;
@@ -170,8 +177,8 @@ Record residuosity_distinguisher := {
 Arguments state_fdist : clear implicits.
 Arguments decide : clear implicits.
 
-(* The probability that D accepts a challenge drawn from law: sample its
-   state, apply its verdict to the challenge, read the mass at true. *)
+(* The probability that D accepts a challenge drawn from law.  It samples the
+   state, applies the verdict to the challenge, and reads the mass at true. *)
 Definition residuosity_accept (D : residuosity_distinguisher)
     (law : R.-fdist T) : R :=
   Pr (state_fdist D >>= (fun c => fdistmap (decide D c) law)) [set true].
@@ -184,17 +191,16 @@ Lemma residuosity_acceptE (D : residuosity_distinguisher) (law : R.-fdist T) :
   = Pr (state_fdist D >>= (fun c => fdistmap (decide D c) law)) [set true].
 Proof. by []. Qed.
 
-(* The absolute gap between D's two acceptance probabilities.  This is the
-   quantity the e-th residuosity assumption bounds, and the currency a
-   scheme's IND-CPA advantage is paid in once the reduction is written. *)
+(* The absolute gap between D's two acceptance probabilities.  It is the
+   quantity the e-th residuosity assumption bounds and the term a scheme's
+   IND-CPA advantage reduces to. *)
 Definition residuosity_advantage (D : residuosity_distinguisher) : R :=
   `| residuosity_accept D residue_fdist - residuosity_accept D unit_fdist |.
 
 (* An extensional class of distinguishers, one epsilon, and the promise that
-   every classified distinguisher stays below that epsilon.  It mirrors
-   indcpa_epsilon_assumption field for field: the classifier says which
-   distinguishers a bound covers, while running time stays a property of a
-   syntax it does not read. *)
+   every classified distinguisher stays below it.  It mirrors
+   indcpa_epsilon_assumption field for field, running time staying outside
+   the classifier. *)
 Record residuosity_assumption := {
   residuosity_admissible : residuosity_distinguisher -> bool ;
   residuosity_assumption_epsilon : R ;
@@ -202,10 +208,9 @@ Record residuosity_assumption := {
     residuosity_admissible D ->
     residuosity_advantage D <= residuosity_assumption_epsilon }.
 
-(* The same bound with the two challenge laws exchanged.  A hybrid that
-   returns from the unit law to the residue law spans the gap in this
-   direction, and the absolute value is symmetric, so the reverse step of a
-   reduction spends the one assumption its forward step spends and no more. *)
+(* The same bound with the two challenge laws exchanged.  The absolute value
+   is symmetric, so the reverse step of a reduction spends the one assumption
+   its forward step spends. *)
 Lemma residuosity_admissible_epsilon_leC (A : residuosity_assumption)
     (D : residuosity_distinguisher) :
   residuosity_admissible A D ->
@@ -213,15 +218,9 @@ Lemma residuosity_admissible_epsilon_leC (A : residuosity_assumption)
   <= residuosity_assumption_epsilon A.
 Proof. by rewrite distrC; exact: residuosity_admissible_epsilon_le. Qed.
 
-(* The key fact of a reduction.  Multiplication by a unit is a bijection of
-   the unit group, and a bijection fixes the uniform law: pushing unit_fdist
-   along x |-> val a * x gives unit_fdist back.  This is Katz and Lindell
-   Lemma 11.15.  Its position: once the challenge is a uniform unit,
-   multiplying it by g ^+ m erases m, and that is where a residue-class
-   ciphertext hides its plaintext.  Every other step of the reduction is an
-   identity by unfolding or an appeal to the assumption.  The pointwise count
-   Pr[a * x = y] = Pr[x = a^-1 * y] = 1/#|units| is done once, inside
-   fdistmap_bij_uniform. *)
+(* A unit's multiplication is a bijection of the unit group, so it fixes the
+   uniform law unit_fdist.  Katz and Lindell Lemma 11.15: multiplying the
+   challenge by g ^+ m erases m, hiding the plaintext. *)
 Lemma unit_fdist_translateE (a : ring_units T) :
   fdistmap (fun x => val a * x) unit_fdist = unit_fdist.
 Proof.
@@ -238,19 +237,18 @@ rewrite -fdistmap_comp (fdistmap_bij_uniform _ card_units) //.
 by exists (fun u => (a^-1 * u)%g) => u; rewrite ?mulKg ?mulKVg.
 Qed.
 
-(* The key fact composed with a Boolean test: deciding on val a * x and
-   deciding on x see the same law when x is a uniform unit.  This is the form
-   the middle equality of a reduction's hybrid consumes. *)
+(* A Boolean test sees the same law on val a * x and on a uniform unit x.
+   It is the form the middle equality of a reduction's hybrid consumes. *)
 Lemma unit_fdistmap_translateE (h : T -> bool) (a : ring_units T) :
   fdistmap (fun x => h (val a * x)) unit_fdist = fdistmap h unit_fdist.
 Proof. by rewrite -[in RHS](unit_fdist_translateE a) [in RHS]fdistmap_comp. Qed.
 
-(* The units of T as a subset of T, the set the first challenge of the
-   textbook wording is drawn from. *)
+(* The units of T as a subset of T.  The textbook wording draws its first
+   challenge from this set. *)
 Definition unit_set : {set T} := val @: [set: ring_units T].
 
-(* The e-th residues of T as a subset of T, the set the second challenge of
-   the textbook wording is drawn from. *)
+(* The e-th residues of T as a subset of T.  The textbook wording draws its
+   second challenge from this set. *)
 Definition residue_set : {set T} :=
   (fun u : ring_units T => val u ^+ e) @: [set: ring_units T].
 
@@ -266,11 +264,9 @@ Proof.
 by apply/card_gt0P; exists (val (1%g : ring_units T) ^+ e); apply: imset_f.
 Qed.
 
-(* The first challenge is uniform on the units: pushing a uniform unit through
-   the subtype projection is the uniform law on the image, the projection
-   being injective and every fiber a singleton.  With residue_fdistE this is
-   the textbook wording of the problem, tell a uniform element of the unit
-   group from a uniform e-th residue. *)
+(* The first challenge is uniform on the units, the subtype projection being
+   injective.  With residue_fdistE this is the textbook wording, a uniform
+   unit against a uniform e-th residue. *)
 Lemma unit_fdistE : unit_fdist = fdist_uniform_supp R card_unit_set_gt0.
 Proof.
 have card1 (u : T) : u \in unit_set ->
@@ -289,10 +285,9 @@ Qed.
 Lemma unit_commute (a b : ring_units T) : commute a b.
 Proof. by apply/val_inj; rewrite !FinRing.val_unitM mulrC. Qed.
 
-(* The e-th power map on the unit group is a group homomorphism, so its fiber
-   over the image point val t0 ^+ e is the left translate by t0 of its fiber
-   over 1, and the two fibers have the same cardinality.  Equinumerous fibers
-   are what makes the second challenge uniform on its image. *)
+(* Every fiber of the e-th power map on the unit group is a translate of the
+   fiber over 1.  Equinumerous fibers are what makes the second challenge
+   uniform on its image. *)
 Lemma residue_fiber_card (u : T) : u \in residue_set ->
   #|[set t : ring_units T | val t ^+ e == u]|
   = #|[set t : ring_units T | (t ^+ e)%g == 1%g]|.
@@ -323,9 +318,8 @@ Qed.
 Definition decide_constant (D : residuosity_distinguisher) : bool :=
   [forall c, [forall x, [forall y, decide D c x == decide D c y]]].
 
-(* Such a distinguisher has advantage zero: at each state its verdict is a
-   constant, both challenge laws are transported to the point mass at that
-   constant, and the two acceptance probabilities coincide. *)
+(* Such a distinguisher has advantage zero.  Its verdict at each state is a
+   constant, so both challenge laws map to the same point mass. *)
 Lemma residuosity_advantage_decide_constant_eq0 D :
   decide_constant D -> residuosity_advantage D = 0.
 Proof.
@@ -342,11 +336,9 @@ Lemma residuosity_advantage_decide_constant_le0 D :
   decide_constant D -> residuosity_advantage D <= 0.
 Proof. by move/residuosity_advantage_decide_constant_eq0 ->. Qed.
 
-(* The class of challenge-ignoring distinguishers at epsilon zero: a
-   residuosity assumption whose bound is proved rather than assumed.  A
-   statement restricted to a residuosity class is therefore not empty for want
-   of a record to read it at.  It does not show that a scheme's own class is
-   inhabited at a useful epsilon. *)
+(* The class of challenge-ignoring distinguishers at epsilon zero, a bound
+   proved rather than assumed.  It inhabits class-restricted statements, a
+   scheme's own class needing its own witness at a useful epsilon. *)
 Definition decide_constant_assumption : residuosity_assumption :=
   {| residuosity_admissible := decide_constant ;
      residuosity_assumption_epsilon := 0 ;
