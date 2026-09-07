@@ -143,20 +143,8 @@ Variables (rb1 rb2 rc1 rc2 ra1 ra2 : randT).
 Variables (dk_a dk_b dk_c : priv_keyT).
 Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msgT).
 
-(* Session-typed processes packed via [aprocs ...].
-
-   Why not use [procs ...] directly with sproc?
-   - Each sproc has different type indices (party, fuel, session env)
-   - Coq unifies list element types BEFORE applying coercions
-   - sproc 0 n1 env1 and sproc 1 n2 env2 cannot unify
-   See: https://github.com/coq/coq/issues/10898
-
-   The aproc wrapper solves this:
-   - aproc existentially packages the indices, making all elements
-     have the same type: aproc dsdp_dtype data
-   - [> dsdp_saprocs] computes total fuel from packaged indices
-   - erase_aprocs converts to seq (proc data) for the interpreter
-   See also: https://github.com/coq/coq/issues/4593 (uniform inheritance) *)
+(* The three DSDP programs packed as aprocs, which hides their differing
+   fuel and session-type indices. *)
 Definition dsdp_saprocs : seq (aproc dsdp_dtype data) :=
   [aprocs palice dk_a v1 u1 u2 u3 r2 r3 ra1 ra2; 
           pbob dk_b v2 rb1 rb2; 
@@ -167,7 +155,7 @@ Definition dsdp_procs : seq (proc data) :=
   erase_aprocs dsdp_saprocs.
 
 Definition dsdp h :=
-  interp h dsdp_procs (nseq 3 [::]).
+  interp h dsdp_procs (nseq 3 [::]) (nseq 3 [::]).
 
 (* Fuel bound computed from program structure:
    - palice: 14 (Init*7 + Recv_enc*2 + Send*2 + Recv_dec + Ret=2)

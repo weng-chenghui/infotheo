@@ -13,8 +13,13 @@ Require Import proba jfdist_cond entropy graphoid.
 (* ```                                                                        *)
 (*                proc == unindexed process type                              *)
 (*   [procs p1;..;pn ] == pack processes into seq proc                        *)
-(*   interp_traces h ps == returns a tuple of traces of size <= h             *)
+(*            Sample f == draw the head of the party's own seed stream        *)
+(*  interp_traces h ps sds == returns a tuple of traces of size <= h          *)
 (* ```                                                                        *)
+(*                                                                            *)
+(* Each party carries a seed stream beside its trace.  A Sample draws the     *)
+(* head of that stream and writes nothing to the trace, so a trace entry is   *)
+(* the image of the drawn values through the program, never a bare seed.      *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -43,6 +48,7 @@ Inductive proc : Type :=
   | Init : data -> proc -> proc
   | Send : nat -> data -> proc -> proc
   | Recv : nat -> (data -> proc) -> proc
+  | Sample : (data -> proc) -> proc
   | Ret : data -> proc
   | Finish : proc
   | Fail : proc.
@@ -50,46 +56,53 @@ Inductive proc : Type :=
 (* Default process for out-of-bounds access *)
 Definition default_proc : proc := Fail.
 
-(* Step function for process list *)
-Definition step (ps : seq proc) (trace : seq data) (i : nat) :=
+(* Step function for process list.  [Sample f] consumes the head of the
+   running party's seed stream and passes it to the continuation; an
+   exhausted stream blocks the party instead of fabricating a value. *)
+Definition step (ps : seq proc) (trace seed : seq data) (i : nat) :=
   let p := nth default_proc ps i in
-  let nop := (p, trace, false) in
+  let nop := (p, trace, seed, false) in
   match p with
   | Recv frm f =>
       match nth default_proc ps frm with
-      | Send dst v next => 
-          if dst == i then (f v, v::trace, true) else nop
+      | Send dst v next =>
+          if dst == i then (f v, v::trace, seed, true) else nop
       | _ => nop
       end
   | Send dst w next =>
       match nth default_proc ps dst with
       | Recv frm f =>
-          if frm == i then (next, trace, true) else nop
+          if frm == i then (next, trace, seed, true) else nop
       | _ => nop
       end
   | Init d next =>
-      (next, d::trace, true)
+      (next, d::trace, seed, true)
+  | Sample f =>
+      if seed is r :: seed' then (f r, trace, seed', true) else nop
   | Ret d =>
-      (Finish, d :: trace, true)
+      (Finish, d :: trace, seed, true)
   | Finish => nop
   | Fail => nop
   end.
 
-(* Fuel-bounded driver: each round runs step at every party and keeps
-   going while any party fired, returning the final processes and traces. *)
-Fixpoint interp h (ps : seq proc) (traces : seq (seq data)) :=
+(* Fuel-bounded driver: each round runs step at every party and keeps going
+   while any party fired, returning the final processes, traces and seeds. *)
+Fixpoint interp h (ps : seq proc) (traces : seq (seq data))
+                  (seeds : seq (seq data)) :=
   if h is h.+1 then
-    let ps_trs' := [seq step ps (nth [::] traces i) i
-                   | i <- iota 0 (size ps)] in
-    if has snd ps_trs' then
-      let ps' := unzip1 (unzip1 ps_trs') in
-      let trs' := unzip2 (unzip1 ps_trs') in
-      interp h ps' trs'
-    else (ps, traces)
-  else (ps, traces).
+    let res := [seq step ps (nth [::] traces i) (nth [::] seeds i) i
+               | i <- iota 0 (size ps)] in
+    if has snd res then
+      let ps' := unzip1 (unzip1 (unzip1 res)) in
+      let trs' := unzip2 (unzip1 (unzip1 res)) in
+      let sds' := unzip2 (unzip1 res) in
+      interp h ps' trs' sds'
+    else (ps, traces, seeds)
+  else (ps, traces, seeds).
 
 (* Entry point: run the interpreter from empty traces for the given fuel. *)
-Definition run_interp h procs := interp h procs (nseq (size procs) [::]).
+Definition run_interp h procs seeds :=
+  interp h procs (nseq (size procs) [::]) seeds.
 
 Local Open Scope tuple_ext_scope.
 Local Open Scope fset_scope.
@@ -113,38 +126,49 @@ Lemma map_extract n m A B (l : lens n m) (f : A -> B) v :
   map_tuple f (extract l v) = extract l (map_tuple f v).
 Proof. by apply: eq_from_tnth => i; rewrite !tnth_map. Qed.
 
-(* Relational reduction - single step reductions *)
-Inductive rstep {n} : forall {m}, lens n m ->
+(* Relational reduction - single step reductions.
+   The relation is read at a seed assignment: [rsample] fires at party i only
+   with the value standing at the head of stream i, so the drawn value is not
+   a further source of nondeterminism and normal forms stay unique. *)
+Inductive rstep {n} (sds : n.-tuple (seq data)) : forall {m}, lens n m ->
       m.-tuple proc -> m.-tuple proc -> m.-tuple (seq data) -> Prop :=
-  | rinit i x p : rstep [tuple i] [tuple Init x p] [tuple p] [tuple [:: x]]
-  | rret i x : rstep [tuple i] [tuple Ret x] [tuple Finish] [tuple [:: x]]
+  | rinit i x p : rstep sds [tuple i] [tuple Init x p] [tuple p] [tuple [:: x]]
+  | rret i x : rstep sds [tuple i] [tuple Ret x] [tuple Finish] [tuple [:: x]]
   | rcomm i j x pi pj :
-    rstep [tuple i; j] [tuple Send j x pi; Recv i pj] [tuple pi; pj x]
-          [tuple nil; [:: x]].
+    rstep sds [tuple i; j] [tuple Send j x pi; Recv i pj] [tuple pi; pj x]
+          [tuple nil; [:: x]]
+  | rsample i f r sd : sds !_ i = r :: sd ->
+    rstep sds [tuple i] [tuple Sample f] [tuple f r] [tuple nil].
 
 (* Reflexive transitive closure of rstep *)
-Inductive rsteps {n} :
+Inductive rsteps {n} (sds : n.-tuple (seq data)) :
       n.-tuple proc -> n.-tuple proc -> n.-tuple (seq data) -> Prop :=
   | rone m (l : lens n m) ps ps' traces :
-    rstep l (extract l ps) ps' traces ->
-    rsteps ps (inject l ps ps') (inject l [tuple nil | _ < n] traces)
-  | rrefl ps : rsteps ps ps [tuple nil | _ < n]
+    rstep sds l (extract l ps) ps' traces ->
+    rsteps sds ps (inject l ps ps') (inject l [tuple nil | _ < n] traces)
+  | rrefl ps : rsteps sds ps ps [tuple nil | _ < n]
   | rtrans ps1 ps2 ps3 tr1 tr2 tr3 :
-    rsteps ps1 ps2 tr1 -> rsteps ps2 ps3 tr2 ->
+    rsteps sds ps1 ps2 tr1 -> rsteps sds ps2 ps3 tr2 ->
     tr3 = [tuple tr2 !_ i ++ tr1 !_ i | i < n] ->
-    rsteps ps1 ps3 tr3.
+    rsteps sds ps1 ps3 tr3.
+
+(* One party's step result: the surviving process, its trace, the remaining
+   seed stream, and whether it fired. *)
+Definition step_resultT := (proc * seq data * seq data * bool)%type.
 
 (* Project the surviving process out of each party's step result. *)
-Definition result_procs n (res : n.-tuple (proc * seq data * bool)) :=
-  map_tuple (fun r : proc * seq data * bool => r.1.1) res.
+Definition result_procs n (res : n.-tuple step_resultT) :=
+  map_tuple (fun r : step_resultT => r.1.1.1) res.
 (* Project the accumulated trace out of each party's step result. *)
-Definition result_traces n (res : n.-tuple (proc * seq data * bool)) :=
-  map_tuple (fun r : proc * seq data * bool => r.1.2) res.
+Definition result_traces n (res : n.-tuple step_resultT) :=
+  map_tuple (fun r : step_resultT => r.1.1.2) res.
 
-(* The step function does all possible reductions at once *)
-Lemma step_complete n m (l : lens n m) ps ps' traces' :
-  rstep l (extract l ps) ps' traces' ->
-  let res := extract l [tuple step ps nil i | i < n] in
+(* The step function does all possible reductions at once, at the seed
+   assignment the relation is read at. *)
+Lemma step_complete n m (sds : n.-tuple (seq data)) (l : lens n m) ps ps'
+    traces' :
+  rstep sds l (extract l ps) ps' traces' ->
+  let res := extract l [tuple step ps nil (sds !_ i) i | i < n] in
   result_procs res = ps' /\
   result_traces res = traces'.
 Proof.
@@ -161,6 +185,9 @@ case: H Hps => /=.
   split; apply /val_inj; congr ([:: _; _]);
     rewrite /= tnth_map tnth_mktuple /= /step;
     by rewrite -tnth_nth (Hi,Hj) -tnth_nth (Hi,Hj) eqxx.
+- move=> i f r sd Hsd [] Hps.
+  split; apply /val_inj;
+    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps Hsd.
 Qed.
 
 (* Characterization of a 2-party reduction at indices a, b: it must be a
@@ -171,31 +198,37 @@ Variant rstep2_spec n (ps : n.-tuple proc) (a b : 'I_n) : Prop :=
     : rstep2_spec ps a b.
 
 (* Invert a 2-party rstep into the Send/Recv pair that produced it. *)
-Lemma rstep2P n (ps : n.-tuple proc) (a b : 'I_n) ps' traces :
-  rstep [tuple a; b] (extract [tuple a; b] ps) ps' traces ->
+Lemma rstep2P n (sds : n.-tuple (seq data)) (ps : n.-tuple proc)
+    (a b : 'I_n) ps' traces :
+  rstep sds [tuple a; b] (extract [tuple a; b] ps) ps' traces ->
   rstep2_spec ps a b.
 Proof.
 inversion 1; subst.
 exact: (Rstep2Comm (esym H3) (esym H4)).
 Qed.
 
-(* No two reductions fireable from the same state can conflict: any two
-   are either the identical reduction or act on disjoint party indices.
-   This disjointness lets the soundness proof compose per-party
-   reductions in any order. Stronger than the old comm_disjoint. *)
-Lemma rstep_disjoint n m p (ps : n.-tuple proc) (l1 : lens n m) (l2 : lens n p)
-  psl1 psl2 ps1 tr1 ps2 tr2 :
+(* Two reductions fireable from one state are either identical or act on
+   disjoint party indices.  That disjointness lets the soundness proof
+   compose per-party reductions in any order. *)
+Lemma rstep_disjoint n m p (sds : n.-tuple (seq data)) (ps : n.-tuple proc)
+  (l1 : lens n m) (l2 : lens n p) psl1 psl2 ps1 tr1 ps2 tr2 :
   psl1 = extract l1 ps -> psl2 = extract l2 ps ->
-  rstep l1 psl1 ps1 tr1 -> rstep l2 psl2 ps2 tr2 ->
+  rstep sds l1 psl1 ps1 tr1 -> rstep sds l2 psl2 ps2 tr2 ->
   l1 == l2 :> seq _ /\ ps1 = ps2 :> seq _ /\ tr1 = tr2 :> seq _
   \/ {in l1 & l2, forall a b, a != b}.
   (* [disjoint l1 & l2] *)
 Proof.
 move=> Hpsl1 Hpsl2 Hred1 Hred2.
-(* Fallback: the constructor equality is consumed as a view in destructuring position, so goal-level congr does not apply. *)
-case: Hred1 Hpsl1 => [i j pi | i x | i j x pi pj] /(congr1 val) /= [] Hpi;
-case: Hred2 Hpsl2 => [i' j' pi' | i' x' | i' j' x' pi' pj'] /(congr1 val) /=[];
-  (have [<-|ii' Hpi'] := eqVneq i i'; [rewrite -Hpi // => -[]
+(* Fallback: the constructor equality is consumed as a view in destructuring
+   position, so goal-level congr does not apply.  The equation between the two
+   indices is kept as [Eii'] instead of being substituted, because two sampling
+   reductions at one index need it to compare their seed streams. *)
+case: Hred1 Hpsl1 =>
+  [i j pi | i x | i j x pi pj | i f r sd Hsd] /(congr1 val) /= [] Hpi;
+case: Hred2 Hpsl2 =>
+  [i' j' pi' | i' x' | i' j' x' pi' pj' | i' f' r' sd' Hsd']
+    /(congr1 val) /=[];
+  (have [Eii'|ii' Hpi'] := eqVneq i i'; [rewrite -Eii' -Hpi // => -[]
    | right => a b; rewrite !inE; try by do! move /eqP ->]).
  by move=> <- <-; left.
  move=> /eqP-> /orP[] /eqP->; apply/eqP => ij; by rewrite ij -(Hpi',H) in Hpi.
@@ -210,6 +243,10 @@ case: Hred2 Hpsl2 => [i' j' pi' | i' x' | i' j' x' pi' pj'] /(congr1 val) /=[];
   move=> /orP[] /eqP -> /orP[] /eqP -> //; apply/eqP => ij.
   + by rewrite ij -Hpj' in Hpi.
   + by rewrite ij -Hpi' in Hpj.
+ move=> /orP[] /eqP-> /eqP->; apply/eqP => ij; by rewrite -ij -(Hpi,H) in Hpi'.
+ move=> /eqP-> /orP[] /eqP->; apply/eqP => ij; by rewrite ij -(Hpi',H) in Hpi.
+move=> Eff'; rewrite Eii' Hsd' in Hsd; case: Hsd => Err' _.
+by left; rewrite Eff' Err'.
 Qed.
 
 Lemma extract_inject_disj n m m' A
@@ -250,18 +287,19 @@ Definition concat_traces n (tr1 tr2 : n.-tuple (seq data)) :=
 Definition empty_traces {n} := [tuple (@nil data) | _ < n].
 
 (* Alternative definition of reduction, better for induction *)
-Inductive rstepl {n} :
+Inductive rstepl {n} (sds : n.-tuple (seq data)) :
       n.-tuple proc -> n.-tuple proc -> n.-tuple (seq data) -> Prop :=
-  | rnil ps : rstepl ps ps [tuple nil | _ < n]
+  | rnil ps : rstepl sds ps ps [tuple nil | _ < n]
   | rcons m (l : lens n m) ps ps1 ps2 tr1 tr2 tr3 :
-    rstep l (extract l ps) ps1 tr1 ->
-    rstepl (inject l ps ps1) ps2 tr2 ->
+    rstep sds l (extract l ps) ps1 tr1 ->
+    rstepl sds (inject l ps ps1) ps2 tr2 ->
     tr3 = concat_traces tr2 (inject l empty_traces tr1) ->
-    rstepl ps ps2 tr3.
+    rstepl sds ps ps2 tr3.
 
-Lemma rconcat n (ps ps1 ps2 : n.-tuple proc) tr1 tr2 :
-  rstepl ps ps1 tr1 -> rstepl ps1 ps2 tr2 ->
-  rstepl ps ps2 (concat_traces tr2 tr1).
+Lemma rconcat n (sds : n.-tuple (seq data)) (ps ps1 ps2 : n.-tuple proc)
+    tr1 tr2 :
+  rstepl sds ps ps1 tr1 -> rstepl sds ps1 ps2 tr2 ->
+  rstepl sds ps ps2 (concat_traces tr2 tr1).
 Proof.
 elim: ps ps1 tr1 / => [ps Hr|].
   rewrite (_ : concat_traces _ _ = tr2) //.
@@ -273,8 +311,8 @@ by apply: eq_from_tnth => i; rewrite Htr' !tnth_mktuple catA.
 Qed.
 
 (* Equiavalence of of rsteps and rstepl *)
-Lemma rstepsP n (ps1 ps2 : n.-tuple proc) tr :
-  rsteps ps1 ps2 tr <-> rstepl ps1 ps2 tr.
+Lemma rstepsP n (sds : n.-tuple (seq data)) (ps1 ps2 : n.-tuple proc) tr :
+  rsteps sds ps1 ps2 tr <-> rstepl sds ps1 ps2 tr.
 Proof.
 split.
 - elim: ps1 ps2 tr/ =>
@@ -305,11 +343,12 @@ Qed.
 (* Note that alone, this gives neither confluence nor termination.
    However, as sound as we have termination, we get confluence,
    and we also proved that the pismc sublanguage is terminating. *)
-Lemma rstepl_normalisation n (ps ps1 ps2 : n.-tuple proc) tr1 tr2 :
-  rstepl ps ps1 tr1 ->
-  (forall m (l : lens n m) ps' tr', ~ rstep l (extract l ps1) ps' tr') ->
-  rstepl ps ps2 tr2 ->
-  exists tr3, rstepl ps2 ps1 tr3 /\ tr1 = concat_traces tr3 tr2.
+Lemma rstepl_normalisation n (sds : n.-tuple (seq data))
+    (ps ps1 ps2 : n.-tuple proc) tr1 tr2 :
+  rstepl sds ps ps1 tr1 ->
+  (forall m (l : lens n m) ps' tr', ~ rstep sds l (extract l ps1) ps' tr') ->
+  rstepl sds ps ps2 tr2 ->
+  exists tr3, rstepl sds ps2 ps1 tr3 /\ tr1 = concat_traces tr3 tr2.
 Proof.
 move=> Hr1 Hterm.
 pose tr0 := @empty_traces n.
@@ -349,7 +388,8 @@ move=> /= ll'.
 rewrite extract_inject_disj in IH'; last first.
   by move=> a b Ha Hb; rewrite eq_sym; apply: ll'.
 pose tr2' := inject l' tr0 tr2.
-have Hrll' : rstepl (inject l ps ps1) (inject l' (inject l ps ps1) ps2) tr2'.
+have Hrll' :
+  rstepl sds (inject l ps ps1) (inject l' (inject l ps ps1) ps2) tr2'.
   apply: (rcons (l:=l')).
       rewrite extract_inject_disj //.
       exact: Hr'.
@@ -388,53 +428,123 @@ Arguments Fail {data}.
 Arguments Init {data}.
 Arguments Send {data}.
 Arguments Recv {data}.
+Arguments Sample {data}.
 Arguments Ret {data}.
+
+Section sampling.
+Variable data : Type.
+
+(* A Sample substitutes the head of the party's stream into its continuation,
+   advances the stream, and leaves the trace alone. *)
+Lemma step_sample (ps : seq (proc data)) tr i f r sd :
+  nth (default_proc data) ps i = Sample f ->
+  step ps tr (r :: sd) i = (f r, tr, sd, true).
+Proof. by rewrite /step => ->. Qed.
+
+(* An exhausted stream blocks the party rather than fabricating a value. *)
+Lemma step_sample_nil (ps : seq (proc data)) tr i f :
+  nth (default_proc data) ps i = Sample f ->
+  step ps tr [::] i = (Sample f, tr, [::], false).
+Proof. by rewrite /step => ->. Qed.
+
+(* One step's trace is a function of the process list and the party index
+   alone.  A seed reaches a trace entry only inside a value the program
+   itself builds and then sends. *)
+Lemma step_trace_seed_indep (ps : seq (proc data)) tr sd1 sd2 i :
+  (step ps tr sd1 i).1.1.2 = (step ps tr sd2 i).1.1.2.
+Proof.
+rewrite /step.
+case: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] //.
+- by case: (nth (default_proc data) ps n) => [*|*|m g|*|*| |] //=; case: ifP.
+- by case: (nth (default_proc data) ps n) => [*|m w q|*|*|*| |] //=; case: ifP.
+- by case: sd1 => [|r1 sd1']; case: sd2.
+Qed.
+
+(* A datum reaches party i's trace only by an Init or Ret of i, or a Send
+   to i. *)
+Definition trace_datum (ps : seq (proc data)) (i : nat) (d : data) : Prop :=
+  (exists p, nth (default_proc data) ps i = Init d p)
+  \/ nth (default_proc data) ps i = Ret d
+  \/ (exists frm p, nth (default_proc data) ps frm = Send i d p).
+
+(* One step either leaves the trace alone or prepends a single datum licensed
+   by an Init, Ret or Send node.  A Sample falls in the first case, so a drawn
+   value is never a trace entry. *)
+Lemma step_trace_extends (ps : seq (proc data)) tr sd i :
+  (step ps tr sd i).1.1.2 = tr
+  \/ exists d, (step ps tr sd i).1.1.2 = d :: tr /\ trace_datum ps i d.
+Proof.
+rewrite /step /trace_datum.
+case Hi: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] /=.
+- by right; exists d; split=> //; left; exists p.
+- case: (nth (default_proc data) ps n) => [*|*|m g|*|*| |] /=; try by left.
+  by case: ifP => _; left.
+- case Hn: (nth (default_proc data) ps n) => [x q|m w q|m g|g|x| |] /=;
+    try by left.
+  case: ifP => [/eqP Hm|_]; last by left.
+  by right; exists w; split=> //; right; right; exists n, q; rewrite Hn Hm.
+- by case: sd => [|r sd']; left.
+- by right; exists d; split=> //; right; left.
+- by left.
+- by left.
+Qed.
+
+(* A Sample draw is the substitution of the stream head into the
+   continuation.  The rest of the run proceeds on the shortened stream. *)
+Lemma interp_sampleE h (f g : data -> proc data) r0 rest :
+  interp h.+1 [:: Recv 1 g; Sample f] [:: [::]; [::]] [:: [::]; r0 :: rest]
+  = interp h [:: Recv 1 g; f r0] [:: [::]; [::]] [:: [::]; rest].
+Proof. by []. Qed.
+
+End sampling.
 
 Section traces.
 Variable data : Type.
 Local Open Scope nat_scope.
 
 (* One step appends at most one datum to the party's trace. *)
-Lemma step_size_le (ps : seq (proc data)) (tr : seq data) (i : nat) :
-  size (step ps tr i).1.2 <= (size tr).+1.
+Lemma step_size_le (ps : seq (proc data)) (tr sd : seq data) (i : nat) :
+  size (step ps tr sd i).1.1.2 <= (size tr).+1.
 Proof.
 rewrite /step.
-case: (nth _ ps i) => [d1 p1|dst1 d1 p1|frm1 f1|d1||] //=.
-- by case: (nth _ ps dst1) => [? ?|? ? ?|? ?|?||] //=; case: ifP.
-- by case: (nth _ ps frm1) => [? ?|? ? ?|? ?|?||] //=; case: ifP.
+case: (nth _ ps i) => [d1 p1|dst1 d1 p1|frm1 f1|f1|d1||] //=.
+- by case: (nth _ ps dst1) => [? ?|? ? ?|? ?|?|?||] //=; case: ifP.
+- by case: (nth _ ps frm1) => [? ?|? ? ?|? ?|?|?||] //=; case: ifP.
+- by case: sd.
 Qed.
 
-(* Fuel bounds every party's trace length, stated by index instead of by
-   membership, hence without an eqType on the data carrier. *)
-Lemma size_interp_nth h (ps : seq (proc data)) (trs : seq (seq data)) k :
+(* Fuel bounds every party's trace length, stated by index rather than by
+   membership, so the data carrier needs no eqType. *)
+Lemma size_interp_nth h (ps : seq (proc data)) (trs sds : seq (seq data)) k :
   (forall i, size (nth [::] trs i) <= k) ->
-  forall i, size (nth [::] (interp h ps trs).2 i) <= k + h.
+  forall i, size (nth [::] (interp h ps trs sds).1.2 i) <= k + h.
 Proof.
-elim: h k ps trs => [k ps trs Hk i|h IH k ps trs Hk i] /=;
+elim: h k ps trs sds => [k ps trs sds Hk i|h IH k ps trs sds Hk i] /=;
   first by rewrite addn0.
 case: ifP => _; last by apply: (leq_trans (Hk i)); rewrite leq_addr.
 rewrite addnS -addSn; apply: IH => j.
-rewrite /unzip2 /unzip1 -2!map_comp.
+rewrite /unzip2 /unzip1 -3!map_comp.
 case: (ltnP j (size ps)) => Hj; last first.
   by rewrite nth_default // size_map size_iota.
 rewrite (nth_map 0) ?size_iota // nth_iota // add0n /=.
-apply: (leq_trans (step_size_le ps (nth [::] trs j) j)).
+apply: (leq_trans (step_size_le ps (nth [::] trs j) (nth [::] sds j) j)).
 by rewrite ltnS; exact: Hk.
 Qed.
 
-(* interp preserves the party count: process and trace lists keep the
+(* interp preserves the party count: the process and trace lists keep the
    same length as the input across all rounds. *)
-Lemma size_interp h (procs : seq (proc data)) (traces : seq (seq data)) :
+Lemma size_interp h (procs : seq (proc data)) (traces seeds : seq (seq data)) :
   size procs = size traces ->
-  size (interp h procs traces).1 = size procs /\
-  size (interp h procs traces).2 = size procs.
+  size (interp h procs traces seeds).1.1 = size procs /\
+  size (interp h procs traces seeds).1.2 = size procs.
 Proof.
-elim: h procs traces => // h IH procs traces Hsz /=.
+elim: h procs traces seeds => // h IH procs traces seeds Hsz /=.
 case: ifP => _ //.
 rewrite /unzip1 /unzip2 -!map_comp.
 set map1 := map _ _.
 set map2 := map _ _.
-case: (IH map1 map2).
+set map3 := map _ _.
+case: (IH map1 map2 map3).
   by rewrite !size_map.
 move=> -> ->.
 by rewrite !size_map size_iota.
@@ -442,8 +552,9 @@ Qed.
 
 (* Per-party fuel bound on trace length, supplying the size proof needed to
    package traces as bounded sequences. *)
-Lemma size_traces_nth h (ps : seq (proc data)) (i : nat) :
-  size (nth [::] (run_interp h ps).2 i) <= h.
+Lemma size_traces_nth h (ps : seq (proc data)) (sds : seq (seq data))
+    (i : nat) :
+  size (nth [::] (run_interp h ps sds).1.2 i) <= h.
 Proof.
 rewrite /run_interp -[h]add0n; apply: size_interp_nth => j.
 by rewrite nth_nseq; case: ifP.
@@ -451,17 +562,17 @@ Qed.
 
 (* Final traces packaged as a tuple of length-bounded sequences, the form
    downstream entropy and security reasoning consumes. *)
-Definition interp_traces h procs : (size procs).-tuple (h.-bseq data) :=
-  [tuple Bseq (size_traces_nth h procs i) | i < size procs].
+Definition interp_traces h procs sds : (size procs).-tuple (h.-bseq data) :=
+  [tuple Bseq (size_traces_nth h procs sds i) | i < size procs].
 
 (* interp_traces is faithful: stripping the bounds recovers exactly the
    raw traces returned by run_interp. *)
-Lemma interp_traces_ok h procs :
- map val (interp_traces h procs) = (run_interp h procs).2.
+Lemma interp_traces_ok h procs sds :
+ map val (interp_traces h procs sds) = (run_interp h procs sds).1.2.
 Proof.
 apply (eq_from_nth (x0:=[::])).
   rewrite size_map /= size_map size_enum_ord.
-  by rewrite (size_interp _ _).2 ?size_nseq.
+  by rewrite (size_interp _ _ _).2 ?size_nseq.
 move=> i Hi.
 rewrite size_map in Hi.
 rewrite (nth_map [bseq]) // /interp_traces.
@@ -477,8 +588,8 @@ Local Open Scope nat_scope.
 
 (* Membership form of [size_traces_nth]: every trace produced in h rounds has
    at most h entries. *)
-Lemma size_traces h (procs : seq (proc data)) :
-  forall s, s \in (run_interp h procs).2 -> size s <= h.
+Lemma size_traces h (procs : seq (proc data)) (sds : seq (seq data)) :
+  forall s, s \in (run_interp h procs sds).1.2 -> size s <= h.
 Proof. by move=> s /(nthP [::])[i _ <-]; exact: size_traces_nth. Qed.
 
 End traces_eqType.

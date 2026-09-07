@@ -102,13 +102,14 @@ Lemma smc_scalar_product_ok :
        [:: one ra;
            vec sb;
            vec sa]
-   ]).
+   ],
+   [:: [::]; [::]; [::]]).
 Proof. reflexivity. Qed.
 
 (* With fuel equal to sum_fuel, evaluation reaches a final state *)
 Lemma smc_scalar_product_terminates :
   all_final (smc_scalar_product dotproduct sa sb ra yb xa xb
-    [> smc_saprocs dotproduct sa sb ra yb xa xb]).1.
+    [> smc_saprocs dotproduct sa sb ra yb xa xb]).1.1.
 Proof. reflexivity. Qed.
 
 Lemma smc_scalar_product_traces_ok :

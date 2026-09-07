@@ -71,6 +71,13 @@ Definition DInit {party n env} (x : data) (p : @sproc dsdp_dtype data party n en
     : @sproc dsdp_dtype data party n.+1 env :=
   SInit x p.
 
+(* DSample: draw one datum from this party's own seed stream.  No channel is
+   used, so the session environment is unchanged and the fuel grows by one. *)
+Definition DSample {party n env}
+    (f : data -> @sproc dsdp_dtype data party n env)
+    : @sproc dsdp_dtype data party n.+1 env :=
+  SSample f.
+
 (* DRet: terminal return wrapper (fuel 2, empty session environment). *)
 Definition DRet {party : nat} (x : data) : @sproc dsdp_dtype data party 2 senv_end :=
   SRet x.
@@ -79,9 +86,8 @@ Definition DRet {party : nat} (x : data) : @sproc dsdp_dtype data party 2 senv_e
 Definition DFinish {party : nat} : @sproc dsdp_dtype data party 1 senv_end :=
   SFinish.
 
-(* Iteration wrapper: send encrypted data to each party in a list.
-   dst maps each element to a destination party index.
-   payload maps each element to the data to send. *)
+(* Send encrypted data to each party of a list, one SSend per element.
+   The destination comes from dst and the datum from payload. *)
 Definition DSend_iter {T} (party : nat) (dst : T -> nat) (payload : T -> data)
     (elems : seq T) {n} {env : senv dsdp_dtype}
     (cont : @sproc dsdp_dtype data party n env)
@@ -118,6 +124,7 @@ Arguments DRecv_enc {DI party n env}.
 Arguments DRecv_dec {DI} decode {party n env}.
 Arguments DSend {DI party n env}.
 Arguments DInit {DI party n env}.
+Arguments DSample {DI party n env}.
 Arguments DRet {DI party}.
 Arguments DFinish {DI party}.
 Arguments DSend_iter {DI T} party dst payload elems {n env} cont.

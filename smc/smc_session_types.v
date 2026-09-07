@@ -127,7 +127,13 @@ Inductive sproc (party : nat) : nat -> senv dtype -> Type :=
   | SRecv : forall n env src (dt : dtype),
       (data -> sproc party n env) ->
       sproc party n.+1 (senv_recv env src dt)
-  
+
+  (* Sample: draws from the party's own seed stream, so no channel is used
+     and the session environment is unchanged; costs one round of fuel *)
+  | SSample : forall n env,
+      (data -> sproc party n env) ->
+      sproc party n.+1 env
+
   (* Fail: polymorphic in fuel and env for error handling *)
   | SFail : forall n env, sproc party n env.
 
@@ -138,6 +144,7 @@ Arguments SRet {dtype data party}.
 Arguments SInit {dtype data party n env}.
 Arguments SSend {dtype data party n env} dst dt.
 Arguments SRecv {dtype data party n env} src dt.
+Arguments SSample {dtype data party n env}.
 Arguments SFail {dtype data party n env}.
 
 (******************************************************************************)
@@ -497,12 +504,13 @@ Fixpoint erase {party : nat} {n : nat} {env : senv dtype}
   | @SInit _ _ _ _ _ d k => Init d (erase k)
   | @SSend _ _ _ _ _ dst _ d k => Send dst d (erase k)
   | @SRecv _ _ _ _ _ src _ f => Recv src (fun d => erase (f d))
+  | @SSample _ _ _ _ _ f => Sample (fun d => erase (f d))
   | @SFail _ _ _ _ _ => Fail
   end.
 
-(* Erasure commutes with sproc_iter: if each body step has a uniform erasure
-   (independent of type indices n/env), then erasing the whole iteration gives
-   a foldr over the erased body steps. *)
+(* Erasure commutes with sproc_iter when the body erases uniformly in the
+   type indices.  The whole iteration then erases to a foldr over the
+   erased body. *)
 Lemma erase_sproc_iter {T} (party : nat) fuel_step env_step
     (body : forall (f : T) (idx : nat) (n : nat) (env : senv dtype),
             @sproc dtype data party n env ->
@@ -525,15 +533,11 @@ Definition erase_aproc (ap : aproc dtype data) : smc_interpreter.proc data :=
 Definition erase_aprocs (aps : seq (aproc dtype data)) : seq (smc_interpreter.proc data) :=
   map erase_aproc aps.
 
-(* A process with zero fuel erases to Fail.
-   Proof: Case analysis on the sproc constructor. Only SFail has fuel 0;
-   all other constructors (SFinish, SRet, SInit, SSend, SRecv) have fuel >= 1. *)
+(* A process with zero fuel erases to Fail. *)
 Lemma nofuel_proc_fail p : aproc_fuel p = 0 -> erase_aproc p = Fail.
-Proof. by case: p => x [y] [e] [||n|n|n|n]. Qed.
+Proof. by case: p => x [y] [e] [||n|n|n|n|n]. Qed.
 
-(* If total fuel is zero, all processes erase to Fail.
-   Proof: By induction on the process list. If the sum is zero, each individual
-   fuel must be zero (since fuel is non-negative), so nofuel_proc_fail applies. *)
+(* If the total fuel is zero, every process erases to Fail. *)
 Lemma nofuel_procs_fail (ps : seq (aproc dtype data)) :
   [> ps] = 0 -> erase_aprocs ps = nseq (size ps) Fail.
 Proof.
@@ -546,31 +550,20 @@ Qed.
 (* Default annotated process used as fallback value for nth when index exceeds list size *)
 Definition aproc_default := @mk_aproc dtype data 0 0 senv_end SFail.
 
-(* Construct a tuple where each element satisfies an index-dependent predicate.
-   Given a function f that produces {a | P i a} for each index i, builds a
-   tuple [tuple sval (f i) | i < n] with proof that forall i, P i (tnth sa i).
-   Proof: Extract values with sval, then use tnth_mktuple to rewrite access,
-   and svalP to get the proof component from each sigma type. *)
+(* A tuple whose entry at each index satisfies an index-dependent
+   predicate, built from a family of dependent pairs. *)
 Definition dependent_mktuple (A : Type) n (P : 'I_n -> A -> Prop)
   (f : forall i, {a | P i a}) : {sa : n.-tuple A | forall i, P i (tnth sa i)}.
 exists [tuple sval (f i) | i < n].
 abstract (move=> i; rewrite tnth_mktuple; exact: (svalP (f i))).
 Defined.
 
-(* Key lemma: after one step, we can reconstruct an annotated process ap' such that:
-   1. ap' erases to the resulting process
-   2. fuel of ap' + "did step happen" (0 or 1) <= original fuel
-   This means: if a step happens (res.2 = 1), fuel strictly decreases;
-   if no step happens (res.2 = 0), fuel stays the same.
-   Proof: Case analysis on the sproc constructor of the k-th process.
-   - SFinish/SRet/SFail: no step possible, return same/default process
-   - SInit: always steps, return continuation with fuel n-1, prove (n-1)+1 <= n
-   - SSend: check if receiver ready; if matched, return continuation with decreased fuel
-   - SRecv: check if sender ready; if matched, apply continuation with decreased fuel *)
-Lemma fuel_decreases (ps : seq (aproc dtype data)) k tr :
+(* After one step the resulting process is again an annotated process.  Its
+   fuel plus the step's progress bit is at most the original fuel. *)
+Lemma fuel_decreases (ps : seq (aproc dtype data)) k tr sds :
   k < size ps ->
-  let res := step (erase_aprocs ps) (nth [::] tr k) k in
-  { ap' | erase_aproc ap' = res.1.1 /\
+  let res := step (erase_aprocs ps) (nth [::] tr k) (nth [::] sds k) k in
+  { ap' | erase_aproc ap' = res.1.1.1 /\
       aproc_fuel ap' + res.2 <= aproc_fuel (nth aproc_default ps k) }.
 Proof.
 move => Hk /=.
@@ -581,35 +574,35 @@ move/(f_equal erase_aproc): Hnth.
 rewrite -(nth_map _ (default_proc _)) // -/(erase_aprocs ps).
 rewrite /erase_aproc /aproc_proc /=.
 case Hn: n env / sp =>
-       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env] Hnth /=.
+       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env g|n' env]
+       Hnth /=.
 - by exists (mk_aproc (party:=p) SFinish).
 - by exists (mk_aproc (party:=p) SFinish).
 - by exists (mk_aproc (party:=p) s); rewrite addn1.
-- case Hnth': nth => [||k' p'|||];
+- case Hnth': nth => [||k' p'||||];
     try by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
   case: ifPn => [/eqP|] k'k.
     by exists (mk_aproc (party:=p) s); rewrite addn1.
   by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
-- case Hnth': nth => [|k' d' p'||||];
+- case Hnth': nth => [|k' d' p'|||||];
     try by exists (mk_aproc (party:=p) (SRecv dst d s));
            rewrite /= (addn0 (aproc_fuel _)).
   case: ifPn => [/eqP|] k'k.
     by exists (mk_aproc (party:=p) (s d')); rewrite addn1.
   by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite addn0.
+- case Hsd: (nth [::] sds k) => [|r sd].
+    by exists (mk_aproc (party:=p) (SSample g)); rewrite addn0.
+  by exists (mk_aproc (party:=p) (g r)); rewrite addn1.
 - by exists aproc_default.
 Qed.
 
-(* Extended fuel_decreases: also tracks senv_depth non-increasing.
-   The senv bound follows from the structure of sproc constructors:
-   - SFinish/SRet: env = senv_end, depth = 0
-   - SInit: env unchanged
-   - SSend matched: env goes from (senv_send env' dst dt) to env', depth non-increasing
-   - SRecv matched: env goes from (senv_recv env' src dt) to env', depth non-increasing
-   - Blocked cases: env unchanged *)
-Lemma fuel_senv_decreases (ps : seq (aproc dtype data)) k tr (parties : seq nat) :
+(* The reconstruction of fuel_decreases, also keeping the session
+   environment depth non-increasing. *)
+Lemma fuel_senv_decreases (ps : seq (aproc dtype data)) k tr sds
+    (parties : seq nat) :
   k < size ps ->
-  let res := step (erase_aprocs ps) (nth [::] tr k) k in
-  { ap' | erase_aproc ap' = res.1.1 /\
+  let res := step (erase_aprocs ps) (nth [::] tr k) (nth [::] sds k) k in
+  { ap' | erase_aproc ap' = res.1.1.1 /\
       aproc_fuel ap' + res.2 <= aproc_fuel (nth aproc_default ps k) /\
       senv_depth (aproc_env ap') <= senv_depth (aproc_env (nth aproc_default ps k)) }.
 Proof.
@@ -621,7 +614,8 @@ move/(f_equal erase_aproc): Hnth.
 rewrite -(nth_map _ (default_proc _)) // -/(erase_aprocs ps).
 rewrite /erase_aproc /aproc_proc /=.
 case Hn: n env / sp =>
-       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env] Hnth /=.
+       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env g|n' env]
+       Hnth /=.
 - (* SFinish: env = senv_end, stays senv_end *)
   by exists (mk_aproc (party:=p) SFinish).
 - (* SRet: env = senv_end, becomes senv_end (via SFinish) *)
@@ -629,7 +623,7 @@ case Hn: n env / sp =>
 - (* SInit: env unchanged *)
   by exists (mk_aproc (party:=p) s); rewrite addn1.
 - (* SSend *)
-  case Hnth': nth => [||k' p'|||];
+  case Hnth': nth => [||k' p'||||];
     try by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
   (* Recv case: check if matched *)
   case: ifPn => [/eqP|] k'k.
@@ -639,7 +633,7 @@ case Hn: n env / sp =>
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
 - (* SRecv *)
-  case Hnth': nth => [|k' d' p'||||];
+  case Hnth': nth => [|k' d' p'|||||];
     try by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite /= addn0.
   (* Send case: check if matched *)
   case: ifPn => [/eqP|] k'k.
@@ -648,26 +642,23 @@ case Hn: n env / sp =>
     by rewrite addn1.
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite addn0.
+- (* SSample: env unchanged whether or not the stream is exhausted *)
+  case Hsd: (nth [::] sds k) => [|r sd].
+    by exists (mk_aproc (party:=p) (SSample g)); rewrite addn0.
+  by exists (mk_aproc (party:=p) (g r)); rewrite addn1.
 - (* SFail: default process has senv_end *)
   by exists aproc_default.
 Qed.
 
-(* Termination guarantee: if fuel h >= sum of all process fuels ([> ps]),
-   then after interpretation, no process can take another step.
-   Every process is stuck - the system has reached a quiescent state.
-   Proof: By induction on h.
-   - Base (h=0): Total fuel is 0, so all processes are Fail (by nofuel_procs_fail),
-     and step on Fail returns false.
-   - Inductive (h=h'+1): Either no step happens (already quiescent, done), or
-     some process k steps. Use dependent_mktuple with fuel_decreases to construct
-     annotated processes aps' for the new state. Since process k stepped, its fuel
-     strictly decreased, so total fuel decreased. Apply IH with the reduced bound. *)
-Lemma fuel_suffices_nored h (ps : seq (aproc dtype data)) traces res :
+(* Given fuel at least the total process fuel, interpretation ends in a
+   state where no party can step. *)
+Lemma fuel_suffices_nored h (ps : seq (aproc dtype data)) traces seeds res :
   (h >= [> ps])%N ->
-  interp h (erase_aprocs ps) traces = res ->
-  ~~ has snd [seq step res.1 (nth [::] res.2 i) i | i <- iota 0 (size ps)].
+  interp h (erase_aprocs ps) traces seeds = res ->
+  ~~ has snd [seq step res.1.1 (nth [::] res.1.2 i) (nth [::] res.2 i) i
+             | i <- iota 0 (size ps)].
 Proof.
-elim: h ps traces => [|h IH] ps traces.
+elim: h ps traces seeds => [|h IH] ps traces seeds.
   rewrite leqn0 => /eqP /nofuel_procs_fail -> <- /=.
   rewrite has_map -all_predC; apply/allP => i /=.
   by rewrite mem_iota leq0n add0n /step nth_nseq => /= ->.
@@ -679,7 +670,8 @@ case: ifPn; last first.
   exact/Hc/map_f.
 rewrite has_map => /hasP[k].
 rewrite mem_iota size_map leq0n add0n => /= Hk Hck.
-set traces' := unzip2 _.
+set traces' := unzip2 (unzip1 _).
+set seeds' := unzip2 _.
 suff : exists aps', erase_aprocs aps' = ps' /\
          \sum_(0 <= i < size ps) aproc_fuel (nth aproc_default aps' i) <= h.
   case=> aps' [Haps' Hh'].
@@ -688,7 +680,8 @@ suff : exists aps', erase_aprocs aps' = ps' /\
   rewrite Hsz -Haps'; apply: IH.
   by rewrite /sum_fuel sumnE big_map (big_nth aproc_default) -Hsz.
 have [aps' Haps'] :=
-  dependent_mktuple (fun k : 'I_(size ps) => fuel_decreases traces (ltn_ord k)).
+  dependent_mktuple
+    (fun k : 'I_(size ps) => fuel_decreases traces seeds (ltn_ord k)).
 exists aps'.
 have Hsz : size aps' = size ps by rewrite size_tuple.
 split.
@@ -696,7 +689,7 @@ split.
     by rewrite !size_map size_tuple size_iota.
   move=> i; rewrite !size_map Hsz => Hi.
   rewrite (nth_map aproc_default) ?Hsz // (_ : i = Ordinal Hi) // -tnth_nth.
-  rewrite (proj1 (Haps' _)) -[ps']map_comp -map_comp.
+  rewrite (proj1 (Haps' _)) -[ps']map_comp -!map_comp.
   by rewrite  (nth_map 0) ?size_iota?size_map // nth_iota.
 rewrite -ltnS (leq_trans _ Hps) // ?(ltnW Hk) // /sum_fuel sumnE big_map.
 rewrite -{3}(map_nth_iota_id aproc_default ps) big_map.
@@ -715,64 +708,55 @@ case/boolP: (i < size aps') => Hi.
 by rewrite nth_default // leqNgt.
 Qed.
 
-(* Interpreter decomposition: running with h1+h2 fuel equals running h1 first,
-   then running h2 on the result.
-   Proof: By induction on h1.
-   - Base (h1=0): trivial, interp 0 is identity
-   - Step (h1=h1'+1): if some process steps, apply IH; if no process steps
-     (quiescent), the interpreter returns immediately regardless of remaining fuel *)
-Lemma interpD h1 h2 (ps : seq (proc data)) traces :
-  interp (h1 + h2) ps traces =
-  let (ps',traces') := interp h1 ps traces in
-  interp h2 ps' traces'.
+(* Running with h1 + h2 fuel equals running h1 first and then h2 on the
+   result. *)
+Lemma interpD h1 h2 (ps : seq (proc data)) traces seeds :
+  interp (h1 + h2) ps traces seeds =
+  let: (ps', traces', seeds') := interp h1 ps traces seeds in
+  interp h2 ps' traces' seeds'.
 Proof.
-elim: h1 ps traces => // h1 IH ps traces /=.
+elim: h1 ps traces seeds => // h1 IH ps traces seeds /=.
 case: ifPn => Hfin.
   by rewrite IH.
 case: h2 {IH} => //= h2.
 by rewrite (negbTE Hfin).
 Qed.
 
-(* Projection form of [interpD]: splitting the fuel exposes the intermediate
-   process and trace lists as projections, so an abstracted intermediate run
-   still matches the shape of the next split. *)
-Lemma interp_fuelD h1 h2 (ps : seq (proc data)) traces :
-  interp (h1 + h2) ps traces
-  = interp h2 (interp h1 ps traces).1 (interp h1 ps traces).2.
-Proof. by rewrite interpD; case: (interp h1 ps traces). Qed.
-
-(* The number of processes is preserved by interpretation.
-   Proof: By induction on fuel h. The step function maps over processes,
-   preserving the list size. *)
-Lemma size_interp_procs h (ps : seq (proc data)) tr :
-  size (interp h ps tr).1 = size ps.
+(* Projection form of interpD: the intermediate process, trace and seed
+   lists appear as projections of the first run. *)
+Lemma interp_fuelD h1 h2 (ps : seq (proc data)) traces seeds :
+  interp (h1 + h2) ps traces seeds
+  = interp h2 (interp h1 ps traces seeds).1.1
+              (interp h1 ps traces seeds).1.2 (interp h1 ps traces seeds).2.
 Proof.
-elim: h ps tr => // h IH ps tr /=.
+by rewrite interpD; case: (interp h1 ps traces seeds) => [[ps' trs'] sds'].
+Qed.
+
+(* Interpretation preserves the number of processes. *)
+Lemma size_interp_procs h (ps : seq (proc data)) tr sds :
+  size (interp h ps tr sds).1.1 = size ps.
+Proof.
+elim: h ps tr sds => // h IH ps tr sds /=.
 by case: ifP => Hfin //; rewrite IH !size_map size_iota.
 Qed.
 
-(* If you have more fuel h than needed ([> ps] = sum of all process fuels),
-   the extra fuel doesn't matter. The result is the same as running with
-   exactly [> ps] fuel.
-   Proof: Split h = [>ps] + d where d is extra fuel. Use interpD to decompose
-   into: run [>ps] fuel first, then run d on result. Apply fuel_suffices_nored
-   to show the intermediate result is quiescent (no more steps possible).
-   Since no process can step, the interpreter's "has snd" check fails,
-   and it returns immediately without using the extra fuel d. *)
-Lemma fuel_suffices h (ps : seq (aproc dtype data)) traces :
+(* Fuel beyond the total process fuel changes nothing: the result equals
+   the run at exactly that total. *)
+Lemma fuel_suffices h (ps : seq (aproc dtype data)) traces seeds :
   (h >= [> ps])%N ->
-  interp h (erase_aprocs ps) traces = interp [> ps] (erase_aprocs ps) traces.
+  interp h (erase_aprocs ps) traces seeds
+  = interp [> ps] (erase_aprocs ps) traces seeds.
 Proof.
 move=> Hh.
 have -> : h = [>ps] + (h - [> ps]).
   rewrite -maxnE; exact/esym/maxn_idPr.
 set d := (h - _)%N; clearbody d.
 rewrite interpD.
-move Hint: (interp [>ps] _ _) => res.
+move Hint: (interp [>ps] _ _ _) => res.
 have /fuel_suffices_nored := Hint.
 move/(_ (leqnn _)).
-case Hres: res => [ps' traces'] /=.
-have := size_interp_procs [>ps] (erase_aprocs ps) traces.
+case Hres: res => [[ps' traces'] seeds'] /=.
+have := size_interp_procs [>ps] (erase_aprocs ps) traces seeds.
 rewrite Hint Hres /= size_map => <- Hfin.
 case: d => // d /=.
 by rewrite (negbTE Hfin).
@@ -809,14 +793,8 @@ Variable parties : seq nat.
 Definition aprocs_senv_depth (ps : seq (aproc dtype data)) : nat :=
   \max_(ap <- ps) senv_depth (aproc_env ap).
 
-(* General: non-failing terminal processes have empty session environment.
-
-   This follows from the sproc type structure:
-   - SFinish has senv_end (depth 0)
-   - SRet has senv_end (depth 0)
-   - SFail is the only terminal that can have non-empty senv
-
-   So if all processes are terminal and none are Fail, senv depth must be 0. *)
+(* A list of terminal, non-failing processes has session environment depth
+   zero.  Only SFinish and SRet are terminal without being Fail. *)
 Lemma terminated_nonfail_senv_zero (aps : seq (aproc dtype data)) :
   all_terminated (erase_aprocs aps) ->
   all_nonfail (erase_aprocs aps) ->
@@ -835,19 +813,17 @@ rewrite /erase_aproc /aproc_proc /aproc_env /=.
 case: n env / sp => //=.
 Qed.
 
-(* senv_bounded: Session environment depth is bounded through interpretation.
-   
-   After running with sufficient fuel h >= [>ps], we can reconstruct aprocs
-   where senv_depth is bounded by the initial value. This uses
-   fuel_senv_decreases to track both fuel and senv through each step. *)
-Lemma senv_bounded h (ps : seq (aproc dtype data)) traces :
+(* Interpretation keeps the session environment depth bounded by its
+   initial value, reconstructing annotated processes for the final
+   state. *)
+Lemma senv_bounded h (ps : seq (aproc dtype data)) traces seeds :
   (h >= [> ps])%N ->
   exists aps' : seq (aproc dtype data),
     size aps' = size ps /\
-    erase_aprocs aps' = (interp h (erase_aprocs ps) traces).1 /\
+    erase_aprocs aps' = (interp h (erase_aprocs ps) traces seeds).1.1 /\
     aprocs_senv_depth aps' <= aprocs_senv_depth ps.
 Proof.
-elim: h ps traces => [|h IH] ps traces.
+elim: h ps traces seeds => [|h IH] ps traces seeds.
   (* Base case: h = 0, interp 0 is identity *)
   rewrite leqn0 => /eqP _.
   exists ps.
@@ -867,7 +843,8 @@ case: ifPn; last first.
 (* Some process stepped *)
 rewrite has_map => /hasP[k].
 rewrite mem_iota size_map leq0n add0n => /= Hk Hck.
-set traces' := unzip2 _.
+set traces' := unzip2 (unzip1 _).
+set seeds' := unzip2 _.
 (* Use suff pattern from fuel_suffices_nored to avoid dependent tuple issues *)
 suff : exists aps', erase_aprocs aps' = ps' /\
          \sum_(0 <= i < size ps) aproc_fuel (nth aproc_default aps' i) <= h /\
@@ -877,7 +854,7 @@ suff : exists aps', erase_aprocs aps' = ps' /\
     by rewrite -(size_map erase_aproc aps') [map _ _]Herase !size_map size_iota.
   have Hfuel_conv : [> aps'] <= h.
     by rewrite /sum_fuel sumnE big_map (big_nth aproc_default) -Hsz.
-  have [aps'' [Hsz'' [Herase'' Hsenv'']]] := IH aps' traces' Hfuel_conv.
+  have [aps'' [Hsz'' [Herase'' Hsenv'']]] := IH aps' traces' seeds' Hfuel_conv.
   exists aps''.
   split; first by rewrite Hsz'' Hsz.
   split.
@@ -885,8 +862,8 @@ suff : exists aps', erase_aprocs aps' = ps' /\
   by apply: leq_trans Hsenv'' Hsenv'.
 (* Now prove the suff: construct aps' using fuel_senv_decreases *)
 have [aps' Haps'] :=
-  dependent_mktuple (fun k : 'I_(size ps) => 
-    fuel_senv_decreases traces parties (ltn_ord k)).
+  dependent_mktuple (fun k : 'I_(size ps) =>
+    fuel_senv_decreases traces seeds parties (ltn_ord k)).
 exists aps'.
 have Hsz: size aps' = size ps by rewrite size_tuple.
 split.
@@ -897,7 +874,7 @@ split.
   rewrite (nth_map aproc_default) ?Hsz //.
   rewrite (_ : i = Ordinal Hi) // -tnth_nth.
   have [Heq _] := Haps' (Ordinal Hi).
-  rewrite Heq -[ps']map_comp -map_comp.
+  rewrite Heq -[ps']map_comp -!map_comp.
   by rewrite (nth_map 0) ?size_iota ?size_map // nth_iota.
 split.
   (* \sum_(0 <= i < size ps) aproc_fuel (nth aproc_default aps' i) <= h *)
@@ -935,23 +912,24 @@ Qed.
 (******************************************************************************)
 
 (* State type for interpreter: processes paired with traces *)
-Definition interp_state : Type := seq (proc data) * seq (seq data).
+Definition interp_state : Type :=
+  seq (proc data) * seq (seq data) * seq (seq data).
 
 (* Wrapper to match isDecomposableInterp signature: nat -> S -> S *)
 Definition interp_on_state (h : nat) (s : interp_state) : interp_state :=
-  let (ps, traces) := s in interp h ps traces.
+  let: (ps, traces, seeds) := s in interp h ps traces seeds.
 
 (* run 0 is identity *)
 Lemma run0_state : forall s : interp_state, interp_on_state 0 s = s.
-Proof. by case. Qed.
+Proof. by case=> [] []. Qed.
 
 (* runD in the form needed for isDecomposableInterp *)
 Lemma runD_state : forall n m (s : interp_state),
   interp_on_state (n + m) s = interp_on_state m (interp_on_state n s).
 Proof.
-move=> n m [ps traces] /=.
+move=> n m [[ps traces] seeds] /=.
 rewrite interpD.
-by case: (interp n ps traces).
+by case: (interp n ps traces seeds).
 Qed.
 
 (* HB instance of isDecomposableInterp for the interpreter state *)
@@ -968,10 +946,8 @@ Arguments erase_aprocs {data dtype}.
 (** * isNatGraded Instance for Fuel                                           *)
 (******************************************************************************)
 
-(* Fuel family: trivially indexed by nat.
-   This represents fuel as a type family where all levels have the same type (unit).
-   The purpose is to enable using the generic termination lemmas from graded_resource.v
-   with the fuel parameter. *)
+(* Fuel as a NatGraded type family: every level is unit, so only the index
+   carries information. *)
 Definition fuel_family (n : nat) : Type := unit.
 
 (* HB instance: fuel_family is a NatGraded type family.
@@ -1096,15 +1072,12 @@ Variable data : Type.
 Record aproc_ctx := {
   ctx_procs : seq (proc data) ;  (* all erased processes *)
   ctx_trace : seq data ;          (* trace for this process *)
+  ctx_seed : seq data ;           (* seed stream for this process *)
   ctx_idx : nat ;                 (* index of this process *)
 }.
 
-(* Full step function: steps an aproc in context of all processes.
-   - SFinish/SFail: no progress, return same
-   - SRet: step to Finish, progress=1
-   - SInit: step to next, progress=1
-   - SSend: check if receiver is ready (Recv from us), if so progress=1
-   - SRecv: check if sender is ready (Send to us), if so apply continuation *)
+(* One step of an annotated process in the context of all processes,
+   returning the successor and its progress bit. *)
 Definition aproc_step (ap : aproc dtype data) (ctx : aproc_ctx)
     : aproc dtype data * nat.
 Proof.
@@ -1115,7 +1088,7 @@ case: sp.
 - move=> n' env' d next; exact (mk_aproc (party:=party) next, 1).
 - move=> n' env' dst dt d next.
   case Hrecv: (nth (default_proc data) (ctx_procs ctx) dst) =>
-      [d' p'|dst' d' p'|frm f|d'| |].
+      [d' p'|dst' d' p'|frm f|g|d'| |].
   + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
   + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
   + case: (frm == ctx_idx ctx).
@@ -1124,9 +1097,10 @@ case: sp.
   + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
   + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
   + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
+  + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
 - move=> n' env' src dt cont.
   case Hsend: (nth (default_proc data) (ctx_procs ctx) src) =>
-      [d' p'|dst' v p'|frm f|d'| |].
+      [d' p'|dst' v p'|frm f|g|d'| |].
   + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
   + case: (dst' == ctx_idx ctx).
     * exact (mk_aproc (party:=party) (cont v), 1).
@@ -1135,6 +1109,11 @@ case: sp.
   + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
   + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
   + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
+  + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
+- move=> n' env' cont.
+  case Hseed: (ctx_seed ctx) => [|r sd].
+  + exact (mk_aproc (party:=party) (SSample cont), 0).
+  + exact (mk_aproc (party:=party) (cont r), 1).
 - move=> n' env'; exact (@mk_aproc _ _ party n' env' SFail, 0).
 Defined.
 
@@ -1150,7 +1129,7 @@ case: sp => /=.
 - move=> n' env' dst dt d next.
   rewrite /aproc_step /=.
   case: (nth (default_proc data) (ctx_procs ctx) dst) =>
-      [d' p'|dst' d' p'|frm f|d'| |] /=.
+      [d' p'|dst' d' p'|frm f|g|d'| |] /=.
   + by rewrite /aproc_fuel /= addn0.
   + by rewrite /aproc_fuel /= addn0.
   + case: (frm == ctx_idx ctx) => /=.
@@ -1159,10 +1138,11 @@ case: sp => /=.
   + by rewrite /aproc_fuel /= addn0.
   + by rewrite /aproc_fuel /= addn0.
   + by rewrite /aproc_fuel /= addn0.
+  + by rewrite /aproc_fuel /= addn0.
 - move=> n' env' src dt cont.
   rewrite /aproc_step /=.
   case: (nth (default_proc data) (ctx_procs ctx) src) =>
-      [d' p'|dst' v p'|frm f|d'| |] /=.
+      [d' p'|dst' v p'|frm f|g|d'| |] /=.
   + by rewrite /aproc_fuel /= addn0.
   + case: (dst' == ctx_idx ctx) => /=.
     * by rewrite /aproc_fuel /= addn1.
@@ -1171,6 +1151,12 @@ case: sp => /=.
   + by rewrite /aproc_fuel /= addn0.
   + by rewrite /aproc_fuel /= addn0.
   + by rewrite /aproc_fuel /= addn0.
+  + by rewrite /aproc_fuel /= addn0.
+- move=> n' env' cont.
+  rewrite /aproc_step /=.
+  case: (ctx_seed ctx) => [|r sd] /=.
+  + by rewrite /aproc_fuel /= addn0.
+  + by rewrite /aproc_fuel /= addn1.
 - move=> n' env'; by rewrite /aproc_fuel /= addn0.
 Qed.
 
@@ -1211,20 +1197,9 @@ Variable dtype : eqType.
 Variable data : Type.
 Variable parties : seq nat.
 
-(* Session env depth never increases after a step.
-   
-   This lemma shows that stepping a process can only decrease or preserve
-   the session environment depth. It's sufficient for showing that senv
-   termination follows from fuel termination, since:
-   1. Fuel bounds the number of steps
-   2. Each step preserves or decreases senv depth
-   3. Therefore, after fuel steps, senv depth is bounded
-   
-   Note: Unlike fuel which strictly decreases by exactly 1 on progress,
-   senv_depth decrease depends on which party is involved. The depth only
-   strictly decreases when the communicating party (dst for SSend, src for 
-   SRecv) has the maximum depth. We use the simpler non-increasing form
-   since it's sufficient for our purposes and avoids complex party tracking. *)
+(* One step never increases the session environment depth.  The
+   non-increasing form suffices: fuel already bounds the number of
+   steps. *)
 Lemma senv_step_nonincreasing (ap : aproc dtype data) (ctx : aproc_ctx) :
   senv_depth (aproc_env (aproc_step ap ctx).1) <= senv_depth (aproc_env ap).
 Proof.
@@ -1235,13 +1210,15 @@ case: sp => //=.
   (* When blocked: output env = input env (same), use reflexivity
      When matched: output env = env' <= senv_send env' = input env *)
   case: (nth (default_proc data) (ctx_procs ctx) dst) =>
-      [d' p'|dst' d' p'|frm f|d'| |] //=.
+      [d' p'|dst' d' p'|frm f|g|d'| |] //=.
   by case: (frm == ctx_idx ctx).
 - (* SRecv *) move=> n' env' src dt cont.
   rewrite /aproc_step /=.
   case: (nth (default_proc data) (ctx_procs ctx) src) =>
-      [d' p'|dst' v p'|frm f|d'| |] //=.
+      [d' p'|dst' v p'|frm f|g|d'| |] //=.
   by case: (dst' == ctx_idx ctx).
+- (* SSample *) move=> n' env' cont.
+  by rewrite /aproc_step /=; case: (ctx_seed ctx).
 Qed.
 
 End senv_step_decreasing.
@@ -1262,10 +1239,10 @@ Notation "[aprocs p ; .. ; q ]" :=
   (at level 0) : sproc_scope.
 
 (* Notation for erasing and running with inferred fuel *)
-(* Usage: run_sprocs [aprocs p1; p2; p3] *)
-Definition run_sprocs {dtype : eqType} {data : Type} 
-    (aps : seq (aproc dtype data)) : seq (proc data) * seq (seq data) :=
-  run_interp [> aps] (erase_aprocs aps).
+(* Usage: run_sprocs [aprocs p1; p2; p3] seeds *)
+Definition run_sprocs {dtype : eqType} {data : Type}
+    (aps : seq (aproc dtype data)) (seeds : seq (seq data)) :=
+  run_interp [> aps] (erase_aprocs aps) seeds.
 
 Local Open Scope sproc_scope.
 
@@ -1287,7 +1264,7 @@ Definition erase_test2 : proc data := erase test2.
 Definition test_procs := [aprocs proto_p0; proto_p1].
 
 (* Run with automatic fuel - no manual "100" needed! *)
-Definition test_run := run_sprocs test_procs.
+Definition test_run := run_sprocs test_procs (nseq (size test_procs) [::]).
 
 (* The erased processes can be used with the interpreter:
    
@@ -1297,7 +1274,7 @@ Definition test_run := run_sprocs test_procs.
        sp_proc_alice xa;
        sp_proc_bob xb yb
      ] in
-     run_sprocs procs.  (* Fuel automatically computed! *)
+     run_sprocs procs (nseq (size procs) [::]).  (* Fuel automatic! *)
 *)
 
 End test_erasure.
@@ -1345,205 +1322,5 @@ Example:
   Proof. by native_compute. Qed.
   
   (* Run with automatic fuel computation *)
-  Definition result := run_sprocs [aprocs my_sender; my_receiver].
-*)
-
-(*
-For how `dependent_mktuple` works:
-
-This is a dependent tuple construction that builds a tuple where each element satisfies an index-dependent predicate. Let me break down how the proof works:
-
-Type Signature
-
-Definition dependent_mktuple (A : Type) n (P : 'I_n -> A -> Prop)
-  (f : forall i, {a | P i a}) : {sa : n.-tuple A | forall i, P i (tnth sa i)}.
-Input f: For each index i : 'I_n, provides a dependent pair {a | P i a} — a value a together with a proof that P i a holds
-Output: A tuple sa with a proof that forall i, P i (tnth sa i) — every element at index i satisfies P i
-The Construction
-
-exists [tuple sval (f i) | i < n].
-This constructs the witness tuple using:
-
-[tuple ... | i < n] — MathComp's tuple comprehension syntax
-sval (f i) — extracts the value part from the sigma type {a | P i a} (discarding the proof)
-The Proof Obligation
-
-abstract (move=> i; rewrite tnth_mktuple; exact: (svalP (f i))).
-After exists, we must prove forall i, P i (tnth [tuple sval (f i) | i < n] i):
-
-move=> i — introduce the index i
-rewrite tnth_mktuple — applies the lemma that tnth [tuple E i | i < n] j = E j, so the goal becomes P i (sval (f i))
-exact: (svalP (f i)) — svalP extracts the proof component from a sigma type: if x : {a | P a}, then svalP x : P (sval x). Here it gives exactly P i (sval (f i))
-The abstract Tactic
-The abstract wrapper makes the proof term opaque, which:
-
-Prevents the proof from being unfolded during computation
-Keeps the definition clean when using Defined (which makes the term transparent for computation)
-This is useful because you want the value (the tuple) to compute, but the proof doesn't need to.
-*)
-
-
-(*
-Temp note:
-
-Now I can explain how the proof of fuel_suffices_nored works. This is a complex induction proof showing that when we have enough fuel, the interpreter reaches a state where no process can make a reduction step.
-
-Statement
-
-Lemma fuel_suffices_nored h (ps : seq (aproc dtype data)) traces res :
-  (h >= [> ps])%N ->
-  interp h (erase_aprocs ps) traces = res ->
-  ~~ has snd [seq step res.1 (nth [::] res.2 i) i | i <- iota 0 (size ps)].
-Meaning: If fuel h is at least the sum of all process fuels ([> ps]), then after interpretation, no process can take another step (the snd of each step is the "did something happen" boolean).
-
-Proof Structure
-Base Case (h = 0)
-
-elim: h ps traces => [|h IH] ps traces.
-  rewrite leqn0 => /eqP /nofuel_procs_fail -> <- /=.
-  rewrite has_map -all_predC; apply/allP => i /=.
-  rewrite mem_iota add0n => /andP[_ Hi].
-  by rewrite /step /= !nth_nseq // Hi.
-leqn0 => /eqP — from h >= [> ps] with h = 0, deduce [> ps] = 0
-/nofuel_procs_fail -> — if total fuel is 0, all processes are Fail
-nth_nseq — in a constant sequence of Fail, every step returns (Fail, _, false), so no reduction happens
-Inductive Case (h = h.+1)
-
-move=> Hps /=.
-set ps' := unzip1 (unzip1 _).
-have hles tr :=
-  dependent_mktuple (fun k : 'I_(size ps) => fuel_decreases tr (ltn_ord k)).
-case: ifPn; last first.
-The proof uses dependent_mktuple with fuel_decreases to construct annotated processes for the next state.
-
-Subcase: No step happened (ifPn; last first)
-
-  rewrite -!all_predC -!all_map -!map_comp size_map => /allP /= Hc <-.
-  apply/allP => /= b /mapP[/= i Hi] ->.
-  exact/Hc/map_f.
-If the interpreter's has snd check fails (no process stepped), we're already done — just propagate that fact.
-
-Subcase: Some step happened
-
-rewrite has_map => /hasP[k].
-rewrite mem_iota size_map add0n => /andP[_ Hk] /= Hck.
-Some process k took a step. The proof must show the IH applies to the new state.
-
-Key obligation (lines 574-582):
-
-
-suff : exists aps', erase_aprocs aps' = ps' /\
-         \sum_(0 <= i < size ps) aproc_fuel (nth aproc_default aps' i) <= h.
-We need annotated processes aps' for the new state such that their total fuel is ≤ h.
-
-Constructing aps' (line 583):
-
-
-have [aps' Haps'] := hles traces.
-Uses dependent_mktuple with fuel_decreases — for each index, fuel_decreases gives a new annotated process whose fuel decreased appropriately after a step.
-
-Proving the fuel bound (lines 593-607):
-
-The key insight is that fuel_decreases guarantees:
-
-
-aproc_fuel ap' + res.2 <= aproc_fuel (nth aproc_default ps k)
-Since process k actually stepped (Hck says res.2 = true = 1), its fuel strictly decreased. The proof uses:
-
-sumnB to express the fuel difference as a sum
-sum_nat_seq_neq0 to show strict decrease (at least 1 unit of fuel consumed)
-Apply IH with the reduced fuel bound
-Summary
-The proof works by strong induction on fuel h:
-
-Base: Zero fuel means all processes are Fail (can't step)
-Inductive: Either no step happens (done), or some step happens, and fuel_decreases ensures the total fuel strictly decreases, allowing the IH to apply
-
-*)
-
-(*
-For how `fuel_decreases` works:
-
-Statement
-
-Lemma fuel_decreases (ps : seq (aproc dtype data)) k tr :
-  k < size ps ->
-  let res := step (erase_aprocs ps) (nth [::] tr k) k in
-  { ap' | erase_aproc ap' = res.1.1 /\
-      aproc_fuel ap' + res.2 <= aproc_fuel (nth aproc_default ps k) }.
-Meaning: For any process at index k, after taking a step, we can construct a new annotated process ap' such that:
-
-erase_aproc ap' = res.1.1 — the new annotated process erases to the resulting process
-aproc_fuel ap' + res.2 <= aproc_fuel (old process) — the fuel of ap' plus the "step happened" flag (0 or 1) is at most the original fuel
-Key insight: If a step happens (res.2 = 1), the fuel strictly decreases. If no step happens (res.2 = 0), fuel stays the same.
-
-Data Structures
-
-(* aproc packs a session-typed process with its fuel index *)
-Definition aproc : Type := 
-  { party : nat & { n : nat & { env : senv dtype & @sproc dtype data party n env }}}.
-
-(* sproc has fuel baked into its type - the 'n' index *)
-Inductive sproc (party : nat) : nat -> senv dtype -> Type :=
-  | SFinish : sproc party 1 senv_end           (* fuel = 1 *)
-  | SRet : data -> sproc party 2 senv_end      (* fuel = 2 *)
-  | SInit : ... sproc party n env -> sproc party n.+1 env    (* fuel + 1 *)
-  | SSend : ... sproc party n env -> sproc party n.+1 (...)  (* fuel + 1 *)
-  | SRecv : ... -> sproc party n.+1 (...)                     (* fuel + 1 *)
-  | SFail : forall n env, sproc party n env                   (* any fuel *)
-Proof Walkthrough
-Setup (lines 527-535)
-
-move => Hk /=.
-rewrite /step (nth_map aproc_default) //.
-move Hnth: (nth _ ps k) => [p [n] [env] sp].
-Introduce bound Hk : k < size ps
-Unfold step and rewrite nth through erase_aprocs (a map)
-Destructure the k-th annotated process as [p [n] [env] sp] where:
-p = party
-n = fuel index
-env = session environment
-sp : sproc p n env = the actual session-typed process
-Case Analysis (lines 534-550)
-
-case Hn: n env / sp =>
-       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env] Hnth /=.
-Case split on the structure of sp:
-
-Case	Constructor	Result	Fuel Accounting
-SFinish	SFinish	No step possible	exists (mk_aproc SFinish) — fuel stays same
-SRet d	SRet d	Returns, becomes Finish	exists (mk_aproc SFinish) — fuel stays same
-SInit d s	Init d (erase s)	Always steps	exists (mk_aproc s); rewrite addn1 — fuel decreases by 1
-SSend dst dt d s	Send dst d (erase s)	Steps if receiver ready	See below
-SRecv src dt f	Recv src (...)	Steps if sender ready	See below
-SFail	Fail	No step	exists aproc_default
-Send Case (lines 539-543)
-
-case Hnth': nth => [||k' p'|||];
-    try by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
-  case: ifPn => [/eqP|] k'k.
-    by exists (mk_aproc (party:=p) s); rewrite addn1.
-  by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
-Look at what the destination process is doing
-If destination is Recv k' f and k' == k (matching), step happens → return continuation s, fuel decreases by 1 (addn1)
-Otherwise, no step → return same SSend, fuel unchanged (addn0)
-Recv Case (lines 544-549)
-
-case Hnth': nth => [|k' d' p'||||];
-    try by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite /= (addn0 (aproc_fuel _)).
-  case: ifPn => [/eqP|] k'k.
-    by exists (mk_aproc (party:=p) (s d')); rewrite addn1.
-  by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite addn0.
-Look at what the source process is doing
-If source is Send k' v next and k' == k (matching), step happens → return s d' (applied continuation), fuel decreases by 1
-Otherwise, no step → return same SRecv, fuel unchanged
-Summary
-The lemma works by:
-
-Type-level fuel tracking: Each sproc constructor has fuel baked into its type index n
-Case analysis: For each process form, determine if a step can happen
-Fuel accounting:
-Step happens → return the continuation with fuel n-1, prove (n-1) + 1 ≤ n
-No step → return same process with same fuel n, prove n + 0 ≤ n
-This is the key invariant that makes fuel_suffices_nored work: the total fuel across all processes is a strict upper bound on the number of reduction steps.
+  Definition result := run_sprocs [aprocs my_sender; my_receiver] seeds.
 *)

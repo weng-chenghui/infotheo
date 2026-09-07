@@ -250,7 +250,7 @@ Definition dsdp_procs_std : seq (proc (di_data DI)) :=
    Bob, three for Charlie.  Each ciphertext appears in the form the programs
    build it. *)
 Lemma dsdp_run_tracesE :
-  (run_interp 15 dsdp_procs_std).2 =
+  (run_interp 15 dsdp_procs_std (nseq (size dsdp_procs_std) [::])).1.2 =
   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
           e (enc (pkey_of_dk Alice)
                  (v3 * u3 + r3 + (v2 * u2 + r2)) (rand_of_renc w_rc2));
@@ -294,18 +294,19 @@ have alice_decE : dec dk_a (enc (pub_of_priv dk_a)
 rewrite /run_interp.
 have -> : (15 = 10 + 5)%N by [].
 rewrite interp_fuelD.
-move Ht: (interp 10 dsdp_procs_std (nseq (size dsdp_procs_std) [::])) => S.
+move Ht: (interp 10 dsdp_procs_std (nseq (size dsdp_procs_std) [::])
+            (nseq (size dsdp_procs_std) [::])) => S.
 cbv -[enc Emul Epow dec pub_of_priv] in Ht.
 rewrite bob_decE in Ht.
 have -> : (5 = 2 + 3)%N by [].
 rewrite interp_fuelD.
-move Ht2: (interp 2 S.1 S.2) => S2.
+move Ht2: (interp 2 S.1.1 S.1.2 S.2) => S2.
 rewrite -Ht in Ht2.
 cbv -[enc Emul Epow dec pub_of_priv] in Ht2.
 rewrite charlie_decE in Ht2.
 have -> : (3 = 1 + 2)%N by [].
 rewrite interp_fuelD.
-move Ht3: (interp 1 S2.1 S2.2) => S3.
+move Ht3: (interp 1 S2.1.1 S2.1.2 S2.2) => S3.
 rewrite -Ht2 in Ht3.
 cbv -[enc Emul Epow dec pub_of_priv] in Ht3.
 rewrite alice_decE in Ht3.
@@ -317,7 +318,7 @@ Qed.
    A combine's randomness is the homomorphic combination of its arguments'
    randomness. *)
 Lemma dsdp_run_traces_encE :
-  (run_interp 15 dsdp_procs_std).2 =
+  (run_interp 15 dsdp_procs_std (nseq (size dsdp_procs_std) [::])).1.2 =
   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
           e (enc (pkey_of_dk Alice)
                  (v3 * u3 + r3 + (v2 * u2 + r2)) (rand_of_renc w_rc2));
@@ -420,7 +421,8 @@ Lemma trace_of_run_size
     (procs : alice_sampleT I -> seq (proc (di_data DI)))
     (i : party_id) (s : alice_sampleT I) :
   (size (map (@trace_data_of_di_data I)
-           (nth [::] (run_interp 15 (procs s)).2 n( i ))) <= 15)%N.
+           (nth [::] (run_interp 15 (procs s)
+                       (nseq (size (procs s)) [::])).1.2 n( i ))) <= 15)%N.
 Proof. by rewrite size_map; exact: size_traces_nth. Qed.
 
 (* The encoded trace party i sees in a run of procs, as a random variable.
@@ -820,7 +822,8 @@ Local Notation decode_a := (di_data_of_trace_data dk_a (pub_of_priv dk_a)).
 Definition alice_raw_trace (s : alice_sampleT I) :
     seq (di_data DI) :=
   nth [::]
-      (run_interp 15 (dsdp_protocol (R:=R) s)).2 0.
+      (run_interp 15 (dsdp_protocol (R:=R) s)
+         (nseq (size (dsdp_protocol (R:=R) s)) [::])).1.2 0.
 
 (* Decoding Alice's encoded trace with her private key restores the raw
    interpreter trace.  The public key pk is universally quantified because her

@@ -98,25 +98,26 @@ Lemma dsdp_ideal_max_fuel_ok : [> dsdp_ideal_saprocs] = 27.
 Proof. reflexivity. Qed.
 
 (* DSDP (Idealized): after interpretation, all processes are terminal. *)
-Lemma dsdp_ideal_terminates traces :
-  all_terminated (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces).1.
+Lemma dsdp_ideal_terminates traces seeds :
+  all_terminated
+    (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* DSDP (Idealized): after interpretation, no process is Fail. *)
-Lemma dsdp_ideal_no_fail traces :
-  all_nonfail (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces).1.
+Lemma dsdp_ideal_no_fail traces seeds :
+  all_nonfail (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* Main theorem: DSDP (Idealized) session environment converges to empty. *)
-Theorem dsdp_ideal_senv_zero traces :
+Theorem dsdp_ideal_senv_zero traces seeds :
   exists aps' : seq (aproc dsdp_dtype data),
     erase_aprocs aps' =
-      (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces).1 /\
+      (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces seeds).1.1 /\
     aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
   @senv_bounded _ _ [:: 0; 1; 2] [> dsdp_ideal_saprocs]
-    dsdp_ideal_saprocs traces (leqnn _).
+    dsdp_ideal_saprocs traces seeds (leqnn _).
 exists aps'.
 split; first exact: Herase.
 apply: terminated_nonfail_senv_zero.
@@ -238,25 +239,25 @@ Lemma dsdp_n4_max_fuel_ok : [> dsdp_n4_saprocs] = 31.
 Proof. reflexivity. Qed.
 
 (* 4-party termination: after interpretation, all processes are terminal *)
-Lemma dsdp_n4_terminates traces :
-  all_terminated (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces).1.
+Lemma dsdp_n4_terminates traces seeds :
+  all_terminated (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* 4-party no-fail: after interpretation, no process is Fail *)
-Lemma dsdp_n4_no_fail traces :
-  all_nonfail (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces).1.
+Lemma dsdp_n4_no_fail traces seeds :
+  all_nonfail (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces seeds).1.1.
 Proof. by native_compute. Qed.
 
 (* 4-party session environment convergence *)
-Theorem dsdp_n4_senv_zero traces :
+Theorem dsdp_n4_senv_zero traces seeds :
   exists aps' : seq (aproc dsdp_dtype data),
     erase_aprocs aps' =
-      (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces).1 /\
+      (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces seeds).1.1 /\
     aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
   @senv_bounded _ _ [:: 0; 1; 2; 3] [> dsdp_n4_saprocs]
-    dsdp_n4_saprocs traces (leqnn _).
+    dsdp_n4_saprocs traces seeds (leqnn _).
 exists aps'.
 split; first exact: Herase.
 apply: terminated_nonfail_senv_zero.
@@ -350,12 +351,12 @@ Definition dsdp_n5_saprocs : seq (aproc dsdp_dtype data) :=
 Definition dsdp_n5_procs : seq (proc data) :=
   erase_aprocs dsdp_n5_saprocs.
 
-Lemma dsdp_n5_terminates traces :
-  all_terminated (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces).1.
+Lemma dsdp_n5_terminates traces seeds :
+  all_terminated (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces seeds).1.1.
 Proof. by native_compute. Qed.
 
-Lemma dsdp_n5_no_fail traces :
-  all_nonfail (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces).1.
+Lemma dsdp_n5_no_fail traces seeds :
+  all_nonfail (interp [> dsdp_n5_saprocs] dsdp_n5_procs traces seeds).1.1.
 Proof. by native_compute. Qed.
 
 End dsdp_n5_idealized_duality.

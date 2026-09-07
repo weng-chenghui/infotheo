@@ -146,7 +146,7 @@ Let dsdp_saprocs : seq (aproc dsdp_dtype data) :=
 Let dsdp_procs : seq (proc data) := erase_aprocs dsdp_saprocs.
 
 (* Protocol definition using interp directly with explicit traces *)
-Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]].
+Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] [::[::];[::];[::]].
 
 (* Protocol execution result: running dsdp for 15 steps produces the expected
    final state with all parties finished and their respective traces.
@@ -162,7 +162,8 @@ Lemma dsdp_ok :
        [:: e (v3 * u3 + r3);
            e (v2 * u2 + r2); d v2; k dk_b];
        [:: e (v3 * u3 + r3 + (v2 * u2 + r2)); d v3; k dk_c]
-  ]).
+   ],
+   [:: [::]; [::]; [::]]).
 Proof. reflexivity. Qed.
 
 (* Trace types for bounded sequences *)
@@ -170,7 +171,7 @@ Notation dsdp_traceT := (15.-bseq data).
 Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 
 Definition dsdp_traces : dsdp_tracesT :=
-  interp_traces 15 dsdp_procs.
+  interp_traces 15 dsdp_procs (nseq (size dsdp_procs) [::]).
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
   let '(s, u3, u2, u1, v1) :=
