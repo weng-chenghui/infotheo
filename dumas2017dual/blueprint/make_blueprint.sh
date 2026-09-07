@@ -39,14 +39,17 @@ MODULES=(
   # bounds, and their transfer to the executed piSMC trace.
   dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
   dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
-  # The programs those two files' facts are spent in, the bounds read off them
-  # at one instance and along a sequence of instances, and the readings of
-  # those bounds at the idealized, Paillier and Benaloh instances.
+  # The programs those two files' facts are spent in, and the bounds read off
+  # them at one instance and along a sequence of instances.
   dumas2017dual/dsdp/hopping/dsdp_alice_main.v
+  # The readings of those bounds at the idealized, Paillier and Benaloh
+  # instances.
+  dumas2017dual/dsdp/hopping/dsdp_alice_instances.v
   # The scheme side: the same bound read off at a concrete scheme, with the
   # cardinality side discharged and the advantage derived from a residuosity
   # assumption, decisional composite residuosity at Paillier and r-th
   # residuosity at Benaloh.
+  computational_security/idealized_indcpa_scheme.v
   computational_security/paillier_indcpa_scheme.v
   computational_security/benaloh_indcpa_scheme.v
 )

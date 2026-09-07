@@ -21,6 +21,8 @@ the order MODULES lists them:
 - `dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_main.v`
+- `dumas2017dual/dsdp/hopping/dsdp_alice_instances.v`
+- `computational_security/idealized_indcpa_scheme.v`
 - `computational_security/paillier_indcpa_scheme.v`
 - `computational_security/benaloh_indcpa_scheme.v`
 
@@ -54,8 +56,8 @@ At this commit the checker exits 1. It reports 40 UNCOVERED declarations
 across the scoped modules and 0 DANGLING refs. The UNCOVERED list is known
 debt, not a regression to fix before the next commit.
 
-The per-instance scheme bounds are stated once, in the tail sections of
-`dsdp_alice_main.v`. `Section paillier` carries the instance and the instance
+The per-instance scheme bounds are stated once, in
+`dsdp_alice_instances.v`. `Section paillier` carries the instance and the instance
 sequence, `paillier_assumption_at_dcrE` and `paillier_epsilon_at_dcrE`,
 `paillier_trace_guess_V2_admissible_le` and `_admissible_pq_le` at the
 section's own k, and `paillier_trace_guess_V2_negligible`; `Section benaloh`

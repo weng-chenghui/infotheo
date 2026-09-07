@@ -12,7 +12,7 @@
 # scheme-level advantage families; the blueprint cites the derived assumption
 # at def:benaloh_indcpa_assumption, the reduction bound at
 # thm:benaloh_residuosity_epsilon_le, and the DSDP bound read off at that
-# scheme in the Benaloh section of dsdp_alice_main.
+# scheme in the Benaloh section of dsdp_alice_instances.
 benaloh_indcpa_scheme:Benaloh_AHEnc
 benaloh_indcpa_scheme:card_renc_benaloh
 benaloh_indcpa_scheme:rand_of_renc_benaloh
@@ -92,22 +92,22 @@ dsdp_alice_main:hop0_real_challengeE
 dsdp_alice_main:hop0_zero_challengeE
 dsdp_alice_main:hop1_real_challengeE
 dsdp_alice_main:hop1_zero_challengeE
-# dsdp_alice_main: the witness and per-scheme plumbing of the tail sections,
-# the coin-space cardinality, the asymptotic values the sequence nodes read
-# through, the two satisfiability lemmas at each scheme, and the per-scheme
-# instances of the generic eventually-false corollary.
-dsdp_alice_main:card_renc_ord1
-dsdp_alice_main:idealized_asymptotic
-dsdp_alice_main:idealized_bob_cipher_constant
-dsdp_alice_main:idealized_charlie_cipher_constant
-dsdp_alice_main:paillier_asymptotic
-dsdp_alice_main:paillier_bob_decide_constant_admissible
-dsdp_alice_main:paillier_charlie_decide_constant_admissible
-dsdp_alice_main:paillier_decrypt_reduction_admissible_eventuallyF
-dsdp_alice_main:benaloh_asymptotic
-dsdp_alice_main:benaloh_bob_decide_constant_admissible
-dsdp_alice_main:benaloh_charlie_decide_constant_admissible
-dsdp_alice_main:benaloh_decrypt_reduction_admissible_eventuallyF
+# idealized_indcpa_scheme and dsdp_alice_instances: the idealized coin-space
+# cardinality, the asymptotic values the sequence nodes read through, the two
+# satisfiability lemmas at each scheme, and the per-scheme instances of the
+# generic eventually-false corollary.
+idealized_indcpa_scheme:card_renc_ord1
+dsdp_alice_instances:idealized_asymptotic
+dsdp_alice_instances:idealized_bob_cipher_constant
+dsdp_alice_instances:idealized_charlie_cipher_constant
+dsdp_alice_instances:paillier_asymptotic
+dsdp_alice_instances:paillier_bob_decide_constant_admissible
+dsdp_alice_instances:paillier_charlie_decide_constant_admissible
+dsdp_alice_instances:paillier_decrypt_reduction_admissible_eventuallyF
+dsdp_alice_instances:benaloh_asymptotic
+dsdp_alice_instances:benaloh_bob_decide_constant_admissible
+dsdp_alice_instances:benaloh_charlie_decide_constant_admissible
+dsdp_alice_instances:benaloh_decrypt_reduction_admissible_eventuallyF
 # dsdp_entropy: the abstract-variable and non-ring forms of the fiber counting
 # facts; the blueprint cites the two ring forms.
 dsdp_entropy:Pr_dsdp_nosol_eq0
@@ -259,7 +259,7 @@ negligible:negligible_fun_le
 # advantage families; the blueprint cites the derived assumption at
 # def:paillier_indcpa_assumption, the reduction bound at
 # thm:paillier_dcr_epsilon_le, and the DSDP bound read off at that scheme in
-# the Paillier section of dsdp_alice_main.
+# the Paillier section of dsdp_alice_instances.
 paillier_indcpa_scheme:card_renc_paillier
 paillier_indcpa_scheme:pq_gt1
 paillier_indcpa_scheme:rand_of_renc_paillier
