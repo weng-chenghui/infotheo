@@ -189,37 +189,20 @@ apply/setP => t0.
 rewrite !inE /= !xpair_eqE.
 apply/idP/idP => H.
 - (* LHS -> RHS: drop S and rearrange *)
-  move/and3P: H => [Hvar Hinput Hs].
-  move/andP: Hinput => [Hinput3 Hu3].
-  move/andP: Hinput3 => [Hinput2 Hu2].
-  move/andP: Hinput2 => [Hv1 Hu1].
-  apply/and3P.
-  split => //.
-  by rewrite Hv1 Hu1 Hu2.
+  move/and3P: H => [Hvar /andP[/andP[/andP[Hv1 Hu1] Hu2] Hu3] Hs].
+  by apply/and3P; split => //; rewrite Hv1 Hu1 Hu2.
 - (* RHS -> LHS: derive S=s from constraint *)
-  move/and3P: H => [Hvar Hinput3 Hu3].
-  move/andP: Hinput3 => [Hinput2 Hu2].
-  move/andP: Hinput2 => [Hv1 Hu1].
-  apply/and3P.
-  split => //.
-  + by rewrite Hv1 Hu1 Hu2 Hu3.
-  + (* S t0 = s follows from the constraint *)
-    move/andP: Hvar => [/eqP Hv2_eq /eqP Hv3_eq].
-    move/eqP: Hv1 => Hv1_eq.
-    move/eqP: Hu1 => Hu1_eq.
-    move/eqP: Hu2 => Hu2_eq.
-    move/eqP: Hu3 => Hu3_eq.
-    move: (constraint_holds t0).
-    rewrite /dsdp_constraint /CondRV /VarRV /=.
-    rewrite Hv1_eq Hu1_eq Hu2_eq Hu3_eq Hv2_eq Hv3_eq.
-    move=> /eqP Hconstr.
-    move: Hin_fiber.
-    rewrite /dsdp_fiber_fn /dsdp_fiber inE /=.
-    move=> /eqP Hfiber_eq.
-    apply/eqP.
-    have Heq: S t0 - u1 * v1 = s - u1 * v1.
-      by rewrite Hconstr Hfiber_eq.
-    by move: Heq => /(f_equal (fun x => x + u1 * v1)); rewrite !subrK.
+  move/and3P: H => [Hvar /andP[/andP[Hv1 Hu1] Hu2] Hu3].
+  apply/and3P; split => //.
+    by rewrite Hv1 Hu1 Hu2 Hu3.
+  (* S t0 = s follows from the constraint *)
+  move/andP: Hvar => [/eqP Hv2_eq /eqP Hv3_eq].
+  move: (constraint_holds t0).
+  rewrite /dsdp_constraint /CondRV /VarRV /=.
+  rewrite (eqP Hv1) (eqP Hu1) (eqP Hu2) (eqP Hu3) Hv2_eq Hv3_eq => /eqP Hconstr.
+  move: Hin_fiber; rewrite /dsdp_fiber_fn /dsdp_fiber inE /= => /eqP Hfiber_eq.
+  apply/eqP; apply: (subIr (u1 * v1)).
+  by rewrite Hconstr Hfiber_eq.
 Qed.
 
 (* The fiber has exactly m input pairs when Alice's weight on Charlie is a
@@ -666,10 +649,6 @@ Lemma dsdp_fiber_card_n (v0 u0 s : msg)
 Proof.
 move=> Hu_pos Hu_lt.
 rewrite /dsdp_fiber_fn_n /dsdp_fiber_n.
-have Heta : linear_fiber_nd u_rel (s - u0 * v0) =
-            @linear_fiber_nd p q n_relay
-              (fun i => u_rel i) (s - u0 * v0) by [].
-rewrite Heta.
 apply: (linear_fiber_nd_card p_gt1 q_gt1).
 exact: (lt_minpq_coprime prime_p prime_q).
 Qed.

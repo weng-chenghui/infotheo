@@ -192,9 +192,7 @@ pose US : {RV P -> {ffun 'I_1.+1 -> msg}} :=
   fun t => [ffun i => if i == ord0 then U2 t else U3 t].
 pose g := fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg
                     * Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg) =>
-  let '(_, s, _, u1, _, _, _, _, _, _, _) := o in
-  let '(_, _, v1, _, _, _, _, _, _, _, _) := o in
-  s - v1 * u1.
+  let '(_, s, v1, u1, _, _, _, _, _, _, _) := o in s - v1 * u1.
 have HVS0 : (fun t => VS t ord0) = V2.
   by apply/funext => t; rewrite /VS ffunE eqxx.
 have HUS_e1 : US = fun _ => @ConstUS_n p q 1.

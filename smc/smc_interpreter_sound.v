@@ -251,52 +251,42 @@ Lemma classify n (ps : n.-tuple (proc data))
     (sds : n.-tuple (seq data)) (i : 'I_n) :
   index_class ps sds i.
 Proof.
+have psE (k : 'I_n) : nth (default_proc data) ps k = ps !_ k by rewrite -tnth_nth.
 case Hpi: (ps !_ i) => [x p|dst w next|frm f|g|x||].
 - by apply (Disjoint (r:=RSinit i x p)); rewrite /reduction_spec_at Hpi.
 - (* Send dst w next *)
   case: (ltnP dst n) => dstn; last first.
-    apply Inert.
-    by rewrite /step -tnth_nth Hpi nth_default // size_tuple.
+    by apply Inert; rewrite /step psE Hpi nth_default // size_tuple.
   set j := Ordinal dstn.
   case Hpj: (ps !_ j) => [y q|dst2 w2 nxt2|frm2 f2|g2|y||];
-    try by apply Inert; rewrite /step -tnth_nth Hpi (_: dst = j) // -tnth_nth Hpj.
+    try by apply Inert; rewrite /step psE Hpi (_: dst = j) // psE Hpj.
   case: (eqVneq frm2 (nat_of_ord i)) => frm2i.
   + apply (Disjoint (r:=RScomm i j w next f2)).
     rewrite /reduction_spec_at Hpi /= /j.
     case: (eqP) => [pf|/negP]; last by rewrite dstn.
     by rewrite (bool_irrelevance pf dstn) Hpj frm2i eqxx.
-  + by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
-      -(tnth_nth (default_proc _) ps j) Hpj (negbTE frm2i).
+  + by apply Inert; rewrite /step psE Hpi (psE j) Hpj (negbTE frm2i).
 - (* Recv frm f *)
   have [frmn|frmn] := boolP (frm < n)%N; last first.
-    by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
-       nth_default ?size_tuple // leqNgt.
+    by apply Inert; rewrite /step psE Hpi nth_default ?size_tuple // leqNgt.
   set j := Ordinal frmn.
-  have Hj : nth (default_proc _) ps frm = ps !_ j.
-    by rewrite -(tnth_nth (default_proc _) ps j).
+  have Hj : nth (default_proc _) ps frm = ps !_ j by rewrite (psE j).
   case Hpj: (ps !_ j) => [y q|dst2 w2 nxt2|frm2 f2|g2|y||];
-    try by (apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
-         Hj Hpj //=).
+    try by apply Inert; rewrite /step psE Hpi Hj Hpj //=.
   (* Send dst2 w2 nxt2 sub-case *)
   case: (eqVneq dst2 (nat_of_ord i)) => dst2i.
   + apply (Disjoint (r:=RScomm j i w2 nxt2 f)).
     rewrite /reduction_spec_at Hpi /= /j.
     case: (eqP) => [pf|/negP]; last by rewrite frmn.
-    rewrite (bool_irrelevance pf frmn).
-    (* Now need: match ps !_ (Ordinal frmn) ... = Some (RScomm ...) *)
-    (* ps !_ (Ordinal frmn) = ps !_ j = Send dst2 w2 nxt2 *)
-    rewrite Hpj dst2i eqxx //.
-  + by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
-      Hj Hpj (negbTE dst2i).
+    by rewrite (bool_irrelevance pf frmn) Hpj dst2i eqxx.
+  + by apply Inert; rewrite /step psE Hpi Hj Hpj (negbTE dst2i).
 - (* Sample g *)
   case Hsd: (sds !_ i) => [|r sd].
-  + by apply Inert;
-      rewrite /step -(tnth_nth (default_proc _) ps i) Hpi Hsd.
-  + by apply (Disjoint (r:=RSsample i g r));
-      rewrite /reduction_spec_at Hpi Hsd.
+  + by apply Inert; rewrite /step psE Hpi Hsd.
+  + by apply (Disjoint (r:=RSsample i g r)); rewrite /reduction_spec_at Hpi Hsd.
 - by apply (Disjoint (r:=RSret i x)); rewrite /reduction_spec_at Hpi.
-- by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi.
-- by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi.
+- by apply Inert; rewrite /step psE Hpi.
+- by apply Inert; rewrite /step psE Hpi.
 Qed.
 
 (* A reduction found at an index meets its seed condition.  The only Sample
@@ -344,28 +334,17 @@ Proof.
 move=> Hr j Hj.
 have Ha := reduction_spec_at_applies Hr.
 have Hseed := reduction_spec_at_seed Hr.
+have psE (k : 'I_n) : nth (default_proc data) ps k = ps !_ k by rewrite -tnth_nth.
+rewrite /reduction_applies in Ha.
 case: r Hr Ha Hseed Hj => /=.
-- (* RSinit *)
-  move=> k y p Hr Ha _. rewrite inE => /eqP ->.
-  rewrite /reduction_applies /= in Ha. move: Ha => [] Hk.
-  by rewrite /step -(tnth_nth (default_proc _) ps k) Hk.
-- (* RSret *)
-  move=> k y Hr Ha _. rewrite inE => /eqP ->.
-  rewrite /reduction_applies /= in Ha. move: Ha => [] Hk.
-  by rewrite /step -(tnth_nth (default_proc _) ps k) Hk.
-- (* RScomm *)
-  move=> a b y pa pb Hr Ha _.
-  rewrite !inE => /orP[/eqP ->|/eqP ->].
-  + rewrite /reduction_applies /= in Ha. move: Ha => [] Ha Hb.
-    rewrite /step -(tnth_nth (default_proc _) ps a) Ha.
-    by rewrite -(tnth_nth (default_proc _) ps b) Hb eqxx.
-  + rewrite /reduction_applies /= in Ha. move: Ha => [] Ha Hb.
-    rewrite /step -(tnth_nth (default_proc _) ps b) Hb.
-    by rewrite -(tnth_nth (default_proc _) ps a) Ha eqxx.
-- (* RSsample *)
-  move=> k g y Hr Ha [sd Hsd]. rewrite inE => /eqP ->.
-  rewrite /reduction_applies /= in Ha. move: Ha => [] Hk.
-  by rewrite /step -(tnth_nth (default_proc _) ps k) Hk Hsd.
+- by move=> k y p _ [] Hk _; rewrite inE => /eqP ->; rewrite /step psE Hk.
+- by move=> k y _ [] Hk _; rewrite inE => /eqP ->; rewrite /step psE Hk.
+- move=> a b y pa pb _ [] Ha' Hb' _; rewrite !inE => /orP[]/eqP ->;
+    rewrite /step psE.
+  + by rewrite Ha' psE Hb' eqxx.
+  + by rewrite Hb' psE Ha' eqxx.
+- by move=> k g y _ [] Hk [sd Hsd]; rewrite inE => /eqP ->;
+     rewrite /step psE Hk Hsd.
 Qed.
 
 (* For RScomm, the sender and receiver are distinct.
@@ -557,41 +536,37 @@ Lemma step_result_reduction_sender n (ps : n.-tuple (proc data))
   step_result_sound ps sds pss.
 Proof.
 move=> Hr Hi Hsender IH.
+(* The three one-party reductions differ only in the process they consume and
+   in the trace and seed the step returns. *)
+have one (q q' : proc data) (tr sd : seq data) :
+    ps !_ i = q ->
+    step ps [::] (sds !_ i) i = (q', tr, sd, true) ->
+    rstep sds [tuple i] [tuple q] [tuple q'] [tuple tr] ->
+    step_result_sound ps sds (pss `\ i) ->
+    step_result_sound ps sds pss.
+  move=> Hpi Hstep Hrs IH'.
+  rewrite /step_result_sound; apply: (rtrans IH'); last first.
+    exact: (step_result_trace1 Hi Hstep).
+  move: Hrs; set ps'' := result_procs _.
+  have -> : [tuple q] = extract [tuple i] ps''.
+    apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
+    by rewrite !inE eqxx /= Hpi.
+  by move/rone; rewrite (step_result_inject1 Hi Hstep).
 case: r Hr IH Hsender => [k y p|k y|a b y pa pb|k g y] Hr IH Hsender.
 - (* RSinit *)
   have Hi_mem := reduction_spec_at_mem Hr.
   rewrite /= inE in Hi_mem; move/eqP: Hi_mem => ?; subst k.
   have Ha := reduction_spec_at_applies Hr.
   rewrite /reduction_applies /= in Ha; move: Ha => [] Hpi.
-  have Hstep : step ps [::] (sds !_ i) i = (p, [:: y], sds !_ i, true)
-    by rewrite /step -(tnth_nth (default_proc _)) Hpi.
-  rewrite /step_result_sound.
-  apply: (rtrans IH); last first.
-  + apply: (step_result_trace1 Hi Hstep).
-  + move: (rinit sds i y p).
-    set ps'' := result_procs _.
-    have -> : [tuple Init y p] = extract [tuple i] ps''.
-      apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
-      by rewrite !inE eqxx /= Hpi.
-    move/rone.
-    by rewrite (step_result_inject1 Hi Hstep).
+  apply: (one _ _ _ _ Hpi _ (rinit sds i y p) IH).
+  by rewrite /step -(tnth_nth (default_proc _)) Hpi.
 - (* RSret *)
   have Hi_mem := reduction_spec_at_mem Hr.
   rewrite /= inE in Hi_mem; move/eqP: Hi_mem => ?; subst k.
   have Ha := reduction_spec_at_applies Hr.
   rewrite /reduction_applies /= in Ha; move: Ha => [] Hpi.
-  have Hstep : step ps [::] (sds !_ i) i = (Finish, [:: y], sds !_ i, true)
-    by rewrite /step -(tnth_nth (default_proc _)) Hpi.
-  rewrite /step_result_sound.
-  apply: (rtrans IH); last first.
-  + apply: (step_result_trace1 Hi Hstep).
-  + move: (rret sds i y).
-    set ps'' := result_procs _.
-    have -> : [tuple Ret y] = extract [tuple i] ps''.
-      apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
-      by rewrite !inE eqxx /= Hpi.
-    move/rone.
-    by rewrite (step_result_inject1 Hi Hstep).
+  apply: (one _ _ _ _ Hpi _ (rret sds i y) IH).
+  by rewrite /step -(tnth_nth (default_proc _)) Hpi.
 - (* RScomm - sender side only *)
   have [Hi_eq Hb_pss] := Hsender a b y pa pb erefl.
   subst i.
@@ -624,18 +599,8 @@ case: r Hr IH Hsender => [k y p|k y|a b y pa pb|k g y] Hr IH Hsender.
   have Ha := reduction_spec_at_applies Hr.
   rewrite /reduction_applies /= in Ha; move: Ha => [] Hpi.
   have [sd Hsd] := reduction_spec_at_seed Hr.
-  have Hstep : step ps [::] (sds !_ i) i = (g y, [::], sd, true)
-    by rewrite /step -(tnth_nth (default_proc _)) Hpi Hsd.
-  rewrite /step_result_sound.
-  apply: (rtrans IH); last first.
-  + apply: (step_result_trace1 Hi Hstep).
-  + move: (rsample g Hsd).
-    set ps'' := result_procs _.
-    have -> : [tuple Sample g] = extract [tuple i] ps''.
-      apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
-      by rewrite !inE eqxx /= Hpi.
-    move/rone.
-    by rewrite (step_result_inject1 Hi Hstep).
+  apply: (one _ _ _ _ Hpi _ (rsample g Hsd) IH).
+  by rewrite /step -(tnth_nth (default_proc _)) Hpi Hsd.
 Qed.
 
 (******************************************************************************)

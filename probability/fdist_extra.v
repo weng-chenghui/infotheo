@@ -111,8 +111,7 @@ Lemma fdistmap_prod (A1 A2 B1 B2 : finType) (Q1 : R.-fdist A1)
   = (fdistmap f1 Q1) `x (fdistmap f2 Q2).
 Proof.
 apply/fdist_ext => -[b1 b2]; rewrite fdist_prodE !fdistmapE big_distrl /=.
-rewrite (eq_bigr (fun i => \sum_(a in preim f2 (pred1 b2)) (Q1 i * Q2 a)));
-  last by move=> i _; rewrite big_distrr.
+under [in RHS]eq_bigr do rewrite big_distrr /=.
 rewrite pair_big /=; apply: eq_big => [[a1 a2]|[a1 a2] _] /=.
   by rewrite !inE /= xpair_eqE.
 by rewrite fdist_prodE.

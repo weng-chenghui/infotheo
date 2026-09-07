@@ -168,8 +168,7 @@ Proof. by move=> p_gt1 q_gt1; rewrite card_ord Zp_cast// pq_gt1. Qed.
 Lemma card_Zp_pq_prednK (p q : nat) :
   (1 < p)%N -> (1 < q)%N -> #|'Z_(p * q)| = (p * q).-1.+1.
 Proof.
-move=> p_gt1 q_gt1; rewrite (card_Zp_pq p_gt1 q_gt1) prednK//.
-exact: (ltnW (pq_gt1 p_gt1 q_gt1)).
+by move=> p_gt1 q_gt1; rewrite (card_Zp_pq p_gt1 q_gt1) prednK// ltnW// pq_gt1.
 Qed.
 
 (* A pair of plaintexts, counted in the successor form the generic fiber
@@ -178,10 +177,8 @@ Lemma card_Zp_pq_pair_prednK (p q : nat) :
   (1 < p)%N -> (1 < q)%N ->
   #|((('Z_(p * q)) * ('Z_(p * q)))%type : finType)| = (((p * q) ^ 2).-1).+1.
 Proof.
-move=> p_gt1 q_gt1.
-rewrite card_prod (card_Zp_pq p_gt1 q_gt1) prednK; last first.
-  by rewrite expn_gt0 (ltnW (pq_gt1 p_gt1 q_gt1)).
-by rewrite expnS expn1.
+move=> p_gt1 q_gt1; rewrite card_prod (card_Zp_pq p_gt1 q_gt1) expnS expn1.
+by rewrite prednK// muln_gt0 (ltnW (pq_gt1 p_gt1 q_gt1)).
 Qed.
 
 (* When m is prime, 'Z_m and 'F_m have the same cardinality *)

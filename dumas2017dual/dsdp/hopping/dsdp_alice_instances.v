@@ -71,8 +71,7 @@ Lemma idealized_bob_constant_admissible (k : nat) :
     (bob_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
-apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] coins].
+by apply/forallP => -[[[vv ms] ra] coins]; apply/forallP => ?; apply/forallP.
 Qed.
 
 (* The Charlie-key counterpart of idealized_bob_constant_admissible. *)
@@ -238,8 +237,7 @@ Lemma paillier_bob_constant_admissible k :
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
-apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] coins].
+by apply/forallP => -[[[vv ms] ra] coins]; apply/forallP => ?; apply/forallP.
 Qed.
 
 (* The Charlie-key counterpart of paillier_bob_constant_admissible, so
@@ -426,8 +424,7 @@ Lemma benaloh_bob_constant_admissible k :
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
-apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[vv ms] ra] coins].
+by apply/forallP => -[[[vv ms] ra] coins]; apply/forallP => ?; apply/forallP.
 Qed.
 
 (* The Charlie-key counterpart of benaloh_bob_constant_admissible, so

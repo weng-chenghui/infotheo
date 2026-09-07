@@ -628,8 +628,7 @@ case Hn: n env / sp =>
   (* Recv case: check if matched *)
   case: ifPn => [/eqP|] k'k.
   + (* Matched: env goes from senv_send env dst dt to env *)
-    exists (mk_aproc (party:=p) s).
-    by rewrite addn1.
+    by exists (mk_aproc (party:=p) s); rewrite addn1.
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
 - (* SRecv *)
@@ -638,8 +637,7 @@ case Hn: n env / sp =>
   (* Send case: check if matched *)
   case: ifPn => [/eqP|] k'k.
   + (* Matched: env goes from senv_recv env dst dt to env *)
-    exists (mk_aproc (party:=p) (s d')).
-    by rewrite addn1.
+    by exists (mk_aproc (party:=p) (s d')); rewrite addn1.
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite addn0.
 - (* SSample: env unchanged whether or not the stream is exhausted *)

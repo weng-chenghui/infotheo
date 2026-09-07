@@ -141,26 +141,21 @@ Implicit Types c d k n : nat.
    n^c. *)
 Lemma expnn_gt_monomial (c n : nat) : (c < n)%N -> (n ^ c < n.+2 ^ n.+2)%N.
 Proof.
-move=> Hcn; apply: leq_ltn_trans (_ : (n.+2) ^ c < _)%N; last first.
-  by rewrite ltn_exp2l //; exact: (leq_trans Hcn (leqW (leqnSn n))).
-move: Hcn; case: c => [_|c _]; first by rewrite !expn0.
-by rewrite leq_exp2r //; exact: (leqW (leqnSn n)).
+move=> Hcn; apply: leq_ltn_trans (_ : n.+2 ^ c < _)%N; last first.
+  by rewrite ltn_exp2l // (leq_trans Hcn) // leqW.
+by move: Hcn; case: c => [_|c _]; [rewrite !expn0 | rewrite leq_exp2r // leqW].
 Qed.
 
 (* Two to the k exceeds the linear term c * (k+1) once k reaches c * c + c.
    It is the linear case of the monomial comparison. *)
 Lemma exp2_gt_linear (c k : nat) : (c * c + c <= k)%N -> (c * k.+1 < 2 ^ k)%N.
 Proof.
-move=> Hk.
-have leq_mulS_expn2 a b : (a.+1 * b.+1 <= 2 ^ (a + b))%N.
-  by rewrite expnD; apply: leq_mul; rewrite ltn_expl.
-have ltn_mul_split a b : (a * a <= b)%N -> (a * (a + b).+1 < a.+1 * b.+1)%N.
-  move=> le_aa_b; rewrite mulnS mulnDr mulSn mulnS.
-  by rewrite addnA addnA ltn_add2r addnC ltn_add2r ltnS.
-have Hck : (c <= k)%N by rewrite (leq_trans _ Hk) // leq_addl.
-have [d Hd] : exists d, k = (c + d)%N by exists (k - c)%N; rewrite subnKC.
-rewrite Hd; apply: leq_trans (leq_mulS_expn2 c d); apply: ltn_mul_split.
-by move: Hk; rewrite Hd [(c + d)%N]addnC leq_add2r.
+move=> Hk; have [d Hd] : exists d, k = (c + d)%N.
+  by exists (k - c)%N; rewrite subnKC // (leq_trans _ Hk) // leq_addl.
+have le_ccd : (c * c <= d)%N by move: Hk; rewrite Hd addnC leq_add2l.
+rewrite Hd; apply: leq_trans (_ : c.+1 * d.+1 <= _)%N; last first.
+  by rewrite expnD leq_mul // ltn_expl.
+by rewrite mulnS mulnDr mulSn mulnS addnA addnA ltn_add2r addnC ltn_add2r ltnS.
 Qed.
 
 (* Two to the n exceeds every monomial n^c once n reaches 2 ^ (c * c + c).
@@ -170,17 +165,13 @@ Lemma exp2_gt_monomial (c n : nat) :
 Proof.
 (* The truncated logarithm of n brackets n between two powers of two, and the
    linear case closes the gap between the brackets. *)
-move=> Hn.
-have Hn0 : (0 < n)%N by rewrite (leq_trans _ Hn) // expn_gt0.
-move: Hn; case: c => [_|c Hn].
-  by rewrite expn0 -{1}(expn0 2) ltn_exp2l.
+move=> Hn; have Hn0 : (0 < n)%N by rewrite (leq_trans _ Hn) // expn_gt0.
+move: Hn; case: c => [_|c Hn]; first by rewrite expn0 -{1}(expn0 2) ltn_exp2l.
 set k := trunc_log 2 n.
 have Hk : (c.+1 * c.+1 + c.+1 <= k)%N by apply: trunc_log_max.
 apply: leq_ltn_trans (_ : 2 ^ (c.+1 * k.+1) < _)%N.
   by rewrite mulnC expnM leq_exp2r // ltnW // trunc_log_ltn.
-apply: leq_trans (_ : 2 ^ (2 ^ k) <= _)%N.
-  by rewrite ltn_exp2l // exp2_gt_linear.
-by rewrite leq_exp2l // trunc_logP.
+by rewrite ltn_exp2l //; apply: leq_trans (exp2_gt_linear Hk) (trunc_logP _ _).
 Qed.
 
 End growth_rates.
@@ -194,11 +185,9 @@ Context {R : realType}.
 Lemma negligible_fun_inv_expnn :
   negligible_fun (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
 Proof.
-move=> c; exists c => n Hn.
-have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
-rewrite -natrX ltf_pV2 ?ltr_nat ?expnn_gt_monomial //.
-  by rewrite posrE ltr0n expn_gt0.
-by rewrite posrE ltr0n expn_gt0 Hn0.
+move=> c; exists c => n Hn; have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
+by rewrite -natrX ltf_pV2 ?posrE ?ltr0n ?expn_gt0 ?Hn0 ?ltr_nat
+  ?expnn_gt_monomial.
 Qed.
 
 (* A sequence dominating (k+2)^(k+2) has negligible inverse.  Paillier and
@@ -208,9 +197,8 @@ Lemma negligible_fun_inv_ge_expnn (f : nat -> nat) :
   negligible_fun (fun k => ((f k)%:R : R)^-1).
 Proof.
 move=> Hf; apply: negligible_fun_le negligible_fun_inv_expnn => k.
-rewrite lef_pV2 ?ler_nat //.
-  by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
-by rewrite posrE ltr0n expn_gt0.
+have fk0 : (0 < f k)%N by rewrite (leq_trans _ (Hf k)) // expn_gt0.
+by rewrite lef_pV2 ?posrE ?ltr0n ?expn_gt0 ?fk0 ?ler_nat ?Hf.
 Qed.
 
 (* The inverse of 2 ^ k is negligible.  It is the growth rate a scheme
@@ -220,9 +208,8 @@ Lemma negligible_fun_inv_exp2 :
 Proof.
 move=> c; exists (2 ^ (c * c + c))%N => n Hn.
 have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
-rewrite -natrX ltf_pV2 ?ltr_nat ?exp2_gt_monomial ?(ltnW Hn) //.
-  by rewrite posrE ltr0n expn_gt0.
-by rewrite posrE ltr0n expn_gt0 Hn0.
+by rewrite -natrX ltf_pV2 ?posrE ?ltr0n ?expn_gt0 ?Hn0 ?ltr_nat
+  ?exp2_gt_monomial ?(ltnW Hn).
 Qed.
 
 (* A sequence dominating 2 ^ k has negligible inverse.  A scheme sequence
@@ -232,9 +219,8 @@ Lemma negligible_fun_inv_ge_exp2 (f : nat -> nat) :
   negligible_fun (fun k => ((f k)%:R : R)^-1).
 Proof.
 move=> Hf; apply: negligible_fun_le negligible_fun_inv_exp2 => k.
-rewrite lef_pV2 ?ler_nat //.
-  by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
-by rewrite posrE ltr0n expn_gt0.
+have fk0 : (0 < f k)%N by rewrite (leq_trans _ (Hf k)) // expn_gt0.
+by rewrite lef_pV2 ?posrE ?ltr0n ?expn_gt0 ?fk0 ?ler_nat ?Hf.
 Qed.
 
 End negligible_inverses.

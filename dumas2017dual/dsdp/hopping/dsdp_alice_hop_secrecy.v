@@ -825,15 +825,12 @@ Definition alice_simulator (s : plain AHE) :
 Lemma centropy_V2_all_zero_logm :
   `H( V2 | alice_tuple_all_zero ) = log (#|plain AHE|%:R : R).
 Proof.
-have cinde_assemble := cinde_RV_comp (fun sp s => alice_hop_tuple_of_spectator (sp, s))
-                 alice_spectator_cinde.
-rewrite -alice_tuple_all_zeroE in cinde_assemble.
-have pair_selfK : cancel (fun v : alice_hop_tupleT => (v, v.1.1.1.2))
-                          (fun p : alice_hop_tupleT * plain AHE => p.1) by [].
-rewrite -(can_centropy_eq pair_selfK V2 alice_tuple_all_zero).
-have -> : (fun v : alice_hop_tupleT => (v, v.1.1.1.2)) `o alice_tuple_all_zero
-        = [% alice_tuple_all_zero, Sout] by [].
-by rewrite (cinde_centropy_eq cinde_assemble) centropy_V2_Sout_logm.
+rewrite -(can_centropy_eq (g := fun v : alice_hop_tupleT => (v, v.1.1.1.2))
+            (h := fst) (fun=> erefl) V2 alice_tuple_all_zero)
+        -centropy_V2_Sout_logm alice_tuple_all_zeroE.
+exact: (cinde_centropy_eq (cinde_RV_comp
+          (fun sp s => alice_hop_tuple_of_spectator (sp, s))
+          alice_spectator_cinde)).
 Qed.
 
 Section alice_hop_tuple_all_zero_mass.
@@ -864,8 +861,6 @@ rewrite /RV2 /comp_RV !xpair_eqE.
    rewriting andbF, whose match against a six-slot tuple equality is
    pathological. *)
 case: (W t =P w) => [Ew|_]; last by apply/idP/idP => /andP[].
-suff -> : alice_tuple_all_zero t
-        = alice_hop_tuple_of_spectator (AliceSpectatorPre t, s) by [].
 by rewrite -(Sout_determinedE Ew).
 Qed.
 
@@ -883,14 +878,12 @@ move=> Hvv.
 have HW t : [% V2, V3] t = (v2, v3) ->
     Sout t = dsdp_output v1 u1 u2 u3 v2 v3.
   by rewrite /Sout /comp_RV => ->.
-have assemble_indep : alice_sample_fdist
-    |= ((fun c : alice_spectator_preT =>
-           alice_hop_tuple_of_spectator (c, dsdp_output v1 u1 u2 u3 v2 v3))
-        `o AliceSpectatorPre) _|_ [% V2, V3].
-  exact: (inde_RV_comp _ idfun spectator_pre_indep).
-rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v HW) (assemble_indep v (v2, v3)).
-rewrite mulfK // -dist_of_RVE /alice_simulator -alice_spectator_law.
-by rewrite /dist_of_RV fdistmap_comp.
+have assemble_indep := inde_RV_comp (fun c : alice_spectator_preT =>
+    alice_hop_tuple_of_spectator (c, dsdp_output v1 u1 u2 u3 v2 v3))
+  idfun spectator_pre_indep.
+rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v HW).
+rewrite (assemble_indep v (v2, v3)) mulfK // -dist_of_RVE /alice_simulator.
+by rewrite -alice_spectator_law /dist_of_RV fdistmap_comp.
 Qed.
 
 (* The ideal-world joint law of the two secret inputs and a simulated view.
