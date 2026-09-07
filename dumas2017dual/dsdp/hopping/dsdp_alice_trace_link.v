@@ -122,11 +122,11 @@ Require Import dsdp_alice_hop_secrecy.
 (*  combine_coins_trace_indep == Alice's combine coins carry no information   *)
 (*                              about Bob's input together with the visible   *)
 (*                              trace information                             *)
-(*   hop_tuple_of_rand_trace == rebuilds the hopping tuple from the private   *)
+(*   hop_tuple_of_coins_trace == rebuilds the hopping tuple from the private   *)
 (*                              combine coins and visible trace information   *)
-(*   rand_trace_of_hop_tuple == separates a hopping tuple into those private  *)
+(*   coins_trace_of_hop_tuple == separates a hopping tuple into those private  *)
 (*                              coins and visible trace information           *)
-(* alice_hop_tuple_rand_traceE ==                                             *)
+(* alice_hop_tuple_coins_traceE ==                                             *)
 (*                              expresses the hopping tuple through this      *)
 (*                              private-and-visible split                     *)
 (*      trace_of_trace_tuple == reconstructs Alice's trace from the visible   *)
@@ -666,28 +666,28 @@ Qed.
 
 (* Alice's hopping tuple rebuilt from her combine coins and the
    trace-visible tuple. *)
-Definition hop_tuple_of_rand_trace
+Definition hop_tuple_of_coins_trace
     (p : ((Renc * Renc) * alice_trace_tupleT)) :
     alice_hop_tupleT I :=
   (p.2.1.1.1.1, p.1, p.2.1.1.1.2, p.2.1.1.2, p.2.1.2, p.2.2).
 
 (* The combine coins and the trace-visible tuple read back off a
    hopping tuple. *)
-Definition rand_trace_of_hop_tuple
+Definition coins_trace_of_hop_tuple
     (v : alice_hop_tupleT I) :
     ((Renc * Renc) * alice_trace_tupleT) :=
   (v.1.1.1.1.2, (v.1.1.1.1.1, v.1.1.1.2, v.1.1.2, v.1.2, v.2)).
 
 (* The two relabellings are mutually inverse. *)
-Lemma hop_tuple_of_rand_traceK :
-  cancel hop_tuple_of_rand_trace rand_trace_of_hop_tuple.
+Lemma hop_tuple_of_coins_traceK :
+  cancel hop_tuple_of_coins_trace coins_trace_of_hop_tuple.
 Proof. by case=> ra [[[[m s] c0] c1] c2]. Qed.
 
 (* Alice's hopping tuple is her combine coins together with the
    trace-visible tuple. *)
-Lemma alice_hop_tuple_rand_traceE :
+Lemma alice_hop_tuple_coins_traceE :
   alice_tuple_real
-  = hop_tuple_of_rand_trace `o [% [% RA1, RA2], AliceTraceTuple].
+  = hop_tuple_of_coins_trace `o [% [% RA1, RA2], AliceTraceTuple].
 Proof.
 (* The combine coins stay eta-expanded as [% RA1, RA2]: [prod] has no
    definitional eta, so [AliceCombineCoins] is not convertible with the pair
@@ -752,8 +752,8 @@ Theorem centropy_V2_trace_tupleE :
   `H( V2 | AliceTrace ) = `H( V2 | alice_tuple_real ).
 Proof.
 rewrite alice_trace_tupleE (can_centropy_eq trace_of_trace_tupleK).
-rewrite alice_hop_tuple_rand_traceE
-        (can_centropy_eq hop_tuple_of_rand_traceK).
+rewrite alice_hop_tuple_coins_traceE
+        (can_centropy_eq hop_tuple_of_coins_traceK).
 by rewrite (inde_centropy_eq combine_coins_trace_indep).
 Qed.
 
