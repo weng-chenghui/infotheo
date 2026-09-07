@@ -1,5 +1,5 @@
 From HB Require Import structures.
-From mathcomp Require Import all_boot all_order all_algebra finalg zmodp.
+From mathcomp Require Import all_boot all_algebra finalg zmodp.
 From mathcomp Require Import reals.
 Require Import homomorphic_encryption idealized_ahe.
 Require Import negligible indcpa_game indcpa_scheme_sequence.
@@ -19,20 +19,20 @@ Require Import negligible indcpa_game indcpa_scheme_sequence.
 (* length reading of the parameter as well.                                   *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*           card_renc_ord1 == the one-element coin space has successor       *)
-(*                             cardinality                                    *)
+(*            card_renc_ord1 == the one-element coin space has successor      *)
+(*                              cardinality                                   *)
 (*   idealized_indcpa_scheme == the idealized AHE scheme as an IND-CPA        *)
-(*                             scheme, at a plaintext ring                    *)
-(*         idealized_scheme == that scheme at the plaintext ring              *)
-(*                             Z/((k+2)^(k+2))Z                               *)
-(*     card_plain_idealized == the plaintext space at k has cardinality       *)
-(*                             (k+2)^(k+2)                                    *)
-(*         idealized_keygen == the one-element seed space and the zero        *)
-(*                             private key at each k                          *)
+(*                              scheme, at a plaintext ring                   *)
+(*          idealized_scheme == that scheme at the plaintext ring             *)
+(*                              Z/((k+2)^(k+2))Z                              *)
+(*      card_plain_idealized == the plaintext space at k has cardinality      *)
+(*                              (k+2)^(k+2)                                   *)
+(*          idealized_keygen == the one-element seed space and the zero       *)
+(*                              private key at each k                         *)
 (* idealized_size_negligible == the inverse plaintext cardinality along the   *)
-(*                             sequence is negligible                         *)
+(*                              sequence is negligible                        *)
 (* idealized_scheme_sequence == that sequence as an indcpa_scheme_sequence,   *)
-(*                             built under no assumption                      *)
+(*                              built under no assumption                     *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -60,11 +60,11 @@ Definition idealized_indcpa_scheme (msgT : finComUnitRingType) :
    cardinality (k+2)^(k+2).  That cardinality is what leaves the guessing
    bound along the sequence a nonzero number rather than zero. *)
 Definition idealized_scheme (k : nat) : indcpa_scheme :=
-  idealized_indcpa_scheme 'Z_((k.+2) ^ k.+2).
+  idealized_indcpa_scheme 'Z_(k.+2 ^ k.+2).
 
 (* The plaintext space at k has cardinality (k+2)^(k+2). *)
 Lemma card_plain_idealized (k : nat) :
-  #|plain (scheme_AHE (idealized_scheme k))| = ((k.+2) ^ k.+2)%N.
+  #|plain (scheme_AHE (idealized_scheme k))| = (k.+2 ^ k.+2)%N.
 Proof. by rewrite card_ord Zp_cast // -{1}(expn0 k.+2) ltn_exp2l. Qed.
 
 (* The idealized key material: a one-element seed space and the zero private
@@ -75,8 +75,8 @@ Definition idealized_keygen :
   @Build_keygen_sequence (fun k => scheme_AHE (idealized_scheme k))
     (fun _ => 'I_1) (fun _ => card_renc_ord1) (fun _ _ => 0).
 
-Section idealized_scheme_sequence.
-Context {R : realType}.
+Section idealized_sequence.
+Variable R : realType.
 
 (* The inverse plaintext cardinality along the idealized sequence is
    negligible, its plaintext spaces growing as (k+2)^(k+2). *)
@@ -98,4 +98,4 @@ Definition idealized_scheme_sequence : indcpa_scheme_sequence R := {|
   scheme_size_negligible := idealized_size_negligible ;
   scheme_adv_negligible := negligible_fun_cst0 |}.
 
-End idealized_scheme_sequence.
+End idealized_sequence.

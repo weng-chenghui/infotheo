@@ -501,17 +501,12 @@ Qed.
 
 End paillier_indcpa_scheme.
 
-Section paillier_dcr_advantage.
-Context {R : realType}.
-
 (* The advantage a sequence of residuosity records assumes at k.  It reads a
    sequence of records, so that the record below can state the asymptotic form
    of its own assumption. *)
-Definition f_dcr_paillier (p q : nat -> nat)
+Definition f_dcr_paillier {R : realType} {p q : nat -> nat}
     (dcr : forall k, dcr_assumption (R:=R) (p k) (q k)) (k : nat) : R :=
   dcr_epsilon (dcr k).
-
-End paillier_dcr_advantage.
 
 (* A Paillier scheme sequence: the moduli, their bounds, the residuosity
    record, the modulus bit length, and the key material.  The parameter is a
@@ -549,7 +544,7 @@ Local Notation q_gt1 := (paillier_q_gt1 P).
 
 (* The inverse modulus sequence 1/(p k * q k), the form a growth condition on
    the moduli is stated in. *)
-Definition f_pq k : R := (((paillier_p P k * paillier_q P k)%N)%:R : R)^-1.
+Definition f_pq k : R := ((paillier_p P k * paillier_q P k)%N%:R : R)^-1.
 
 (* The inverse plaintext-cardinality sequence at Paillier: the
    information-theoretic summand of every guessing bound read off along the
@@ -571,7 +566,7 @@ Lemma f_size_paillier_negligible : negligible_fun f_size_paillier.
 Proof.
 rewrite /f_size_paillier.
 under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
-exact: (negligible_fun_inv_ge_exp2 (paillier_modulus_bits P)).
+exact: negligible_fun_inv_ge_exp2 (paillier_modulus_bits P).
 Qed.
 
 (* The derived IND-CPA advantage along the sequence is negligible, being twice

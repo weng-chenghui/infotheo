@@ -43,12 +43,12 @@ Local Open Scope sproc_scope.
    of the guessing headline is discharged at once there, the assumed advantage
    being zero at every k. *)
 Section idealized.
-Context {R : realType}.
+Variable R : realType.
 
 (* The idealized sequence: the schemes of idealized_indcpa_scheme.v, zero
    weights with a unit on Charlie's input, and one seed per key space. *)
 Definition idealized_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (idealized_scheme_sequence (R:=R))
+  mk_dsdp_instance_sequence (idealized_scheme_sequence R)
     (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
     (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
 
@@ -63,7 +63,7 @@ Definition idealized_instance (k : nat) : dsdp_instance :=
    1/#|plain| term. *)
 Definition idealized_asymptotic :
     dsdp_asymptotic idealized_instance_sequence :=
-  mk_dsdp_asymptotic (idealized_scheme_sequence (R:=R))
+  mk_dsdp_asymptotic (idealized_scheme_sequence R)
     (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
     (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
 

@@ -30,7 +30,7 @@ Require Import negligible indcpa_game.
 (*          keygen_card_seed == nonemptiness of that type, in the successor   *)
 (*                              form fdist_uniform takes                      *)
 (*           keygen_priv_key == the private key a seed generates              *)
-(*          f_size_scheme S == the inverse plaintext-cardinality sequence     *)
+(*           f_size_scheme S == the inverse plaintext-cardinality sequence    *)
 (*                              along the schemes S                           *)
 (*            f_adv_scheme A == the advantage sequence the assumptions A      *)
 (*                              assume                                        *)
@@ -65,8 +65,10 @@ Record keygen_sequence (S : nat -> AHEncType) := {
   (* the private key a seed generates *)
   keygen_priv_key : forall k, keygen_seedT k -> priv_key (S k) }.
 
-(* A call site names the record it reads a key off, the seed alone leaving it
-   to unification. *)
+(* A call site names the record it reads a key off and the parameter it reads
+   at, the seed alone leaving both to unification. *)
+Arguments keygen_seedT {S} K k : rename.
+Arguments keygen_card_seed {S} K k : rename.
 Arguments keygen_priv_key {S} K k : rename.
 
 Section scheme_sequence_terms.
@@ -92,11 +94,14 @@ Record indcpa_scheme_sequence (R : realType) := {
   (* the IND-CPA scheme at the security parameter k *)
   scheme_at : nat -> indcpa_scheme ;
   (* the IND-CPA assumption made at the scheme at k *)
-  scheme_assumption : forall k,
-    indcpa_epsilon_assumption (R:=R) (scheme_at k) ;
+  scheme_assumption : forall k, indcpa_epsilon_assumption (R:=R) (scheme_at k) ;
   (* the seed spaces and private keys along the sequence *)
   scheme_keygen : keygen_sequence (fun k => scheme_AHE (scheme_at k)) ;
   (* the unconditional term: the inverse plaintext cardinality vanishes *)
   scheme_size_negligible : negligible_fun (f_size_scheme (R:=R) scheme_at) ;
   (* the assumption-conditional term: the assumed advantage vanishes *)
   scheme_adv_negligible : negligible_fun (f_adv_scheme scheme_assumption) }.
+
+(* The record stays an explicit argument of the scheme projection, for the same
+   reason it does on the key material above. *)
+Arguments scheme_at {R} Q k : rename.

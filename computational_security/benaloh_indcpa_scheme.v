@@ -523,18 +523,13 @@ Qed.
 
 End benaloh_indcpa_scheme.
 
-Section benaloh_residuosity_advantage.
-Context {R : realType}.
-
 (* The advantage a sequence of r-th residuosity records assumes at k.  It
    reads a sequence of records, so that the record below can state the
    asymptotic form of its own assumption. *)
-Definition f_residuosity_benaloh (n r : nat -> nat)
+Definition f_residuosity_benaloh {R : realType} {n r : nat -> nat}
     (residuosity : forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k))
     (k : nat) : R :=
   benaloh_residuosity_epsilon (residuosity k).
-
-End benaloh_residuosity_advantage.
 
 (* A Benaloh scheme sequence: modulus and block size, their bounds, the
    residuosity record, two bit lengths, and key material.  The block size
@@ -594,7 +589,7 @@ Lemma f_size_benaloh_negligible : negligible_fun f_size_benaloh.
 Proof.
 rewrite /f_size_benaloh.
 under eq_fun => k do rewrite card_ord (Zp_cast (r_gt1 k)).
-exact: (negligible_fun_inv_ge_exp2 (benaloh_block_bits B)).
+exact: negligible_fun_inv_ge_exp2 (benaloh_block_bits B).
 Qed.
 
 (* The derived IND-CPA advantage is negligible, twice a negligible function
