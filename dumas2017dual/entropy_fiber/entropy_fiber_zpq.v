@@ -44,13 +44,13 @@ Local Open Scope entropy_scope.
 Section fiber_entropy.
 
 Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
+Variables (p0 q0 : nat).
+Local Notation p := p0.+2.
+Local Notation q := q0.+2.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
-Local Notation m := (p * q).
+Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 Variable T : finType.
@@ -114,15 +114,9 @@ Hypothesis joint_eq_input :
     `Pr[[%VarRV, CondRV] = (var, cond)] =
     `Pr[[%VarRV, InputRV] = (var, proj_input cond)].
 
-(** Marginal probability over fiber.
-    
-    Pr[CondRV = cond] = |fiber(cond)| × (m²)^-1 × Pr[InputRV = proj_input(cond)]
-    
-    This expresses the marginal probability of the conditioning event
-    as a product of:
-    1. The fiber cardinality (number of solutions)
-    2. The uniform probability (m²)^-1 for each solution
-    3. The probability of the input values
+(** The conditioning event's marginal law factors through its fiber.  It is
+    the fiber count times one solution's uniform weight times the probability
+    of the input values.
 *)
 Lemma Pr_cond_fiber_marginE (cond : CondT) :
   `Pr[InputRV = proj_input cond] != 0 ->
@@ -188,18 +182,9 @@ Hypothesis joint_eq_input :
     `Pr[[%VarRV, CondRV] = (var, cond)] =
     `Pr[[%VarRV, InputRV] = (var, proj_input cond)].
 
-(** Uniform conditional probability over fiber.
-    
-    Pr[VarRV = v | CondRV = cond] = |fiber(cond)|^-1
-    
-    When:
-    1. VarRV is uniform over msg × msg
-    2. VarRV is independent of InputRV
-    3. The conditioning event has positive probability
-    4. v is in the fiber of cond
-    
-    This is the key lemma for deriving entropy bounds in protocols
-    where the constraint creates a fiber structure.
+(** Inside the fiber the conditional law of the variable is uniform, at one
+    over the fiber count.  This is what turns a solution count into a
+    conditional-entropy value.
 *)
 Lemma cPr_uniform_fiber (cond : CondT) (v : msg * msg) :
   `Pr[CondRV = cond] != 0 ->

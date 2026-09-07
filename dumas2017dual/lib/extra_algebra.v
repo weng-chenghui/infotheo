@@ -33,6 +33,12 @@ Local Open Scope ring_scope.
 Lemma pq_gt1 (p q : nat) : (1 < p)%N -> (1 < q)%N -> (1 < p * q)%N.
 Proof. by move=> p1 q1; rewrite (leq_trans p1) // leq_pmulr // (ltnW q1). Qed.
 
+(* A natural above one is the second successor of its double predecessor.
+   The equality is propositional, so it transports a statement written at
+   a.+2 rather than converting it. *)
+Lemma pred2K (n : nat) : (1 < n)%N -> n.-2.+2 = n.
+Proof. by case: n => [|[|n]]. Qed.
+
 (* ========================================================================== *)
 (*                           Bigop lemmas                                      *)
 (* ========================================================================== *)
@@ -149,15 +155,38 @@ Section Zp_Fp_equivalence.
 
 Context {R : realType}.
 
-(* The cardinality of 'Z_(a.+2 * b.+2) is the product itself.  Both factors
-   are at least two, so the product is a successor by conversion, the shape
-   fdist_uniform takes. *)
-Lemma card_Zp_pq (a b : nat) : #|'Z_(a.+2 * b.+2)| = (a.+2 * b.+2)%N.
-Proof. by rewrite card_ord Zp_cast. Qed.
+(* The plaintext ring at modulus p * q has p * q elements whenever both
+   factors are above one.  This value form is what the entropy statements
+   downstream read their log at. *)
+Lemma card_Zp_pq (p q : nat) :
+  (1 < p)%N -> (1 < q)%N -> #|'Z_(p * q)| = (p * q)%N.
+Proof. by move=> p_gt1 q_gt1; rewrite card_ord Zp_cast// pq_gt1. Qed.
+
+(* The same count in the successor form fdist_uniform takes its argument in.
+   At an abstract modulus the two forms separate, the product no longer being
+   a successor by conversion. *)
+Lemma card_Zp_pq_prednK (p q : nat) :
+  (1 < p)%N -> (1 < q)%N -> #|'Z_(p * q)| = (p * q).-1.+1.
+Proof.
+move=> p_gt1 q_gt1; rewrite (card_Zp_pq p_gt1 q_gt1) prednK//.
+exact: (ltnW (pq_gt1 p_gt1 q_gt1)).
+Qed.
+
+(* A pair of plaintexts, counted in the successor form the generic fiber
+   framework takes its cardinality argument in. *)
+Lemma card_Zp_pq_pair_prednK (p q : nat) :
+  (1 < p)%N -> (1 < q)%N ->
+  #|((('Z_(p * q)) * ('Z_(p * q)))%type : finType)| = (((p * q) ^ 2).-1).+1.
+Proof.
+move=> p_gt1 q_gt1.
+rewrite card_prod (card_Zp_pq p_gt1 q_gt1) prednK; last first.
+  by rewrite expn_gt0 (ltnW (pq_gt1 p_gt1 q_gt1)).
+by rewrite expnS expn1.
+Qed.
 
 (* When m is prime, 'Z_m and 'F_m have the same cardinality *)
-Lemma Zp_Fp_card_eq (m_minus_2 : nat) :
-  let m := m_minus_2.+2 in
+Lemma Zp_Fp_card_eq (a : nat) :
+  let m := a.+2 in
   prime m ->
   #|'Z_m| = #|'F_m|.
 Proof.

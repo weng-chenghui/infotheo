@@ -17,6 +17,10 @@ Import Num.Theory.
 (*                                                                            *)
 (* DSDP Protocol Correctness                                                  *)
 (*                                                                            *)
+(* The correctness statements hold at every m.  The plaintext carrier 'F_m   *)
+(* is 'Z_(pdiv m), the integers modulo the least prime divisor of m, and at   *)
+(* m at most one it is Z/2Z.                                                  *)
+(*                                                                            *)
 (* This file contains computational correctness proofs for the DSDP protocol. *)
 (* - Algebraic correctness (generic): defined in dsdp_program.v               *)
 (* - Computational correctness (idealized): Section dsdp_computational        *)
@@ -56,10 +60,12 @@ Local Open Scope sproc_scope.
 
 Section dsdp_computational.
 
-Variable m_minus_2 : nat.
-Local Notation m := m_minus_2.+2.
+Variable m : nat.
 
-Local Notation msg := 'F_m.  (* Finite field with m elements *)
+(* The plaintext carrier 'F_m is 'Z_(pdiv m), the integers modulo the least
+   prime divisor of m.  Above one it has pdiv m elements, and at m at most
+   one it is Z/2Z. *)
+Local Notation msg := 'F_m.
 
 (* ========================================================================== *)
 (* Build Idealized_HETypes as AHEncType                                   *)
@@ -125,11 +131,9 @@ Let ek (p : party_id) : pub_key AHE :=
   | NoParty => pkof dk_a
   end.
 
-(* Instantiate generic programs from dsdp_program.v
-   Note: Coq only generalizes section variables that are actually used:
-   - palice uses bob, charlie (not alice)
-   - pbob uses alice, bob, charlie
-   - pcharlie uses alice, bob, charlie *)
+(* The three DSDP programs of dsdp_program.v at this instance.  Each is
+   applied to the parties its own body names, which is what the section
+   discharge left explicit. *)
 Let palice_inst := @palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3 runit runit.
 Let pbob_inst := @pbob AHE alice bob charlie pn ek dk_b v2 runit runit.
 Let pcharlie_inst := @pcharlie AHE alice bob charlie pn ek dk_c v3 runit runit.

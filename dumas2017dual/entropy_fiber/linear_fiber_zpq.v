@@ -33,9 +33,9 @@ Local Open Scope entropy_scope.
 
 Section fiber_2d.
 
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
+Variables (p0 q0 : nat).
+Local Notation p := p0.+2.
+Local Notation q := q0.+2.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
@@ -323,12 +323,9 @@ by rewrite /crt_proj_pair /crt_pair /= !proj_Fp_crt !proj_Fq_crt
    -!surjective_pairing.
 Qed.
 
-(* Two unknowns over Z/pqZ, with m solutions.  The hypothesis is numeric
-   rather than an invertibility assumption because the count goes through the
-   two prime moduli separately and each needs its coefficient nonzero there:
-   a value strictly between 0 and min(p,q) is divisible by neither prime.
-   This is a separate result from the n-unknown count below, not an instance
-   of it, since the two represent the fiber differently. *)
+(* Two unknowns over Z/pqZ, with m solutions, counted separately from the
+   n-unknown result below.  The numeric hypothesis puts the coefficient
+   outside both prime factors, which is what the CRT count needs. *)
 Lemma linear_fiber_2d_card (u2 u3 target : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   #|linear_fiber_2d u2 u3 target| = m.
@@ -371,19 +368,16 @@ End fiber_2d.
 
 Section fiber_nd.
 
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
+Variables (p q : nat).
+Hypothesis p_gt1 : (1 < p)%N.
+Hypothesis q_gt1 : (1 < q)%N.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
 Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
-Let m_gt1 : (1 < m)%N.
-Proof.
-by rewrite (leq_trans (prime_gt1 prime_p)) // leq_pmulr // prime_gt0.
-Qed.
+Let m_gt1 : (1 < m)%N := pq_gt1 p_gt1 q_gt1.
 
 Variable n : nat.
 
@@ -502,10 +496,7 @@ by move=> w1 w2 /(congr1 project_fiber); rewrite !project_extend_id.
 Qed.
 
 (* One equation in n+1 unknowns over Z/pqZ has m^n solutions when its last
-   coefficient is invertible: that coefficient is then a bijection on the
-   unknown it multiplies, so every assignment of the other n unknowns extends
-   to exactly one solution.  Invertibility of this coefficient is sufficient
-   and not necessary, and the count it gives is what the conditional-entropy
+   coefficient is invertible.  That count is what the conditional-entropy
    results downstream are computed from. *)
 Lemma linear_fiber_nd_card (u : 'I_n.+1 -> msg) (target : msg) :
   coprime (val (u ord_max)) m ->

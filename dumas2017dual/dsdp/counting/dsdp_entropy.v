@@ -45,6 +45,27 @@ Local Open Scope vec_ext_scope.
 Reserved Notation "u *h w" (at level 40).
 Reserved Notation "u ^h w" (at level 40).
 
+(* ========================================================================= *)
+(* The two-unknown fiber count at a modulus written p * q                    *)
+(* ========================================================================= *)
+
+(* The count of a two-unknown linear fiber over the plaintext ring, at a
+   modulus written p * q.  The fiber set is spelled out because
+   linear_fiber_2d does not elaborate at that modulus. *)
+Lemma linear_fiber_2d_card_pq (p q : nat) :
+  prime p -> prime q -> coprime p q ->
+  forall u2 u3 target : 'Z_(p * q),
+  (0 < u3)%N -> (u3 < minn p q)%N ->
+  #|[set vv : 'Z_(p * q) * 'Z_(p * q) | u2 * vv.1 + u3 * vv.2 == target]|
+  = (p * q)%N.
+Proof.
+(* Destructing the two factors puts the goal in the successor shape
+   linear_fiber_2d_card is stated at. *)
+case: p => [|[|p0]]//; case: q => [|[|q0]]// pr_p pr_q co_pq u2 u3 target
+  u3_gt0 u3_ltmin.
+exact: linear_fiber_2d_card.
+Qed.
+
 (*
   CRT Reconstruction Section
   ==========================
@@ -66,9 +87,9 @@ Reserved Notation "u ^h w" (at level 40).
 Section dsdp_entropy.
 
 Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
+Variables (p q : nat).
+Hypothesis p_gt1 : (1 < p)%N.
+Hypothesis q_gt1 : (1 < q)%N.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
@@ -80,7 +101,7 @@ Local Notation msg := 'Z_m.
    s - u1 * v1.  These are the pairs consistent with one value of Alice's
    plaintext view. *)
 Definition dsdp_fiber (u1 u2 u3 v1 s : msg) : {set msg * msg} :=
-  linear_fiber_2d u2 u3 (s - u1 * v1)%R.
+  [set vv : msg * msg | u2 * vv.1 + u3 * vv.2 == (s - u1 * v1)%R].
 
 Variable T : finType.
 Variable P : R.-fdist T.
@@ -89,11 +110,10 @@ Let CondRV : {RV P -> (msg * msg * msg * msg * msg)} :=
   [% V1, U1, U2, U3, S].
 Let VarRV : {RV P -> (msg * msg)} := [%V2, V3].
 
-Let card_msg : #|msg| = m.
-Proof. by rewrite card_ord Zp_cast. Qed.
+Let card_msg : #|msg| = m := card_Zp_pq p_gt1 q_gt1.
 
-Let card_msg_pair : #|((msg * msg)%type : finType)| = (m ^ 2)%N.
-Proof. by rewrite card_prod !card_msg expnS expn1. Qed.
+Let card_msg_pair : #|((msg * msg)%type : finType)| = ((m ^ 2).-1).+1 :=
+  card_Zp_pq_pair_prednK p_gt1 q_gt1.
 
 Definition dsdp_constraint (cond : msg * msg * msg * msg * msg)
   (var : msg * msg) : bool :=
@@ -142,7 +162,7 @@ Let dsdp_proj_input (cond : msg * msg * msg * msg * msg) :
 Let constraint_fiber_dsdp : forall t, VarRV t \in dsdp_fiber_fn (CondRV t).
 Proof.
 move=> t.
-rewrite /dsdp_fiber_fn /dsdp_fiber /linear_fiber_2d inE /=.
+rewrite /dsdp_fiber_fn /dsdp_fiber inE /=.
 apply/eqP.
 move: (constraint_holds t).
 by rewrite /dsdp_constraint /CondRV /VarRV /= => /eqP.
@@ -194,7 +214,7 @@ apply/idP/idP => H.
     rewrite Hv1_eq Hu1_eq Hu2_eq Hu3_eq Hv2_eq Hv3_eq.
     move=> /eqP Hconstr.
     move: Hin_fiber.
-    rewrite /dsdp_fiber_fn /dsdp_fiber /linear_fiber_2d inE /=.
+    rewrite /dsdp_fiber_fn /dsdp_fiber inE /=.
     move=> /eqP Hfiber_eq.
     apply/eqP.
     have Heq: S t0 - u1 * v1 = s - u1 * v1.
@@ -210,8 +230,9 @@ Lemma dsdp_fiber_card (u1 u2 u3 v1 s : msg) :
   #|dsdp_fiber u1 u2 u3 v1 s| = m.
 Proof.
 move=> Hu3_pos Hu3_lt.
-rewrite /dsdp_fiber /linear_fiber_2d.
-exact: (linear_fiber_2d_card prime_p prime_q).
+rewrite /dsdp_fiber.
+exact: (@linear_fiber_2d_card_pq p q prime_p prime_q coprime_pq u2 u3
+          (s - u1 * v1) Hu3_pos Hu3_lt).
 Qed.
 
 (* An input pair outside the fiber has conditional probability zero given
@@ -231,7 +252,7 @@ set constraint := fun (conds : msg * msg * msg * msg * msg)
 have Hconstraint: forall t, constraint (CondRV t) (VarRV t).
   move=> t.
   rewrite /constraint /=.
-  rewrite /dsdp_fiber /linear_fiber_2d inE /=.
+  rewrite /dsdp_fiber inE /=.
   apply/eqP.
   (* constraint_holds gives: s - u1*v1 = u2*v2 + u3*v3 *)
   (* We need: u2*v2 + u3*v3 = s - u1*v1 *)
@@ -253,14 +274,15 @@ move=> Hu3_pos Hu3_lt Hcond_pos Hin.
 (* Fiber cardinality = m *)
 have Hcard: #|dsdp_fiber u1 u2 u3 v1 s| = m.
   by apply: dsdp_fiber_card.
-(* Apply cPr_uniform_fiber from entropy_fiber_zpq.v.
-   The card_msg_pair parameter is now implicit and accepts any proof. *)
-have Hcpr := @cPr_uniform_fiber R p_minus_2 q_minus_2
-               T P VarRV (msg * msg * msg * msg)%type InputRV
+(* gen_cPr_uniform_fiber is the modulus-free section of entropy_fiber_zpq.v,
+   so it applies at an abstract p * q. *)
+have Hcpr := @gen_cPr_uniform_fiber R T P
+               ((msg * msg)%type : finType) _ card_msg_pair
+               VarRV (msg * msg * msg * msg)%type InputRV
                (msg * msg * msg * msg * msg)%type CondRV
                dsdp_fiber_fn dsdp_proj_input
                constraint_fiber_dsdp InputRV_proj_dsdp
-               card_msg_pair VarRV_uniform VarRV_indep_inputs
+               VarRV_uniform VarRV_indep_inputs
                joint_eq_input_dsdp
                (v1, u1, u2, u3, s) (v2, v3) Hcond_pos Hin.
 by rewrite Hcpr /= Hcard.
@@ -313,7 +335,7 @@ Lemma dsdp_fiber_eq_abstract (v1 u1 u2 u3 s : msg) :
   [set x' : msg * msg | dsdp_g x' (v1, u1, u2, u3) == s].
 Proof.
 apply/setP => [[v2 v3]].
-rewrite /dsdp_fiber /linear_fiber_2d !inE /dsdp_g /=.
+rewrite /dsdp_fiber !inE /dsdp_g /=.
 apply/eqP/eqP => H.
 - by rewrite -addrA H addrC subrK.
 - by rewrite -H; ring.
@@ -368,14 +390,8 @@ Qed.
 
 Section dsdp_var_entropy.
 
-(* The modulus m = p * q exceeds 1, since both primes are at least 2. *)
-Let m_gt1 : (1 < m)%N.
-Proof.
-(* p >= 2, q >= 2, so p * q >= 4 > 1 *)
-have Hp2: (1 < p)%N by [].
-have Hq2: (1 < q)%N by [].
-by rewrite (ltn_trans Hp2) // -{1}(muln1 p) ltn_pmul2l // ltnS.
-Qed.
+(* The modulus m = p * q exceeds 1, since both factors do. *)
+Let m_gt1 : (1 < m)%N := pq_gt1 p_gt1 q_gt1.
 
 (* card_msg and card_msg_pair are inherited from outer section *)
 
@@ -575,9 +591,9 @@ End dsdp_entropy_ring.
 Section dsdp_entropy_n.
 
 Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
+Variables (p q : nat).
+Hypothesis p_gt1 : (1 < p)%N.
+Hypothesis q_gt1 : (1 < q)%N.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
@@ -589,8 +605,9 @@ Variable n_relay : nat.
 Variable T : finType.
 Variable P : R.-fdist T.
 
-Let m_gt0 : (0 < m)%N.
-Proof. by rewrite muln_gt0 prime_gt0 // prime_gt0. Qed.
+Let m_gt1 : (1 < m)%N := pq_gt1 p_gt1 q_gt1.
+
+Let m_gt0 : (0 < m)%N := ltnW m_gt1.
 
 Let card_ffun_msg : #|{ffun 'I_n_relay.+1 -> msg}| = (m ^ n_relay.+1).-1.+1.
 Proof. by rewrite prednK ?expn_gt0 ?m_gt0 // card_ffun !card_ord Zp_cast. Qed.
@@ -599,7 +616,7 @@ Proof. by rewrite prednK ?expn_gt0 ?m_gt0 // card_ffun !card_ord Zp_cast. Qed.
    the N-party form of dsdp_fiber. *)
 Definition dsdp_fiber_n (u_rel : {ffun 'I_n_relay.+1 -> msg}) (target : msg)
     : {set {ffun 'I_n_relay.+1 -> msg}} :=
-  @linear_fiber_nd p_minus_2 q_minus_2 n_relay u_rel target.
+  @linear_fiber_nd p q n_relay u_rel target.
 
 (* The conditioning tuple of the N-party run: Alice's input, her own
    weight, the vector of relay weights, and the output. *)
@@ -650,10 +667,10 @@ Proof.
 move=> Hu_pos Hu_lt.
 rewrite /dsdp_fiber_fn_n /dsdp_fiber_n.
 have Heta : linear_fiber_nd u_rel (s - u0 * v0) =
-            @linear_fiber_nd p_minus_2 q_minus_2 n_relay
+            @linear_fiber_nd p q n_relay
               (fun i => u_rel i) (s - u0 * v0) by [].
 rewrite Heta.
-apply: (linear_fiber_nd_card prime_p).
+apply: (linear_fiber_nd_card p_gt1 q_gt1).
 exact: (lt_minpq_coprime prime_p prime_q).
 Qed.
 

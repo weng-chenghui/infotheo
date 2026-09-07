@@ -10,6 +10,9 @@ Require Import idealized_ahe.
 (* # Idealized executions of the DSDP piSMC programs                         *)
 (*                                                                            *)
 (* Idealized three-, four- and five-party programs terminate without failure. *)
+(*                                                                            *)
+(* The statements hold at every m: the plaintext carrier 'F_m is 'Z_(pdiv m), *)
+(* which at m at most one is Z/2Z.                                            *)
 (******************************************************************************)
 
 Local Open Scope pismc_scope.
@@ -25,8 +28,7 @@ Local Open Scope ring_scope.
 
 Section dsdp_idealized_termination.
 
-Variable m_minus_2 : nat.
-Local Notation m := m_minus_2.+2.
+Variable m : nat.
 Local Notation msg := 'F_m.
 
 (* Build the Idealized AHEncType *)
@@ -130,8 +132,7 @@ End dsdp_idealized_termination.
 
 Section dsdp_n4_idealized_duality.
 
-Variable m_minus_2 : nat.
-Local Notation m := m_minus_2.+2.
+Variable m : nat.
 Local Notation msg := 'F_m.
 
 (* Idealized AHE setup *)
@@ -271,8 +272,7 @@ End dsdp_n4_idealized_duality.
 
 Section dsdp_n5_idealized_duality.
 
-Variable m_minus_2 : nat.
-Local Notation m := m_minus_2.+2.
+Variable m : nat.
 Local Notation msg := 'F_m.
 
 (* Idealized AHE setup *)

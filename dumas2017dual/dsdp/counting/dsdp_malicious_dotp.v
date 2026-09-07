@@ -50,10 +50,8 @@ Variable T : finType.
 Variable P : R.-fdist T.
 
 (* Z/pqZ parameters *)
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
+Variables (p q : nat).
+Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
@@ -96,10 +94,8 @@ Variable T : finType.
 Variable P : R.-fdist T.
 
 (* Z/pqZ parameters *)
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
+Variables (p q : nat).
+Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
@@ -110,12 +106,12 @@ Variable n_relay : nat.
 Theorem US_e1_centropy_VS0_eq0 {A : finType}
     (View : {RV P -> A}) (g : A -> msg)
     (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
-    (US_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 n_relay)
+    (US_e1 : US = fun _ => @ConstUS_n p q n_relay)
     (output_in_view :
-       @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS = g `o View) :
+       @Dotp_n_rv R T P p q n_relay US VS = g `o View) :
   `H( (fun t => VS t ord0) | View ) = 0.
 Proof.
-have disc : @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS
+have disc : @Dotp_n_rv R T P p q n_relay US VS
             = (fun t => VS t ord0).
   rewrite US_e1 /Dotp_n_rv; apply/funext => t /=.
   exact: dotp_n_e1.
@@ -131,16 +127,16 @@ Local Open Scope reals_ext_scope.
 Local Open Scope entropy_scope.
 
 Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
+Variables (p q : nat).
+Hypothesis p_gt1 : (1 < p)%N.
+Hypothesis q_gt1 : (1 < q)%N.
+Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 (* One 3-party run at this modulus, on the counting side.  The theorem below
    reads a relay's input off Alice's view at a query she chooses, so it needs
    the run's random inputs and none of the record's independence fields. *)
-Variable I : dsdp_random_inputs R p_minus_2 q_minus_2.
+Variable I : dsdp_random_inputs R p_gt1 q_gt1.
 
 Local Notation T := (sampleT I).
 Local Notation P := (sample_fdist I).
@@ -201,12 +197,12 @@ pose g := fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg
   s - v1 * u1.
 have HVS0 : (fun t => VS t ord0) = V2.
   by apply/funext => t; rewrite /VS ffunE eqxx.
-have HUS_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 1.
+have HUS_e1 : US = fun _ => @ConstUS_n p q 1.
   rewrite /US /ConstUS_n; apply/funext => t; apply/ffunP => i.
   by rewrite !ffunE HU2 HU3 /=; case: (i == ord0).
-have Hout : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS
+have Hout : @Dotp_n_rv R T P p q 1 US VS
              = g `o AliceDotpView.
-  rewrite (_ : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS = (fun t => V2 t)).
+  rewrite (_ : @Dotp_n_rv R T P p q 1 US VS = (fun t => V2 t)).
     rewrite /g /AliceDotpView /comp_RV /S /D3 /D2.
     by apply/funext => t /=; rewrite HU2 HU3 /=; ring.
   rewrite HUS_e1 /Dotp_n_rv.

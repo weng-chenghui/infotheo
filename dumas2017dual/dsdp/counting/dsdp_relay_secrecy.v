@@ -64,16 +64,16 @@ Section dsdp_relay_secrecy.
    real view is a deterministic function of inputs independent of V1, so its
    conditional entropy about V1 stays at log m. *)
 Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
+Variables (p q : nat).
+Hypothesis p_gt1 : (1 < p)%N.
+Hypothesis q_gt1 : (1 < q)%N.
+Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 (* One 3-party run at this modulus, on the counting side: the sample space,
    the law, the eleven random inputs, and the independence and uniformity
    facts the two views below are measured against. *)
-Variable I : dsdp_random_inputs R p_minus_2 q_minus_2.
+Variable I : dsdp_random_inputs R p_gt1 q_gt1.
 
 Local Notation T := (sampleT I).
 Local Notation P := (sample_fdist I).
@@ -87,9 +87,16 @@ Local Notation R3 := (R3 I).
 Local Notation Dk_b := (Dk_b I).
 Local Notation Dk_c := (Dk_c I).
 
-(* The count #|msg| = m of the plaintext ring.  The uniform laws below
-   discharge in this shape. *)
-Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
+(* The count #|msg| = m of the plaintext ring, the value form the entropy
+   statements below read their log at. *)
+Let card_msg : #|msg| = m := card_Zp_pq p_gt1 q_gt1.
+
+(* The same count in the successor form fdist_uniform takes.  The record's
+   five uniformity fields are stated at this proof. *)
+Let card_msg_prednK : #|msg| = m.-1.+1 := card_Zp_pq_prednK p_gt1 q_gt1.
+
+(* The modulus is above one, which is what makes log m positive. *)
+Let m_gt1 : (1 < m)%N := pq_gt1 p_gt1 q_gt1.
 
 (* Bob's input under Alice's query weight U2.  It reaches the aggregate only
    through D2. *)
@@ -135,7 +142,8 @@ Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
    ciphertext he receives from Bob. *)
 Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
 
-Let pV1_unif : `p_ V1 = fdist_uniform card_msg := dsdp_random_inputs.pV1_unif I.
+Let pV1_unif : `p_ V1 = fdist_uniform card_msg_prednK :=
+  dsdp_random_inputs.pV1_unif I.
 Let bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1 :=
   dsdp_random_inputs.bob_inputs_indep_V1 I.
 Let charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1 :=
@@ -190,8 +198,10 @@ Qed.
 
 (* V3 is uniform on the plaintext ring, by the record's pV3_unif field.  The
    bound on Bob's view about V3 rests on this law and on Alice's mask R3. *)
-Let pV3_unif : `p_ V3 = fdist_uniform card_msg := dsdp_random_inputs.pV3_unif I.
-Let pR3_unif : `p_ R3 = fdist_uniform card_msg := dsdp_random_inputs.pR3_unif I.
+Let pV3_unif : `p_ V3 = fdist_uniform card_msg_prednK :=
+  dsdp_random_inputs.pV3_unif I.
+Let pR3_unif : `p_ R3 = fdist_uniform card_msg_prednK :=
+  dsdp_random_inputs.pR3_unif I.
 Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] :=
   dsdp_random_inputs.R3_indep_VU3_V3 I.
 Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
@@ -201,11 +211,8 @@ Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
    and independent of the pair it masks. *)
 Let VU3R_indep_V3 : P |= VU3R _|_ V3.
 Proof.
-have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
-have pR3_adj : `p_ R3 = fdist_uniform card_TZ.
-  by rewrite pR3_unif; congr fdist_uniform; exact: eq_irrelevance.
 exact: (@lemma_3_5' R T msg msg P VU3 R3 V3 R3_indep_VU3_V3
-        (Zp_trunc m).+1 card_TZ pR3_adj).
+        m.-1 card_msg_prednK pR3_unif).
 Qed.
 
 (* [% Dk_b, V2, D2] _|_ [% V3, VU3R]: Bob's clean data is independent of
@@ -257,8 +264,10 @@ Qed.
 (* V2 is uniform on the plaintext ring, by the record's pV2_unif field.  The
    bound on Charlie's view about V2 rests on this law and on Alice's mask
    R2. *)
-Let pV2_unif : `p_ V2 = fdist_uniform card_msg := dsdp_random_inputs.pV2_unif I.
-Let pR2_unif : `p_ R2 = fdist_uniform card_msg := dsdp_random_inputs.pR2_unif I.
+Let pV2_unif : `p_ V2 = fdist_uniform card_msg_prednK :=
+  dsdp_random_inputs.pV2_unif I.
+Let pR2_unif : `p_ R2 = fdist_uniform card_msg_prednK :=
+  dsdp_random_inputs.pR2_unif I.
 Let R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2] :=
   dsdp_random_inputs.R2_indep_VU2_V2 I.
 Let R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]] :=
@@ -270,27 +279,21 @@ Let Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3] :=
    uniform and independent of that pair. *)
 Let D2_indep_VU3R_V2 : P |= D2 _|_ [%VU3R, V2].
 Proof.
-have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
-have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
-  by rewrite pR2_unif; congr fdist_uniform; exact: eq_irrelevance.
 exact: (@lemma_3_5' R T _ msg P VU2 R2 [%VU3R, V2] R2_indep_VU2_VU3R_V2
-        (Zp_trunc m).+1 card_TZ pR2_adj).
+        m.-1 card_msg_prednK pR2_unif).
 Qed.
 
 (* D3 _|_ V2: the aggregate VU3R + D2 is independent of Bob's input.  D2 is
    uniform and independent of the pair [% VU3R, V2]. *)
 Let D3_indep_V2 : P |= D3 _|_ V2.
 Proof.
-have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
-have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
-  by rewrite pR2_unif; congr fdist_uniform; exact: eq_irrelevance.
-have pD2_unif : `p_ D2 = fdist_uniform card_TZ.
+have pD2_unif : `p_ D2 = fdist_uniform card_msg_prednK.
   have R2_VU2_indep : P |= R2 _|_ VU2.
     exact/cinde_RV_unit/decomposition/cinde_RV_unit/R2_indep_VU2_V2.
   have VU2_R2_indep : P |= VU2 _|_ R2 by rewrite inde_RV_sym.
-  exact: (add_RV_unif VU2 R2 card_TZ pR2_adj VU2_R2_indep).
+  exact: (add_RV_unif VU2 R2 card_msg_prednK pR2_unif VU2_R2_indep).
 exact: (@lemma_3_5' R T msg msg P VU3R D2 V2 D2_indep_VU3R_V2
-        (Zp_trunc m).+1 card_TZ pD2_unif).
+        m.-1 card_msg_prednK pD2_unif).
 Qed.
 
 (* E_charlie_d3 _|_ V2: the ciphertext Charlie receives is independent of
