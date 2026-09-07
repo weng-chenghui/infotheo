@@ -308,17 +308,6 @@ Definition stype_step (ps : seq (stype dtype)) i :=
   | STEnd => (p, false)
   end.
 
-Fixpoint stypes_interp h (ps : seq (stype dtype)) :=
-  if h is h.+1 then
-    let ps_c := [seq stype_step ps i | i <- iota 0 (size ps)] in
-    if has snd ps_c then stypes_interp h (unzip1 ps_c) else ps
-  else [::].
-
-Definition isSTEnd (x : stype dtype) := if x is STEnd then true else false.
-
-Definition stypes_ok ps :=
-  all isSTEnd (stypes_interp (sumn (map senv_depth ps)) ps).
-
 End duality.
 
 (******************************************************************************)
@@ -344,7 +333,6 @@ Definition aproc_fuel (ap : aproc) : nat := projT1 (projT2 ap).
 Definition aproc_env (ap : aproc) : senv dtype := projT1 (projT2 (projT2 ap)).
 Definition aproc_proc (ap : aproc) : @sproc dtype data (aproc_party ap) (aproc_fuel ap) (aproc_env ap) :=
   projT2 (projT2 (projT2 ap)).
-Definition aprocs_compat (ps : seq aproc) := stypes_ok (map aproc_env ps).
 End aproc_def.
 
 Arguments mk_aproc {dtype data party n env}.
@@ -402,6 +390,73 @@ HB.instance Definition _ := hasDecEq.Build (stype dtype) stype_eqP.
 
 End stype_eq.
 
+(******************************************************************************)
+(** * Session Type Compatibility                                              *)
+(******************************************************************************)
+
+Section stypes_compat.
+Variable dtype : eqType.
+
+Fixpoint stypes_interp h (ps : seq (stype dtype)) :=
+  if h is h.+1 then
+    let ps_c := [seq stype_step ps i | i <- iota 0 (size ps)] in
+    if has snd ps_c then stypes_interp h (unzip1 ps_c) else ps
+  else [::].
+
+Definition isSTEnd (x : stype dtype) := if x is STEnd then true else false.
+
+Definition stypes_interp_fuel (ps : seq (stype dtype)) :=
+  sumn (map senv_depth ps) + 1.
+
+Definition stypes_compat ps :=
+  all isSTEnd (stypes_interp (stypes_interp_fuel ps) ps).
+
+Lemma stypes_interp_fuel_ok ps h :
+  h >= stypes_interp_fuel ps ->
+  stypes_interp h ps = stypes_interp (stypes_interp_fuel ps) ps.
+Proof.
+elim/ltn_ind: h ps => -[|h] IH ps /=.
+  by rewrite leqn0 => /eqP ->.
+rewrite /stypes_interp_fuel addn1.
+move Heqh': (sumn _) => h'.
+rewrite ltnS => hh' /=.
+set ps' := map _ _.
+case: ifP => // Hh.
+have Hh' : stypes_interp_fuel (unzip1 ps') <= h'.
+  rewrite /stypes_interp_fuel addn1.
+  rewrite -ltnS -{}Heqh' {hh' IH}.
+  subst ps'.
+  move: Hh; rewrite has_map => /hasP[] /= i.
+  rewrite mem_iota leq0n add0n /= => Hi psi.
+  rewrite -{3}(map_nth_iota_id STEnd ps) !sumnE.
+  rewrite !big_map (bigD1_seq i) /=; first last.
+    exact: iota_uniq.
+    by rewrite mem_iota leq0n.
+  rewrite [X in _ < X.+1](bigD1_seq i) /=; first last.
+    exact: iota_uniq.
+    by rewrite mem_iota leq0n.
+  rewrite ltnS -addSn leq_add //.
+    move: psi; rewrite /stype_step.
+    case: (nth STEnd ps i) => [p d s|p d s|] //=.
+    - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+      by case: ifP.
+    - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+      by case: ifP.
+  apply: leq_sum => j _.
+  rewrite /stype_step.
+  case: (nth STEnd ps j) => [p d s|p d s|] //=.
+  - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+    by case: ifP.
+  - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+    by case: ifP.
+rewrite IH; [|by rewrite ltnS|].
+  rewrite [RHS]IH //.
+exact: leq_trans hh'.
+Qed.
+
+Definition aprocs_compat data (ps : seq (aproc dtype data)) :=
+  stypes_compat (map aproc_env ps).
+End stypes_compat.
 
 (******************************************************************************)
 (** * Phase 2 Tests                                                           *)
@@ -599,6 +654,19 @@ case Hn: n env / sp =>
 - by exists aproc_default.
 Qed.
 
+Definition stype_down (s : stype dtype) : stype dtype :=
+  match s with
+  | STSend _ _ k => k
+  | STRecv _ _ k => k
+  | STEnd => STEnd
+  end.
+
+Definition is_comm (p : proc data) :=
+  match p with
+  | Send _ _ _ | Recv _ _ => true
+  | _ => false
+  end.
+
 (* Extended fuel_decreases: also tracks senv_depth non-increasing.
    The senv bound follows from the structure of sproc constructors:
    - SFinish/SRet: env = senv_end, depth = 0
@@ -611,17 +679,20 @@ Lemma fuel_senv_decreases (ps : seq (aproc dtype data)) k tr (parties : seq nat)
   let res := step (erase_aprocs ps) (nth [::] tr k) k in
   { ap' | erase_aproc ap' = res.1.1 /\
       aproc_fuel ap' + res.2 <= aproc_fuel (nth aproc_default ps k) /\
-      senv_depth (aproc_env ap') <= senv_depth (aproc_env (nth aproc_default ps k)) }.
+      aproc_env ap' =
+        if res.2 && is_comm (nth Fail (erase_aprocs ps) k)
+        then stype_down (aproc_env (nth aproc_default ps k))
+        else aproc_env (nth aproc_default ps k) }.
 Proof.
 move => Hk /=.
 rewrite /step (nth_map aproc_default) //.
 move Hnth: (nth _ ps k) => [p [n] [env] sp].
 rewrite {2}/aproc_fuel {2}/aproc_env /=.
-move/(f_equal erase_aproc): Hnth.
+move/(f_equal erase_aproc): (Hnth).
 rewrite -(nth_map _ (default_proc _)) // -/(erase_aprocs ps).
 rewrite /erase_aproc /aproc_proc /=.
-case Hn: n env / sp =>
-       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env] Hnth /=.
+case Hn: n env / sp Hnth =>
+       [|d|n' env d s|n' env dst dt d s|n' env dst d s|n' env] Hnthk Hnth /=.
 - (* SFinish: env = senv_end, stays senv_end *)
   by exists (mk_aproc (party:=p) SFinish).
 - (* SRet: env = senv_end, becomes senv_end (via SFinish) *)
@@ -649,7 +720,13 @@ case Hn: n env / sp =>
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite addn0.
 - (* SFail: default process has senv_end *)
-  by exists aproc_default.
+  exists (nth aproc_default ps k).
+  simpl in Hnth.
+  split.
+    by rewrite -Hnth /erase_aprocs (nth_map aproc_default).
+  split.
+    by rewrite Hnthk /aproc_fuel /= addn0.
+  by rewrite Hnthk.
 Qed.
 
 (* Termination guarantee: if fuel h >= sum of all process fuels ([> ps]),
@@ -922,7 +999,8 @@ rewrite (big_tuple 0 maxn aps' xpredT (fun ap => senv_depth (aproc_env ap))).
 rewrite (big_nth aproc_default) /=.
 apply/bigmax_leqP => i _.
 have [_ [_ Hsenv_i]] := Haps' i.
-apply: leq_trans Hsenv_i _.
+apply: (@leq_trans (senv_depth (aproc_env (nth aproc_default ps i)))).
+  by rewrite Hsenv_i; case: ifP => _ //; case: aproc_env.
 rewrite big_mkord.
 have H := @leq_bigmax 'I_(size ps) 
   (fun j : 'I_(size ps) => senv_depth (aproc_env (nth aproc_default ps j))) i.
@@ -963,6 +1041,261 @@ End erasure.
 Arguments erase {data dtype party n env}.
 Arguments erase_aproc {data dtype}.
 Arguments erase_aprocs {data dtype}.
+
+(******************************************************************************)
+(** * Proof of preservation of session typing                                 *)
+(******************************************************************************)
+
+Section preservation.
+Variable dtype : eqType.
+Variable data : Type.
+
+(* Progress *)
+
+Fixpoint skip_nocomm (p : proc data) :=
+  match p with
+  | Init _ q   => skip_nocomm q
+  | Send _ _ _ => p
+  | Recv _ _   => p
+  | Ret _      => Finish
+  | Finish     => p
+  | Fail       => p
+  end.
+
+Definition inert_nocomm (p : proc data) :=
+  match p with
+  | Init _ _ | Ret _ => false
+  | _ => true
+  end.
+
+Lemma inert_nocomm_red_skip_nocomm p : inert_nocomm (skip_nocomm p).
+Proof. by elim: p. Qed.
+
+Lemma inject_dup A n m (l : lens n m) (ps : n.-tuple A) q1 q2 :
+  inject l (inject l ps q1) q2 = inject l ps q2.
+Proof.
+apply: eq_from_tnth => i.
+rewrite !tnth_mktuple.
+case/boolP: (i \in l); rewrite -index_mem size_tuple => Hi.
+  apply: set_nth_default.
+  by rewrite size_tuple.
+rewrite -leqNgt in Hi.
+by rewrite !nth_default // size_tuple.
+Qed.
+
+Lemma extract1 A n (i : 'I_n) (ps : n.-tuple A) :
+  extract [tuple i] ps = [tuple tnth ps i].
+Proof. by apply: val_inj. Qed.
+
+Lemma inject_same A n (i : 'I_n) ps (a : A) :
+  tnth ps i = a ->
+  inject [tuple i] ps [tuple a] = ps.
+Proof.
+move=> Ha.
+apply: eq_from_tnth => j /=.
+rewrite !tnth_mktuple /=.
+by case: ifP => // /eqP <-.
+Qed.
+
+Lemma rsteps_skip_nocomm n (i : 'I_n) (ps : n.-tuple (proc data)) :
+  exists tr,
+    rsteps ps (inject [tuple i] ps [tuple skip_nocomm (tnth ps i)])
+      (inject [tuple i] [tuple nil | _ < n] [tuple tr]).
+Proof.
+move Hp: (tnth ps i) => p.
+elim: p ps Hp => [d q IH | j d q _ | j q _ | d ||] ps Hp /=;
+try (exists [::];
+     rewrite !inject_same //; [exact: rrefl | by rewrite tnth_mktuple]).
+- case: (IH (inject [tuple i] ps [tuple q])).
+    by rewrite tnth_mktuple /= eqxx.
+  move=> tr.
+  rewrite inject_dup => Hr.
+  exists (tr ++ [:: d]).
+  apply: rtrans.
+    apply: (rone (l:=[tuple i])).
+    rewrite extract1 Hp.
+    exact: rinit.
+   exact: Hr.
+  apply: eq_from_tnth => j.
+  rewrite !tnth_mktuple /=.
+  by case: ifP.
+- exists [:: d].
+  apply: rone.
+  rewrite extract1 Hp.
+  exact: rret.
+Qed.
+Print sproc.
+
+Fixpoint aproc_skip_nocomm_rec party h env (p : sproc data party h env) :=
+  match p with
+  | SFinish   => mk_aproc (dtype:=dtype) p
+  | SFail _ _ => mk_aproc p
+  | SRet _    => mk_aproc (party:=party) SFinish
+  | SInit _ _ _ k => aproc_skip_nocomm_rec k
+  | SSend _ _ _ _ _ _ => mk_aproc p
+  | SRecv _ _ _ _ _   => mk_aproc p
+  end.
+
+Definition aproc_skip_nocomm (ap : aproc dtype data) : aproc dtype data :=
+  aproc_skip_nocomm_rec (aproc_proc ap).
+
+Lemma aproc_skip_nocomm_env ap :
+  aproc_env (aproc_skip_nocomm ap) = aproc_env ap.
+Proof.
+rewrite /aproc_skip_nocomm /aproc_proc /aproc_env.
+case: ap => party [h] [env] p /=.
+by elim: p.
+Qed.
+
+Lemma aproc_skip_nocomm_fuel ap :
+  aproc_fuel (aproc_skip_nocomm ap) <= aproc_fuel ap.
+Proof.
+rewrite /aproc_skip_nocomm /aproc_proc /aproc_fuel.
+case: ap => party [h] [env] p /=.
+elim: h env / p => //= h env d p.
+by rewrite -ltnS => /ltnW.
+Qed.
+
+Lemma aproc_skip_nocomm_party ap :
+  aproc_party (aproc_skip_nocomm ap) = aproc_party ap.
+Proof.
+rewrite /aproc_skip_nocomm /aproc_proc /aproc_party.
+case: ap => party [h] [env] p /=.
+by elim: p.
+Qed.
+
+Lemma erase_aproc_skip_nocomm ap :
+  erase_aproc (aproc_skip_nocomm ap) = skip_nocomm (erase_aproc ap).
+Proof.
+rewrite /aproc_skip_nocomm /aproc_proc.
+case: ap => party [h] [env] p /=.
+by elim: p.
+Qed.
+
+Lemma aprocs_compat_skip_nocomm aps :
+  aprocs_compat aps ->
+  aprocs_compat (map aproc_skip_nocomm aps).
+Proof.
+rewrite /aprocs_compat -map_comp.
+set s1 := map _ _.
+set s2 := map _ _.
+have <- // : s1 = s2.
+apply: eq_map => p /=.
+by rewrite aproc_skip_nocomm_env.
+Qed.
+
+Lemma aprocs_rstep_preserve n m (l : lens n m)
+      (aps : n.-tuple (aproc dtype data)) aps' tr :
+  rstep l (map_tuple erase_aproc (extract l aps))
+        (map_tuple erase_aproc aps') tr ->
+  all inert_nocomm (erase_aprocs aps) ->
+  aprocs_compat aps ->
+  aprocs_compat (inject l aps aps').
+Proof.
+inversion 1; subst.
+- clear H8 H6 H4 H2.
+  case: aps' H H7 => -[] // a [] //= ? _ [] Hp.
+  subst p.
+  case: l H5 {H3} => -[] // j [] //= _ [] Ha.
+  move/all_nthP/(_ j).
+  rewrite size_map {1}size_tuple => /(_ Fail (ltn_ord j)).
+  by rewrite -tnth_nth tnth_map -Ha.
+- clear H8 H6 H4 H2.
+  case: aps' H H7 => -[] // a [] //= ? _ [] Hp.
+  case: l H5 {H3} => -[] // j [] //= _ [] Ha.
+  move/all_nthP/(_ j).
+  rewrite size_map {1}size_tuple => /(_ Fail (ltn_ord j)).
+  by rewrite -tnth_nth tnth_map -Ha.
+- clear H8 H6 H4 H2.
+  case: aps' H H7 => -[] // a [] // b [] //= z _ {z}.
+  have Hl := Eqdep_dec.inj_pair2_eq_dec _ PeanoNat.Nat.eq_dec _ _ _ _ H3.
+  subst l.
+  move=> [Ha Hb] _ Hcompat.
+Abort.
+
+Lemma aprocs_step_preserve (aps : seq (aproc dtype data)) :
+  aprocs_compat aps ->
+  let aps1 := map aproc_skip_nocomm aps in
+  let ps' :=
+    [seq step (erase_aprocs aps1) [::] i | i <- iota 0 (size aps1)] in
+  all_nonfail (map (fst \o fst) ps') ->
+  exists aps' : seq (aproc dtype data),
+    erase_aprocs aps' = map (fst \o fst) ps' /\ aprocs_compat aps'.
+Proof.
+move=> Hcompat /=.
+set aps1 := map aproc_skip_nocomm _.
+set ps' := map _ _.
+set aps' := [tuple sval (fuel_senv_decreases (ps:=aps1) [::] [::] (ltn_ord i))
+            | i < size aps1].
+move=> Hnf.
+exists aps'.
+have Haps' : erase_aprocs aps' = ps'.
+  rewrite /aps' /ps' /= -[LHS]map_comp -map_comp.
+  rewrite -val_ord_enum -map_comp.
+  have -> : ord_enum (size aps1) = enum 'I_(size aps1) by rewrite enumT unlock.
+  apply/eq_in_map => i Hi /=.
+  case: fuel_senv_decreases => aps2 [] /= -> _.
+  by rewrite nth_default.
+split => //.
+move/aprocs_compat_skip_nocomm: Hcompat.
+rewrite /aprocs_compat /stypes_compat -/aps1.
+set h := stypes_interp_fuel _.
+set h' := stypes_interp_fuel _.
+have hh' : (h' <= h)%N.
+  subst h h' aps'.
+  rewrite /stypes_interp_fuel !sumnE.
+  rewrite 4!big_map -/aps1.
+  rewrite -[in X in _ <= X + 1](in_tupleE aps1).
+  rewrite (tuple_map_ord (in_tuple aps1)) 2![X in _ <= X + 1]big_map.
+  rewrite leq_add //.
+  apply: leq_sum => i _.
+  case: fuel_senv_decreases => /= p [_] [_].
+  rewrite (tnth_nth (aproc_default data dtype)) /=.
+  rewrite (nth_map (aproc_default data dtype)) //=.
+  case: ifP => _ -> //.
+  by case: aproc_env.
+case Hh: h => [|h1] //=.
+  have -> // : h' = 0.
+  apply/eqP.
+  by rewrite -leqn0 -Hh.
+case: ifPn; last first.
+  rewrite has_map size_map -all_predC => /allP /= Hall.
+  rewrite /is_true => all_aps1.
+  rewrite -[RHS]all_aps1; congr all.
+  have Henv : map aproc_env aps' = map aproc_env aps1.
+    rewrite -[in RHS](in_tupleE aps1).
+    rewrite (tuple_map_ord (in_tuple aps1)) -map_comp -[RHS]map_comp.
+    apply: eq_map => i /=.
+    case: fuel_senv_decreases => /= ap [Her] [_] ->.
+    rewrite (tnth_nth (aproc_default data dtype)) /=.
+    case: ifP => // /andP[Hstep Hcomm].
+    move: all_aps1.
+    rewrite -{1}(in_tupleE aps1).
+    rewrite (tuple_map_ord (in_tuple aps1)) 2!all_map => /allP/(_ i).
+    rewrite val_ord_tuple mem_enum => /(_ isT) /=.
+    rewrite (tnth_nth (aproc_default data dtype)) /=.
+    move: Hcomm.
+    rewrite (nth_map (aproc_default data dtype)) //.
+    by case: nth => pa2 [h2] [e2] [].
+  rewrite [h']addn1 /= ifF //.
+  apply/negbTE.
+  rewrite -all_predC.
+  rewrite all_map.
+  apply/allP => /= i.
+  rewrite mem_iota leq0n /= add0n 2!size_map size_enum_ord => Hi.
+  rewrite /stype_step.
+  set ape := nth _ _ _.
+  have -> // : ape = STEnd.
+  move: all_aps1; rewrite -Henv => /allP/(_ ape).
+  suff -> : ape \in map aproc_env aps'.
+    by move/(_ isT); case: ape.
+  rewrite -map_comp /ape.
+  rewrite -map_comp.
+  have <- : enum 'I_(size aps1) = ord_tuple (size aps1) by [].
+  apply: mem_nth.
+  by rewrite size_map size_enum_ord.
+Abort.
+End preservation.
 
 (******************************************************************************)
 (** * isNatGraded Instance for Fuel                                           *)
@@ -1017,12 +1350,12 @@ Variable dtype : eqType.
 Variable parties : seq nat.
 
 (* Step down a single session type - pop outer Send/Recv constructor *)
-Definition stype_down (s : stype dtype) : stype dtype :=
+(* Definition stype_down (s : stype dtype) : stype dtype :=
   match s with
   | STSend _ _ k => k
   | STRecv _ _ k => k
   | STEnd => STEnd
-  end.
+  end. *)
 
 (* stype_down reduces depth by 1, saturating at 0 *)
 Lemma stype_depth_down (s : stype dtype) :
@@ -1106,36 +1439,36 @@ Record aproc_ctx := {
    - SSend: check if receiver is ready (Recv from us), if so progress=1
    - SRecv: check if sender is ready (Send to us), if so apply continuation *)
 Definition aproc_step (ap : aproc dtype data) (ctx : aproc_ctx)
-    : aproc dtype data * nat.
+    : aproc dtype data * bool.
 Proof.
 case: ap => [party [n [env sp]]].
 case: sp.
-- exact (mk_aproc (party:=party) SFinish, 0).
-- move=> d; exact (mk_aproc (party:=party) SFinish, 1).
-- move=> n' env' d next; exact (mk_aproc (party:=party) next, 1).
+- exact (mk_aproc (party:=party) SFinish, false).
+- move=> d; exact (mk_aproc (party:=party) SFinish, true).
+- move=> n' env' d next; exact (mk_aproc (party:=party) next, true).
 - move=> n' env' dst dt d next.
   case Hrecv: (nth (default_proc data) (ctx_procs ctx) dst) =>
       [d' p'|dst' d' p'|frm f|d'| |].
-  + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
-  + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
+  + exact (mk_aproc (party:=party) (SSend dst dt d next), false).
+  + exact (mk_aproc (party:=party) (SSend dst dt d next), false).
   + case: (frm == ctx_idx ctx).
-    * exact (mk_aproc (party:=party) next, 1).
-    * exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
-  + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
-  + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
-  + exact (mk_aproc (party:=party) (SSend dst dt d next), 0).
+    * exact (mk_aproc (party:=party) next, true).
+    * exact (mk_aproc (party:=party) (SSend dst dt d next), false).
+  + exact (mk_aproc (party:=party) (SSend dst dt d next), false).
+  + exact (mk_aproc (party:=party) (SSend dst dt d next), false).
+  + exact (mk_aproc (party:=party) (SSend dst dt d next), false).
 - move=> n' env' src dt cont.
   case Hsend: (nth (default_proc data) (ctx_procs ctx) src) =>
       [d' p'|dst' v p'|frm f|d'| |].
-  + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
+  + exact (mk_aproc (party:=party) (SRecv src dt cont), false).
   + case: (dst' == ctx_idx ctx).
-    * exact (mk_aproc (party:=party) (cont v), 1).
-    * exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
-  + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
-  + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
-  + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
-  + exact (mk_aproc (party:=party) (SRecv src dt cont), 0).
-- move=> n' env'; exact (@mk_aproc _ _ party n' env' SFail, 0).
+    * exact (mk_aproc (party:=party) (cont v), true).
+    * exact (mk_aproc (party:=party) (SRecv src dt cont), false).
+  + exact (mk_aproc (party:=party) (SRecv src dt cont), false).
+  + exact (mk_aproc (party:=party) (SRecv src dt cont), false).
+  + exact (mk_aproc (party:=party) (SRecv src dt cont), false).
+  + exact (mk_aproc (party:=party) (SRecv src dt cont), false).
+- move=> n' env'; exact (@mk_aproc _ _ party n' env' SFail, false).
 Defined.
 
 (* Proof that full step decreases fuel *)
