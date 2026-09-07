@@ -8,7 +8,7 @@ Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption residuosity_game.
 Require Import idealized_ahe paillier_fdist_instance.
 Require Import negligible epshop epshop_sequence.
-Require Import indcpa_game idealized_indcpa_scheme.
+Require Import indcpa_game indcpa_scheme_sequence idealized_indcpa_scheme.
 Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
@@ -17,8 +17,12 @@ Require Import dsdp_alice_main.
 (**md**************************************************************************)
 (* # Concrete readings of DSDP corrupted-Alice secrecy                       *)
 (*                                                                            *)
-(* The abstract Alice bounds are instantiated at the idealized, Paillier and *)
-(* Benaloh IND-CPA schemes.                                                   *)
+(* The abstract Alice bounds are read at the idealized, Paillier and Benaloh  *)
+(* scheme sequences of computational_security/.  Each section takes one       *)
+(* scheme-sequence record, Alice's four weights and the three key seeds, and  *)
+(* assumes nothing further about the scheme: the IND-CPA assumption at each   *)
+(* security parameter and the two negligibility facts an asymptotic           *)
+(* statement carries come with that record.                                   *)
 (******************************************************************************)
 
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
@@ -35,54 +39,33 @@ Local Open Scope proc_scope.
 Local Open Scope sproc_scope.
 
 (* The vacuity question the abstract bounds leave open, answered on the
-   idealized scheme of idealized_ahe.v: a sequence of instances that
-   discharges every hypothesis of the guessing headline at once, where the
-   assumed advantage is zero at every k and the whole content of the bound is
-   its information-theoretic term. *)
+   idealized scheme sequence of idealized_indcpa_scheme.v.  Every hypothesis
+   of the guessing headline is discharged at once there, the assumed advantage
+   being zero at every k. *)
 Section idealized.
 Context {R : realType}.
 
+(* The idealized sequence: the schemes of idealized_indcpa_scheme.v, zero
+   weights with a unit on Charlie's input, and one seed per key space. *)
+Definition idealized_instance_sequence : dsdp_instance_sequence R :=
+  mk_dsdp_instance_sequence (idealized_scheme_sequence (R:=R))
+    (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
+    (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
 
-(* The witness instance at k, over a plaintext space of cardinality
+(* The idealized instance at k, over a plaintext space of cardinality
    (k+2)^(k+2).  Its guessing probability is 1/#|plain| rather than 0, so the
    bound has content. *)
-Definition idealized_instance (k : nat) : dsdp_instance := {|
-  inst_scheme       := idealized_indcpa_scheme 'Z_((k.+2) ^ k.+2) ;
-  inst_v1 := 0 ; inst_u1 := 0 ; inst_u2 := 0 ; inst_u3 := 1 ;
-  inst_u3_unit      := GRing.unitr1 _ ;
-  inst_dk_a := 0 ; inst_dk_b := 0 ; inst_dk_c := 0 ;
-  inst_rb2 := ord0 ; inst_rc2 := ord0 |}.
+Definition idealized_instance (k : nat) : dsdp_instance :=
+  sequence_instance idealized_instance_sequence k.
 
-(* The witness plaintext space at k has cardinality (k+2)^(k+2). *)
-Let card_plain_idealized (k : nat) :
-  #|plain (scheme_AHE (idealized_instance k))| = ((k.+2) ^ k.+2)%N.
-Proof. by rewrite card_ord Zp_cast // -{1}(expn0 k.+2) ltn_exp2l. Qed.
-
-(* The unconditional term of every bound along the witness sequence.  Its
-   plaintext spaces grow as (k+2)^(k+2), so the term falls below every inverse
-   polynomial. *)
-Let idealized_size_negligible :
-  negligible_fun (fun k =>
-    (#|plain (scheme_AHE (idealized_instance k))|%:R : R)^-1).
-Proof.
-apply: negligible_fun_le negligible_fun_inv_expnn => k.
-by rewrite card_plain_idealized.
-Qed.
-
-(* The witness sequence: the idealized instances above, under the
-   cipher-constant assumption of indcpa_game.v at each k. *)
-Definition idealized_instance_sequence : dsdp_instance_sequence R := {|
-  sequence_instance := idealized_instance ;
-  sequence_assumption := fun k =>
-    cipher_constant_assumption (idealized_instance k) |}.
-
-(* The two negligibility facts about the witness sequence, discharged rather
+(* The two negligibility facts about that sequence, discharged rather
    than assumed.  Its assumed advantage is zero at every k, leaving only the
    1/#|plain| term. *)
 Definition idealized_asymptotic :
     dsdp_asymptotic idealized_instance_sequence :=
-  @Build_dsdp_asymptotic R idealized_instance_sequence
-    idealized_size_negligible negligible_fun_cst0.
+  mk_dsdp_asymptotic (idealized_scheme_sequence (R:=R))
+    (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
+    (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
 
 (* The constant predictor's distinguisher reads only the state slot.  Its
    Bob-key reduction ignores the challenge ciphertext, so the cipher-constant
@@ -123,25 +106,19 @@ Qed.
 
 End idealized.
 
-(* The Paillier reading of the corrupted-Alice bounds: a sequence of moduli
-   p k q k, the DSDP instance the Paillier IND-CPA scheme of
-   paillier_indcpa_scheme.v carries at each of them, and the decisional
-   composite residuosity record the computational term of every bound below
-   is stated in.  Everything DSDP, the four weights, the three keys and the
-   two hop coins, is declared here; the scheme file carries the packaging,
-   the coin type and coin map, and the derived assumption alone.  At this
-   scheme both terms of the abstract bound have number-theoretic values:
-   1/(p k * q k) for the plaintext count, and twice the residuosity epsilon
-   for the assumed advantage. *)
+(* The Paillier reading of the corrupted-Alice bounds: one paillier_sequence
+   record, and the DSDP data Alice's execution adds to it, her four weights
+   and the three key seeds.  At this scheme both terms of the abstract bound
+   have number-theoretic values, 1/(p k * q k) for the plaintext count and
+   twice the residuosity epsilon for the assumed advantage. *)
 Section paillier.
 Context {R : realType}.
-Variables p q : nat -> nat.
-Hypothesis p_gt1 : forall k, (1 < p k)%N.
-Hypothesis q_gt1 : forall k, (1 < q k)%N.
+Variable P : paillier_sequence R.
 
-(* The Paillier IND-CPA instance of paillier_indcpa_scheme.v at the k-th
-   modulus, pinned once under the name that file exports it by. *)
-Local Notation AHE k := (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k))).
+(* The Paillier packaging at the k-th modulus, pinned once under the name
+   paillier_indcpa_scheme.v exports it by. *)
+Local Notation AHE k :=
+  (Paillier_AHEnc (pq_gt1 (paillier_p_gt1 P k) (paillier_q_gt1 P k))).
 
 Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
 
@@ -151,56 +128,60 @@ Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
    into a determination of Bob's input. *)
 Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
 
-Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
-Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
+(* The seeds Alice's, Bob's and Charlie's private keys at k are generated
+   from.  The keys enter the execution through the key material the record P
+   carries, so no key of the sequence is assumed on its own. *)
+Variables (sa sb sc : forall k, keygen_seedT (paillier_keygen P) k).
 
 (* The plaintext space at k has cardinality p k * q k, the form the
    composite-modulus DSDP bounds consume. *)
-Let card_plain_pq k : #|plain (AHE k)| = (p k * q k)%N.
-Proof. exact: card_plain_paillier_pq. Qed.
+Let card_plain_pq k :
+  #|plain (AHE k)| = (paillier_p P k * paillier_q P k)%N.
+Proof.
+exact: (card_plain_paillier_pq (paillier_p_gt1 P k) (paillier_q_gt1 P k)).
+Qed.
 
 (* The inverse plaintext cardinality at the composite modulus. *)
-Let inv_pq_cardE k : ((p k * q k)%N%:R : R)^-1 = (#|plain (AHE k)|%:R : R)^-1.
+Let inv_pq_cardE k :
+  ((paillier_p P k * paillier_q P k)%N%:R : R)^-1
+  = (#|plain (AHE k)|%:R : R)^-1.
 Proof. by rewrite card_plain_pq. Qed.
 
-(* The DSDP instance at k on the Paillier IND-CPA scheme, with the weights,
-   keys and coins supplied as sequences.  Everything number-theoretic about
-   the moduli beyond 1 < p, q stays assumed. *)
-Definition paillier_instance (k : nat) : dsdp_instance := {|
-  inst_scheme       := paillier_indcpa_scheme (p_gt1 k) (q_gt1 k) ;
-  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
-  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
-  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
-  inst_rb2 := rb2 k ; inst_rc2 := rc2 k |}.
+(* The Paillier instance sequence: the Paillier scheme sequence of
+   paillier_indcpa_scheme.v with Alice's weights and the three key seeds.  It
+   is the sequence alice_trace_guess_V2_negligible is applied at below. *)
+Definition paillier_instance_sequence : dsdp_instance_sequence R :=
+  mk_dsdp_instance_sequence (paillier_scheme_sequence P)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
-(* A decisional composite residuosity record at each modulus p k q k, the
-   only computational premise the Paillier bounds are read at.  The IND-CPA
-   assumption at k is derived from it by paillier_indcpa_assumption, so those
-   bounds are stated in residuosity epsilons rather than in an advantage left
-   free. *)
-Variable dcr : forall k, dcr_assumption (R:=R) (p k) (q k).
+(* The DSDP instance at k on the Paillier IND-CPA scheme.  Everything
+   number-theoretic about the moduli beyond the fields of P stays assumed. *)
+Definition paillier_instance (k : nat) : dsdp_instance :=
+  sequence_instance paillier_instance_sequence k.
 
-(* The Paillier instance sequence: the instances above, with the IND-CPA
-   assumption derived at each k from dcr k.  It is the sequence
-   alice_trace_guess_V2_negligible is applied at below. *)
-Definition paillier_instance_sequence : dsdp_instance_sequence R := {|
-  sequence_instance := paillier_instance ;
-  sequence_assumption := fun k =>
-    paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k) |}.
-
-(* The assumption at k is the one paillier_indcpa_scheme.v derives from dcr k.
-   The equation holds by unfolding, so the identification is a conversion. *)
+(* The assumption at k is the one paillier_indcpa_scheme.v derives from the
+   residuosity record P carries.  The equation holds by unfolding, so the
+   identification is a conversion. *)
 Lemma paillier_assumption_at_dcrE k :
   sequence_assumption paillier_instance_sequence k
-  = paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k).
+  = paillier_indcpa_assumption (paillier_p_gt1 P k) (paillier_q_gt1 P k)
+      (paillier_dcr P k).
 Proof. by []. Qed.
 
 (* The epsilon at k is twice the residuosity epsilon, one call per hop.  It
    restates a Paillier bound in decisional composite residuosity epsilons. *)
 Lemma paillier_epsilon_at_dcrE k :
   indcpa_assumption_epsilon (sequence_assumption paillier_instance_sequence k)
-  = 2 * dcr_epsilon (dcr k).
+  = 2 * dcr_epsilon (paillier_dcr P k).
 Proof. by []. Qed.
+
+(* The two negligibility facts about the Paillier sequence, both read off P.
+   The unconditional one is derived from the modulus bit length, the other
+   from the asymptotic form of residuosity. *)
+Definition paillier_asymptotic :
+    dsdp_asymptotic paillier_instance_sequence :=
+  mk_dsdp_asymptotic (paillier_scheme_sequence P)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter, with the two class premises every trace bound below is
@@ -228,7 +209,7 @@ Hypothesis charlie_admissible : forall k,
    on the residuosity record. *)
 Corollary paillier_trace_guess_V2_admissible_le k :
   alice_trace_guess_V2_pr (I:=paillier_instance k) (predict k)
-  <= (#|plain (AHE k)|%:R : R)^-1 + 4 * dcr_epsilon (dcr k).
+  <= (#|plain (AHE k)|%:R : R)^-1 + 4 * dcr_epsilon (paillier_dcr P k).
 Proof.
 have := alice_trace_guess_V2_admissible_le (I:=paillier_instance k)
           (bob_admissible k) (charlie_admissible k).
@@ -239,7 +220,8 @@ Qed.
    plaintext count at the Paillier modulus. *)
 Corollary paillier_trace_guess_V2_admissible_pq_le k :
   alice_trace_guess_V2_pr (I:=paillier_instance k) (predict k)
-  <= ((p k * q k)%N%:R : R)^-1 + 4 * dcr_epsilon (dcr k).
+  <= ((paillier_p P k * paillier_q P k)%N%:R : R)^-1
+     + 4 * dcr_epsilon (paillier_dcr P k).
 Proof.
 rewrite inv_pq_cardE; exact: paillier_trace_guess_V2_admissible_le.
 Qed.
@@ -249,8 +231,11 @@ Qed.
    above are satisfiable. *)
 Lemma paillier_bob_decide_constant_admissible k :
   paillier_dcr_admissible
-    (decide_constant_assumption (R:=R) 'Z_((p k * q k) * (p k * q k))
-       (p k * q k) (card_renc_paillier (p k) (q k)))
+    (decide_constant_assumption (R:=R)
+       'Z_((paillier_p P k * paillier_q P k)
+           * (paillier_p P k * paillier_q P k))
+       (paillier_p P k * paillier_q P k)
+       (card_renc_paillier (paillier_p P k) (paillier_q P k)))
     (bob_trace_adversary (I:=paillier_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
@@ -263,8 +248,11 @@ Qed.
    that both class premises hold at the same record and the same predictor. *)
 Lemma paillier_charlie_decide_constant_admissible k :
   paillier_dcr_admissible
-    (decide_constant_assumption (R:=R) 'Z_((p k * q k) * (p k * q k))
-       (p k * q k) (card_renc_paillier (p k) (q k)))
+    (decide_constant_assumption (R:=R)
+       'Z_((paillier_p P k * paillier_q P k)
+           * (paillier_p P k * paillier_q P k))
+       (paillier_p P k * paillier_q P k)
+       (card_renc_paillier (paillier_p P k) (paillier_q P k)))
     (charlie_trace_adversary (I:=paillier_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
@@ -273,35 +261,9 @@ apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
 by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
-(* Supplies the unconditional summand of the bound
-   Pr_k <= 1/(p k * q k) + 2 * eps k, through f_size_paillier_negligible,
-   which reads the plaintext cardinality at k as the modulus p k * q k.
-
-   The summand 1/(p k * q k) is the guessing probability the leaked
-   output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
-   and Sout confines the uniform V2 to a fiber of that size.  Negligible
-   is the acceptance criterion of the asymptotic reading: the concrete
-   analysis already treats this residue as the acceptable leak, and this
-   hypothesis states that acceptability uniformly in k, the residue
-   falling below every inverse polynomial. *)
-Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
-
-(* The residuosity advantage the assumption sequence assumes is negligible:
-   the asymptotic form of decisional composite residuosity along the moduli
-   p k q k, and the only computational hypothesis the sequence makes. *)
-Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier dcr).
-
-(* The two negligibility facts about the Paillier sequence.  The unconditional
-   one is read at the modulus, the other from the residuosity hypothesis. *)
-Definition paillier_asymptotic :
-    dsdp_asymptotic paillier_instance_sequence :=
-  @Build_dsdp_asymptotic R paillier_instance_sequence
-    (f_size_paillier_negligible p_gt1 q_gt1 f_pq_negligible)
-    (f_adv_paillier_negligible p_gt1 q_gt1 f_dcr_negligible).
-
 (* Past some security parameter the derived class admits the decrypting
    predictor's Bob-key reduction adversary at no k.  The two negligibility
-   facts above exclude the predictor whose guessing probability is 1. *)
+   facts of P exclude the predictor whose guessing probability is 1. *)
 Corollary paillier_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (sequence_assumption paillier_instance_sequence k)
@@ -323,11 +285,11 @@ Corollary paillier_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
 (* At each k the two class premises yield the bound of
    alice_trace_guess_V2_admissible_le, Pr_k <= 1/(p k * q k) + 2 * eps k,
-   with eps k the advantage dcr k assumes.  The two fields of
+   with eps k the advantage the residuosity record assumes.  The two fields of
    paillier_asymptotic make f_size and f_adv negligible, f_size through the
-   scheme-side reading of modulus growth as plaintext growth.  Those two are
-   the loss terms the three labels of the program carry, so the terminal over
-   the security parameter reads the bound off the label list and transfers
+   k-bit modulus of P read as a k-bit plaintext space.  Those two are the loss
+   terms the three labels of the program carry, so the terminal over the
+   security parameter reads the bound off the label list and transfers
    negligibility to f_guess_V2. *)
 exact: (alice_trace_guess_V2_negligible (Q := paillier_instance_sequence)
           bob_admissible charlie_admissible paillier_asymptotic).
@@ -335,22 +297,17 @@ Qed.
 
 End paillier.
 
-(* The Benaloh reading of the corrupted-Alice bounds: a sequence of moduli
-   n k with block sizes r k, the DSDP instance the Benaloh IND-CPA scheme of
-   benaloh_indcpa_scheme.v carries at each of them, and the r-th residuosity
-   record the computational term of every bound below is stated in.  The
-   plaintext count here is the block size r k and not the modulus n k, which
-   sizes the ciphertext space, so the information-theoretic term reads 1/r k;
-   the assumed advantage is twice the residuosity epsilon. *)
+(* The Benaloh reading of the corrupted-Alice bounds: one benaloh_sequence
+   record, and the DSDP data Alice's execution adds to it.  The plaintext
+   count here is the block size r k and not the modulus n k, which sizes the
+   ciphertext space, so the information-theoretic term reads 1/r k. *)
 Section benaloh.
 Context {R : realType}.
-Variables n r : nat -> nat.
-Hypothesis n_gt1 : forall k, (1 < n k)%N.
-Hypothesis r_gt1 : forall k, (1 < r k)%N.
+Variable B : benaloh_sequence R.
 
-(* The Benaloh IND-CPA scheme at the k-th modulus and block size.  It is
-   pinned once, under the name benaloh_indcpa_scheme.v exports it by. *)
-Local Notation AHE k := (Benaloh_AHEnc (n k) (r_gt1 k)).
+(* The Benaloh packaging at the k-th modulus and block size, pinned once under
+   the name benaloh_indcpa_scheme.v exports it by. *)
+Local Notation AHE k := (Benaloh_AHEnc (benaloh_n B k) (benaloh_r_gt1 B k)).
 
 Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
 
@@ -360,59 +317,57 @@ Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
    a determination of Bob's input. *)
 Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
 
-Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
-Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
+(* The seeds Alice's, Bob's and Charlie's private keys at k are generated
+   from.  The keys enter the execution through the key material the record B
+   carries, so no key of the sequence is assumed on its own. *)
+Variables (sa sb sc : forall k, keygen_seedT (benaloh_keygen B) k).
 
 (* The plaintext space at k is Z/(r k)Z, so its cardinality is the block size
    r k.  The unconditional term below is read off r k, where n k sizes the
    ciphertext space. *)
-Let card_plain_r k : #|plain (AHE k)| = r k.
-Proof. by rewrite card_ord (Zp_cast (r_gt1 k)). Qed.
+Let card_plain_r k : #|plain (AHE k)| = benaloh_r B k.
+Proof. by rewrite card_ord (Zp_cast (benaloh_r_gt1 B k)). Qed.
 
 (* The inverse plaintext cardinality at the Benaloh block size. *)
-Let inv_r_cardE k : ((r k)%:R : R)^-1 = (#|plain (AHE k)|%:R : R)^-1.
+Let inv_r_cardE k :
+  ((benaloh_r B k)%:R : R)^-1 = (#|plain (AHE k)|%:R : R)^-1.
 Proof. by rewrite card_plain_r. Qed.
 
-(* The DSDP instance at k on the Benaloh IND-CPA scheme, with the weights,
-   keys and coins supplied as sequences.  Everything number-theoretic about
-   the modulus and the block size beyond 1 < n, r stays assumed. *)
-Definition benaloh_instance (k : nat) : dsdp_instance := {|
-  inst_scheme       := benaloh_indcpa_scheme (n k) (r_gt1 k) ;
-  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
-  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
-  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
-  inst_rb2 := rb2 k ; inst_rc2 := rc2 k |}.
+(* The Benaloh instance sequence: the Benaloh scheme sequence of
+   benaloh_indcpa_scheme.v with Alice's weights and the three key seeds.  It
+   is the sequence alice_trace_guess_V2_negligible is applied at below. *)
+Definition benaloh_instance_sequence : dsdp_instance_sequence R :=
+  mk_dsdp_instance_sequence (benaloh_scheme_sequence B)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
-(* An r-th residuosity record at each modulus n k and exponent r k, the only
-   computational premise the Benaloh bounds are read at.  The IND-CPA
-   assumption at k is derived from it by benaloh_indcpa_assumption, so those
-   bounds are stated in residuosity epsilons rather than in an advantage left
-   free. *)
-Variable residuosity :
-  forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
+(* The DSDP instance at k on the Benaloh IND-CPA scheme.  Everything
+   number-theoretic about the modulus and the block size beyond the fields of
+   B stays assumed. *)
+Definition benaloh_instance (k : nat) : dsdp_instance :=
+  sequence_instance benaloh_instance_sequence k.
 
-(* The Benaloh instance sequence: the instances above, with the IND-CPA
-   assumption derived at each k from residuosity k.  It is the sequence
-   alice_trace_guess_V2_negligible is applied at below. *)
-Definition benaloh_instance_sequence : dsdp_instance_sequence R := {|
-  sequence_instance := benaloh_instance ;
-  sequence_assumption := fun k =>
-    benaloh_indcpa_assumption (r_gt1 k) (residuosity k) |}.
-
-(* The assumption at k is the one benaloh_indcpa_scheme.v derives from
-   residuosity k.  The equation holds by unfolding, so the identification is a
-   conversion. *)
+(* The assumption at k is the one benaloh_indcpa_scheme.v derives from the
+   residuosity record B carries.  The equation holds by unfolding, so the
+   identification is a conversion. *)
 Lemma benaloh_assumption_at_residuosityE k :
   sequence_assumption benaloh_instance_sequence k
-  = benaloh_indcpa_assumption (r_gt1 k) (residuosity k).
+  = benaloh_indcpa_assumption (benaloh_r_gt1 B k) (benaloh_residuosity B k).
 Proof. by []. Qed.
 
 (* The epsilon at k is twice the residuosity epsilon, one call per hop.  It
    restates a Benaloh bound in r-th residuosity epsilons. *)
 Lemma benaloh_epsilon_at_residuosityE k :
   indcpa_assumption_epsilon (sequence_assumption benaloh_instance_sequence k)
-  = 2 * benaloh_residuosity_epsilon (residuosity k).
+  = 2 * benaloh_residuosity_epsilon (benaloh_residuosity B k).
 Proof. by []. Qed.
+
+(* The two negligibility facts about the Benaloh sequence, both read off B.
+   The unconditional one is derived from the block-size bit length, the other
+   from the asymptotic form of residuosity. *)
+Definition benaloh_asymptotic :
+    dsdp_asymptotic benaloh_instance_sequence :=
+  mk_dsdp_asymptotic (benaloh_scheme_sequence B)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter, with the two class premises every trace bound below is
@@ -441,7 +396,7 @@ Hypothesis charlie_admissible : forall k,
 Corollary benaloh_trace_guess_V2_admissible_le k :
   alice_trace_guess_V2_pr (I:=benaloh_instance k) (predict k)
   <= (#|plain (AHE k)|%:R : R)^-1
-     + 4 * benaloh_residuosity_epsilon (residuosity k).
+     + 4 * benaloh_residuosity_epsilon (benaloh_residuosity B k).
 Proof.
 have := alice_trace_guess_V2_admissible_le (I:=benaloh_instance k)
           (bob_admissible k) (charlie_admissible k).
@@ -451,10 +406,10 @@ Qed.
 (* The same bound at a block size written as a product p * q.  The hypothesis
    r k = p * q is the only link between the two readings. *)
 Corollary benaloh_trace_guess_V2_admissible_pq_le k (p q : nat)
-    (r_pq : r k = (p * q)%N) :
+    (r_pq : benaloh_r B k = (p * q)%N) :
   alice_trace_guess_V2_pr (I:=benaloh_instance k) (predict k)
   <= ((p * q)%N%:R : R)^-1
-     + 4 * benaloh_residuosity_epsilon (residuosity k).
+     + 4 * benaloh_residuosity_epsilon (benaloh_residuosity B k).
 Proof.
 rewrite -r_pq inv_r_cardE; exact: benaloh_trace_guess_V2_admissible_le.
 Qed.
@@ -464,8 +419,8 @@ Qed.
    above are satisfiable. *)
 Lemma benaloh_bob_decide_constant_admissible k :
   benaloh_residuosity_admissible
-    (decide_constant_assumption (R:=R) 'Z_(n k) (r k)
-       (card_renc_benaloh (n k)))
+    (decide_constant_assumption (R:=R) 'Z_(benaloh_n B k) (benaloh_r B k)
+       (card_renc_benaloh (benaloh_n B k)))
     (bob_trace_adversary (I:=benaloh_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
@@ -478,8 +433,8 @@ Qed.
    that both class premises hold at the same record and the same predictor. *)
 Lemma benaloh_charlie_decide_constant_admissible k :
   benaloh_residuosity_admissible
-    (decide_constant_assumption (R:=R) 'Z_(n k) (r k)
-       (card_renc_benaloh (n k)))
+    (decide_constant_assumption (R:=R) 'Z_(benaloh_n B k) (benaloh_r B k)
+       (card_renc_benaloh (benaloh_n B k)))
     (charlie_trace_adversary (I:=benaloh_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
@@ -488,37 +443,9 @@ apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
 by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
-(* Supplies the unconditional summand of the bound
-   Pr_k <= 1/(r k) + 2 * eps k, through f_size_benaloh_negligible, which
-   reads the plaintext cardinality at k as the block size r k.
-
-   The summand 1/(r k) is the guessing probability the leaked output
-   Sout concedes: at Benaloh #|plain| is the block size r k, and Sout
-   confines the uniform V2 to a fiber of that size.  Negligible is the
-   acceptance criterion of the asymptotic reading: the concrete analysis
-   already treats this residue as the acceptable leak, and this
-   hypothesis states that acceptability uniformly in k, the residue
-   falling below every inverse polynomial. *)
-Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
-
-(* The residuosity advantage the assumption sequence assumes is negligible:
-   the asymptotic form of r-th residuosity along the moduli n k, and the only
-   computational hypothesis the sequence makes. *)
-Hypothesis f_residuosity_negligible :
-  negligible_fun (f_residuosity_benaloh residuosity).
-
-(* The two negligibility facts about the Benaloh sequence.  The unconditional
-   one is read at the block size, the other from the residuosity
-   hypothesis. *)
-Definition benaloh_asymptotic :
-    dsdp_asymptotic benaloh_instance_sequence :=
-  @Build_dsdp_asymptotic R benaloh_instance_sequence
-    (f_size_benaloh_negligible n r_gt1 f_r_negligible)
-    (f_adv_benaloh_negligible r_gt1 f_residuosity_negligible).
-
 (* Past some security parameter the derived class admits the decrypting
    predictor's Bob-key reduction adversary at no k.  The two negligibility
-   facts above exclude the predictor whose guessing probability is 1. *)
+   facts of B exclude the predictor whose guessing probability is 1. *)
 Corollary benaloh_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (sequence_assumption benaloh_instance_sequence k)
@@ -540,11 +467,11 @@ Corollary benaloh_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
 (* At each k the two class premises yield the bound of
    alice_trace_guess_V2_admissible_le, Pr_k <= 1/(r k) + 2 * eps k, with
-   eps k the advantage residuosity k assumes.  The two fields of
+   eps k the advantage the residuosity record assumes.  The two fields of
    benaloh_asymptotic make f_size and f_adv negligible, f_size through the
-   scheme-side reading of block-size growth as plaintext growth.  Those two
-   are the loss terms the three labels of the program carry, so the terminal
-   over the security parameter reads the bound off the label list and transfers
+   k-bit block size of B read as a k-bit plaintext space.  Those two are the
+   loss terms the three labels of the program carry, so the terminal over the
+   security parameter reads the bound off the label list and transfers
    negligibility to f_guess_V2. *)
 exact: (alice_trace_guess_V2_negligible (Q := benaloh_instance_sequence)
           bob_admissible charlie_admissible benaloh_asymptotic).

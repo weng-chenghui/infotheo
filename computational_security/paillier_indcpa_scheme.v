@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba extra_algebra.
 Require Import homomorphic_encryption residuosity_game.
 Require Import paillier_enc paillier_ahe paillier_fdist_instance.
-Require Import negligible indcpa_game epshop.
+Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 
 (**md**************************************************************************)
 (* # Paillier as an IND-CPA scheme                                            *)
@@ -92,9 +92,11 @@ Require Import negligible indcpa_game epshop.
 (* never read by the game; only the protocol uses them.                       *)
 (*                                                                            *)
 (* Along a sequence of moduli every datum above becomes a function of the     *)
-(* security parameter k, and two hypotheses give the sequence its asymptotic  *)
-(* content: the moduli outgrow every polynomial, and the assumed residuosity  *)
-(* advantages fall below every inverse polynomial.                            *)
+(* security parameter k, and the record paillier_sequence packs the whole     *)
+(* sequence as one object.  The parameter is a key length there: the modulus  *)
+(* at k has at least k bits, from which the negligibility of the inverse      *)
+(* plaintext cardinality is derived rather than assumed, and the assumed      *)
+(* residuosity advantages fall below every inverse polynomial.                *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*             renc_paillier == the coin index type of this instantiation,    *)
@@ -154,18 +156,27 @@ Require Import negligible indcpa_game epshop.
 (*                              experiment written out: acceptance of an      *)
 (*                              encryption of the chosen plaintext and of     *)
 (*                              zero differ by at most 2 eps_DCR              *)
-(*                      f_pq == the inverse modulus sequence 1/(p k * q k)    *)
-(*           f_size_paillier == the inverse plaintext-cardinality sequence    *)
+(*        f_dcr_paillier dcr == the residuosity-advantage sequence a          *)
+(*                              sequence of residuosity records assumes       *)
+(*         paillier_sequence == the moduli at each k, their bounds, the       *)
+(*                              residuosity record and the modulus bit        *)
+(*                              length there, the asymptotic form of that     *)
+(*                              assumption, and the key material, as one      *)
+(*                              record                                        *)
+(*                    f_pq P == the inverse modulus sequence 1/(p k * q k)    *)
+(*         f_size_paillier P == the inverse plaintext-cardinality sequence    *)
 (*                              at Paillier                                   *)
-(*            f_dcr_paillier == the assumed residuosity-advantage sequence    *)
-(*            f_adv_paillier == the derived IND-CPA advantage sequence,       *)
+(*          f_adv_paillier P == the derived IND-CPA advantage sequence,       *)
 (*                              twice f_dcr_paillier                          *)
 (* f_size_paillier_negligible ==                                              *)
-(*                             superpolynomial growth of p k * q k makes      *)
-(*                             f_size_paillier negligible                     *)
+(*                             the k-bit modulus makes f_size_paillier        *)
+(*                             negligible                                     *)
 (* f_adv_paillier_negligible ==                                               *)
 (*                             f_adv_paillier is negligible when              *)
 (*                             f_dcr_paillier is                              *)
+(*  paillier_scheme_sequence == the Paillier reading of                       *)
+(*                              indcpa_scheme_sequence, every field read off  *)
+(*                              a paillier_sequence                           *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -490,26 +501,55 @@ Qed.
 
 End paillier_indcpa_scheme.
 
+Section paillier_dcr_advantage.
+Context {R : realType}.
+
+(* The advantage a sequence of residuosity records assumes at k.  It reads a
+   sequence of records, so that the record below can state the asymptotic form
+   of its own assumption. *)
+Definition f_dcr_paillier (p q : nat -> nat)
+    (dcr : forall k, dcr_assumption (R:=R) (p k) (q k)) (k : nat) : R :=
+  dcr_epsilon (dcr k).
+
+End paillier_dcr_advantage.
+
+(* A Paillier scheme sequence: the moduli, their bounds, the residuosity
+   record, the modulus bit length, and the key material.  The parameter is a
+   key length by paillier_modulus_bits, from which the size term is
+   derived. *)
+Record paillier_sequence (R : realType) := {
+  (* the first factor of the modulus at k *)
+  paillier_p : nat -> nat ;
+  (* the second factor of the modulus at k *)
+  paillier_q : nat -> nat ;
+  (* the first factor exceeds one, the bound the Paillier packaging takes *)
+  paillier_p_gt1 : forall k, (1 < paillier_p k)%N ;
+  (* the second factor exceeds one *)
+  paillier_q_gt1 : forall k, (1 < paillier_q k)%N ;
+  (* decisional composite residuosity at the modulus of parameter k *)
+  paillier_dcr : forall k,
+    dcr_assumption (R:=R) (paillier_p k) (paillier_q k) ;
+  (* the modulus at k has at least k bits: k is the key length *)
+  paillier_modulus_bits : forall k,
+    (2 ^ k <= paillier_p k * paillier_q k)%N ;
+  (* the assumed residuosity advantage falls below every inverse polynomial *)
+  paillier_dcr_negligible : negligible_fun (f_dcr_paillier paillier_dcr) ;
+  (* the seed spaces and private keys along the sequence *)
+  paillier_keygen : keygen_sequence
+    (fun k => Paillier_AHEnc (pq_gt1 (paillier_p_gt1 k) (paillier_q_gt1 k))) }.
+
 Section paillier_indcpa_scheme_sequence.
 Context {R : realType}.
-Variables p q : nat -> nat.
-Hypothesis p_gt1 : forall k, (1 < p k)%N.
-Hypothesis q_gt1 : forall k, (1 < q k)%N.
+Variable P : paillier_sequence R.
 
-(* The Paillier IND-CPA scheme at parameter k is the fixed scheme above taken
-   at p k and q k: the packaging Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)),
-   the coin type renc_paillier (p k) (q k), the pinned cardinality
-   card_renc_paillier (p k) (q k), and the coin map
-   rand_of_renc_paillier (p_gt1 k) (q_gt1 k), which is
-   paillier_indcpa_scheme (p_gt1 k) (q_gt1 k).  A sequence of decisional
-   composite residuosity records at those moduli is the per-k form of the
-   single computational premise the scheme carries; the IND-CPA assumption at
-   each k is derived from it by paillier_indcpa_assumption. *)
-Variable dcr : forall k, dcr_assumption (R:=R) (p k) (q k).
+(* The two modulus bounds of P, under the short names the statements below
+   read the Paillier packaging at. *)
+Local Notation p_gt1 := (paillier_p_gt1 P).
+Local Notation q_gt1 := (paillier_q_gt1 P).
 
 (* The inverse modulus sequence 1/(p k * q k), the form a growth condition on
    the moduli is stated in. *)
-Definition f_pq k : R := (((p k * q k)%N)%:R : R)^-1.
+Definition f_pq k : R := (((paillier_p P k * paillier_q P k)%N)%:R : R)^-1.
 
 (* The inverse plaintext-cardinality sequence at Paillier: the
    information-theoretic summand of every guessing bound read off along the
@@ -517,42 +557,38 @@ Definition f_pq k : R := (((p k * q k)%N)%:R : R)^-1.
 Definition f_size_paillier k : R :=
   (#|plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))|%:R : R)^-1.
 
-(* The assumed residuosity-advantage sequence: the epsilon dcr k assumes at
-   each k, the asymptotic form of decisional composite residuosity. *)
-Definition f_dcr_paillier k : R := dcr_epsilon (dcr k).
-
-(* The derived IND-CPA advantage sequence: twice f_dcr_paillier.  The
-   reduction spends its two hops once each at the key of parameter k. *)
+(* The derived IND-CPA advantage sequence: twice the residuosity advantage.
+   The reduction makes one residuosity call per hop at the key of parameter
+   k. *)
 Definition f_adv_paillier k : R :=
   indcpa_assumption_epsilon
-    (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k)).
+    (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (paillier_dcr P k)).
 
-(* The moduli outgrow every polynomial in k.  At Paillier the modulus is the
-   plaintext cardinality, so this is the growth of the plaintext space, and
-   negligible is the asymptotic acceptance criterion for the guessing
-   residue an inverse plaintext cardinality concedes. *)
-Hypothesis f_pq_negligible : negligible_fun f_pq.
-
-(* The residuosity advantage the assumption sequence assumes is negligible:
-   the asymptotic form of decisional composite residuosity along the moduli
-   p k q k. *)
-Hypothesis f_dcr_paillier_negligible : negligible_fun f_dcr_paillier.
-
-(* The inverse plaintext cardinality along the sequence is negligible, the
-   plaintext space at k being Z/(p k * q k)Z.  It is the scheme-side summand
-   of every guessing bound of the shape 1/#|plain| + 2 * eps. *)
+(* The inverse plaintext cardinality along the sequence is negligible, derived
+   from the modulus bit length.  The plaintext space at k is Z/(p k * q k)Z,
+   so a k-bit modulus is a k-bit plaintext space. *)
 Lemma f_size_paillier_negligible : negligible_fun f_size_paillier.
 Proof.
 rewrite /f_size_paillier.
 under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
-exact: f_pq_negligible.
+exact: (negligible_fun_inv_ge_exp2 (paillier_modulus_bits P)).
 Qed.
 
-(* The derived IND-CPA advantage along the sequence is negligible, being
-   twice a negligible residuosity advantage.  The asymptotic content of
-   decisional composite residuosity becomes the asymptotic content of Paillier
-   IND-CPA. *)
+(* The derived IND-CPA advantage along the sequence is negligible, being twice
+   a negligible residuosity advantage.  The asymptotic content of decisional
+   composite residuosity becomes that of Paillier IND-CPA. *)
 Lemma f_adv_paillier_negligible : negligible_fun f_adv_paillier.
-Proof. exact: negligible_fun_double f_dcr_paillier_negligible. Qed.
+Proof. exact: negligible_fun_double (paillier_dcr_negligible P). Qed.
+
+(* The Paillier reading of indcpa_scheme_sequence: the scheme at k, the
+   assumption derived from residuosity, the key material, and both
+   negligibility facts.  Nothing is assumed here beyond what P carries. *)
+Definition paillier_scheme_sequence : indcpa_scheme_sequence R := {|
+  scheme_at := fun k => paillier_indcpa_scheme (p_gt1 k) (q_gt1 k) ;
+  scheme_assumption := fun k =>
+    paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (paillier_dcr P k) ;
+  scheme_keygen := paillier_keygen P ;
+  scheme_size_negligible := f_size_paillier_negligible ;
+  scheme_adv_negligible := f_adv_paillier_negligible |}.
 
 End paillier_indcpa_scheme_sequence.

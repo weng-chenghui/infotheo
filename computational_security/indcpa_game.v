@@ -94,6 +94,8 @@ Require Import extra_proba.
 (*              indcpa_scheme == an encryption scheme, a finite coin space,   *)
 (*                               its nonemptiness, and the map from a coin    *)
 (*                               index to the randomness encryption consumes  *)
+(*            card_renc_gt0 S == the coin space of S is nonempty              *)
+(*             renc_default S == the coin of S the pinned nonemptiness names  *)
 (* indcpa_epsilon_assumption == a Boolean adversary class, one epsilon, and   *)
 (*                               the assumption that every classified         *)
 (*                               adversary stays below that epsilon at every  *)
@@ -205,6 +207,16 @@ Record indcpa_scheme := {
   scheme_card_renc    : #|scheme_renc| = #|scheme_renc|.-1.+1 ;
   (* the randomness a coin index stands for *)
   scheme_rand_of_renc : scheme_renc -> rand scheme_AHE }.
+
+(* The coin space of a scheme is nonempty, its pinned cardinality read in the
+   form an ordinal index takes. *)
+Lemma card_renc_gt0 (S : indcpa_scheme) : (0 < #|scheme_renc S|)%N.
+Proof. by rewrite scheme_card_renc. Qed.
+
+(* The coin that nonemptiness names.  A field asking for one concrete coin of
+   the scheme takes it where no protocol run has produced one. *)
+Definition renc_default (S : indcpa_scheme) : scheme_renc S :=
+  enum_val (Ordinal (card_renc_gt0 S)).
 
 Section indcpa_game.
 Context {R : realType}.

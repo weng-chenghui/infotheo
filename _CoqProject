@@ -146,6 +146,7 @@ dumas2017dual/dsdp/counting/dsdp_entropy.v
 # computational_security
 computational_security/negligible.v
 computational_security/indcpa_game.v
+computational_security/indcpa_scheme_sequence.v
 computational_security/idealized_indcpa_scheme.v
 computational_security/epshop.v
 computational_security/epshop_sequence.v

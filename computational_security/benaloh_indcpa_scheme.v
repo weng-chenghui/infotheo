@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption residuosity_game.
 Require Import benaloh_enc benaloh_ahe.
-Require Import negligible indcpa_game epshop.
+Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 
 (**md**************************************************************************)
 (* # Benaloh as an IND-CPA scheme                                             *)
@@ -93,11 +93,11 @@ Require Import negligible indcpa_game epshop.
 (* only by the protocol, never by the game.                                   *)
 (*                                                                            *)
 (* Along a sequence of parameters every datum above becomes a function of     *)
-(* the security parameter k, and two hypotheses give the sequence its         *)
-(* asymptotic content: the block sizes outgrow every polynomial, and the      *)
-(* assumed residuosity advantages fall below every inverse polynomial.  It    *)
-(* is the block size r, the plaintext space Z/rZ, that must grow, and not     *)
-(* the modulus n, which sizes the ciphertext space.                           *)
+(* the security parameter k, and the record benaloh_sequence packs the whole  *)
+(* sequence as one object.  It carries two bit lengths, which are separate    *)
+(* here: the block size r k, the plaintext space Z/rZ, has at least k bits,   *)
+(* and that is what the size term is derived from, while the modulus n k,     *)
+(* which sizes the ciphertext space, has at least k bits as the key length.   *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*              Benaloh_AHEnc == the Benaloh AHEncType at modulus n and       *)
@@ -166,17 +166,27 @@ Require Import negligible indcpa_game epshop.
 (*                               written out: acceptance of an encryption of  *)
 (*                               the chosen plaintext and of zero differ by   *)
 (*                               at most twice the residuosity epsilon        *)
-(*                        f_r == the inverse block-size sequence 1/(r k)      *)
-(*             f_size_benaloh == the inverse plaintext-cardinality sequence   *)
+(* f_residuosity_benaloh residuosity ==                                       *)
+(*                            the residuosity-advantage sequence a sequence   *)
+(*                            of residuosity records assumes                  *)
+(*          benaloh_sequence == the modulus and block size at each k, their   *)
+(*                              bounds, the residuosity record there, the     *)
+(*                              two bit lengths, the asymptotic form of that  *)
+(*                              assumption, and the key material, as one      *)
+(*                              record                                        *)
+(*                      f_r B == the inverse block-size sequence 1/(r k)      *)
+(*           f_size_benaloh B == the inverse plaintext-cardinality sequence   *)
 (*                               at Benaloh                                   *)
-(*      f_residuosity_benaloh == the assumed residuosity-advantage sequence   *)
-(*              f_adv_benaloh == the derived advantage sequence, twice        *)
+(*            f_adv_benaloh B == the derived advantage sequence, twice        *)
 (*                               f_residuosity_benaloh                        *)
 (* f_size_benaloh_negligible ==                                               *)
-(*                              superpolynomial growth of r k makes           *)
-(*                              f_size_benaloh negligible                     *)
+(*                              the k-bit block size makes f_size_benaloh     *)
+(*                              negligible                                    *)
 (*   f_adv_benaloh_negligible == f_adv_benaloh is negligible when             *)
 (*                               f_residuosity_benaloh is                     *)
+(*   benaloh_scheme_sequence == the Benaloh reading of                        *)
+(*                              indcpa_scheme_sequence, every field read off  *)
+(*                              a benaloh_sequence                            *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -513,71 +523,95 @@ Qed.
 
 End benaloh_indcpa_scheme.
 
+Section benaloh_residuosity_advantage.
+Context {R : realType}.
+
+(* The advantage a sequence of r-th residuosity records assumes at k.  It
+   reads a sequence of records, so that the record below can state the
+   asymptotic form of its own assumption. *)
+Definition f_residuosity_benaloh (n r : nat -> nat)
+    (residuosity : forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k))
+    (k : nat) : R :=
+  benaloh_residuosity_epsilon (residuosity k).
+
+End benaloh_residuosity_advantage.
+
+(* A Benaloh scheme sequence: modulus and block size, their bounds, the
+   residuosity record, two bit lengths, and key material.  The block size
+   carries the size term and the modulus is the key length. *)
+Record benaloh_sequence (R : realType) := {
+  (* the modulus at k *)
+  benaloh_n : nat -> nat ;
+  (* the block size at k, the cardinality of the plaintext space *)
+  benaloh_r : nat -> nat ;
+  (* the modulus exceeds one *)
+  benaloh_n_gt1 : forall k, (1 < benaloh_n k)%N ;
+  (* the block size exceeds one, the bound the Benaloh packaging takes *)
+  benaloh_r_gt1 : forall k, (1 < benaloh_r k)%N ;
+  (* r-th residuosity at the modulus and block size of parameter k *)
+  benaloh_residuosity : forall k,
+    benaloh_residuosity_assumption (R:=R) (benaloh_n k) (benaloh_r k) ;
+  (* the plaintext block at k has at least k bits, the growth the size term
+     of every bound along the sequence needs *)
+  benaloh_block_bits : forall k, (2 ^ k <= benaloh_r k)%N ;
+  (* the modulus at k has at least k bits: k is the key length *)
+  benaloh_modulus_bits : forall k, (2 ^ k <= benaloh_n k)%N ;
+  (* the assumed residuosity advantage falls below every inverse polynomial *)
+  benaloh_residuosity_negligible :
+    negligible_fun (f_residuosity_benaloh benaloh_residuosity) ;
+  (* the seed spaces and private keys along the sequence *)
+  benaloh_keygen : keygen_sequence
+    (fun k => Benaloh_AHEnc (benaloh_n k) (benaloh_r_gt1 k)) }.
+
 Section benaloh_indcpa_scheme_sequence.
 Context {R : realType}.
-Variables n r : nat -> nat.
-Hypothesis n_gt1 : forall k, (1 < n k)%N.
-Hypothesis r_gt1 : forall k, (1 < r k)%N.
+Variable B : benaloh_sequence R.
 
-(* The Benaloh IND-CPA scheme at parameter k is the fixed scheme above taken
-   at n k and r k: the packaging Benaloh_AHEnc (n k) (r_gt1 k), the coin type
-   renc_benaloh (n k), the pinned cardinality card_renc_benaloh (n k), and
-   the coin map rand_of_renc_benaloh (r_gt1 k), which is
-   benaloh_indcpa_scheme (n k) (r_gt1 k).  A sequence of r-th residuosity
-   assumptions, at the modulus n k and the exponent r k, is the only
-   computational premise the sequence takes: the IND-CPA assumption at k is
-   derived from it by benaloh_indcpa_assumption. *)
-Variable residuosity :
-  forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
+(* The block-size bound of B, under the short name the statements below read
+   the Benaloh packaging at. *)
+Local Notation r_gt1 := (benaloh_r_gt1 B).
 
-(* The inverse block-size sequence 1/(r k), the form a growth condition on
-   the block sizes is stated in. *)
-Definition f_r k : R := ((r k)%:R : R)^-1.
+(* The inverse block-size sequence 1/(r k), the form a growth condition on the
+   block sizes is stated in. *)
+Definition f_r k : R := ((benaloh_r B k)%:R : R)^-1.
 
 (* The inverse plaintext-cardinality sequence at Benaloh: the
    information-theoretic summand of every guessing bound read off along the
    sequence. *)
 Definition f_size_benaloh k : R :=
-  (#|plain (Benaloh_AHEnc (n k) (r_gt1 k))|%:R : R)^-1.
-
-(* The assumed residuosity-advantage sequence: the epsilon residuosity k
-   assumes at each k.  Every computational bound along the sequence is a
-   multiple of it. *)
-Definition f_residuosity_benaloh k : R :=
-  benaloh_residuosity_epsilon (residuosity k).
+  (#|plain (Benaloh_AHEnc (benaloh_n B k) (r_gt1 k))|%:R : R)^-1.
 
 (* The derived IND-CPA advantage sequence: twice the residuosity advantage at
    k.  The reduction spends two residuosity calls at one key. *)
 Definition f_adv_benaloh k : R :=
   indcpa_assumption_epsilon
-    (benaloh_indcpa_assumption (r_gt1 k) (residuosity k)).
+    (benaloh_indcpa_assumption (r_gt1 k) (benaloh_residuosity B k)).
 
-(* The block sizes outgrow every polynomial in k.  At Benaloh the block size
-   is the plaintext cardinality, so this is the growth of the plaintext
-   space, and negligible is the asymptotic acceptance criterion for the
-   guessing residue an inverse plaintext cardinality concedes. *)
-Hypothesis f_r_negligible : negligible_fun f_r.
-
-(* The advantage the residuosity assumption sequence assumes is negligible:
-   the asymptotic reading of r-th residuosity along the sequence, and the only
-   computational hypothesis the sequence makes. *)
-Hypothesis f_residuosity_benaloh_negligible :
-  negligible_fun f_residuosity_benaloh.
+(* The inverse plaintext cardinality along the sequence is negligible, derived
+   from the block-size bit length.  The plaintext space at k is Z/(r k)Z, so a
+   k-bit block is a k-bit plaintext space. *)
+Lemma f_size_benaloh_negligible : negligible_fun f_size_benaloh.
+Proof.
+rewrite /f_size_benaloh.
+under eq_fun => k do rewrite card_ord (Zp_cast (r_gt1 k)).
+exact: (negligible_fun_inv_ge_exp2 (benaloh_block_bits B)).
+Qed.
 
 (* The derived IND-CPA advantage is negligible, twice a negligible function
    being negligible.  The residuosity hypothesis now implies what a sequence
    of IND-CPA assumptions had to take, at a factor two. *)
 Lemma f_adv_benaloh_negligible : negligible_fun f_adv_benaloh.
-Proof. exact: negligible_fun_double f_residuosity_benaloh_negligible. Qed.
+Proof. exact: negligible_fun_double (benaloh_residuosity_negligible B). Qed.
 
-(* The inverse plaintext cardinality along the sequence is negligible, the
-   plaintext space at k being Z/(r k)Z.  It is the scheme-side summand of
-   every guessing bound of the shape 1/#|plain| + 2 * eps. *)
-Lemma f_size_benaloh_negligible : negligible_fun f_size_benaloh.
-Proof.
-rewrite /f_size_benaloh.
-under eq_fun => k do rewrite card_ord (Zp_cast (r_gt1 k)).
-exact: f_r_negligible.
-Qed.
+(* The Benaloh reading of indcpa_scheme_sequence: the scheme at k, the
+   assumption derived from residuosity, the key material, and both
+   negligibility facts.  Nothing is assumed here beyond what B carries. *)
+Definition benaloh_scheme_sequence : indcpa_scheme_sequence R := {|
+  scheme_at := fun k => benaloh_indcpa_scheme (benaloh_n B k) (r_gt1 k) ;
+  scheme_assumption := fun k =>
+    benaloh_indcpa_assumption (r_gt1 k) (benaloh_residuosity B k) ;
+  scheme_keygen := benaloh_keygen B ;
+  scheme_size_negligible := f_size_benaloh_negligible ;
+  scheme_adv_negligible := f_adv_benaloh_negligible |}.
 
 End benaloh_indcpa_scheme_sequence.

@@ -24,6 +24,10 @@ MODULES=(
   # The game layer the computational leg reduces to: the adversary record,
   # the hidden-bit challenger, the two experiment arms and the advantage.
   computational_security/indcpa_game.v
+  # The AHE-layer object the DSDP side assumes as one record: a scheme at each
+  # security parameter, its assumption, its key material, and the two
+  # negligibility facts a bound in that parameter carries.
+  computational_security/indcpa_scheme_sequence.v
   # The epsHop language a multi-hop bound is written in: the accumulated loss
   # as a list of labelled terms, and the soundness the bound is read off.
   computational_security/epshop.v

@@ -4,7 +4,7 @@ From mathcomp Require Import zmodp ring boolp reals.
 Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
-Require Import negligible indcpa_game.
+Require Import negligible indcpa_game indcpa_scheme_sequence.
 
 (**md**************************************************************************)
 (* # The data of a DSDP instance and of a sequence of instances               *)
@@ -32,6 +32,12 @@ Require Import negligible indcpa_game.
 (* sequence, the unconditional one and the assumption-conditional one, and    *)
 (* they are a record of their own because only the statements that let the    *)
 (* parameter grow spend them.                                                 *)
+(*                                                                            *)
+(* A sequence and its asymptotic content are built from one scheme sequence   *)
+(* of computational_security/indcpa_scheme_sequence.v: the schemes, the       *)
+(* assumptions and the private keys are read off that record, and the two     *)
+(* negligibility facts come with it, so the DSDP side supplies the weights    *)
+(* and the key seeds alone and assumes nothing further.                       *)
 (*                                                                            *)
 (* The file carries data alone.  It sits below the corrupted-Alice hopping    *)
 (* and trace files, which state their bounds over an instance of it.          *)
@@ -64,6 +70,13 @@ Require Import negligible indcpa_game.
 (*             adv_negligible == f_adv is a negligible sequence, the          *)
 (*                               assumption-conditional term of every         *)
 (*                               bound along the sequence                     *)
+(*           mk_dsdp_instance == the instance at k built from a scheme        *)
+(*                               sequence, four weights and three key seeds   *)
+(*  mk_dsdp_instance_sequence == the sequence of those instances, its         *)
+(*                               assumption at k the one the scheme           *)
+(*                               sequence makes                               *)
+(*         mk_dsdp_asymptotic == the two negligibility facts about that       *)
+(*                               sequence, both read off the scheme sequence  *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -166,3 +179,49 @@ Record dsdp_asymptotic (R : realType) (Q : dsdp_instance_sequence R) := {
   size_negligible : negligible_fun (f_size Q) ;
   (* the assumption-conditional term: the assumed advantage vanishes *)
   adv_negligible : negligible_fun (f_adv Q) }.
+
+(* The corrupted-Alice data read off one scheme sequence.  The schemes, the
+   assumptions and the private keys come from that record, and the weights and
+   the key seeds are the only data supplied alongside it. *)
+Section dsdp_of_scheme_sequence.
+Context {R : realType}.
+Variable Q : indcpa_scheme_sequence R.
+Variables (v1 u1 u2 u3 : forall k, plain (scheme_AHE (scheme_at Q k))).
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (sa sb sc : forall k, keygen_seedT (scheme_keygen Q) k).
+
+(* The instance at k: the scheme the sequence carries there, the four weights,
+   and the keys the three seeds generate.  The two hop coins are filled from
+   the scheme's pinned nonemptiness, no protocol run having produced one at
+   this point. *)
+Definition mk_dsdp_instance (k : nat) : dsdp_instance := {|
+  inst_scheme  := scheme_at Q k ;
+  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ; inst_u3 := u3 k ;
+  inst_u3_unit := u3_unit k ;
+  inst_dk_a    := keygen_priv_key (scheme_keygen Q) k (sa k) ;
+  inst_dk_b    := keygen_priv_key (scheme_keygen Q) k (sb k) ;
+  inst_dk_c    := keygen_priv_key (scheme_keygen Q) k (sc k) ;
+  inst_rb2     := renc_default (scheme_at Q k) ;
+  inst_rc2     := renc_default (scheme_at Q k) |}.
+
+(* The sequence of those instances.  Its assumption at k is the one the scheme
+   sequence makes, so instance and assumption name the same scheme value. *)
+Definition mk_dsdp_instance_sequence : dsdp_instance_sequence R := {|
+  sequence_instance := mk_dsdp_instance ;
+  sequence_assumption := scheme_assumption Q |}.
+
+(* The asymptotic content of that sequence, both facts read off Q.  What a
+   protocol file used to carry as two negligibility hypotheses beside its
+   scheme variables is discharged here. *)
+Definition mk_dsdp_asymptotic : dsdp_asymptotic mk_dsdp_instance_sequence :=
+  @Build_dsdp_asymptotic R mk_dsdp_instance_sequence
+    (scheme_size_negligible Q) (scheme_adv_negligible Q).
+
+End dsdp_of_scheme_sequence.
+
+(* The scheme sequence and Charlie's weight stay explicit arguments: a call
+   site names the sequence it reads its schemes off, and both would otherwise
+   be left to unification against the weights. *)
+Arguments mk_dsdp_instance {R} Q v1 u1 u2 u3 u3_unit sa sb sc k.
+Arguments mk_dsdp_instance_sequence {R} Q v1 u1 u2 u3 u3_unit sa sb sc.
+Arguments mk_dsdp_asymptotic {R} Q v1 u1 u2 u3 u3_unit sa sb sc.
