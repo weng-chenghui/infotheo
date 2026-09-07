@@ -236,7 +236,7 @@ Qed.
 (******************************************************************************)
 
 (* Per-index verdict: either inert (step does nothing) or Disjoint with a
-   witnessing reduction. Lets step_sound dispatch on 2 cases, not 6. *)
+   witnessing reduction. Lets step_sound dispatch on 2 cases, not 7. *)
 Inductive index_class n (ps : n.-tuple (proc data))
     (sds : n.-tuple (seq data)) (i : 'I_n) : Type :=
   | Inert :
@@ -426,7 +426,7 @@ Definition step_result_sound n (ps : n.-tuple (proc data))
 
 (* When step leaves party i unchanged, removing i from the active set
    doesn't change step_result. For k != i, membership is unchanged;
-   for k = i, step returning (ps !_ i, nil, false) matches the default. *)
+   for k = i, step returns the process, trace and stream it was given. *)
 Lemma step_result_inert n (ps : n.-tuple (proc data))
     (sds : n.-tuple (seq data)) (i : 'I_n)
     (pss : {fset 'I_n}) :

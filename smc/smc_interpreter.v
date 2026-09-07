@@ -14,12 +14,15 @@ Require Import proba jfdist_cond entropy graphoid.
 (*                proc == unindexed process type                              *)
 (*   [procs p1;..;pn ] == pack processes into seq proc                        *)
 (*            Sample f == draw the head of the party's own seed stream        *)
-(*  interp_traces h ps sds == returns a tuple of traces of size <= h          *)
+(*       interp_traces == traces of a run, as h-bounded seqs                  *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* Each party carries a seed stream beside its trace.  A Sample draws the     *)
-(* head of that stream and writes nothing to the trace, so a trace entry is   *)
-(* the image of the drawn values through the program, never a bare seed.      *)
+(* head of that stream and writes nothing to the trace, so every trace        *)
+(* entry is the program's image of the drawn values.                          *)
+(*                                                                            *)
+(* The reduction relation below is read at a fixed seed assignment, so an     *)
+(* rsteps models at most one draw per party; interp consumes the stream.      *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -127,9 +130,8 @@ Lemma map_extract n m A B (l : lens n m) (f : A -> B) v :
 Proof. by apply: eq_from_tnth => i; rewrite !tnth_map. Qed.
 
 (* Relational reduction - single step reductions.
-   The relation is read at a seed assignment: [rsample] fires at party i only
-   with the value standing at the head of stream i, so the drawn value is not
-   a further source of nondeterminism and normal forms stay unique. *)
+   The relation is read at one seed assignment, so a sampling party draws that
+   stream's head.  A run therefore models at most one draw per party. *)
 Inductive rstep {n} (sds : n.-tuple (seq data)) : forall {m}, lens n m ->
       m.-tuple proc -> m.-tuple proc -> m.-tuple (seq data) -> Prop :=
   | rinit i x p : rstep sds [tuple i] [tuple Init x p] [tuple p] [tuple [:: x]]
@@ -448,8 +450,8 @@ Lemma step_sample_nil (ps : seq (proc data)) tr i f :
 Proof. by rewrite /step => ->. Qed.
 
 (* One step's trace is a function of the process list and the party index
-   alone.  A seed reaches a trace entry only inside a value the program
-   itself builds and then sends. *)
+   alone.  A drawn value reaches a later trace only through the
+   continuation. *)
 Lemma step_trace_seed_indep (ps : seq (proc data)) tr sd1 sd2 i :
   (step ps tr sd1 i).1.1.2 = (step ps tr sd2 i).1.1.2.
 Proof.
