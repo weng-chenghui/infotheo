@@ -155,7 +155,7 @@ Let dsdp_seeds : seq (seq data) :=
 (* Protocol definition using interp directly with explicit traces *)
 Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] dsdp_seeds.
 
-(* Protocol execution result: running dsdp for 15 steps produces the expected
+(* Protocol execution result: running dsdp for 18 steps produces the expected
    final state with all parties finished and their respective traces.
    In the idealized scheme, enc(pk, m, r) = m, so ciphertexts are just messages. *)
 Lemma dsdp_ok :
