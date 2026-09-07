@@ -8,9 +8,11 @@ Import Num.Theory.
 
 (******************************************************************************)
 (*                                                                            *)
-(* General algebra lemmas used in dumas2017dual formalization                 *)
+(* General algebra lemmas, used by the dumas2017dual and the                  *)
+(* computational_security files                                               *)
 (*                                                                            *)
 (* This file contains lemmas that are more general than DSDP-specific:        *)
+(*   - Modulus bounds                                                         *)
 (*   - Bigop lemmas                                                           *)
 (*   - Z/mZ unit characterization lemmas                                      *)
 (*                                                                            *)
@@ -23,14 +25,22 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 
 (* ========================================================================== *)
+(*                        Moduli greater than one                              *)
+(* ========================================================================== *)
+
+(* A product of two naturals above one is above one.  It is the condition the
+   Paillier and Benaloh packagings take their modulus at. *)
+Lemma pq_gt1 (p q : nat) : (1 < p)%N -> (1 < q)%N -> (1 < p * q)%N.
+Proof. by move=> p1 q1; rewrite (leq_trans p1) // leq_pmulr // (ltnW q1). Qed.
+
+(* ========================================================================== *)
 (*                           Bigop lemmas                                      *)
 (* ========================================================================== *)
 
 Section bigop_extra.
 
-(* Extract a term from a filtered big operation: if j is in r and satisfies P,
-   we can factor out F(j) from the sum/product over filtered elements.
-   Useful for manipulating sums over constrained index sets. *)
+(* Extract a term from a filtered big operation.  When j is in r and satisfies
+   P, F j factors out of the operation over the filtered sequence. *)
 Lemma bigD1_filter {R : Type} {op : SemiGroup.com_law R} {idx : R}
   {I : eqType} (r : seq I) (j : I) (P : pred I) (F : I -> R) :
   j \in r -> P j -> uniq r ->
@@ -140,8 +150,8 @@ Section Zp_Fp_equivalence.
 Context {R : realType}.
 
 (* The cardinality of 'Z_(a.+2 * b.+2) is the product itself.  Both factors
-   are at least two, so the product is a successor by conversion, which is the
-   shape fdist_uniform takes its cardinality argument in. *)
+   are at least two, so the product is a successor by conversion, the shape
+   fdist_uniform takes. *)
 Lemma card_Zp_pq (a b : nat) : #|'Z_(a.+2 * b.+2)| = (a.+2 * b.+2)%N.
 Proof. by rewrite card_ord Zp_cast. Qed.
 

@@ -19,13 +19,21 @@ From mathcomp Require Import reals.
 (* function dominated pointwise by a negligible one being negligible, and     *)
 (* that is the direction a security claim is read in.                         *)
 (*                                                                            *)
-(* FCF's negligible states the same test in negated form over its rational    *)
-(* probability type, ~ (1 / x ^ c <= f x), a shape that needs no classical    *)
-(* totality of the order; the CertiCrypt paper bounds an absolute value,      *)
-(* |nu n| <= n ^- c.  Classical reasoning is in scope here through boolp,     *)
-(* and the intended arguments are nonnegative advantage functions, so the     *)
-(* test is the direct strict inequality and the closure lemmas are direct     *)
-(* order arithmetic.                                                          *)
+(* FCF states the same test in negated form over its rational probability     *)
+(* type, in src/FCF/Asymptotic.v lines 227-230 at commit 2550fa27.  The       *)
+(* negated inequality needs no classical totality of the order.               *)
+(*                                                                            *)
+(* ```                                                                        *)
+(* Definition negligible(f : nat -> Rat) :=                                   *)
+(*   forall c, exists n, forall x (pf_nz : nz x),                             *)
+(*     x > n ->                                                               *)
+(*     ~ ((1 / expnat x c) <= f x)%rat.                                       *)
+(* ```                                                                        *)
+(*                                                                            *)
+(* The CertiCrypt paper bounds an absolute value instead, |nu n| <= n ^- c.   *)
+(* Classical reasoning is in scope here through boolp, and the intended       *)
+(* arguments are nonnegative advantage functions, so the test is the direct   *)
+(* strict inequality and the closure lemmas are direct order arithmetic.      *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*          negligible_fun f == f eventually falls below every inverse        *)
@@ -37,6 +45,16 @@ From mathcomp Require Import reals.
 (*       negligible_fun_cst0 == the zero function is negligible               *)
 (*        negligible_fun_sum == a finite sum of negligible functions is       *)
 (*                              negligible                                    *)
+(*         expnn_gt_monomial == (n+2)^(n+2) exceeds every monomial n^c        *)
+(*                              past c                                        *)
+(*            exp2_gt_linear == 2 ^ k exceeds c * (k+1) past c * c + c        *)
+(*          exp2_gt_monomial == 2 ^ n exceeds n ^ c past 2 ^ (c * c + c)      *)
+(*  negligible_fun_inv_expnn == the inverse of (k+2)^(k+2) is negligible      *)
+(* negligible_fun_inv_ge_expnn == a sequence dominating (k+2)^(k+2) has       *)
+(*                              a negligible inverse                          *)
+(*   negligible_fun_inv_exp2 == the inverse of 2 ^ k is negligible            *)
+(* negligible_fun_inv_ge_exp2 == a sequence dominating 2 ^ k has a            *)
+(*                              negligible inverse                            *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -115,3 +133,108 @@ by rewrite big_cons lexx.
 Qed.
 
 End negligible_asymptotics.
+
+Section growth_rates.
+Implicit Types c d k n : nat.
+
+(* Superpolynomial growth of (n+2)^(n+2): past c it exceeds every monomial
+   n^c. *)
+Lemma expnn_gt_monomial (c n : nat) : (c < n)%N -> (n ^ c < n.+2 ^ n.+2)%N.
+Proof.
+move=> Hcn; apply: leq_ltn_trans (_ : (n.+2) ^ c < _)%N; last first.
+  by rewrite ltn_exp2l //; exact: (leq_trans Hcn (leqW (leqnSn n))).
+move: Hcn; case: c => [_|c _]; first by rewrite !expn0.
+by rewrite leq_exp2r //; exact: (leqW (leqnSn n)).
+Qed.
+
+(* Two to the k exceeds the linear term c * (k+1) once k reaches c * c + c.
+   It is the linear case of the monomial comparison. *)
+Lemma exp2_gt_linear (c k : nat) : (c * c + c <= k)%N -> (c * k.+1 < 2 ^ k)%N.
+Proof.
+move=> Hk.
+have leq_mulS_expn2 a b : (a.+1 * b.+1 <= 2 ^ (a + b))%N.
+  by rewrite expnD; apply: leq_mul; rewrite ltn_expl.
+have ltn_mul_split a b : (a * a <= b)%N -> (a * (a + b).+1 < a.+1 * b.+1)%N.
+  move=> le_aa_b; rewrite mulnS mulnDr mulSn mulnS.
+  by rewrite addnA addnA ltn_add2r addnC ltn_add2r ltnS.
+have Hck : (c <= k)%N by rewrite (leq_trans _ Hk) // leq_addl.
+have [d Hd] : exists d, k = (c + d)%N by exists (k - c)%N; rewrite subnKC.
+rewrite Hd; apply: leq_trans (leq_mulS_expn2 c d); apply: ltn_mul_split.
+by move: Hk; rewrite Hd [(c + d)%N]addnC leq_add2r.
+Qed.
+
+(* Two to the n exceeds every monomial n^c once n reaches 2 ^ (c * c + c).
+   A security parameter read as a bit length grows at this rate. *)
+Lemma exp2_gt_monomial (c n : nat) :
+  (2 ^ (c * c + c) <= n)%N -> (n ^ c < 2 ^ n)%N.
+Proof.
+(* The truncated logarithm of n brackets n between two powers of two, and the
+   linear case closes the gap between the brackets. *)
+move=> Hn.
+have Hn0 : (0 < n)%N by rewrite (leq_trans _ Hn) // expn_gt0.
+move: Hn; case: c => [_|c Hn].
+  by rewrite expn0 -{1}(expn0 2) ltn_exp2l.
+set k := trunc_log 2 n.
+have Hk : (c.+1 * c.+1 + c.+1 <= k)%N by apply: trunc_log_max.
+apply: leq_ltn_trans (_ : 2 ^ (c.+1 * k.+1) < _)%N.
+  by rewrite mulnC expnM leq_exp2r // ltnW // trunc_log_ltn.
+apply: leq_trans (_ : 2 ^ (2 ^ k) <= _)%N.
+  by rewrite ltn_exp2l // exp2_gt_linear.
+by rewrite leq_exp2l // trunc_logP.
+Qed.
+
+End growth_rates.
+
+Section negligible_inverses.
+Context {R : realType}.
+
+(* The inverse of (k+2)^(k+2) is negligible, falling below every inverse
+   polynomial.  It is the growth rate a scheme sequence's plaintext spaces
+   have to follow. *)
+Lemma negligible_fun_inv_expnn :
+  negligible_fun (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
+Proof.
+move=> c; exists c => n Hn.
+have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
+rewrite -natrX ltf_pV2 ?ltr_nat ?expnn_gt_monomial //.
+  by rewrite posrE ltr0n expn_gt0.
+by rewrite posrE ltr0n expn_gt0 Hn0.
+Qed.
+
+(* A sequence dominating (k+2)^(k+2) has negligible inverse.  Paillier and
+   Benaloh sequences are checked against it to supply size_negligible. *)
+Lemma negligible_fun_inv_ge_expnn (f : nat -> nat) :
+  (forall k, ((k.+2) ^ k.+2 <= f k)%N) ->
+  negligible_fun (fun k => ((f k)%:R : R)^-1).
+Proof.
+move=> Hf; apply: negligible_fun_le negligible_fun_inv_expnn => k.
+rewrite lef_pV2 ?ler_nat //.
+  by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
+by rewrite posrE ltr0n expn_gt0.
+Qed.
+
+(* The inverse of 2 ^ k is negligible.  It is the growth rate a scheme
+   sequence follows when k counts the bits of its key. *)
+Lemma negligible_fun_inv_exp2 :
+  negligible_fun (fun k : nat => ((2 ^ k)%N%:R : R)^-1).
+Proof.
+move=> c; exists (2 ^ (c * c + c))%N => n Hn.
+have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
+rewrite -natrX ltf_pV2 ?ltr_nat ?exp2_gt_monomial ?(ltnW Hn) //.
+  by rewrite posrE ltr0n expn_gt0.
+by rewrite posrE ltr0n expn_gt0 Hn0.
+Qed.
+
+(* A sequence dominating 2 ^ k has negligible inverse.  A scheme sequence
+   whose k-th key has k bits supplies size_negligible through it. *)
+Lemma negligible_fun_inv_ge_exp2 (f : nat -> nat) :
+  (forall k, (2 ^ k <= f k)%N) ->
+  negligible_fun (fun k => ((f k)%:R : R)^-1).
+Proof.
+move=> Hf; apply: negligible_fun_le negligible_fun_inv_exp2 => k.
+rewrite lef_pV2 ?ler_nat //.
+  by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
+by rewrite posrE ltr0n expn_gt0.
+Qed.
+
+End negligible_inverses.

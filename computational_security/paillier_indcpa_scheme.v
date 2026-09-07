@@ -2,7 +2,7 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import zmodp ring boolp reals.
 Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
-Require Import fdist_extra proba.
+Require Import fdist_extra proba extra_algebra.
 Require Import homomorphic_encryption residuosity_game.
 Require Import paillier_enc paillier_ahe paillier_fdist_instance.
 Require Import negligible indcpa_game epshop.
@@ -26,11 +26,10 @@ Require Import negligible indcpa_game epshop.
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
 (*                                                                            *)
-(* pq_gt1 is a Lemma rather than a section Let because the exported           *)
-(* statements below mention the scheme, hence this proof term, and a          *)
-(* downstream file restating that bound needs a name to write.                *)
-(* Bounds stated at two proofs of the card_renc_paillier equation would       *)
-(* compose only through a rewrite.                                            *)
+(* The modulus bound pq_gt1 comes from extra_algebra.v, so the exported       *)
+(* statements below and a downstream file restating them name one proof       *)
+(* term.  Two proofs of the card_renc_paillier equation would likewise give   *)
+(* bounds that compose only through a rewrite.                                *)
 (*                                                                            *)
 (* ## How the scheme and the game are connected                               *)
 (*                                                                            *)
@@ -98,7 +97,6 @@ Require Import negligible indcpa_game epshop.
 (* advantages fall below every inverse polynomial.                            *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*                    pq_gt1 == the modulus bound the packaging is taken at   *)
 (*             renc_paillier == the coin index type of this instantiation,    *)
 (*                              the unit group of Z/(pq)^2 Z                  *)
 (*     rand_of_renc_paillier == the coin map, the identity                    *)
@@ -189,13 +187,7 @@ Variables p q : nat.
 Hypothesis p_gt1 : (1 < p)%N.
 Hypothesis q_gt1 : (1 < q)%N.
 
-(* The modulus p q is greater than 1.  This is the condition the Paillier
-   packaging is taken at, and every scheme value below carries this proof
-   term. *)
-Lemma pq_gt1 : (1 < p * q)%N.
-Proof. by rewrite (leq_trans p_gt1) // leq_pmulr // (ltnW q_gt1). Qed.
-
-Local Notation AHE := (Paillier_AHEnc pq_gt1).
+Local Notation AHE := (Paillier_AHEnc (pq_gt1 p_gt1 q_gt1)).
 
 (* The coin index type here: the unit group of Z/(pq)^2 Z, the scheme's own
    randomness carrier.  Coins and randomness are separate in the abstract
@@ -310,7 +302,7 @@ Lemma unit_accept_dcrE (g : 'Z_((p * q) * (p * q))) (gn : g ^+ (p * q) = 1)
   residuosity_accept (dcr_of_adversary g adv) unit_fdist
   = residuosity_accept (dcr_of_adversary_zero adv) unit_fdist.
 Proof.
-have pq_gt0 : (0 < p * q)%N := ltnW pq_gt1.
+have pq_gt0 : (0 < p * q)%N := ltnW (pq_gt1 p_gt1 q_gt1).
 (* Both sides draw the state c the same way; compare the inner laws at each
    fixed c. *)
 rewrite !residuosity_acceptE /=; congr (Pr _ _); congr (_ >>= _).

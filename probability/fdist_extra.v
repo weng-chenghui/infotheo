@@ -21,6 +21,10 @@ Require Import fdist.
 (* fdistmap_uniform_supp_img == the pushforward of a uniform law along a      *)
 (*                              map whose fibers over its image are           *)
 (*                              equinumerous is uniform on that image         *)
+(*             fdistmap_prod == the pushforward of a product along a pair of  *)
+(*                              coordinate maps is a product                  *)
+(*            fdistmap_prodr == the pushforward of a product along a map on   *)
+(*                              the second coordinate keeps the first factor  *)
 (*               eq_fdistmap == fdistmap is congruent in a pointwise-equal    *)
 (*                              transported map                               *)
 (*              fdistmap_cst == the transport of a law along a constant map   *)
@@ -50,10 +54,9 @@ Lemma fdist_prod2 (T1 T2 : finType) (Q1 : R.-fdist T1)
     (Q2 : R.-fdist T2) : (Q1 `x Q2)`2 = Q2.
 Proof. by rewrite -fdistX1 fdistX_prod fdist_prod1. Qed.
 
-(* The fdistmap/fdistbind commutation of the fdist monad.  A convenience rather
-   than a necessity, though the obvious inline spelling does not substitute for
-   it: [rewrite /fdistmap fdistbindA] at a use site unfolds every [fdistmap] in
-   the goal, destroying the nested ones a later [fdistmap_comp] must match. *)
+(* The fdistmap/fdistbind commutation of the fdist monad.  Inlining it as
+   [rewrite /fdistmap fdistbindA] unfolds every [fdistmap] in the goal, which
+   a later [fdistmap_comp] then fails to match. *)
 Lemma fdistmap_bind (T1 T2 T3 : finType) (Q : R.-fdist T1)
     (g : T1 -> R.-fdist T2) (h : T2 -> T3) :
   fdistmap h (Q >>= g) = Q >>= (fun a => fdistmap h (g a)).
@@ -71,8 +74,8 @@ rewrite fdistmapE fdist_uniformE (big_pred1 (h b)); last first.
 by rewrite fdist_uniformE (bij_eq_card bg).
 Qed.
 
-(* The pushforward of a uniform distribution along a map with equal fiber
-   cardinalities over its image is the uniform distribution on the image. *)
+(* A uniform law pushed along a map with equinumerous fibers over its image
+   is uniform on that image. *)
 Lemma fdistmap_uniform_supp_img (T U : finType) (n : nat)
     (cardT : #|T| = n.+1) (f : T -> U)
     (Himg : (0 < #|f @: [set: T]|)%N)
@@ -98,6 +101,31 @@ rewrite -[LHS]mulr_natr Hpart natrM invfM -mulrA mulVf ?mulr1 //.
 rewrite pnatr_eq0 -lt0n.
 by case/imsetP : Hu => r _ ->; apply/card_gt0P; exists r; rewrite inE.
 Qed.
+
+(* The pushforward of a product distribution along a pair of coordinate maps is
+   the product of the pushforwards.  Two independent factors stay independent
+   when each is transported on its own. *)
+Lemma fdistmap_prod (A1 A2 B1 B2 : finType) (Q1 : R.-fdist A1)
+    (Q2 : R.-fdist A2) (f1 : A1 -> B1) (f2 : A2 -> B2) :
+  fdistmap (fun a : (A1 * A2)%type => (f1 a.1, f2 a.2)) (Q1 `x Q2)
+  = (fdistmap f1 Q1) `x (fdistmap f2 Q2).
+Proof.
+apply/fdist_ext => -[b1 b2]; rewrite fdist_prodE !fdistmapE big_distrl /=.
+rewrite (eq_bigr (fun i => \sum_(a in preim f2 (pred1 b2)) (Q1 i * Q2 a)));
+  last by move=> i _; rewrite big_distrr.
+rewrite pair_big /=; apply: eq_big => [[a1 a2]|[a1 a2] _] /=.
+  by rewrite !inE /= xpair_eqE.
+by rewrite fdist_prodE.
+Qed.
+
+(* The pushforward of a product distribution along a map acting only on the
+   second coordinate keeps the first factor.  That factor stays independent of
+   the transported one. *)
+Lemma fdistmap_prodr (A1 A2 B2 : finType) (Q1 : R.-fdist A1)
+    (Q2 : R.-fdist A2) (f2 : A2 -> B2) :
+  fdistmap (fun a : (A1 * A2)%type => (a.1, f2 a.2)) (Q1 `x Q2)
+  = Q1 `x (fdistmap f2 Q2).
+Proof. by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id. Qed.
 
 (* Pointwise equal maps transport a law to the same law. *)
 Lemma eq_fdistmap (A B : finType) (g h : A -> B) (p : R.-fdist A) :

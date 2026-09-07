@@ -190,10 +190,6 @@ Require Import epshop.
 (* distinguisher_of_predictor predict ==                                      *)
 (*                              accepts exactly when the predictor            *)
 (*                              recovers Bob's input                          *)
-(*             fdistmap_prod == applying separate functions to independent    *)
-(*                              factors preserves their product form          *)
-(*            fdistmap_prodr == changing only the second factor leaves the    *)
-(*                              first factor unchanged                        *)
 (* all_zero_guess_V2_le_invm == a predictor reading Alice's all-zero tuple    *)
 (*                              returns Bob's input at most as often as the   *)
 (*                              inverse plaintext-space cardinality           *)
@@ -778,29 +774,6 @@ by apply: (cinde_diagonal_bound
     (cinde_RV_comp (fun sp s => predict (alice_hop_tuple_of_spectator (sp, s)))
        alice_spectator_cinde)) => a c; exact: alice_V2_cond_le.
 Qed.
-
-(* The pushforward of a product distribution along a pair of coordinate maps is
-   the product of the pushforwards. *)
-Lemma fdistmap_prod (A1 A2 B1 B2 : finType) (Q1 : R.-fdist A1)
-    (Q2 : R.-fdist A2) (f1 : A1 -> B1) (f2 : A2 -> B2) :
-  fdistmap (fun a : (A1 * A2)%type => (f1 a.1, f2 a.2)) (Q1 `x Q2)
-  = (fdistmap f1 Q1) `x (fdistmap f2 Q2).
-Proof.
-apply/fdist_ext => -[b1 b2]; rewrite fdist_prodE !fdistmapE big_distrl /=.
-rewrite (eq_bigr (fun i => \sum_(a in preim f2 (pred1 b2)) (Q1 i * Q2 a)));
-  last by move=> i _; rewrite big_distrr.
-rewrite pair_big /=; apply: eq_big => [[a1 a2]|[a1 a2] _] /=.
-  by rewrite !inE /= xpair_eqE.
-by rewrite fdist_prodE.
-Qed.
-
-(* The pushforward of a product distribution along a map acting only on the
-   second coordinate keeps the first factor. *)
-Lemma fdistmap_prodr (A1 A2 B2 : finType) (Q1 : R.-fdist A1)
-    (Q2 : R.-fdist A2) (f2 : A2 -> B2) :
-  fdistmap (fun a : (A1 * A2)%type => (a.1, f2 a.2)) (Q1 `x Q2)
-  = Q1 `x (fdistmap f2 Q2).
-Proof. by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id. Qed.
 
 (* The simulator law at one leaked output: uniform masks, uniform combine
    randomness, that output, and two zero encryptions.  It reads only the

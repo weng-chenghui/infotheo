@@ -64,11 +64,6 @@ Require Import negligible indcpa_game.
 (*             adv_negligible == f_adv is a negligible sequence, the          *)
 (*                               assumption-conditional term of every         *)
 (*                               bound along the sequence                     *)
-(*          expnn_gt_monomial == (k+2)^(k+2) exceeds every monomial k^c past  *)
-(*                               c                                            *)
-(*   negligible_fun_inv_expnn == the inverse of (k+2)^(k+2) is negligible     *)
-(* negligible_fun_inv_ge_expnn == a sequence dominating (k+2)^(k+2) has a     *)
-(*                               negligible inverse                           *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -171,43 +166,3 @@ Record dsdp_asymptotic (R : realType) (Q : dsdp_instance_sequence R) := {
   size_negligible : negligible_fun (f_size Q) ;
   (* the assumption-conditional term: the assumed advantage vanishes *)
   adv_negligible : negligible_fun (f_adv Q) }.
-
-(* Superpolynomial growth of (k+2)^(k+2): past c it exceeds every monomial
-   k^c. *)
-Lemma expnn_gt_monomial (c n : nat) : (c < n)%N -> (n ^ c < n.+2 ^ n.+2)%N.
-Proof.
-move=> Hcn; apply: leq_ltn_trans (_ : (n.+2) ^ c < _)%N; last first.
-  by rewrite ltn_exp2l //; exact: (leq_trans Hcn (leqW (leqnSn n))).
-move: Hcn; case: c => [_|c _]; first by rewrite !expn0.
-by rewrite leq_exp2r //; exact: (leqW (leqnSn n)).
-Qed.
-
-Section negligible_helpers.
-Context {R : realType}.
-
-(* The inverse of (k+2)^(k+2) is negligible, falling below every inverse
-   polynomial.  It is the growth rate a scheme sequence's plaintext spaces
-   have to follow. *)
-Lemma negligible_fun_inv_expnn :
-  negligible_fun (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
-Proof.
-move=> c; exists c => n Hn.
-have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
-rewrite -natrX ltf_pV2 ?ltr_nat ?expnn_gt_monomial //.
-  by rewrite posrE ltr0n expn_gt0.
-by rewrite posrE ltr0n expn_gt0 Hn0.
-Qed.
-
-(* A sequence dominating (k+2)^(k+2) has negligible inverse.  Paillier and
-   Benaloh sequences are checked against it to supply size_negligible. *)
-Lemma negligible_fun_inv_ge_expnn (f : nat -> nat) :
-  (forall k, ((k.+2) ^ k.+2 <= f k)%N) ->
-  negligible_fun (fun k => ((f k)%:R : R)^-1).
-Proof.
-move=> Hf; apply: negligible_fun_le negligible_fun_inv_expnn => k.
-rewrite lef_pV2 ?ler_nat //.
-  by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
-by rewrite posrE ltr0n expn_gt0.
-Qed.
-
-End negligible_helpers.
