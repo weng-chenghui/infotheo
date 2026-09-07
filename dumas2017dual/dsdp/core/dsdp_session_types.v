@@ -71,12 +71,17 @@ Definition DInit {party n env} (x : data) (p : @sproc dsdp_dtype data party n en
     : @sproc dsdp_dtype data party n.+1 env :=
   SInit x p.
 
-(* DSample: draw one datum from this party's own seed stream.  No channel is
-   used, so the session environment is unchanged and the fuel grows by one. *)
+(* DSample: draw one encryption coin from this party's own seed stream, a
+   datum of any other sort failing the party.  No channel is used, so the
+   session environment is unchanged and the fuel grows by one. *)
 Definition DSample {party n env}
-    (f : data -> @sproc dsdp_dtype data party n env)
+    (f : di_randT DI -> @sproc dsdp_dtype data party n env)
     : @sproc dsdp_dtype data party n.+1 env :=
-  SSample f.
+  SSample (fun x =>
+    match di_get_rand DI x with
+    | Some r => f r
+    | None => SFail
+    end).
 
 (* DRet: terminal return wrapper (fuel 2, empty session environment). *)
 Definition DRet {party : nat} (x : data) : @sproc dsdp_dtype data party 2 senv_end :=
