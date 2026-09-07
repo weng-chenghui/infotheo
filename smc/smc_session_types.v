@@ -1184,6 +1184,8 @@ apply: eq_map => p /=.
 by rewrite aproc_skip_nocomm_env.
 Qed.
 
+(* Failed attempt at preservation:
+   the parallel nature of stypes_interp makes it unpractical directly *)
 Lemma aprocs_rstep_preserve n m (l : lens n m)
       (aps : n.-tuple (aproc dtype data)) aps' tr :
   rstep l (map_tuple erase_aproc (extract l aps))
@@ -1213,6 +1215,8 @@ inversion 1; subst.
   move=> [Ha Hb] _ Hcompat.
 Abort.
 
+(* In progress attempt at preservation.
+   The main case remains to formalize, but is proved on paper. *)
 Lemma aprocs_step_preserve (aps : seq (aproc dtype data)) :
   aprocs_compat aps ->
   let aps1 := map aproc_skip_nocomm aps in
