@@ -564,7 +564,7 @@ Hypothesis f_r_negligible : negligible_fun f_r.
 Hypothesis f_residuosity_benaloh_negligible :
   negligible_fun f_residuosity_benaloh.
 
-(* The derived IND-CPA advantage is negligible, twice a negligible family
+(* The derived IND-CPA advantage is negligible, twice a negligible function
    being negligible.  The residuosity hypothesis now implies what a sequence
    of IND-CPA assumptions had to take, at a factor two. *)
 Lemma f_adv_benaloh_negligible : negligible_fun f_adv_benaloh.

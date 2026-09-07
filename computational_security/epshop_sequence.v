@@ -15,9 +15,9 @@ Require Import negligible epshop.
 (* sequence that no single member of it can carry.                            *)
 (*                                                                            *)
 (* A sequence program whose label list is the same at every k has a           *)
-(* negligible advantage as soon as every label's loss sequence is negligible. *)
-(* The negligible sequences form a submonoid of the additive sequences,       *)
-(* closed under addition and containing the zero sequence                     *)
+(* negligible advantage as soon as every label's loss is a negligible         *)
+(* function.  The negligible functions form a submonoid of the additive       *)
+(* functions, closed under addition and containing the zero function          *)
 (* (negligible_fun_add, negligible_fun_cst0, negligible_fun_sum) and downward *)
 (* closed (negligible_fun_le); loss_eval is a monoid morphism out of the free *)
 (* monoid on labels, and result_total says the bound a program publishes is   *)
@@ -47,7 +47,7 @@ Require Import negligible epshop.
 (* ```                                                                        *)
 (*      negligibleClaims L R == a sequence of dictionaries indexed by the     *)
 (*                              security parameter, together with the         *)
-(*                              negligibility of the loss sequence of every   *)
+(*                              negligibility of the loss function of every   *)
 (*                              label                                         *)
 (*                  claims C == the dictionary a negligibleClaims carries, a  *)
 (*                              coercion to Funclass                          *)
@@ -71,7 +71,7 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 
 (* A sequence of dictionaries indexed by the security parameter, every label
-   of which has a negligible loss sequence.  Registration is keyed on a named
+   of which has a negligible loss function.  Registration is keyed on a named
    dictionary sequence, since a lambda has no head constant for unification. *)
 Structure negligibleClaims (L : Type) (R : realType) := NegligibleClaims {
   claims :> nat -> L -> claim R ;

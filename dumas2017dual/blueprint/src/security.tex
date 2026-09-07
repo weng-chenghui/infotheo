@@ -1641,7 +1641,7 @@ single member of it can carry.
   \rocqok
   \uses{def:alice_trace_sim_chain_admissible,def:dsdp_asymptotic,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances with an asymptotic value
-  $\mathcal{N}$, and a family $D_k$ of tests
+  $\mathcal{N}$, and a sequence $D_k$ of tests
   of Alice's executed trace, if both reduction adversaries of $D_k$ are
   admissible for $\mathcal{A}_k$ at every $k$, then the distances between that
   trace and the simulation are negligible.
@@ -1658,7 +1658,7 @@ single member of it can carry.
   $\mathrm{negl}(k \mapsto \varepsilon_{\mathrm{cpa},k})$ and no
   plaintext-size term enters, which is what separates it from
   Theorem~\ref{thm:alice_guess_negligible}. The dictionary is registered a
-  second time, at the family of tests rather than at the test a predictor
+  second time, at the sequence of tests rather than at the test a predictor
   induces, because a statement made at the predictor's own test would be
   weaker than a statement quantified over every test.
 \end{theorem}
@@ -1725,7 +1725,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_pq_le}
   \rocqok
   \uses{def:paillier_setting,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dsdp_asymptotic,def:dcr_assumption,def:paillier_indcpa_assumption}
-  Along the Paillier sequence a predictor family admissible at every $k$
+  Along the Paillier sequence a predictor sequence admissible at every $k$
   matches Bob's input with negligible probability, and at one fixed instance
   the class-conditional trace bound is written in residuosity epsilons, at
   the two spellings of its unconditional term.
@@ -1745,7 +1745,7 @@ single member of it can carry.
   identification into the statement, the factor four being two keys times two
   residuosity calls per key. The negligible statement leaves no
   plaintext-size term visible: that residue enters it as the size half of the
-  asymptotic value, one of the two negligible families
+  asymptotic value, one of the two negligible functions
   Theorem~\ref{thm:alice_guess_negligible} consumes.
 \end{corollary}
 
@@ -1781,7 +1781,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_pq_le}
   \rocqok
   \uses{def:benaloh_setting,cor:alice_guess_benaloh,thm:alice_guess_negligible,def:dsdp_asymptotic,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
-  Along the Benaloh sequence a predictor family admissible at every $k$
+  Along the Benaloh sequence a predictor sequence admissible at every $k$
   matches Bob's input with negligible probability, and at one fixed instance
   the class-conditional trace bound is written in residuosity epsilons, at
   the two spellings of its unconditional term.
