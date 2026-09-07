@@ -138,6 +138,7 @@ dumas2017dual/dsdp/core/dsdp_interface.v
 dumas2017dual/dsdp/core/dsdp_session_types.v
 dumas2017dual/dsdp/core/dsdp_program.v
 dumas2017dual/dsdp/core/dsdp_pismc.v
+dumas2017dual/dsdp/core/dsdp_pismc_idealized.v
 dumas2017dual/dsdp/core/dsdp_correctness.v
 dumas2017dual/dsdp/counting/dsdp_entropy_trace.v
 dumas2017dual/dsdp/counting/dsdp_random_inputs.v
@@ -145,6 +146,7 @@ dumas2017dual/dsdp/counting/dsdp_entropy.v
 # computational_security
 computational_security/negligible.v
 computational_security/indcpa_game.v
+computational_security/idealized_indcpa_scheme.v
 computational_security/epshop.v
 computational_security/epshop_family.v
 computational_security/paillier_indcpa_scheme.v
@@ -153,6 +155,7 @@ dumas2017dual/dsdp/hopping/dsdp_instance.v
 dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
 dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
 dumas2017dual/dsdp/hopping/dsdp_alice_main.v
+dumas2017dual/dsdp/hopping/dsdp_alice_instances.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
 dumas2017dual/dsdp/counting/dsdp_relay_secrecy.v
 
