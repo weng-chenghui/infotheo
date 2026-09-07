@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Standalone pre-commit step: statement comments stay short.
+# Every (* ... *) block directly above a Definition, Lemma, Theorem, Record or
+# Notation in a staged .v file has at most two sentences of at most twenty
+# words each (scripts/check_comment_sentences.py).  Independent of the
+# rocq-audit hook.  Bypass once with COMMENT_SENTENCES_BYPASS=1.
+#
+# Wiring: this repository's core.hooksPath points outside the repository, so
+# call this script from the active pre-commit, as COVERAGE.md does for the
+# blueprint step:
+#   "$(git rev-parse --show-toplevel)/scripts/pre-commit-comment-sentences"
+# or make it the pre-commit itself:
+#   git config core.hooksPath scripts/git-hooks   # after linking it there
+set -euo pipefail
+
+if [ "${COMMENT_SENTENCES_BYPASS:-0}" = "1" ]; then
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+staged="$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.v$' || true)"
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+echo "[comment-sentences] checking statement comments of staged .v files…"
+# shellcheck disable=SC2086
+if ! (cd "$ROOT" && python3 scripts/check_comment_sentences.py $staged); then
+  echo "[comment-sentences] FAILED — shorten the comments listed above:" >&2
+  echo "  at most two sentences, each at most twenty words." >&2
+  echo "  Bypass once with: COMMENT_SENTENCES_BYPASS=1 git commit …" >&2
+  exit 1
+fi

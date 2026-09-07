@@ -93,12 +93,9 @@ Definition pkey_of_dk (AHE : AHEncType) (dk_a dk_b dk_c : priv_key AHE)
   | NoParty => pub_of_priv dk_a
   end.
 
-(* One execution of DSDP, the section variables of the corrupted-Alice trace
-   development packed as one record: an IND-CPA scheme, Alice's input and her
-   three weights with the weight on Charlie's input invertible, the three
-   private keys, and the coins of Bob's and Charlie's second encryptions.
-   The scheme is a single field and a coercion, so an instance and the IND-CPA
-   assumption made about it name one scheme, and hence one coin space. *)
+(* One DSDP execution as a record: the IND-CPA scheme, Alice's input and three
+   weights, three private keys, and two coins.  The weight on Charlie's input
+   is a unit. *)
 Record dsdp_instance := {
   (* the IND-CPA scheme the execution runs on *)
   inst_scheme  :> indcpa_scheme ;
@@ -129,9 +126,9 @@ Record dsdp_instance := {
 Definition inst_pkey_of_party (I : dsdp_instance) :=
   pkey_of_dk (inst_dk_a I) (inst_dk_b I) (inst_dk_c I).
 
-(* The instance with the coin of Charlie's encryption replaced.  A statement
-   that samples that coin speaks about the protocol rather than about one
-   execution, and this is the only field it leaves free. *)
+(* The instance with the coin of Charlie's encryption replaced.  Sampling that
+   coin makes a statement speak about the protocol rather than one
+   execution. *)
 Definition inst_with_rc2 (I : dsdp_instance) (w : scheme_renc I)
     : dsdp_instance :=
   {| inst_scheme := inst_scheme I ;
@@ -148,8 +145,7 @@ Arguments inst_with_rc2 : clear implicits.
 
 (* A sequence of DSDP instances indexed by the security parameter, with the
    IND-CPA assumption made at each k.  Consecutive instances are unrelated:
-   each one is supplied on its own, and an asymptotic statement reads its
-   content off a dsdp_asymptotic value rather than off a recurrence. *)
+   each one is supplied on its own. *)
 Record dsdp_instance_sequence (R : realType) := {
   (* the instance at the security parameter k *)
   sequence_instance : nat -> dsdp_instance ;
@@ -157,9 +153,8 @@ Record dsdp_instance_sequence (R : realType) := {
   sequence_assumption : forall k,
     indcpa_epsilon_assumption (R:=R) (sequence_instance k) }.
 
-(* The inverse plaintext cardinality at k along Q.  It counts the solution
-   fiber the leaked output confines Bob's input to, and it is the summand
-   every trace guessing bound along Q carries for that output. *)
+(* The inverse plaintext cardinality at k along Q.  Every trace guessing bound
+   along Q carries it as the leaked-output term. *)
 Definition f_size {R : realType} (Q : dsdp_instance_sequence R) (k : nat)
     : R := (#|plain (scheme_AHE (sequence_instance Q k))|%:R : R)^-1.
 
@@ -203,9 +198,8 @@ rewrite -natrX ltf_pV2 ?ltr_nat ?expnn_gt_monomial //.
 by rewrite posrE ltr0n expn_gt0 Hn0.
 Qed.
 
-(* A sequence dominating (k+2)^(k+2) has negligible inverse.  It is the
-   condition on modulus growth a Paillier or Benaloh sequence is checked
-   against to supply the unconditional negligibility field. *)
+(* A sequence dominating (k+2)^(k+2) has negligible inverse.  Paillier and
+   Benaloh sequences are checked against it to supply size_negligible. *)
 Lemma negligible_fun_inv_ge_expnn (f : nat -> nat) :
   (forall k, ((k.+2) ^ k.+2 <= f k)%N) ->
   negligible_fun (fun k => ((f k)%:R : R)^-1).

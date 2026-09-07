@@ -42,12 +42,11 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* advantage its own reduction shows, the second at the epsilon an            *)
 (* adversary-class assumption promises.                                       *)
 (*                                                                            *)
-(* Four programs follow, each charging a hop at the advantage its own         *)
-(* reduction shows.  alice_hops and alice_trace_sim_chain lose the two        *)
-(* IND-CPA advantages and nothing else, the first at the hopping tuple and    *)
-(* the second at the executed trace.  alice_chain and alice_trace_chain add   *)
-(* the fiber term and return one over the plaintext count plus those two      *)
-(* advantages.                                                                *)
+(* Two programs follow, each charging a hop at the advantage its own          *)
+(* reduction shows, and both opening at the trace the interpreter hands       *)
+(* Alice when it runs the protocol.  alice_trace_sim_chain loses the two      *)
+(* IND-CPA advantages and nothing else.  alice_trace_chain adds the fiber     *)
+(* term and returns one over the plaintext count plus those two advantages.   *)
 (*                                                                            *)
 (* The readings follow.  alice_sim_advantage_le and                           *)
 (* alice_trace_sim_advantage_le bound what a Boolean test sees between the    *)
@@ -129,16 +128,14 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                              the fiber term                                *)
 (*              alice_claim == what each label claims at its own advantage    *)
 (*   alice_claim_admissible == what each label claims at a class epsilon      *)
-(*             alice_totalE == the loss of alice_chain in the order its       *)
-(*                              bound reads it                                *)
+(*             alice_totalE == the loss of alice_trace_chain in the order     *)
+(*                              its bound reads it                            *)
 (*  alice_admissible_totalE == the same for a class-conditional total         *)
 (*                                                                            *)
 (* The programs                                                               *)
 (*                                                                            *)
-(*               alice_hops == the two ciphertext replacements at the hopping *)
-(*                              tuple, losing the two advantages              *)
-(*              alice_chain == alice_hops with the fiber term added           *)
-(*        alice_trace_chain == the same argument opened at the executed trace *)
+(*        alice_trace_chain == the two ciphertext replacements at the         *)
+(*                              executed trace, with the fiber term added     *)
 (*    alice_trace_sim_chain == the executed trace against the simulated       *)
 (*                              trace, losing the two advantages              *)
 (*                                                                            *)
@@ -316,10 +313,9 @@ Local Open Scope sproc_scope.
 Section dsdp_alice_main.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, Alice's input and the
-   three protocol weights, the three private keys and the key table they
-   induce. *)
+(* The instance's fields under the names this development gives them.  They
+   are the scheme data, Alice's input, the three weights, the three keys and
+   the key table. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation card_renc := (scheme_card_renc I).
@@ -342,11 +338,9 @@ Local Notation indcpa_epsilon_assumption :=
 Local Notation indcpa_fdist_acceptE := (indcpa_fdist_acceptE (R:=R) (S:=I)).
 Local Notation predictor := (predictor I).
 
-(* The declarations discharged by dsdp_alice_hop_secrecy.v and by
-   dsdp_alice_trace_link.v take these parameters explicitly.  Each
-   abbreviation pins them once, under the name it abbreviates; the shadowing
-   is not recursive, since the right-hand side resolves against the
-   constant. *)
+(* The declarations of dsdp_alice_hop_secrecy.v and dsdp_alice_trace_link.v
+   take these parameters explicitly.  Each abbreviation pins them once, and
+   the shadowing is not recursive. *)
 Local Notation alice_sampleT := (alice_sampleT I).
 Local Notation alice_sample_fdist := (alice_sample_fdist (R:=R) I).
 Local Notation alice_hop_tupleT := (alice_hop_tupleT I).
@@ -512,10 +506,9 @@ Local Notation alice_trace_idealE := (alice_trace_idealE (R:=R) I).
    the real and zero experiments.  They are not themselves complete
    experiments. *)
 
-(* The IND-CPA adversary built from D at Bob's key: it samples the hop-0 state,
-   submits Bob's input V2 as the challenge plaintext, and answers with D run on
-   the joint value assembled around the challenge ciphertext.  At the real bit
-   it reproduces the real experiment and at the zero bit the Bob-zero one. *)
+(* The IND-CPA adversary built from D at Bob's key, over the hop-0 state.  At
+   the real bit it runs the real experiment, at the zero bit the Bob-zero
+   one. *)
 Definition bob_challenge_adversary
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
     indcpa_adversary :=
@@ -524,10 +517,8 @@ Definition bob_challenge_adversary
      adv_plain := fun c => c.1.1.1.1 ;
      adv_decide := fun c ch => D (hop0_assemble c ch) |}.
 
-(* The IND-CPA adversary built from D at Charlie's key: it samples the hop-1
-   state, submits Charlie's input V3 as the challenge plaintext, and answers
-   with D run on the joint value assembled around the challenge ciphertext.  At
-   the real bit it reproduces the Bob-zero experiment and at the zero bit the
+(* The IND-CPA adversary built from D at Charlie's key, over the hop-1 state.
+   At the real bit it runs the Bob-zero experiment, at the zero bit the
    all-zero one. *)
 Definition charlie_challenge_adversary
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
@@ -554,9 +545,8 @@ rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
 by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
-(* D's acceptance probability on the experiment whose Bob slot carries zero
-   equals the zero-bit success probability of bob_challenge_adversary D
-   against Bob's key. *)
+(* D accepts the Bob-zero experiment as often as bob_challenge_adversary D
+   succeeds at the zero bit. *)
 Lemma hop0_zero_challengeE
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
   accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
@@ -584,10 +574,9 @@ Proof.
 by rewrite /indcpa_epsilon hop0_real_challengeE hop0_zero_challengeE.
 Qed.
 
-(* D's acceptance probability on the Bob-zero experiment equals the real-bit
-   success probability of charlie_challenge_adversary D against Charlie's key.
-   That experiment is the zero side for Bob's key and the real side for
-   Charlie's, which is what joins the two replacements. *)
+(* D accepts the Bob-zero experiment as often as charlie_challenge_adversary D
+   succeeds at the real bit.  That experiment is the zero side for Bob's key
+   and the real side for Charlie's. *)
 Lemma hop1_real_challengeE
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
   accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
@@ -633,11 +622,9 @@ Proof.
 by rewrite /indcpa_epsilon hop1_real_challengeE hop1_zero_challengeE.
 Qed.
 
-(* The probability that a predictor matches Bob's input is the acceptance
-   probability of its distinguisher on the law of the two inputs beside the
-   observation the predictor reads.  The observation is a parameter, so one
-   equality serves the three hopping-tuple games and Alice's executed
-   trace. *)
+(* A predictor matches Bob's input as often as its distinguisher accepts.  The
+   observation is a parameter, so one equality serves the three tuple games
+   and the trace. *)
 Lemma guess_V2_acceptE (O : finType) (predict : predictor O)
     (H : {RV alice_sample_fdist -> O}) :
   Pr alice_sample_fdist
@@ -648,9 +635,9 @@ rewrite acceptE /dist_of_RV Pr_fdistmap_preim.
 by apply: eq_bigl => t; rewrite !inE.
 Qed.
 
-(* The all-zero game is at most one over the plaintext count, the mass the
-   leaked output leaves along the DSDP solution fiber.  It is the one term of
-   every total below that rests on no computational assumption. *)
+(* The all-zero game is at most 1/#|plain AHE|, the mass left along the DSDP
+   solution fiber.  It is the one term of every total below resting on no
+   computational assumption. *)
 Lemma all_zero_game_V2_le_invm (predict : predictor alice_hop_tupleT) :
   accept (distinguisher_of_predictor predict)
          (`p_ [% V2, V3, alice_tuple_all_zero])
@@ -675,42 +662,34 @@ case: (eqVneq `Pr[ [% V2, V3] = (v2, v3) ] 0) => [H0|H0].
 by rewrite -[RHS]cpr_eqE_mul (dsdp_alice_hop_tuple_cond_sim v H0) mulrC.
 Qed.
 
-(* A trace test D lifted to Alice's hopping tuple: it rebuilds the trace with
-   alice_trace_of_hop_tuple and runs D on it.  The lift is what lets the two
-   ciphertext hops bound
+(* A trace test D lifted to Alice's hopping tuple by alice_trace_of_hop_tuple.
+   The lift is what lets the two ciphertext hops bound the trace distance.
      |accept D `p_[% V2, V3, trace_of_run dsdp_protocol Alice]
-      - accept D alice_trace_ideal|,
-   the distance D sees between Alice's executed trace and the trace the
-   simulator builds from the leaked output alone. *)
+      - accept D alice_trace_ideal| *)
 Definition hop_tuple_distinguisher
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
   D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)).
 
-(* The IND-CPA adversary at Bob's key induced by a trace test D: it embeds the
-   challenge in the ciphertext of Bob's input V2, rebuilds Alice's trace
-   around it, and decides with D.  Its advantage is the gap
+(* The IND-CPA adversary at Bob's key induced by a trace test D.  Its
+   advantage is the first ciphertext hop of every trace program.
      |accept (hop_tuple_distinguisher D) `p_[% V2, V3, alice_tuple_real]
       - accept (hop_tuple_distinguisher D)
-          `p_[% V2, V3, alice_tuple_bob_zero]|,
-   the first ciphertext hop of every trace program. *)
+          `p_[% V2, V3, alice_tuple_bob_zero]| *)
 Definition bob_trace_adversary
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
   bob_challenge_adversary (hop_tuple_distinguisher D).
 
-(* The Charlie-key counterpart of bob_trace_adversary: its advantage is the
-   gap
+(* The Charlie-key counterpart of bob_trace_adversary.  Its advantage is the
+   second ciphertext hop of every trace program.
      |accept (hop_tuple_distinguisher D) `p_[% V2, V3, alice_tuple_bob_zero]
       - accept (hop_tuple_distinguisher D)
-          `p_[% V2, V3, alice_tuple_all_zero]|,
-   the second ciphertext hop of every trace program. *)
+          `p_[% V2, V3, alice_tuple_all_zero]| *)
 Definition charlie_trace_adversary
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
   charlie_challenge_adversary (hop_tuple_distinguisher D).
 
-(* A Boolean test reading Alice's executed trace beside the two honest inputs
-   accepts as often as its lift reading her hopping tuple, the trace being a
-   deterministic image of the tuple.  The step costs nothing, so the run of
-   the interpreter itself stands as the first game of a trace argument. *)
+(* A trace test accepts as often as its lift on the hopping tuple.  The step
+   costs nothing, so the interpreter's own run stands as the first game. *)
 Lemma accept_trace_tupleE
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   accept D (`p_ [% V2, V3, AliceTrace])
@@ -719,10 +698,9 @@ Proof.
 by rewrite /accept /hop_tuple_distinguisher alice_trace_realE fdistmap_comp.
 Qed.
 
-(* A Boolean trace test accepts the simulated trace law as often as its lift
-   accepts the all-zero hopping tuple beside the two honest inputs.  The step
-   costs nothing at the simulator end, as accept_trace_tupleE does at the
-   executed-protocol end. *)
+(* A trace test accepts the simulated trace as often as its lift accepts the
+   all-zero tuple.  The step costs nothing at the simulator end, as
+   accept_trace_tupleE does at the protocol end. *)
 Lemma accept_trace_ideal_tupleE
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   accept D alice_trace_ideal
@@ -752,10 +730,9 @@ Definition charlie_trace_predictor_epsilon
   indcpa_epsilon (pkey_of_dk Charlie)
     (charlie_trace_adversary (distinguisher_of_predictor predict)).
 
-(* The three experiments, the acceptance probability of a distinguisher on
-   one of them, and the two IND-CPA advantages a hop of the chain below logs,
-   under the short names that chain reads at.  G0, G1 and G2 are the three
-   boxes of the figure, in the order the chain visits them. *)
+(* The three experiments and the two IND-CPA advantages, under the short names
+   the chains read at.  G0, G1 and G2 are the three games, in the order a
+   chain visits them. *)
 Local Notation G0 := (`p_ [% V2, V3, alice_tuple_real]).
 Local Notation G1 := (`p_ [% V2, V3, alice_tuple_bob_zero]).
 Local Notation G2 := (`p_ [% V2, V3, alice_tuple_all_zero]).
@@ -766,20 +743,14 @@ Local Notation eps_charlie D :=
 
 Local Open Scope epshop_scope.
 
-(* The three labels of the argument: cpa_bob and cpa_charlie for the two
-   IND-CPA reductions, at Bob's key and at Charlie's, and uniform_fiber for
-   the plaintext-count term at the all-zero endpoint.  A label tells a reader
-   of an accumulated loss which terms are conditional on a computational
-   assumption and at which key: the two hop labels are, the terminal label is
-   not. *)
+(* The three labels: cpa_bob, cpa_charlie for the two IND-CPA reductions,
+   uniform_fiber for the plaintext-count term.  A label says which terms are
+   conditional on an assumption, and at which key. *)
 Variant alice_label := cpa_bob | cpa_charlie | uniform_fiber.
 
-(* What each label claims: for a hop label the two acceptance probabilities
-   its ciphertext replacement moves between and the advantage that
-   replacement costs, and for uniform_fiber the all-zero game against the zero
-   game, at one over the plaintext count.  Every step of a program is checked
-   against the claim of the label it stands under, so an advantage cannot be
-   charged to a key whose reduction it does not come from. *)
+(* What each label claims: the two games a hop moves between, and the
+   advantage it costs.  A step is checked against its label, so each advantage
+   is charged to the key its reduction comes from. *)
 Definition alice_claim
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
     (l : alice_label) : claim R :=
@@ -789,11 +760,9 @@ Definition alice_claim
   | uniform_fiber => Claim (accept D G2) 0 #|plain AHE|%:R^-1
   end.
 
-(* The class-conditional reading of the same three games: the two hop labels
-   cost the epsilon an adversary-class assumption promises rather than the
-   advantage the reduction at that key shows.  A hop under this dictionary is
-   conditional on the class admitting its reduction adversary, and the
-   terminal label costs the same unconditional term as under alice_claim. *)
+(* The class-conditional reading of the same three games, each hop at the
+   epsilon the class assumption promises.  A hop here is conditional on the
+   class admitting its reduction adversary. *)
 Definition alice_claim_admissible (A : indcpa_epsilon_assumption)
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
     (l : alice_label) : claim R :=
@@ -805,76 +774,23 @@ Definition alice_claim_admissible (A : indcpa_epsilon_assumption)
   | uniform_fiber => Claim (accept D G2) 0 #|plain AHE|%:R^-1
   end.
 
-(* The closed form of the loss the chain below accumulates, written in the
-   order alice_tuple_guess_V2_le states: the plaintext-space residue first,
-   then the Bob-key advantage, then the Charlie-key advantage.  The chain
-   accumulates them in the order it spends them, the two hops before the
-   endpoint, so the return statement reorders. *)
+(* The loss alice_trace_chain accumulates, in the order
+   alice_tuple_guess_V2_le states it.  The chain spends the two hops before
+   the endpoint, so the bound reorders the three terms. *)
 Lemma alice_totalE
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
   eps_bob D + eps_charlie D + #|plain AHE|%:R^-1
   = #|plain AHE|%:R^-1 + eps_bob D + eps_charlie D.
 Proof. by rewrite addrAC [X in X + _]addrC. Qed.
 
-(* The closed form of the loss a chain over alice_claim_admissible
-   accumulates, in the order alice_trace_guess_V2_admissible_le states it:
-   the plaintext-count term first, then the two hops, both at one and the same
-   class epsilon, which is where the factor two of that statement comes
-   from. *)
+(* The loss a chain over alice_claim_admissible accumulates, both hops at one
+   class epsilon.  That is where the factor 2 of
+   alice_trace_guess_V2_admissible_le comes from. *)
 Lemma alice_admissible_totalE (A : indcpa_epsilon_assumption) :
   indcpa_assumption_epsilon A + indcpa_assumption_epsilon A
   + (#|plain AHE|%:R : R)^-1
   = (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof. by rewrite mulr_natl mulr2n addrC. Qed.
-
-(* The two ciphertext replacements as one program: from the real hopping
-   tuple to the tuple whose two ciphertext slots both carry zero, each hop at
-   the advantage its own reduction shows.  It carries no terminal, and the gap
-   result it returns is the simulation bound of alice_sim_advantage_le. *)
-Definition alice_hops
-    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :=
-  \epsilon[ alice_claim D ]{
-            (* the real view, both ciphertext slots carrying their
-               plaintexts *)
-            start (accept D G0) ;
-            (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
-            hop cpa_bob (eps_bob D) to (accept D G1)
-              by le_of_eq (hop0_advantageE D) ;
-            (* Charlie's slot zeroed, at a second IND-CPA advantage *)
-            hop cpa_charlie (eps_charlie D) to (accept D G2)
-              by le_of_eq (hop1_advantageE D) }.
-
-(* The two ciphertext replacements at the hopping tuple, then the all-zero
-   endpoint bounded by one over the plaintext count.  The bound it returns is
-   the statement of alice_tuple_guess_V2_le: the terminal term is
-   unconditional, and each hop term is conditional on the IND-CPA assumption
-   at one key. *)
-Definition alice_chain (predict : predictor alice_hop_tupleT) :=
-  \epsilon[ alice_claim (distinguisher_of_predictor predict) ]{
-            (* the real view, both ciphertext slots carrying their
-               plaintexts *)
-            start (accept (distinguisher_of_predictor predict) G0) ;
-            (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
-            hop cpa_bob (eps_bob (distinguisher_of_predictor predict))
-              to (accept (distinguisher_of_predictor predict) G1)
-              by le_of_eq
-                   (hop0_advantageE (distinguisher_of_predictor predict)) ;
-            (* Charlie's slot zeroed, at a second IND-CPA advantage *)
-            hop cpa_charlie (eps_charlie (distinguisher_of_predictor predict))
-              to (accept (distinguisher_of_predictor predict) G2)
-              by le_of_eq
-                   (hop1_advantageE (distinguisher_of_predictor predict)) ;
-            (* the guessing residue of the all-zero view, a term outside the
-               hopping, added to the loss so the total bounds the real view *)
-            plus uniform_fiber #|plain AHE|%:R^-1
-              by plus_le (accept_ge0 _ _)
-                   (all_zero_game_V2_le_invm predict) ;;
-            (* the real-view game, at the residue and the two advantages *)
-            bound (#|plain AHE|%:R^-1
-                   + eps_bob (distinguisher_of_predictor predict)
-                   + eps_charlie (distinguisher_of_predictor predict))
-              by alice_totalE (distinguisher_of_predictor predict) }.
-
 
 (* Alice's trace secrecy as one program.  Its first game is the trace the
    interpreter hands Alice when it runs the DSDP protocol at the sampled
@@ -892,11 +808,10 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) :=
 Section alice_trace_chain.
 Variable predict : predictor alice_traceT.
 
-(* The predictor's Boolean test on the hopping tuple: rebuild Alice's trace
-   from the tuple, let predict guess Bob's input from it, and accept when the
-   guess is right.  Its advantage against the zero game,
-     |accept _ `p_[% V2, V3, alice_tuple_real] - 0|,
-   is the probability that the predictor guesses V2 from the real trace. *)
+(* The predictor's test on the hopping tuple: it accepts when predict guesses
+   Bob's input.  Its advantage against the zero game is that guessing
+   probability.
+     |accept _ `p_[% V2, V3, alice_tuple_real] - 0| *)
 Local Notation tuple_distinguisher :=
   (hop_tuple_distinguisher (distinguisher_of_predictor predict)).
 
@@ -940,12 +855,11 @@ End alice_trace_chain.
 Section alice_trace_sim_chain.
 Variable D : distinguisher (plain AHE * plain AHE * alice_traceT)%type.
 
-(* The trace test D on the hopping tuple: it rebuilds Alice's trace from a
-   tuple and runs D on it.  Its advantage
+(* The trace test D on the hopping tuple: it rebuilds Alice's trace and runs D
+   on it.  Its advantage is the distance D sees between the executed trace and
+   the simulated trace.
      |accept _ `p_[% V2, V3, alice_tuple_real]
-      - accept _ `p_[% V2, V3, alice_tuple_all_zero]|
-   is the distance D sees between Alice's executed trace and the simulated
-   trace, the two end steps costing nothing. *)
+      - accept _ `p_[% V2, V3, alice_tuple_all_zero]| *)
 Local Notation tuple_distinguisher := (hop_tuple_distinguisher D).
 
 Definition alice_trace_sim_chain :=
@@ -966,10 +880,9 @@ Definition alice_trace_sim_chain :=
     same to (accept D alice_trace_ideal)
       by esym (accept_trace_ideal_tupleE D) }.
 
-(* A Boolean trace test separates the real and simulated joint laws by at most
-   the two hop advantages of its lifted hopping-tuple test.  Nothing outside
-   the two ciphertext replacements enters the bound, the steps at either end
-   costing nothing. *)
+(* A trace test separates the real and simulated laws by at most the two hop
+   advantages.  The steps at either end cost nothing, so only the two
+   ciphertext replacements enter. *)
 Theorem alice_trace_sim_advantage_le :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr alice_trace_ideal [set x | D x] |
@@ -980,22 +893,19 @@ rewrite -!acceptE.
 exact: result_sound alice_trace_sim_chain.
 Qed.
 
-(* The distance a Boolean trace test sees between the law of Alice's executed
-   trace beside the two honest inputs and the law the simulator builds from
-   the leaked output alone.  It is the quantity every trace simulation bound
-   of this file bounds, at a fixed instance and along the security parameter
-   alike. *)
+(* The distance a trace test sees between Alice's executed trace and the
+   simulator's trace.  It is the quantity every trace simulation bound of this
+   file bounds. *)
 Definition alice_trace_sim_advantage : R :=
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr alice_trace_ideal [set x | D x] |.
 
 End alice_trace_sim_chain.
 
-(* A distinguisher separates the real joint law of the two secret inputs and
-   Alice's view from the ideal law by at most the sum of the two hop
-   advantages.  The real world is the real experiment and the ideal world the
-   all-zero one, so this is the simulation reading of the same two ciphertext
-   replacements. *)
+(* A distinguisher separates the real law from the ideal law by at most the
+   two hop advantages.  The ideal law is the all-zero experiment, so the gap
+   splits at G1.
+     |accept D G0 - accept D G2| *)
 Theorem alice_sim_advantage_le
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
   `| Pr (`p_ [% V2, V3, alice_tuple_real]) [set x | D x]
@@ -1004,14 +914,14 @@ Theorem alice_sim_advantage_le
      + indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite alice_idealE -!acceptE.
-exact: result_sound (alice_hops D).
+apply: (le_trans (ler_distD (accept D G1) _ _)).
+by rewrite hop0_advantageE hop1_advantageE.
 Qed.
 
-(* A predictor reading Alice's real view returns Bob's input with probability
-   at most one over the plaintext count plus the two hop advantages.  The
-   first term is unconditional, the residue the leaked output leaves along the
-   DSDP solution fiber, and each hop term is conditional on the IND-CPA
-   assumption at one key. *)
+(* A predictor guesses V2 from the hopping tuple with probability at most
+   1/#|plain AHE| + eps_bob D + eps_charlie D.  The proof adds the fiber
+   residue at G2 to the simulation bound.
+     |accept D G0 - accept D G2| <= eps_bob D + eps_charlie D *)
 Theorem alice_tuple_guess_V2_le
     (predict : predictor alice_hop_tupleT) :
   Pr alice_sample_fdist [set t | (predict `o alice_tuple_real) t == V2 t]
@@ -1021,8 +931,18 @@ Theorem alice_tuple_guess_V2_le
        + indcpa_epsilon charlie_pkey
            (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
-exact: result_sound (alice_chain predict).
+have step (x y u v : R) : y <= u -> `|x - y| <= v -> x <= u + v.
+  move=> Hy Hv; have -> : x = y + (x - y) by ring.
+  by apply: lerD => //; exact: le_trans (ler_norm _) Hv.
+have Hsim : `| accept (distinguisher_of_predictor predict) G0
+               - accept (distinguisher_of_predictor predict) G2 |
+            <= eps_bob (distinguisher_of_predictor predict)
+               + eps_charlie (distinguisher_of_predictor predict).
+  by rewrite -alice_idealE 2!acceptE; exact: alice_sim_advantage_le.
+rewrite guess_V2_acceptE -addrA.
+apply: (step _ (accept (distinguisher_of_predictor predict) G2)).
+  exact: all_zero_game_V2_le_invm.
+exact: Hsim.
 Qed.
 
 (* The trace guessing bound, the trace-level simulation bound with the fiber
@@ -1030,11 +950,9 @@ Qed.
 Section alice_trace_guess.
 Variable predict : predictor alice_traceT.
 
-(* A predictor reading the trace the interpreter produces for Alice matches
-   Bob's input with probability at most one over the plaintext count plus the
-   advantages of the two hop reductions.  The first term is unconditional, the
-   residue the leaked output leaves along the DSDP solution fiber, and each
-   hop term is conditional on the IND-CPA assumption at one key. *)
+(* A predictor reading Alice's executed trace guesses Bob's input with
+   probability at most 1/#|plain AHE| plus the two hop advantages.  The first
+   term is unconditional, each hop term conditional on IND-CPA at one key. *)
 Theorem alice_trace_guess_V2_le :
   Pr alice_sample_fdist [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
@@ -1058,10 +976,9 @@ End dsdp_alice_main.
 Section dsdp_alice_trace_decrypt.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, Alice's input and the
-   three protocol weights, the three private keys, and Bob's and Charlie's
-   second-hop coins as indices into the coin space. *)
+(* The instance's fields under the names this development gives them.  They
+   are the scheme data, the weights, the three keys and the two second-hop
+   coins. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation card_renc := (scheme_card_renc I).
@@ -1093,9 +1010,8 @@ by apply/setP => t; rewrite !inE eqxx.
 Qed.
 
 (* A predictor holding Bob's private key induces a Bob-key reduction of
-   advantage at least 1 - 1/#|plain AHE|.  It reads Bob's input off the
-   challenge ciphertext at the real bit and is always right, and at the zero
-   bit it is right only on the fiber the leaked output leaves. *)
+   advantage at least 1 - 1/#|plain AHE|.  At the real bit it decrypts and is
+   always right, at the zero bit only on the fiber. *)
 Corollary decrypt_bob_epsilon_ge :
   1 - (#|plain AHE|%:R : R)^-1
   <= bob_trace_predictor_epsilon bob_decrypt_predictor.
@@ -1124,11 +1040,9 @@ rewrite -Hlift H0.
 exact: le_trans (lerB (lexx _) H1) (ler_norm _).
 Qed.
 
-(* An assumption promising an epsilon below 1 - 1/#|plain AHE| must answer
-   false on the Bob-key reduction the decrypting predictor induces, that
-   reduction having advantage at least 1 - 1/#|plain AHE|.  A key-holding
-   adversary sits outside the public-key attack model an epsilon is measured
-   in, so its rejection is forced. *)
+(* An assumption promising an epsilon below 1 - 1/#|plain AHE| rejects the
+   decrypting predictor's Bob-key reduction.  A key-holding adversary sits
+   outside the public-key attack model an epsilon is measured in. *)
 Lemma decrypt_reduction_admissibleF (A : indcpa_epsilon_assumption) :
   indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
   indcpa_admissible A
@@ -1141,12 +1055,9 @@ have Hle := le_trans decrypt_bob_epsilon_ge
 by move: (lt_le_trans Heps Hle); rewrite ltxx.
 Qed.
 
-(* Dropping the two class premises of the class-conditional guessing bound
-   leaves a false statement: whenever the promised epsilon is small, the
-   premise-free right-hand side sits strictly below what the decrypting
-   predictor achieves.  With decrypt_reduction_admissibleF, which shows those
-   premises cannot be supplied for this predictor, it places the bound's truth
-   in the class restriction. *)
+(* At a small promised epsilon the premise-free bound sits strictly below what
+   the decrypting predictor achieves.  With decrypt_reduction_admissibleF it
+   places the truth of the guessing bound in the class restriction. *)
 Lemma decrypt_guess_V2_premise_free_lt
     (A : indcpa_epsilon_assumption) :
   2 * indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
@@ -1231,9 +1142,8 @@ Local Notation encoded_predictor g_raw :=
      g_raw (map decode_a b)).
 
 (* The guessing bound restated at the raw interpreter trace, before any
-   encoding.  Alice's trace carries no public-key mark, so decoding it under
-   her own key returns the run's own trace and a predictor reading either
-   format is right on the same samples. *)
+   encoding.  Decoding under Alice's own key returns the run's own trace, so
+   both formats agree. *)
 Corollary alice_raw_trace_guess_V2_le
     (g_raw : seq (di_data DI) -> plain AHE) :
   Pr (alice_sample_fdist (R:=R) I)
@@ -1259,21 +1169,18 @@ End dsdp_alice_raw_trace_bounds.
 Section dsdp_alice_raw_trace_avg.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, Alice's input and the
-   three protocol weights, the three private keys, and Bob's and Charlie's
-   second-hop coins as indices into the coin space. *)
+(* The instance's fields under the names this development gives them.  They
+   are the scheme data, the weights, the three keys and the two second-hop
+   coins. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation card_renc := (scheme_card_renc I).
 Local Notation rand_of_renc := (@scheme_rand_of_renc I).
 Local Notation dk_a := (inst_dk_a I).
 
-(* Each abbreviation reads the instance, except the per-coin ones, which read
-   the instance with Charlie's second-hop coin replaced by w.  The two
-   reduction adversaries are among them: their state distribution is built
-   from the sample space of that instance, so the summand at w names them
-   there. *)
+(* Each abbreviation reads the instance, except the per-coin ones, which
+   replace Charlie's second-hop coin by w.  The two reduction adversaries are
+   among them, so the summand at w names them there. *)
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation trace_dataT := (trace_dataT I).
 Local Notation pkey_of_dk := (inst_pkey_of_party I).
@@ -1303,9 +1210,9 @@ Local Notation encoded_distinguisher D_raw :=
      D_raw (x.1.1, x.1.2,
             map decode_a x.2)).
 
-(* The Boolean real raw-trace experiment: the re-encryption coin sampled
-   uniformly, then the test applied to the two honest inputs and Alice's raw
-   interpreter trace at that coin. *)
+(* The Boolean real raw-trace experiment, at a uniformly sampled re-encryption
+   coin.  The test reads the two honest inputs and Alice's raw trace at that
+   coin. *)
 Definition alice_raw_trace_real_experiment_avg
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
     R.-fdist bool :=
@@ -1313,16 +1220,16 @@ Definition alice_raw_trace_real_experiment_avg
     fdistmap (fun t => D_raw (V2 t, V3 t, AliceRawTrace_coin w t))
       (alice_sample_fdist (R:=R) (inst_with_rc2 I w))).
 
-(* The Boolean ideal raw-trace experiment: the image of the averaged ideal
-   trace law under the test composed with the fixed-key decoder. *)
+(* The Boolean ideal raw-trace experiment: the averaged ideal trace law read
+   through the decoded test. *)
 Definition alice_raw_trace_ideal_experiment_avg
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
     R.-fdist bool :=
   fdistmap (encoded_distinguisher D_raw) ideal_avg.
 
-(* The averaged gap a Boolean test reading Alice's raw interpreter trace sees
-   between the real and the ideal experiment is at most the average of the
-   two per-coin hop advantages of the decoded test. *)
+(* The averaged gap between the real and the ideal raw-trace experiment.  It
+   is at most the average of the two per-coin hop advantages of the decoded
+   test. *)
 Theorem alice_raw_trace_sim_advantage_avg_le
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
   `| Pr (alice_raw_trace_real_experiment_avg D_raw) [set true]
@@ -1383,9 +1290,9 @@ Hypothesis charlie_admissible : forall k,
   indcpa_admissible (assumption k)
     (charlie_trace_adversary (distinguisher_of_predictor (predict k))).
 
-(* The trace guessing-probability sequence: the probability that the k-th
-   predictor, reading Alice's executed trace at the k-th instance, returns
-   Bob's input. *)
+(* The trace guessing-probability sequence: at k, the probability that
+   predict k returns Bob's input.  It reads Alice's executed trace at the k-th
+   instance. *)
 Definition f_guess_V2 k : R := alice_trace_guess_V2_pr (predict k).
 
 (* The dictionary the guessing program below is written at, one at each
@@ -1396,15 +1303,10 @@ Definition alice_claims_admissible_at (k : nat) : alice_label -> claim R :=
     (hop_tuple_distinguisher (distinguisher_of_predictor (predict k))).
 
 (* The objects the programs of this section are written over, at the k-th
-   instance: a trace test lifted to the hopping tuple, the law of Alice's
-   executed trace beside the two honest inputs, the three hopping-tuple
-   experiments in the order a program visits them, and the epsilon the k-th
-   assumption promises for its class. *)
+   instance.  They are the lifted trace test, the three experiments in
+   visiting order, and the class epsilon. *)
 Local Notation tuple_distinguisher k :=
   (hop_tuple_distinguisher (distinguisher_of_predictor (predict k))).
-Local Notation trace_game k :=
-  (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-         trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice]).
 Local Notation G0 k :=
   (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k), alice_tuple_real (I:=I k)]).
 Local Notation G1 k :=
@@ -1415,13 +1317,15 @@ Local Notation G2 k :=
          alice_tuple_all_zero (I:=I k)]).
 Local Notation eps k := (indcpa_assumption_epsilon (assumption k)).
 
-(* The guessing sequence as the distance of the trace game from the zero
-   game, which is the form the terminal below reads it in.  It speaks of the
-   games alone, which is what lets the program under that terminal stay
+(* The guessing sequence as the distance of the trace game from the zero game.
+   It speaks of the games alone, so the program under the terminal below stays
    unnamed. *)
 Lemma f_guess_V2_advantageE k :
   f_guess_V2 k
-  = `| accept (distinguisher_of_predictor (predict k)) (trace_game k) - 0 |.
+  = `| accept (distinguisher_of_predictor (predict k))
+         (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+                trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])
+       - 0 |.
 Proof.
 by rewrite /f_guess_V2 /alice_trace_guess_V2_pr guess_V2_acceptE
    (advantage0 (accept_ge0 _ _)).
@@ -1432,10 +1336,8 @@ Qed.
 Variable N : dsdp_asymptotic Q.
 
 (* Every label of the guessing dictionary costs a negligible family along the
-   sequence: the two hop labels the epsilon the assumption at k assumes, the
-   terminal label one over the plaintext count.  This is the whole asymptotic
-   content of the argument, stated once for the dictionary rather than once
-   per statement proved over it. *)
+   sequence.  This is the whole asymptotic content, stated once for the
+   dictionary. *)
 Lemma alice_label_negligible_at (l : alice_label) :
   negligible_fun (fun k => claim_cost (alice_claims_admissible_at k l)).
 Proof.
@@ -1450,17 +1352,18 @@ Canonical alice_claims_admissible_negligible :=
 
 Local Open Scope epshop_scope.
 
-(* Along a sequence of DSDP instances, a sequence of predictors reading
-   Alice's executed traces matches Bob's input with negligible probability,
-   under the two class premises of this section.  Two of the three terms are
-   assumption-conditional, the class epsilon at Bob's key and at Charlie's,
-   and the third, one over the plaintext count, is unconditional. *)
+(* Along a sequence of instances, a sequence of trace predictors guesses Bob's
+   input with negligible probability.  The two hop terms are
+   assumption-conditional, the plaintext-count term unconditional. *)
 Theorem alice_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
 exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]{ fun k =>
   \epsilon[ alice_claims_admissible_at k ]{
     (* the trace of a run of the protocol by the interpreter *)
-    start (accept (distinguisher_of_predictor (predict k)) (trace_game k)) ;
+    start (accept (distinguisher_of_predictor (predict k))
+             (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
+                      Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (tuple_distinguisher k) (G0 k))
       by accept_trace_tupleE _ ;
@@ -1487,11 +1390,9 @@ exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]{ fun k =>
       by alice_admissible_totalE (assumption k) } }).
 Qed.
 
-(* The bound the same program returns at every security parameter: one over
-   the plaintext count, unconditional, plus twice the assumption's epsilon,
-   one ciphertext replacement at Bob's key and one at Charlie's, both under
-   the two class premises.  It is what alice_trace_guess_V2_admissible_le
-   reads at the sequence that repeats one instance. *)
+(* The bound the same program returns at k: 1/#|plain| unconditional, plus
+   twice the class epsilon.  It is what alice_trace_guess_V2_admissible_le
+   reads at the sequence repeating one instance. *)
 Lemma f_guess_V2_le k :
   f_guess_V2 k <= (#|plain (scheme_AHE (I k))|%:R : R)^-1 + 2 * eps k.
 Proof.
@@ -1501,7 +1402,10 @@ Proof.
 rewrite f_guess_V2_advantageE.
 exact: (result_sound (\epsilon[ alice_claims_admissible_at k ]{
     (* the trace of a run of the protocol by the interpreter *)
-    start (accept (distinguisher_of_predictor (predict k)) (trace_game k)) ;
+    start (accept (distinguisher_of_predictor (predict k))
+             (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
+                      Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (tuple_distinguisher k) (G0 k))
       by accept_trace_tupleE _ ;
@@ -1529,9 +1433,8 @@ exact: (result_sound (\epsilon[ alice_claims_admissible_at k ]{
 Qed.
 
 (* Under the two negligibility facts of N, the decrypting predictor's Bob-key
-   reduction adversary is eventually outside the class.  The predictor whose
-   guessing probability is 1 is excluded by those two facts, not by the
-   unconditional term of the bound. *)
+   reduction adversary is eventually outside the class.  The two facts exclude
+   the predictor whose guessing probability is 1. *)
 Corollary decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (assumption k)
@@ -1578,18 +1481,15 @@ Hypothesis charlie_admissible_distinguisher : forall k,
     (charlie_trace_adversary (trace_distinguishers k)).
 
 (* The dictionary of the trace simulation argument at the k-th instance.  It
-   is a second dictionary because alice_claims_admissible_at is pinned to the
-   test one predictor induces, where indistinguishability quantifies over
-   every test. *)
+   is second because alice_claims_admissible_at is pinned to one predictor's
+   test. *)
 Definition alice_sim_claims_at (k : nat) : alice_label -> claim R :=
   alice_claim_admissible (assumption k)
     (hop_tuple_distinguisher (trace_distinguishers k)).
 
 (* Every label of that dictionary costs a negligible family along the
-   sequence, the two hop labels the class epsilon and the terminal label one
-   over the plaintext count.  The terminal branch is owed although the program
-   below never spends that label, the condition quantifying over the whole
-   label type. *)
+   sequence.  The terminal branch is owed because the condition quantifies
+   over the whole label type. *)
 Lemma alice_sim_label_negligible_at (l : alice_label) :
   negligible_fun (fun k => claim_cost (alice_sim_claims_at k l)).
 Proof.
@@ -1602,34 +1502,38 @@ Qed.
 Canonical alice_sim_claims_negligible :=
   NegligibleClaims alice_sim_claims_at alice_sim_label_negligible_at.
 
-(* The trace simulation distance sequence: the distance the k-th Boolean test
-   sees at the k-th instance between Alice's executed trace and the
+(* The trace simulation distance sequence, at the k-th test and the k-th
+   instance.  It is the distance between Alice's executed trace and the
    simulation. *)
 Definition f_sim_advantage k : R :=
   alice_trace_sim_advantage (trace_distinguishers k).
 
 (* That distance as the gap between the two games the simulation program
-   joins, the executed trace at one end and the simulated trace at the other.
-   Stated on the games alone, as f_guess_V2_advantageE is. *)
+   joins.  It is stated on the games alone, as f_guess_V2_advantageE is. *)
 Lemma f_sim_advantageE k :
   f_sim_advantage k
-  = `| accept (trace_distinguishers k) (trace_game k)
+  = `| accept (trace_distinguishers k)
+         (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+                trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])
        - accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)) |.
 Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
 
-(* Along a sequence of DSDP instances, every family of Boolean tests of
-   Alice's executed trace whose two induced reduction adversaries the
-   assumption at k admits separates that trace from the simulation by a
-   negligible amount.  The program at k spends the two hop labels and nothing
-   else, so no plaintext-count term enters, which is what separates this
-   bound from the guessing bound. *)
+(* Along a sequence of instances, a family of trace tests has negligible
+   simulation advantage.  The class admits its two reduction adversaries at
+   every k.
+     |accept (trace_distinguishers k)
+        `p_[% V2, V3, trace_of_run dsdp_protocol Alice]
+      - accept (trace_distinguishers k) (alice_trace_ideal (I k))| *)
 Theorem alice_trace_sim_advantage_negligible :
   negligible_fun f_sim_advantage.
 Proof.
 exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]{ fun k =>
   \epsilon[ alice_sim_claims_at k ]{
     (* the trace of a run of the protocol by the interpreter *)
-    start (accept (trace_distinguishers k) (trace_game k)) ;
+    start (accept (trace_distinguishers k)
+             (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
+                      Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G0 k))
       by accept_trace_tupleE _ ;
@@ -1672,19 +1576,15 @@ Hypothesis charlie_admissible :
     (charlie_trace_adversary (distinguisher_of_predictor predict)).
 
 (* The instance repeated at every security parameter, under the assumption
-   made once, so that a statement quantified over sequences can be read at one
+   made once.  A statement quantified over sequences is then read at one
    instance. *)
 Let const_sequence : dsdp_instance_sequence R :=
   {| sequence_instance := fun _ => I ;
      sequence_assumption := fun _ => assumption |}.
 
-(* The trace guessing bound with both hop advantages replaced by the single
-   epsilon an adversary-class assumption carries: one over the plaintext
-   count, unconditional, plus twice that epsilon, one replacement at Bob's
-   key and one at Charlie's.  The two premises restrict the adversaries the
-   predictor induces and are assumed here, decrypt_bob_epsilon_ge showing
-   that an assumption admitting every adversary is forced to an epsilon of at
-   least 1 - 1/#|plain AHE|. *)
+(* The trace guessing bound at one class epsilon: 1/#|plain AHE| plus twice
+   that epsilon.  The two premises restrict the adversaries the predictor
+   induces, and are assumed here. *)
 Corollary alice_trace_guess_V2_admissible_le :
   alice_trace_guess_V2_pr predict
     <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon assumption.
@@ -1698,10 +1598,9 @@ End dsdp_alice_admissible.
 Section dsdp_alice_trace_pq.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, Alice's input and the
-   three protocol weights, the three private keys, and Bob's and Charlie's
-   second-hop coins as indices into the coin space. *)
+(* The instance's fields under the names this development gives them.  They
+   are the scheme data, the weights, the three keys and the two second-hop
+   coins. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation card_renc := (scheme_card_renc I).
@@ -1727,8 +1626,7 @@ Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
 Proof. by rewrite card_plain_pq natrM. Qed.
 
 (* The class-conditional trace guessing bound with its unconditional term
-   written at the composite modulus p * q, the modulus of the Paillier-style
-   instances.  Its three levels of conditionality are those of
+   written 1/(p * q).  Its premises are those of
    alice_trace_guess_V2_admissible_le. *)
 Corollary alice_trace_guess_V2_admissible_pq_le
     (assumption : indcpa_epsilon_assumption)
@@ -1759,11 +1657,9 @@ Context {R : realType}.
 Fact card_renc_ord1 : #|'I_1| = #|'I_1|.-1.+1.
 Proof. by rewrite card_ord. Qed.
 
-(* The idealized scheme of idealized_ahe.v as one value of the scheme record
-   the IND-CPA game is quantified over: encryption returns the message and
-   ignores its randomness, so one coin exhausts the coin space.  It answers
-   the vacuity question for bounds stated at an indcpa_scheme, the
-   cipher-constant class admitting the reduction adversaries at advantage 0. *)
+(* The idealized scheme of idealized_ahe.v as one indcpa_scheme record,
+   encryption returning the message itself.  It answers the vacuity question:
+   the cipher-constant class admits the reductions at advantage 0. *)
 Definition idealized_indcpa_scheme (msgT : finComUnitRingType) :
     indcpa_scheme := {|
   scheme_AHE          := Idealized_HETypes msgT ;
@@ -1771,10 +1667,9 @@ Definition idealized_indcpa_scheme (msgT : finComUnitRingType) :
   scheme_card_renc    := card_renc_ord1 ;
   scheme_rand_of_renc := fun _ => 0 |}.
 
-(* The witness instance at k: the idealized scheme over a plaintext space of
-   cardinality (k+2)^(k+2), the first three weights zero, Charlie's weight 1,
-   zero keys and the single coin.  On it the guessing probability is
-   1/#|plain| rather than 0, so the guessing bound has content here. *)
+(* The witness instance at k, over a plaintext space of cardinality
+   (k+2)^(k+2).  Its guessing probability is 1/#|plain| rather than 0, so the
+   bound has content. *)
 Definition idealized_instance (k : nat) : dsdp_instance := {|
   inst_scheme       := idealized_indcpa_scheme 'Z_((k.+2) ^ k.+2) ;
   inst_v1 := 0 ; inst_u1 := 0 ; inst_u2 := 0 ; inst_u3 := 1 ;
@@ -1787,9 +1682,9 @@ Let card_plain_idealized (k : nat) :
   #|plain (scheme_AHE (idealized_instance k))| = ((k.+2) ^ k.+2)%N.
 Proof. by rewrite card_ord Zp_cast // -{1}(expn0 k.+2) ltn_exp2l. Qed.
 
-(* The unconditional term of every bound along the witness sequence: its
-   plaintext spaces grow as (k+2)^(k+2), so their inverse cardinalities fall
-   below every inverse polynomial. *)
+(* The unconditional term of every bound along the witness sequence.  Its
+   plaintext spaces grow as (k+2)^(k+2), so the term falls below every inverse
+   polynomial. *)
 Let idealized_size_negligible :
   negligible_fun (fun k =>
     (#|plain (scheme_AHE (idealized_instance k))|%:R : R)^-1).
@@ -1806,16 +1701,16 @@ Definition idealized_instance_sequence : dsdp_instance_sequence R := {|
     cipher_constant_assumption (idealized_instance k) |}.
 
 (* The two negligibility facts about the witness sequence, discharged rather
-   than assumed.  Its assumed advantage is zero at every k, so the whole
-   content of a bound along it is the unconditional 1/#|plain| term. *)
+   than assumed.  Its assumed advantage is zero at every k, leaving only the
+   1/#|plain| term. *)
 Definition idealized_asymptotic :
     dsdp_asymptotic idealized_instance_sequence :=
   @Build_dsdp_asymptotic R idealized_instance_sequence
     idealized_size_negligible negligible_fun_cst0.
 
-(* The constant predictor's distinguisher reads only the state slot, so the
-   Bob-key reduction adversary ignores the challenge ciphertext and the
-   cipher-constant class admits it. *)
+(* The constant predictor's distinguisher reads only the state slot.  Its
+   Bob-key reduction ignores the challenge ciphertext, so the cipher-constant
+   class admits it. *)
 Lemma idealized_bob_cipher_constant (k : nat) :
   indcpa_admissible
     (cipher_constant_assumption (R:=R) (idealized_instance k))
@@ -1838,9 +1733,8 @@ by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
 (* The hypotheses of alice_trace_guess_V2_negligible hold together at least
-   once: on the idealized sequence the constant predictor's two reduction
-   adversaries are in the cipher-constant class at every k, and the whole
-   content of the bound is its unconditional term. *)
+   once, on the idealized sequence.  The constant predictor's two reductions
+   are in the cipher-constant class at every k. *)
 Corollary alice_trace_guess_V2_idealized_negligible :
   negligible_fun (fun k =>
     alice_trace_guess_V2_pr (R:=R) (I:=idealized_instance k) (fun _ => 0)).
@@ -1918,18 +1812,15 @@ Definition paillier_instance_sequence : dsdp_instance_sequence R := {|
   sequence_assumption := fun k =>
     paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k) |}.
 
-(* The assumption every bound along this sequence is read at is the one
-   paillier_indcpa_scheme.v derives from dcr k, and no other record.  The
-   equation holds by unfolding, so the identification is a conversion. *)
+(* The assumption at k is the one paillier_indcpa_scheme.v derives from dcr k.
+   The equation holds by unfolding, so the identification is a conversion. *)
 Lemma paillier_assumption_at_dcrE k :
   sequence_assumption paillier_instance_sequence k
   = paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k).
 Proof. by []. Qed.
 
-(* The epsilon those bounds are stated at is twice the residuosity epsilon at
-   k, one residuosity call per hop of the scheme reduction.  It is the
-   conversion that restates a Paillier bound in decisional composite
-   residuosity epsilons. *)
+(* The epsilon at k is twice the residuosity epsilon, one call per hop.  It
+   restates a Paillier bound in decisional composite residuosity epsilons. *)
 Lemma paillier_epsilon_at_dcrE k :
   indcpa_assumption_epsilon (sequence_assumption paillier_instance_sequence k)
   = 2 * dcr_epsilon (dcr k).
@@ -1956,11 +1847,9 @@ Hypothesis charlie_admissible : forall k,
     (charlie_trace_adversary (I:=paillier_instance k)
        (distinguisher_of_predictor (predict k))).
 
-(* The trace guessing bound at k written in residuosity epsilons, on the two
-   class premises: an IND-CPA epsilon at Bob's key and at Charlie's, each
-   costing two residuosity calls, hence 4 eps.  The first summand is
-   unconditional, the residue the leaked output leaves along the DSDP
-   solution fiber, and the second is conditional on the residuosity record. *)
+(* The trace guessing bound at k: 1/#|plain| plus 4 residuosity epsilons, two
+   calls per key.  The first summand is unconditional, the second conditional
+   on the residuosity record. *)
 Corollary paillier_trace_guess_V2_admissible_le k :
   alice_trace_guess_V2_pr (I:=paillier_instance k) (predict k)
   <= (#|plain (AHE k)|%:R : R)^-1 + 4 * dcr_epsilon (dcr k).
@@ -1979,11 +1868,9 @@ Proof.
 rewrite inv_pq_cardE; exact: paillier_trace_guess_V2_admissible_le.
 Qed.
 
-(* The class premises of the bounds above are satisfiable: at the
-   challenge-ignoring residuosity record, whose epsilon is zero and proved,
-   the constant predictor's Bob-key reduction adversary is in the derived
-   class.  The decrypting predictor stays outside that class at the same
-   record, by decrypt_reduction_admissibleF at epsilon zero. *)
+(* The constant predictor's Bob-key reduction is in the class the residuosity
+   record induces.  Its epsilon is zero, so the class premises of the bounds
+   above are satisfiable. *)
 Lemma paillier_bob_decide_constant_admissible k :
   paillier_dcr_admissible
     (decide_constant_assumption (R:=R) 'Z_((p k * q k) * (p k * q k))
@@ -2028,9 +1915,8 @@ Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
    p k q k, and the only computational hypothesis the sequence makes. *)
 Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier dcr).
 
-(* The two negligibility facts about the Paillier sequence, the unconditional
-   one read at the modulus and the assumption-conditional one derived from
-   the residuosity hypothesis by doubling. *)
+(* The two negligibility facts about the Paillier sequence.  The unconditional
+   one is read at the modulus, the other from the residuosity hypothesis. *)
 Definition paillier_asymptotic :
     dsdp_asymptotic paillier_instance_sequence :=
   @Build_dsdp_asymptotic R paillier_instance_sequence
@@ -2038,9 +1924,8 @@ Definition paillier_asymptotic :
     (f_adv_paillier_negligible p_gt1 q_gt1 f_dcr_negligible).
 
 (* Past some security parameter the derived class admits the decrypting
-   predictor's Bob-key reduction adversary at no k.  The predictor whose
-   guessing probability is 1 is excluded by the two negligibility facts
-   above, not by the unconditional term of the bound. *)
+   predictor's Bob-key reduction adversary at no k.  The two negligibility
+   facts above exclude the predictor whose guessing probability is 1. *)
 Corollary paillier_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (sequence_assumption paillier_instance_sequence k)
@@ -2055,11 +1940,9 @@ Qed.
 Local Notation f_guess_V2 :=
   (f_guess_V2 (R:=R) (Q:=paillier_instance_sequence) predict).
 
-(* The probability that the k-th predictor guesses Bob's input at the k-th
-   Paillier instance is negligible in k, under the two class premises.  Its
-   whole computational content is decisional composite residuosity along the
-   moduli p k q k, the assumption at k being twice the epsilon dcr k
-   assumes. *)
+(* The k-th predictor's guessing probability at the k-th Paillier instance is
+   negligible in k.  Its whole computational content is decisional composite
+   residuosity along the moduli p k q k. *)
 Corollary paillier_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
 (* At each k the two class premises yield the bound of
@@ -2089,9 +1972,8 @@ Variables n r : nat -> nat.
 Hypothesis n_gt1 : forall k, (1 < n k)%N.
 Hypothesis r_gt1 : forall k, (1 < r k)%N.
 
-(* The Benaloh IND-CPA instance of benaloh_indcpa_scheme.v at the k-th
-   modulus and block size, pinned once under the name that file exports it
-   by. *)
+(* The Benaloh IND-CPA scheme at the k-th modulus and block size.  It is
+   pinned once, under the name benaloh_indcpa_scheme.v exports it by. *)
 Local Notation AHE k := (Benaloh_AHEnc (n k) (r_gt1 k)).
 
 Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
@@ -2106,8 +1988,8 @@ Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
 Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
 (* The plaintext space at k is Z/(r k)Z, so its cardinality is the block size
-   r k.  The unconditional term of the bounds below is read off r k and not
-   off the modulus n k, which sizes the ciphertext space. *)
+   r k.  The unconditional term below is read off r k, where n k sizes the
+   ciphertext space. *)
 Let card_plain_r k : #|plain (AHE k)| = r k.
 Proof. by rewrite card_ord (Zp_cast (r_gt1 k)). Qed.
 
@@ -2141,17 +2023,16 @@ Definition benaloh_instance_sequence : dsdp_instance_sequence R := {|
   sequence_assumption := fun k =>
     benaloh_indcpa_assumption (r_gt1 k) (residuosity k) |}.
 
-(* The assumption every bound along this sequence is read at is the one
-   benaloh_indcpa_scheme.v derives from residuosity k, and no other record.
-   The equation holds by unfolding, so the identification is a conversion. *)
+(* The assumption at k is the one benaloh_indcpa_scheme.v derives from
+   residuosity k.  The equation holds by unfolding, so the identification is a
+   conversion. *)
 Lemma benaloh_assumption_at_residuosityE k :
   sequence_assumption benaloh_instance_sequence k
   = benaloh_indcpa_assumption (r_gt1 k) (residuosity k).
 Proof. by []. Qed.
 
-(* The epsilon those bounds are stated at is twice the residuosity epsilon at
-   k, one residuosity call per hop of the scheme reduction.  It is the
-   conversion that restates a Benaloh bound in r-th residuosity epsilons. *)
+(* The epsilon at k is twice the residuosity epsilon, one call per hop.  It
+   restates a Benaloh bound in r-th residuosity epsilons. *)
 Lemma benaloh_epsilon_at_residuosityE k :
   indcpa_assumption_epsilon (sequence_assumption benaloh_instance_sequence k)
   = 2 * benaloh_residuosity_epsilon (residuosity k).
@@ -2178,11 +2059,9 @@ Hypothesis charlie_admissible : forall k,
     (charlie_trace_adversary (I:=benaloh_instance k)
        (distinguisher_of_predictor (predict k))).
 
-(* The trace guessing bound at k written in residuosity epsilons, on the two
-   class premises: an IND-CPA epsilon at Bob's key and at Charlie's, each
-   costing two residuosity calls, hence 4 eps.  The first summand is
-   unconditional, the residue the leaked output leaves along the DSDP
-   solution fiber, and the second is conditional on the residuosity record. *)
+(* The trace guessing bound at k: 1/#|plain| plus 4 residuosity epsilons, two
+   calls per key.  The first summand is unconditional, the second conditional
+   on the residuosity record. *)
 Corollary benaloh_trace_guess_V2_admissible_le k :
   alice_trace_guess_V2_pr (I:=benaloh_instance k) (predict k)
   <= (#|plain (AHE k)|%:R : R)^-1
@@ -2193,9 +2072,8 @@ have := alice_trace_guess_V2_admissible_le (I:=benaloh_instance k)
 by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
 Qed.
 
-(* The same bound at a block size written as a product p * q, the form a
-   composite modulus is stated in.  The hypothesis r k = p * q is the only
-   link between the two readings of that cardinality. *)
+(* The same bound at a block size written as a product p * q.  The hypothesis
+   r k = p * q is the only link between the two readings. *)
 Corollary benaloh_trace_guess_V2_admissible_pq_le k (p q : nat)
     (r_pq : r k = (p * q)%N) :
   alice_trace_guess_V2_pr (I:=benaloh_instance k) (predict k)
@@ -2205,11 +2083,9 @@ Proof.
 rewrite -r_pq inv_r_cardE; exact: benaloh_trace_guess_V2_admissible_le.
 Qed.
 
-(* The class premises of the bounds above are satisfiable: at the
-   challenge-ignoring residuosity record, whose epsilon is zero and proved,
-   the constant predictor's Bob-key reduction adversary is in the derived
-   class.  The decrypting predictor stays outside that class at the same
-   record, by decrypt_reduction_admissibleF at epsilon zero. *)
+(* The constant predictor's Bob-key reduction is in the class the residuosity
+   record induces.  Its epsilon is zero, so the class premises of the bounds
+   above are satisfiable. *)
 Lemma benaloh_bob_decide_constant_admissible k :
   benaloh_residuosity_admissible
     (decide_constant_assumption (R:=R) 'Z_(n k) (r k)
@@ -2255,9 +2131,9 @@ Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 Hypothesis f_residuosity_negligible :
   negligible_fun (f_residuosity_benaloh residuosity).
 
-(* The two negligibility facts about the Benaloh sequence, the unconditional
-   one read at the block size and the assumption-conditional one derived from
-   the residuosity hypothesis by doubling. *)
+(* The two negligibility facts about the Benaloh sequence.  The unconditional
+   one is read at the block size, the other from the residuosity
+   hypothesis. *)
 Definition benaloh_asymptotic :
     dsdp_asymptotic benaloh_instance_sequence :=
   @Build_dsdp_asymptotic R benaloh_instance_sequence
@@ -2265,9 +2141,8 @@ Definition benaloh_asymptotic :
     (f_adv_benaloh_negligible r_gt1 f_residuosity_negligible).
 
 (* Past some security parameter the derived class admits the decrypting
-   predictor's Bob-key reduction adversary at no k.  The predictor whose
-   guessing probability is 1 is excluded by the two negligibility facts
-   above, not by the unconditional term of the bound. *)
+   predictor's Bob-key reduction adversary at no k.  The two negligibility
+   facts above exclude the predictor whose guessing probability is 1. *)
 Corollary benaloh_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (sequence_assumption benaloh_instance_sequence k)
@@ -2282,10 +2157,9 @@ Qed.
 Local Notation f_guess_V2 :=
   (f_guess_V2 (R:=R) (Q:=benaloh_instance_sequence) predict).
 
-(* The probability that the k-th predictor guesses Bob's input at the k-th
-   Benaloh instance is negligible in k, under the two class premises.  Its
-   whole computational content is r-th residuosity along the moduli n k, the
-   assumption at k being twice the epsilon residuosity k assumes. *)
+(* The k-th predictor's guessing probability at the k-th Benaloh instance is
+   negligible in k.  Its whole computational content is r-th residuosity along
+   the moduli n k. *)
 Corollary benaloh_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
 (* At each k the two class premises yield the bound of

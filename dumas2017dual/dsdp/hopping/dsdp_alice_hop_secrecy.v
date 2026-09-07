@@ -262,16 +262,15 @@ Local Open Scope fdist_scope.
 Section dsdp_alice_hop_secrecy.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The scheme the instance runs on, its coin space, the pinned coin-space
-   cardinality and the coin decoding, read off the instance through the
-   coercion. *)
+(* The scheme, its coin space, the coin-space cardinality and the coin
+   decoding.  All four are read off the instance through the coercion. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation card_renc := (scheme_card_renc I).
 Local Notation rand_of_renc := (@scheme_rand_of_renc I).
 Local Notation pkey_of_party := (inst_pkey_of_party I).
 (* Alice's input and the three protocol weights, with Charlie's weight
-   invertible: the instance's fields, under the names the DSDP protocol
+   invertible.  These are instance fields, under the names the DSDP protocol
    gives them. *)
 Local Notation v1 := (inst_v1 I).
 Local Notation u1 := (inst_u1 I).
@@ -314,9 +313,9 @@ Local Notation indcpa_epsilon_assumption :=
 Local Notation indcpa_fdist_acceptE := (indcpa_fdist_acceptE (R:=R) (S:=I)).
 Local Notation predictor := (predictor I).
 
-(* The sample space of the corrupted-Alice experiment: the two honest inputs,
-   Alice's two mask plaintexts, the randomness of the two hop encryptions, and
-   the randomness of Alice's two combines. *)
+(* The sample space of the corrupted-Alice experiment: the two honest inputs
+   and Alice's two mask plaintexts.  It also carries the randomness of the two
+   hop encryptions and of Alice's two combines. *)
 Definition alice_sampleT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * (Renc * Renc))%type.
@@ -326,8 +325,8 @@ Definition alice_sample_fdist : R.-fdist alice_sampleT :=
   (((fdist_uniform card_plain_pair) `x (fdist_uniform card_plain_pair))
      `x (fdist_uniform card_renc_pair)) `x (fdist_uniform card_renc_pair).
 
-(* Bob's honest input, the first plaintext coordinate of the sample and the
-   secret every bound in this file is stated about. *)
+(* Bob's honest input, the first plaintext coordinate of the sample.  Every
+   bound in this file is stated about it. *)
 Definition sample_V2 : {RV alice_sample_fdist -> plain AHE} :=
   fun t => t.1.1.1.1.
 (* Charlie's honest input, the second plaintext coordinate of the sample.  It
@@ -367,13 +366,12 @@ Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
   uncurry (dsdp_output v1 u1 u2 u3) `o [% V2, V3].
 
 (* The leaked output written out as u1 * v1 + u2 * V2 + u3 * V3.  Alice learns
-   one affine equation in the two secret inputs, and the fiber term of the
-   guessing bound accounts for that leak. *)
+   one affine equation in the two secret inputs. *)
 Lemma SoutE t : Sout t = u1 * v1 + u2 * V2 t + u3 * V3 t.
 Proof. by []. Qed.
 
-(* Bob's ciphertext slot of Alice's hopping tuple carrying his real input: the
-   encryption of V2 under Bob's key with the coin Bob drew for it. *)
+(* Bob's ciphertext slot of Alice's hopping tuple, carrying his real input.
+   It is the encryption of V2 under Bob's key with Bob's own coin. *)
 Definition bob_real_cipher : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => enc bob_pkey (V2 t) (rand_of_renc (Rho2 t)).
 
@@ -391,30 +389,28 @@ Definition charlie_real_cipher : {RV alice_sample_fdist -> cipher AHE} :=
 Definition charlie_zero_cipher : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => enc charlie_pkey 0 (rand_of_renc (Rho3 t)).
 
-(* The type of Alice's hopping tuple: her two masks, her two combine
-   randomnesses, the leaked output, and the two ciphertexts she receives. *)
+(* The type of Alice's hopping tuple: two masks, two combine randomnesses,
+   the leaked output, two received ciphertexts. *)
 Definition alice_hop_tupleT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
    * cipher AHE * cipher AHE)%type.
 
-(* Alice's real hopping tuple: her two masks, her two combine randomnesses,
-   the leaked output, and the two ciphertexts she receives, both carrying
-   their real plaintexts.  Her protocol run produces this tuple, and every
-   bound of this file conditions on it. *)
+(* Alice's hopping tuple with both ciphertext slots carrying their real
+   plaintexts.  Her protocol run produces this tuple, and every bound of this
+   file conditions on it. *)
 Definition alice_tuple_real :
     {RV alice_sample_fdist -> alice_hop_tupleT} :=
   [% [% R2, R3], [% RA1, RA2], Sout, bob_real_cipher, charlie_real_cipher].
 
-(* The same tuple with Bob's slot carrying zero and Charlie's still real.  The
-   two ciphertext replacements meet here: it is the zero side of the challenge
-   at Bob's key and the real side of the challenge at Charlie's. *)
+(* The same tuple with Bob's slot carrying zero and Charlie's still real.  It
+   is the zero side of the challenge at Bob's key and the real side at
+   Charlie's. *)
 Definition alice_tuple_bob_zero :
     {RV alice_sample_fdist -> alice_hop_tupleT} :=
   [% [% R2, R3], [% RA1, RA2], Sout, bob_zero_cipher, charlie_real_cipher].
 
-(* The tuple with both slots carrying zero: the endpoint where the leaked
-   output is the only channel from the honest inputs into what Alice holds,
-   and where the solution fiber of the DSDP constraint bounds a guess. *)
+(* The tuple with both ciphertext slots carrying zero.  Here the leaked output
+   is the only channel from the honest inputs into Alice's view. *)
 Definition alice_tuple_all_zero :
     {RV alice_sample_fdist -> alice_hop_tupleT} :=
   [% [% R2, R3], [% RA1, RA2], Sout, bob_zero_cipher, charlie_zero_cipher].
@@ -451,8 +447,8 @@ Let card_hop0_pair :
 Proof. exact: fdist_card_prednK (`p_ [% Hop0State, Rho2]). Qed.
 
 (* The hop-0 state and Bob's encryption randomness are jointly uniform on the
-   product of their spaces, so the randomness the challenger draws is uniform
-   and independent of everything the reduction holds. *)
+   product of their spaces.  So the challenger's randomness is uniform and
+   independent of the reduction's data. *)
 Lemma hop0_pair_uniformE :
   `p_ [% Hop0State, Rho2]
     = (fdist_uniform card_hop0_state) `x (fdist_uniform card_renc).
@@ -467,10 +463,9 @@ by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho3] rho2].
 Qed.
 
 (* Bob's encryption randomness is uniform and independent of the hop-0 state,
-   the freshness condition protocol_indcpa_fdistE consumes.  Its protocol
-   reading is that Bob draws the randomness of the ciphertext he sends
-   independently of his own input and of the other parties' randomness, and
-   that this randomness reaches Alice only through that ciphertext. *)
+   the freshness condition protocol_indcpa_fdistE consumes.  Bob draws that
+   randomness independently of his own input and of the other parties'
+   randomness. *)
 Lemma hop0_state_prodE :
   `p_ [% Hop0State, Rho2] = (`p_ Hop0State) `x (fdist_uniform card_renc).
 Proof.
@@ -485,9 +480,9 @@ Definition hop1_stateT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * cipher AHE)%type.
 
-(* The hop-1 state as a random variable: what charlie_challenge_adversary holds
-   after Bob's slot has been zeroed and before it queries Charlie's
-   challenger. *)
+(* The hop-1 state as a random variable.  It is what
+   charlie_challenge_adversary holds after Bob's slot is zeroed, before it
+   queries Charlie's challenger. *)
 Definition Hop1State : {RV alice_sample_fdist -> hop1_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, bob_zero_cipher t).
 
@@ -533,9 +528,8 @@ Lemma inde_RV_of_prod (A B : finType)
 Proof. by move=> H a b; rewrite -!dist_of_RVE H fdist_prodE. Qed.
 
 (* Charlie's encryption randomness is uniform and independent of the hop-1
-   state, the same freshness condition at the second hop.  Hop1State holds
-   Bob's zero ciphertext where the hop-0 state held a coordinate, so the
-   product is read off Hop1StatePre and carried across by hop1_state_of. *)
+   state.  It is the freshness condition at the second hop, read off
+   Hop1StatePre through hop1_state_of. *)
 Lemma hop1_state_prodE :
   `p_ [% Hop1State, Rho3] = (`p_ Hop1State) `x (fdist_uniform card_renc).
 Proof.
@@ -548,11 +542,10 @@ have Hstate : alice_sample_fdist |= Hop1State _|_ Rho3.
 by rewrite (inde_dist_of_RV2 Hstate) rho3_uniformE.
 Qed.
 
-(* The hop-0 value the distinguisher is given: the hop-0 state with ch in
-   Bob's ciphertext slot and Charlie's real ciphertext built from the stored
-   randomness,
-     (V2, V3, R2, R3, RA1, RA2, Sout, ch, enc charlie_pkey V3 Rho3).
-   bob_challenge_adversary rebuilds D's input with it. *)
+(* The hop-0 value the distinguisher is given: ch in Bob's slot, Charlie's
+   real ciphertext from the stored randomness.
+     (V2, V3, R2, R3, RA1, RA2, Sout, ch, enc charlie_pkey V3 Rho3)
+   Here bob_challenge_adversary rebuilds D's input. *)
 Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
     plain AHE * plain AHE * alice_hop_tupleT :=
   (* bob_challenge_adversary D is the procedure that adapts D to the
@@ -581,8 +574,8 @@ Definition U2c : {RV alice_sample_fdist -> plain AHE} := const_RV _ u2.
 (* Alice's third protocol weight as a constant random variable. *)
 Definition U3c : {RV alice_sample_fdist -> plain AHE} := const_RV _ u3.
 
-(* The sample coordinates the view reads besides the two secret inputs: the
-   masks, the two encryption randomnesses, and Alice's combine randomness. *)
+(* The sample coordinates besides the two secret inputs: the masks, the two
+   encryption randomnesses, and Alice's combine randomness. *)
 Definition alice_spectator_preT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * (Renc * Renc))%type.
 
@@ -630,8 +623,8 @@ by rewrite -(snd_RV2 AliceSpectatorPre [% V2, V3]) spectator_pre_pair_uniformE
            fdist_prod2.
 Qed.
 
-(* The spectator coordinates are independent of the two secret inputs, which is
-   what lets the all-zero view be produced from public data alone. *)
+(* The spectator coordinates are independent of the two secret inputs.  The
+   all-zero view can therefore be produced from public data alone. *)
 Lemma spectator_pre_indep :
   alice_sample_fdist |= AliceSpectatorPre _|_ [% V2, V3].
 Proof.
@@ -656,7 +649,8 @@ by rewrite /dsdp_constraint_ring /Sout /comp_RV /dsdp_output /V1c /U1c /U2c /U3c
 Qed.
 
 (* Conditioned on the protocol weights and the leaked output, the secret input
-   pair is uniform on the solution fiber, with mass 1/#|plain AHE|. *)
+   pair is uniform on the solution fiber.  Each pair on that fiber has mass
+   1/#|plain AHE|. *)
 Lemma alice_VarRV_cond_uniform (s v2 v3 : plain AHE) :
   `Pr[ [% V1c, U1c, U2c, U3c, Sout] = (v1, u1, u2, u3, s) ] != 0 ->
   (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
@@ -712,9 +706,8 @@ by rewrite (alice_V2_cond_Sout a Hn0).
 Qed.
 
 (* Given the leaked output alone, Bob's input still carries log #|plain AHE|
-   bits, the uncertainty it carries with no conditioning at all.  The leaked
-   output is one affine equation in the two secret inputs, so it cuts the
-   sample space to a fiber on which Bob's input is still uniform. *)
+   bits.  The leaked output cuts the sample space to a fiber on which Bob's
+   input is uniform. *)
 Lemma centropy_V2_Sout_logm :
   `H( V2 | Sout ) = log (#|plain AHE|%:R : R).
 Proof.
@@ -809,11 +802,9 @@ Lemma fdistmap_prodr (A1 A2 B2 : finType) (Q1 : R.-fdist A1)
   = Q1 `x (fdistmap f2 Q2).
 Proof. by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id. Qed.
 
-(* The law a simulator produces from a value of the leaked output: uniform
-   masks, uniform combine randomness, that output, and an encryption of zero
-   under each of the two other parties' keys.  It reads only the output value
-   and the two public keys, so everything it produces is available without the
-   secret inputs. *)
+(* The simulator law at one leaked output: uniform masks, uniform combine
+   randomness, that output, and two zero encryptions.  It reads only the
+   output value and the two public keys. *)
 Definition alice_simulator (s : plain AHE) :
     R.-fdist alice_hop_tupleT :=
   ((((fdist_uniform card_plain_pair) `x (fdist_uniform card_renc_pair))
@@ -825,8 +816,8 @@ Definition alice_simulator (s : plain AHE) :
 Definition alice_spectator_pre2T : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * Renc * Renc)%type.
 
-(* The spectator coordinates with the two encryption randomnesses last, the
-   layout on which the spectator law factors as the simulator's product. *)
+(* The spectator coordinates with the two encryption randomnesses last.  At
+   this layout the spectator law factors as the simulator's product. *)
 Definition AliceSpectatorPre2 :
     {RV alice_sample_fdist -> alice_spectator_pre2T} :=
   fun t => (t.1.1.2, t.2, t.1.2.1, t.1.2.2).
@@ -882,8 +873,8 @@ Proof.
 by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
 Qed.
 
-(* The law of the spectator is the product of the mask law, the combine
-   randomness law and the two zero-plaintext encryption laws. *)
+(* The spectator law is the product of the mask law, the combine randomness
+   law and two zero-plaintext encryption laws. *)
 Lemma alice_spectator_law :
   `p_ AliceSpectator
   = ((((fdist_uniform card_plain_pair) `x (fdist_uniform card_renc_pair))
@@ -908,20 +899,18 @@ Definition alice_spectator_of_hop_tuple (v : alice_hop_tupleT) :
      * cipher AHE)%type :=
   (v.1.1.1.1, v.1.1.1.2, v.1.2, v.2).
 
-(* Assembling the spectator with the leaked output loses neither: the leaked
-   output is read back from the third slot and the spectator from the rest.
-   An uncertainty measured at Alice's all-zero view can therefore be measured
-   at the pair instead. *)
+(* The leaked output and the spectator are both read back from the assembled
+   tuple.  An uncertainty measured at Alice's all-zero view can therefore be
+   measured at the pair. *)
 Lemma alice_hop_tuple_of_spectatorK :
   cancel alice_hop_tuple_of_spectator
     (fun v : alice_hop_tupleT =>
        (alice_spectator_of_hop_tuple v, v.1.1.2)).
 Proof. by case=> [[[[m ra] c2] c3] s]. Qed.
 
-(* Given Alice's all-zero view, Bob's input carries the same log #|plain AHE|
-   bits it carries given the leaked output alone.  Both ciphertext slots
-   encrypt zero, so the leaked output is the only channel from V2 into the
-   view and the spectator coordinates add nothing. *)
+(* Given Alice's all-zero view, Bob's input still carries log #|plain AHE|
+   bits.  Both ciphertext slots encrypt zero, so the leaked output is the only
+   channel from V2 into the view. *)
 Lemma centropy_V2_all_zero_logm :
   `H( V2 | alice_tuple_all_zero ) = log (#|plain AHE|%:R : R).
 Proof.
@@ -942,9 +931,9 @@ Variables (w : BT) (s : plain AHE).
 Hypothesis Sout_determinedE :
   forall t, W t = w -> Sout t = s.
 
-(* On a conditioning event that determines the leaked output, the joint mass
-   of Alice's all-zero view splits into the leaked-output indicator times the
-   joint mass of the spectator. *)
+(* The joint mass of Alice's all-zero view splits into the leaked-output
+   indicator times the joint mass of the spectator.  The conditioning event
+   determines the leaked output. *)
 Lemma alice_hop_tuple_all_zero_pfwd1E :
   pfwd1 [% alice_tuple_all_zero, W] (v, w)
   = (v.1.1.2 == s)%:R
@@ -986,8 +975,8 @@ rewrite /alice_spectator_of_hop_tuple /alice_simulator
 by ring.
 Qed.
 
-(* The ideal-world joint law of the two secret inputs and a simulated view: the
-   honest input law bound to the simulator fed the leaked output. *)
+(* The ideal-world joint law of the two secret inputs and a simulated view.
+   The honest input law is bound to the simulator fed the leaked output. *)
 Definition alice_ideal :
     R.-fdist (plain AHE * plain AHE * alice_hop_tupleT) :=
   vv <- `p_ [% V2, V3] ;

@@ -189,10 +189,9 @@ Import Prenex Implicits.
 
 Local Open Scope ring_scope.
 
-(* What a label asserts: the game it goes from and the game it goes to lie
-   within its cost of each other.  A step written under a label is checked
-   against its claim, so an assumption-conditional term cannot enter a chain
-   under the name of a different assumption. *)
+(* What a label asserts: its two games lie within its cost of each other.  A
+   step is checked against its label's claim, so no term can enter under
+   another assumption's name. *)
 Record claim (R : realType) :=
   Claim {
     (* the game the label goes from *)
@@ -208,9 +207,8 @@ Record claim (R : realType) :=
 Definition hop_obligation (R : realType) (c : claim R) : Prop :=
   `| claim_from c - claim_to c | <= claim_cost c.
 
-(* An accumulated security loss, the free monoid on labels.  A list of labels
-   rather than a real so that a finished chain still names the assumptions its
-   bound rests on. *)
+(* An accumulated security loss, the free monoid on labels.  A list of
+   labels, not a real, so a finished chain still names its assumptions. *)
 Definition loss (L : Type) := seq L.
 
 Section epshop.
@@ -227,9 +225,8 @@ Definition loss_eval (s : loss L) : R := \sum_(l <- s) claim_cost (claim_of l).
 Lemma loss_eval_nil : loss_eval [::] = 0.
 Proof. by rewrite /loss_eval big_nil. Qed.
 
-(* loss_eval is a monoid morphism.  Composing two fragments therefore adds
-   their totals, which is what makes the total of a finished chain the sum of
-   the epsilons its steps assume. *)
+(* loss_eval is a monoid morphism.  Composing two fragments adds their
+   totals, so a finished chain's total is the sum of its epsilons. *)
 Lemma loss_eval_cat s1 s2 :
   loss_eval (s1 ++ s2) = loss_eval s1 + loss_eval s2.
 Proof. by rewrite /loss_eval big_cat. Qed.
@@ -239,10 +236,9 @@ Proof. by rewrite /loss_eval big_cat. Qed.
 Lemma loss_eval1 l : loss_eval [:: l] = claim_cost (claim_of l).
 Proof. by rewrite /loss_eval big_cons big_nil addr0. Qed.
 
-(* The same total as a left fold, seeded at the first label's cost.  On a list
-   of literal labels it converts to a left-associated sum of the costs those
-   labels name, which is the shape the terminal statement asks a client to
-   match. *)
+(* The same total as a left fold, seeded at the first label's cost.  On
+   literal labels it computes a left-associated sum, the shape the terminal
+   statement asks a client to match. *)
 Definition loss_total (s : loss L) : R :=
   if s is l :: s' then
     foldl (fun acc l' => acc + claim_cost (claim_of l'))
@@ -257,18 +253,17 @@ elim: s a => [|l s IH] a; first by rewrite loss_eval_nil addr0.
 by rewrite /= IH /loss_eval big_cons addrA.
 Qed.
 
-(* The two readings of a loss agree.  The sum is the one a monoid morphism
-   argument is run on, the fold is the one a concrete chain computes. *)
+(* The two readings of a loss agree.  A monoid morphism argument runs on the
+   sum, a concrete chain computes the fold. *)
 Lemma loss_evalE s : loss_eval s = loss_total s.
 Proof.
 case: s => [|l s]; first exact: loss_eval_nil.
 by rewrite /loss_total foldl_lossE /loss_eval big_cons.
 Qed.
 
-(* A chain fragment: the game it goes from, the game it has reached, the
-   labels it logged, and the proof that their total bounds the distance
-   between the two games.  The proof is unconditional, so a fragment is a
-   theorem rather than an implication waiting for a hypothesis. *)
+(* A chain fragment: two games, the labels it logged, and the proof their
+   total bounds the distance.  The proof is unconditional, so a fragment is a
+   theorem rather than a waiting implication. *)
 Record chain := Chain {
   (* the game the fragment goes from *)
   chain_from : R ;
@@ -312,10 +307,9 @@ Definition chain_same (x g' : R) (H : x = g') : chain :=
   {| chain_from := x ; chain_to := g' ; chain_loss := [::] ;
      chain_sound := @same_sound x g' H |}.
 
-(* Composition, sound only when the continuation starts where the previous
-   fragment stopped, which is the side condition Hb.  It is the one triangle
-   inequality of the development, discharged once here so that a chain of any
-   length needs none. *)
+(* Composition, sound when the continuation starts where the previous
+   fragment stopped, the side condition Hb.  It is the development's one
+   triangle inequality, discharged here so no chain needs another. *)
 Lemma then_sound (m frag : chain) (Hb : chain_from frag = chain_to m) :
   `| chain_from m - chain_to frag |
   <= loss_eval (chain_loss m ++ chain_loss frag).
@@ -332,10 +326,9 @@ Definition chain_then (m frag : chain)
      chain_loss := chain_loss m ++ chain_loss frag ;
      chain_sound := @then_sound m frag Hb |}.
 
-(* What a program returns: an advantage, a loss, a bound, the proof that the
-   bound bounds the advantage, and the proof that the bound is the total of
-   the loss.  This is the shape a security theorem takes, one number bounded
-   rather than two games compared. *)
+(* What a program returns: an advantage, a loss, a bound, and the proofs
+   relating the three.  A security theorem takes this shape: one number
+   bounded, rather than two games compared. *)
 Record chain_result :=
   ChainResult {
     (* the quantity the program bounds, a distance between two games *)
@@ -350,8 +343,8 @@ Record chain_result :=
     result_total : loss_total result_loss = result_bound }.
 
 (* | chain_from m - chain_to m | is within the total of the chain's loss.
-   That distance is the advantage of the chain, so a chain stopping at the
-   zero game bounds the probability of the game it opened at. *)
+   A chain stopping at the zero game therefore bounds the probability of the
+   game it opened at. *)
 Lemma chain_result_sound (m : chain) :
   `| chain_from m - chain_to m | <= loss_total (chain_loss m).
 Proof. by rewrite -loss_evalE; exact: chain_sound. Qed.
@@ -362,8 +355,8 @@ Definition chain_result_of_chain (m : chain) : chain_result :=
      result_sound := chain_result_sound m ; result_total := erefl |}.
 
 (* A result's advantage is at most any c its bound is equal to.  It justifies
-   the return statement, whose H is an algebraic identity between the sum of
-   the costs and the number the client's theorem states. *)
+   the return statement, whose H equates the sum of the costs with the stated
+   number. *)
 Lemma bound_sound (b : chain_result) (c : R)
     (H : result_bound b = c) :
   result_advantage b <= c.
@@ -397,8 +390,8 @@ Variable R : realType.
 Variable claim_of : L -> claim R.
 
 (* Two chains agreeing on their three observable fields are equal.  The fourth
-   field is a proof of a Boolean, unique by bool_irrelevance, so the laws below
-   are equalities of records rather than statements up to an equivalence. *)
+   field is a proof of a Boolean, unique by bool_irrelevance, so the laws
+   below are record equalities. *)
 Lemma chain_observable_eq (c1 c2 : chain claim_of) :
   chain_from c1 = chain_from c2 -> chain_to c1 = chain_to c2 ->
   chain_loss c1 = chain_loss c2 -> c1 = c2.
@@ -432,21 +425,21 @@ Proof. by apply: chain_observable_eq; rewrite //= catA. Qed.
 
 End chain_laws.
 
-(* An inequality out of an equality, for the hops whose gap is proved by an
-   exact equality of advantages rather than bounded by an assumption.  It is
-   what puts such a step in the shape chain_hop's justification takes. *)
+(* An inequality out of an equality, for a hop proved by an exact equality of
+   advantages.  It puts such a step in the shape chain_hop's justification
+   takes. *)
 Lemma le_of_eq (R : realType) (x y : R) : x = y -> x <= y.
 Proof. by move=> ->. Qed.
 
-(* A nonnegative quantity bounded by c satisfies | x - 0 | <= c, so it lies
-   within c of the zero game.  It is the shape the justification of a plus
-   statement takes, that statement being a hop to zero. *)
+(* A nonnegative quantity bounded by c satisfies | x - 0 | <= c.  It is the
+   shape a plus statement's justification takes, that statement being a hop
+   to zero. *)
 Lemma plus_le (R : realType) (x c : R) : 0 <= x -> x <= c -> `| x - 0 | <= c.
 Proof. by move=> x0 xc; rewrite subr0 ger0_norm. Qed.
 
 (* | x - 0 | = x for nonnegative x: the advantage against the zero game is
-   the quantity itself.  It reads the bound of a program ending at zero back
-   as a bound on the probability of the game it opened at. *)
+   the quantity itself.  It reads a program ending at zero back as a bound on
+   its opening game. *)
 Lemma advantage0 (R : realType) (x : R) : 0 <= x -> `| x - 0 | = x.
 Proof. by move=> x0; rewrite subr0 ger0_norm. Qed.
 
@@ -461,8 +454,8 @@ Notation "x" := x (in custom epshop at level 0, x ident).
 Notation "'start' g" := (chain_start g)
   (in custom epshop at level 80, g constr at level 0).
 
-(* The two erefl are the checks that the cost and the game written here are
-   the cost and the game the label's claim names. *)
+(* The cost and the game written on the line must match the label's claim.
+   The two erefl are that check. *)
 Notation "'hop' l e 'to' g' 'by' H" := (chain_hop l e g' H erefl erefl)
   (in custom epshop at level 80, l constr at level 0, e constr at level 0,
    g' constr at level 0, H constr at level 10).
@@ -470,30 +463,26 @@ Notation "'hop' l e 'to' g' 'by' H" := (chain_hop l e g' H erefl erefl)
 Notation "'same' 'to' g' 'by' H" := (chain_same g' H)
   (in custom epshop at level 80, g' constr at level 0, H constr at level 10).
 
-(* plus l c by H is hop l c to 0 by H: the game reached lies within c of the
-   zero game, so its probability is at most c and c is added to the bound.
-   Spelled plus so a reader sees a term added, not a hop taken. *)
+(* A hop to the zero game: plus l c by H is hop l c to 0 by H.  The game's
+   probability is at most c, and c joins the bound. *)
 Notation "'plus' l c 'by' H" := (chain_hop l c 0 H erefl erefl)
   (in custom epshop at level 80, l constr at level 0, c constr at level 0,
    H constr at level 10).
 
-(* The statement separator.  The erefl discharges the side condition of
-   chain_then by conversion, so two consecutive statements type-check exactly
-   when the second opens at the game the first reached. *)
+(* The statement separator.  The erefl makes the second statement open at
+   the game the first reached, by conversion. *)
 Notation "s1 ';' s2" := (chain_then s1 s2 erefl)
   (in custom epshop at level 90, right associativity).
 
-(* The delimiter: the program e is read at the dictionary C, the claim
-   function saying what each label asserts.  The ascription is what lets a
-   bare label elaborate, and a program with no terminal is a chain, composable
-   as a fragment of a longer program. *)
+(* The delimiter: program e is read at dictionary C, which says what each
+   label claims.  A program with no terminal is a chain, a fragment of a
+   longer program. *)
 Notation "'\epsilon[' C ']{' e '}'" := (e : chain C)
   (C constr at level 0, e custom epshop at level 99) : epshop_scope.
 
-(* The terminal, a closed notation on the same delimiter: bound republishes
-   the result at the explicit c its proof says the loss totals.  The chain
-   reaching it is coerced to the result on its advantage, the distance
-   between the game it opened at and the game it stopped at. *)
+(* The terminal: bound publishes the result at the explicit c that H says
+   the loss totals.  The chain before it becomes a result on its advantage,
+   the gap from its first game to its last. *)
 Notation "'\epsilon[' C ']{' s ';;' 'bound' c 'by' H '}'" :=
   ((chain_bound s c H : chain_result C))
   (C constr at level 0, s custom epshop at level 99, c constr at level 0,

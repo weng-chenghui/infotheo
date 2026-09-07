@@ -105,12 +105,10 @@ Local Open Scope fdist_scope.
    V1 I would not typecheck. *)
 Set Strict Implicit.
 
-(* The counting side of a 3-party DSDP run at the plaintext modulus
-   a.+2 * b.+2: one sample space with one law, the eleven random inputs of
-   the run, each input independent of the joint of the other ten, and the
-   three plaintext inputs and the two masks uniform.  Every message and
-   every party view is a deterministic function of the eleven, so a bound
-   proved from these fields holds against a party of any running time. *)
+(* The counting side of one 3-party DSDP run at modulus a.+2 * b.+2: one law,
+   the eleven random inputs, their independence and uniformity.  Each input is
+   independent of the other ten; the three plaintext inputs and the two masks
+   are uniform. *)
 Record dsdp_random_inputs (R : realType) (a b : nat) := {
   (* The finite sample space of one run. *)
   sampleT : finType ;
@@ -247,10 +245,9 @@ Let D3 : {RV P -> msg} := VU3R \+ D2.
    ciphertext Charlie's view contains. *)
 Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
-(* [% Dk_b, V2, VU3R, D2] _|_ V1: Bob's key, his own input and the two
-   combines he handles are independent of Alice's input.  Alice keeps V1
-   to herself, so this is the record's V1 field projected onto those
-   four. *)
+(* [% Dk_b, V2, VU3R, D2] _|_ V1: Bob's key, his input and the two combines
+   he handles are independent of Alice's input.  It is the record's V1_indep
+   field projected onto those four. *)
 Lemma bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1.
 Proof.
 have h := inde_RV_comp
@@ -261,9 +258,9 @@ have h := inde_RV_comp
 by rewrite /comp_RV /VU3R /VU3 /D2 /VU2 /= in h *.
 Qed.
 
-(* [% Dk_c, V3, D3] _|_ V1: Charlie's key, his own input and the
-   aggregate he decrypts are independent of Alice's input.  It is the
-   record's V1 field projected onto those three. *)
+(* [% Dk_c, V3, D3] _|_ V1: Charlie's key, his input and the aggregate he
+   decrypts are independent of Alice's input.  It is the record's V1_indep
+   field projected onto those three. *)
 Lemma charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1.
 Proof.
 have h := inde_RV_comp
@@ -287,11 +284,9 @@ rewrite /comp_RV /VU3 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
 
-(* [% Dk_b, V2, D2] _|_ [% V3, VU3, R3]: Bob's key, his own input and the
-   combine he decrypts are independent of Charlie's input, of that input
-   under Alice's weight, and of Alice's second mask.  The whole Charlie
-   group stands on the right, so the mask may be added to the weighted
-   input afterwards and the independence still holds. *)
+(* [% Dk_b, V2, D2] _|_ [% V3, VU3, R3]: Bob's key, his input and D2 are
+   independent of the whole Charlie group.  V3, VU3 and R3 stand together on
+   the right, so VU3R may be formed downstream. *)
 Lemma bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3].
 Proof.
 (* Contracting on VU3 directly is unavailable, since VU3 shares V3 with the
@@ -349,11 +344,9 @@ rewrite /comp_RV /VU2 /VU3R /VU3 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
 
-(* [% Dk_c, V3] _|_ [% V2, E_charlie_d3]: Charlie's key and his own input
-   are independent of Bob's input together with the aggregate ciphertext
-   Charlie receives.  Bob's input sits under two of Alice's masks inside
-   that aggregate, so the independence holds with no assumption on the
-   encryption. *)
+(* [% Dk_c, V3] _|_ [% V2, E_charlie_d3]: Charlie's key and his input are
+   independent of Bob's input and the ciphertext.  Alice's two masks hide V2
+   inside the aggregate, so this needs no encryption assumption. *)
 Lemma Dk_c_V3_indep_V2_E_charlie_d3 :
   P |= [% Dk_c, V3] _|_ [% V2, E_charlie_d3].
 Proof.
@@ -463,9 +456,9 @@ exact: (uniform_bij_indep (uniform_card_rest a b) (uniform_card_msg a b)
           bij_split).
 Qed.
 
-(* The rest-tuple seen from an input coordinate: the four remaining
-   coordinates in their original order with the three weights and the three
-   keys read off as constants. *)
+(* The rest-tuple seen from an input coordinate: the four other coordinates
+   in order.  The three weights and the three keys are read off as
+   constants. *)
 Definition uniform_view_input (a b : nat) (w1 w2 w3 : msg a b)
     (w : 'rV[msg a b]_4) :=
   (w ``_ (ord4 0), w ``_ (ord4 1), w1, w2, w3,
@@ -473,8 +466,8 @@ Definition uniform_view_input (a b : nat) (w1 w2 w3 : msg a b)
    @KeyOf Alice Dec (msg a b) 0, @KeyOf Bob Dec (msg a b) 0,
    @KeyOf Charlie Dec (msg a b) 0).
 
-(* The same tuple seen from a mask coordinate, where the three weights sit
-   after the three inputs rather than after two of them. *)
+(* The same tuple seen from a mask coordinate.  Here the three weights sit
+   after the three inputs, not after two of them. *)
 Definition uniform_view_mask (a b : nat) (w1 w2 w3 : msg a b)
     (w : 'rV[msg a b]_4) :=
   (w ``_ (ord4 0), w ``_ (ord4 1), w ``_ (ord4 2), w1, w2, w3,
@@ -699,9 +692,9 @@ Lemma uniform_pR3_unif (a b : nat) :
   `p_ (uniform_R3 a b) = fdist_uniform (uniform_card_msg a b).
 Proof. by have [_ _ unif] := uniform_split a b (ord5 4). Qed.
 
-(* The counting side at any modulus with the query held fixed: five
-   coordinates of the plaintext ring drawn uniformly for the three inputs and
-   the two masks, the three weights and the three keys constant. *)
+(* An inhabitant of dsdp_random_inputs at any modulus: five uniform
+   coordinates for the three inputs and the two masks.  The three weights and
+   the three keys are constants of the sample space. *)
 Definition uniform_inputs (a b : nat) (w1 w2 w3 : msg a b) :
     dsdp_random_inputs R a b := {|
   sampleT := uniform_sampleT a b ;

@@ -415,9 +415,8 @@ $V_3$.
   what the simulator's output reveals: on the ideal-world law $g$ succeeds
   with probability at most $1/m$, the mass of the fiber of the leaked output
   (Lemma~\ref{lem:guess_all_zero}), and the real law is within the two hop
-  advantages of it. The epsHop program \texttt{alice\_chain} returns the same
-  bound, its last line adding that fiber term to the two hops.
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v} as
+  advantages of it.
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{alice\_tuple\_guess\_V2\_le}, over the data of one DSDP scheme, so a
   reading at a concrete scheme supplies that data and proves nothing further.
 \end{theorem}
@@ -481,16 +480,16 @@ functionality on the other, rather than quantified over all input vectors.
   the sum of the advantages of its two hop reductions.
   \[ \big\lvert \Pr_{\mathrm{law}(V_2,V_3,\hoptuple{0})}[D]
        - \Pr_{\Ideal}[D] \big\rvert \le \epshopsum{D} \]
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{alice\_sim\_advantage\_le}, over the data of one DSDP scheme.
 \end{theorem}
 \begin{proof}
-  \uses{lem:simulator_factorization,def:alice_hops}
+  \uses{lem:simulator_factorization,lem:alice_view_advantage}
   \rocqok
   The ideal-world law is the hop-$2$ law, so the gap is
-  $\lvert \gamma_0(D) - \gamma_2(D) \rvert$, which is the gap result of the
-  fragment of Definition~\ref{def:alice_hops}. The triangle inequality that
-  composes the two hop equalities is the one the fragment already carries.
+  $\lvert \gamma_0(D) - \gamma_2(D) \rvert$. The triangle inequality splits it
+  at $\gamma_1(D)$, and Lemma~\ref{lem:alice_view_advantage} reads each of the
+  two halves as the advantage of the reduction at one key.
 \end{proof}
 
 \begin{remark}[Worst-case simulation: open]
@@ -566,7 +565,7 @@ carries the three bounds above to the executed protocol.
   simulation bound at the predictor's distinguisher plus the fiber term of the
   ideal trace, as at the tuple; the program of
   Definition~\ref{def:alice_trace_chain} returns the same bound.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}. Both bounds at the raw
+  Proved in \texttt{dsdp\_alice\_main.v}. Both bounds at the raw
   trace, Theorems~\ref{thm:raw_trace_guess}
   and~\ref{thm:raw_trace_simulation}, are read through the decoding of
   Lemma~\ref{lem:raw_trace_decode}.
@@ -607,7 +606,7 @@ carries the three bounds above to the executed protocol.
   IND-CPA assumption at one key. This is the guessing bound at the observation
   a corrupted Alice actually holds, the encoded trace being an intermediate of
   the interpreter rather than something the protocol emits.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{alice\_raw\_trace\_guess\_V2\_le}.
 \end{theorem}
 
@@ -625,7 +624,7 @@ carries the three bounds above to the executed protocol.
   Drawing the coin makes the statement one about the protocol rather than about
   one of its executions, and both terms of the bound are conditional on the
   IND-CPA assumption, one at Bob's key and one at Charlie's.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{alice\_raw\_trace\_sim\_advantage\_avg\_le}.
 \end{theorem}
 
@@ -1260,89 +1259,54 @@ pending obligation, and a bound is read off it by projection.
   the soundness field of this result at its two class memberships.
 \end{definition}
 
-\begin{definition}[The two ciphertext replacements as one fragment]
-  \label{def:alice_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_hops}
-  \rocqok
-  \uses{def:chain,def:claim,def:loss,lem:alice_view_advantage,def:indcpa_assumption}
-  The two ciphertext replacements as one chain over $\gamma_0(D)$,
-  $\gamma_1(D)$ and $\gamma_2(D)$, carrying no terminal statement. Its loss is
-  the two labels $\mathsf{cpa\_bob}$ and $\mathsf{cpa\_charlie}$, and the gap
-  result it returns on its own bounds the distance between the real hopping
-  tuple and the all-zero one, which is the simulation bound.
-  \[ \mathrm{tot}(s) = \epshopsum{D} \]
-  Each hop is justified by Lemma~\ref{lem:alice_view_advantage}, which makes
-  its gap exactly the advantage it logs, read as an inequality through
-  \texttt{le\_of\_eq}. The fragment carries the simulation bound of
-  Theorem~\ref{thm:alice_simulation_secure} and nothing else; the five
-  programs below write their two hops where they take them.
-\end{definition}
-
-\begin{definition}[Alice's ladder as a chain, and the bound read off it]
-  \label{def:alice_chain}
+\begin{definition}[Alice's trace argument as a chain opening at the protocol]
+  \label{def:alice_trace_chain}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_label,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_chain,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE}
-  \rocqok
-  \uses{def:chain,def:chain_result,def:claim,def:loss,def:alice_hops,lem:alice_view_advantage,lem:guess_all_zero,thm:alice_guess_real}
-  Alice's ladder as a chain over $\gamma_0(D_g), \gamma_1(D_g), \gamma_2(D_g)$,
-  the acceptance probabilities of a predictor's distinguisher at the three
-  hops, written where they are taken and spanning the same two gaps as the
-  fragment of Definition~\ref{def:alice_hops}. Each hop logs the advantage
-  of the reduction its label names, at Bob's key and then at Charlie's, and a
-  third step hops from the all-zero endpoint to the zero game, so the program
-  is a chain bound on $\gamma_0(D_g)$. \texttt{alice\_claim} fixes what
-  each of the three labels claims: the games a hop label joins and the
-  advantage it costs, and the all-zero game against the zero game.
-  \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_g} \]
-  The chain accumulates the two hop terms before the endpoint term, so the
-  return statement reorders, which is what \texttt{alice\_totalE} proves.
-  This loss has two kinds of term and the labels separate them. The two hop terms
-  are the advantages of the reductions $\hopred{0}{D_g}$ and $\hopred{1}{D_g}$,
-  each of which becomes conditional on a computational assumption only where a
-  later statement requires it to be small. The term
-  $\mathsf{uniform\_fiber}$ is information-theoretic and unconditional, the
-  residue the leaked output leaves along the solution fiber. The two hops are
-  those of Definition~\ref{def:alice_hops}, justified by
-  Lemma~\ref{lem:alice_view_advantage}, which makes each gap
-  exactly the term it logs, read as an inequality through
-  \texttt{le\_of\_eq}; the step to the zero game is justified by
-  \texttt{all\_zero\_game\_V2\_le\_invm}, which is
-  Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
-  the fiber enters. Theorem~\ref{thm:alice_guess_real} states the bound this
-  program returns and is its soundness field.
-\end{definition}
-
-\begin{definition}[Alice's trace argument as a chain opening at the protocol]
-  \label{def:alice_trace_chain}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop_tuple_distinguisher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain}
   \rocqok
-  \uses{def:alice_chain,def:alice_hops,def:alice_trace,lem:trace_of_hop_tuple}
-  The chain of Definition~\ref{def:alice_chain} preceded by one further game.
+  \uses{def:chain,def:chain_result,def:claim,def:loss,def:alice_trace,lem:trace_of_hop_tuple,lem:alice_view_advantage,lem:guess_all_zero}
+  Alice's guessing argument as one chain, opening at the executed protocol.
   $G_\tau$ is the law of the honest input pair beside the trace the interpreter
   returns for Alice when it runs $\mathrm{dsdp\_protocol}$ at a sample, and
-  $\gamma_\tau(D)$ the probability that $D$ accepts a value sampled from it, so
-  the object the argument starts from is the executed protocol and not the
-  tuple $\hoptuple{0}$.
+  $\gamma_\tau(D_g)$ the probability that a predictor's distinguisher accepts a
+  value sampled from it, so the object the argument starts from is the executed
+  protocol and not the tuple $\hoptuple{0}$.
   \[ \mathrm{start}\ \gamma_\tau(D_g) \]
   \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
        \texttt{accept\_trace\_tupleE} \]
   The step to $\gamma_0$ carries no label and adds nothing to the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
-  $\tau$, so a test on the trace accepts as often as its lift on the tuple.
-  The two hops span the same two gaps as the fragment of
-  Definition~\ref{def:alice_hops} at the lifted test $D_{g \circ \tau}$, which
-  is \texttt{hop\_tuple\_distinguisher} applied once under a local name, and
-  the step to the zero game and the terminal statement are those of
-  Definition~\ref{def:alice_chain}, so the loss and the bound are the same
-  three terms.
+  $\tau$, so a test on the trace accepts as often as its lift
+  $D_{g \circ \tau}$ on the tuple, which is
+  \texttt{hop\_tuple\_distinguisher} applied once under a local name. Two hops
+  then run the ciphertext replacements over $\gamma_0$, $\gamma_1$ and
+  $\gamma_2$ at that lift, each logging the advantage of the reduction its
+  label names, at Bob's key and then at Charlie's, and a third step hops from
+  the all-zero endpoint to the zero game, so the program is a chain bound on
+  $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what each of the three labels
+  claims: the games a hop label joins and the advantage it costs, and the
+  all-zero game against the zero game.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
-  The trace bound of Theorem~\ref{thm:alice_trace_bounds} is the soundness
-  field of this result.
+  The chain accumulates the two hop terms before the endpoint term, so the
+  return statement reorders, which is what \texttt{alice\_totalE} proves.
+  This loss has two kinds of term and the labels separate them. The two hop
+  terms are the advantages of the reductions $\hopred{0}{D_{g \circ \tau}}$ and
+  $\hopred{1}{D_{g \circ \tau}}$, each of which becomes conditional on a
+  computational assumption only where a later statement requires it to be
+  small. The term $\mathsf{uniform\_fiber}$ is information-theoretic and
+  unconditional, the residue the leaked output leaves along the solution fiber.
+  Each hop is justified by Lemma~\ref{lem:alice_view_advantage}, which makes
+  its gap exactly the term it logs, read as an inequality through
+  \texttt{le\_of\_eq}; the step to the zero game is justified by
+  \texttt{all\_zero\_game\_V2\_le\_invm}, which is
+  Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
+  the fiber enters. The trace bound of Theorem~\ref{thm:alice_trace_bounds} is
+  the soundness field of this result.
 \end{definition}
 
 \begin{definition}[Alice's trace against the simulation as one chain]
@@ -1350,9 +1314,9 @@ pending obligation, and a bound is read off it by projection.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_ideal_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_chain}
   \rocqok
-  \uses{def:alice_hops,def:alice_trace_chain,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
-  The two hops of Definition~\ref{def:alice_hops} with one step at each end
-  that adds nothing to the loss. The chain opens at $\gamma_\tau(D)$, runs the
+  \uses{def:alice_trace_chain,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
+  The two hops of Definition~\ref{def:alice_trace_chain} with one step at each
+  end that adds nothing to the loss. The chain opens at $\gamma_\tau(D)$, runs the
   two ciphertext replacements at the lifted test $D \circ \tau$, and closes at
   $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
   trace-level ideal law.
@@ -1379,7 +1343,7 @@ pending obligation, and a bound is read off it by projection.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_admissible_totalE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_guess_V2_le}
   \rocqok
-  \uses{def:alice_trace_chain,def:alice_hops,def:indcpa_assumption,def:claim,def:loss}
+  \uses{def:alice_trace_chain,def:indcpa_assumption,def:claim,def:loss}
   The program of Definition~\ref{def:alice_trace_chain} over the dictionary
   $C^{\mathcal{A}}$ that charges each hop the advantage $\mathcal{A}$ assumes
   in place of the advantage its own reduction shows. The three games and the
@@ -1519,7 +1483,7 @@ single member of it can carry.
   $2\varepsilon_{\mathrm{cpa}} \ge 1 - 1/m$, so the premises of
   Theorem~\ref{thm:alice_guess_admissible} are what make that bound say
   anything.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{decrypt\_bob\_epsilon\_ge}.
 \end{theorem}
 
@@ -1535,7 +1499,7 @@ single member of it can carry.
      \mathrm{adm}\big(\hopred{0}{D_\delta}\big) = \mathsf{false} \]
   Class membership is therefore not free bookkeeping. On this adversary the
   assumption's own bound decides membership, and decides against it.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{decrypt\_reduction\_admissibleF}.
 \end{corollary}
 
@@ -1554,7 +1518,7 @@ single member of it can carry.
   false statement, and for every such assumption rather than a contrived one.
   Corollary~\ref{cor:decrypt_not_admissible} is the complementary half: the
   missing premises cannot be supplied for this predictor.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{decrypt\_guess\_V2\_premise\_free\_lt}.
 \end{corollary}
 

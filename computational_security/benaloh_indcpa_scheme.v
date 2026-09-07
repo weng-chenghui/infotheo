@@ -198,11 +198,9 @@ Variables n r : nat.
 Hypothesis n_gt1 : (1 < n)%N.
 Hypothesis r_gt1 : (1 < r)%N.
 
-(* The Benaloh AHEncType at modulus n and block size r: the encryption and
-   decryption pair of benaloh_ahe.v with the additively homomorphic structure
-   the DSDP protocol runs on, built at r > 1.  The condition n > 1 is weaker
-   than the composite modulus the scheme's security rests on, and neither the
-   packaging nor the bounds below read it. *)
+(* The Benaloh AHEncType at modulus n and block size r, the additively
+   homomorphic packaging of benaloh_ahe.v.  The condition n > 1 is weaker than
+   the composite modulus security rests on, and nothing below reads it. *)
 Definition Benaloh_AHEnc : AHEncType :=
   @AHEnc.Pack (BenalohHETypes n r)
     (@AHEnc.Class (BenalohHETypes n r) (@Benaloh_isEncDec n r)
@@ -210,29 +208,25 @@ Definition Benaloh_AHEnc : AHEncType :=
 
 Local Notation AHE := Benaloh_AHEnc.
 
-(* The coin index type of this instantiation: the unit group of Z/nZ, which is
-   the scheme's own randomness carrier.  Coins and randomness are separate in
-   the abstract development because rand is a bare Type and carries no
-   distribution, and at a concrete scheme the two coincide. *)
+(* The coin index type here: the unit group of Z/nZ, the scheme's own
+   randomness carrier.  Coins and randomness are separate in the abstract
+   development, and at a concrete scheme they coincide. *)
 Definition renc_benaloh : finType := {unit 'Z_n}.
 
-(* The coin map of this instantiation is the identity: the coin index type
-   above is definitionally the scheme's randomness, so a coin is already the
-   randomness the encryption consumes. *)
+(* The coin map here is the identity.  The coin index type above is
+   definitionally the scheme's randomness, so a coin is already that
+   randomness. *)
 Definition rand_of_renc_benaloh : renc_benaloh -> rand AHE := idfun.
 
-(* The coin space is nonempty, in the successor form the uniform distribution
-   of the abstract development takes.  Every statement below is read at this
-   one proof term, since a second proof of the same equation is not
-   convertible with it. *)
+(* The coin space is nonempty, in the successor form fdist_uniform takes.
+   Every statement below is read at this one proof term, since a second proof
+   is not convertible. *)
 Lemma card_renc_benaloh : #|renc_benaloh| = #|renc_benaloh|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
-(* The Benaloh scheme as one value of the record the IND-CPA game is
-   quantified over: the packaging at modulus n and block size r, its coin
-   index type, the pinned cardinality above, and the identity coin map.  The
-   DSDP files instantiate the game here, so every Benaloh bound they read off
-   is a bound at this record. *)
+(* The Benaloh scheme as one indcpa_scheme: the packaging at modulus n and
+   block size r, plus its coin data.  The DSDP files instantiate the game
+   here, so every Benaloh bound is read at this record. *)
 Definition benaloh_indcpa_scheme : indcpa_scheme :=
   {| scheme_AHE := AHE ; scheme_renc := renc_benaloh ;
      scheme_card_renc := card_renc_benaloh ;
@@ -240,41 +234,36 @@ Definition benaloh_indcpa_scheme : indcpa_scheme :=
 
 (* The IND-CPA challenger at this packaging is the Benaloh encryption of
    benaloh_enc.v under uniform unit-group randomness.  Every advantage below
-   is measured against this law, c = y^m * u^r mod n with u uniform in the
-   unit group. *)
+   is measured against this law, c = y^m * u^r mod n with u uniform. *)
 Lemma enc_fdist_benalohE (pk : pub_key AHE) (v : plain AHE) :
   enc_fdist (R:=R) (S:=benaloh_indcpa_scheme) pk v
   = fdistmap (benaloh_enc (pub_gen pk) v) (fdist_uniform card_renc_benaloh).
 Proof. by []. Qed.
 
-(* The two challenge laws of the residuosity game at this scheme's ring: a
-   uniform unit of Z/nZ read as a ring element, and its r-th power.  The
-   second is the law of a Benaloh encryption of zero, the first the law the
-   reduction moves that encryption to. *)
+(* The two challenge laws of the residuosity game here: a uniform unit of
+   Z/nZ, and its r-th power.  The second is the law of a Benaloh encryption of
+   zero, the first the law it moves to. *)
 Local Notation unit_fdist := (unit_fdist (R:=R) 'Z_n card_renc_benaloh).
 Local Notation residue_fdist :=
   (residue_fdist (R:=R) 'Z_n r card_renc_benaloh).
 
-(* The r-th residuosity assumption at modulus n, Benaloh 1994: a Boolean class
-   of distinguishers, one epsilon, and the assumption that every classified
-   distinguisher tells an r-th residue of Z/nZ from a uniform unit with
-   advantage at most that epsilon.  It is the one computational premise every
-   bound below is read at. *)
+(* The r-th residuosity assumption at modulus n, Benaloh 1994: a class of
+   distinguishers and an epsilon.  Every classified distinguisher tells an
+   r-th residue of Z/nZ from a uniform unit, with advantage at most
+   epsilon. *)
 Definition benaloh_residuosity_assumption : Type :=
   residuosity_assumption (R:=R) 'Z_n r card_renc_benaloh.
 
-(* The advantage an r-th residuosity record assumes of the distinguishers its
-   class admits.  Every Benaloh bound below is a multiple of it: twice it at
-   one key, one call per hop of the reduction, and four times it for a trace
-   that replaces a ciphertext at two keys. *)
+(* The advantage an r-th residuosity record assumes of its classified
+   distinguishers.  Every Benaloh bound below is a multiple of it: twice it at
+   one key, four times at two. *)
 Definition benaloh_residuosity_epsilon
     (residuosity : benaloh_residuosity_assumption) : R :=
   residuosity_assumption_epsilon residuosity.
 
-(* The first reduction: an IND-CPA adversary read as a residuosity
-   distinguisher that multiplies its challenge by y ^+ m, the generator power
-   its own plaintext names.  Under the residue law that multiplier turns the
-   challenge into an encryption of m, and under the unit law it erases m. *)
+(* The first reduction: the adversary run on the residuosity challenge times
+   y ^+ m.  Under the residue law it runs the real arm, under the unit law the
+   multiplier erases m. *)
 Definition residuosity_of_adversary (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_n :=
@@ -284,7 +273,7 @@ Definition residuosity_of_adversary (y : ring_units 'Z_n)
 
 (* The second reduction: the same adversary with its challenge passed through
    unchanged.  Under the residue law the challenge is already an encryption of
-   zero, so this distinguisher runs the zero arm of the IND-CPA experiment. *)
+   zero, so it runs the zero arm. *)
 Definition residuosity_of_adversary_zero
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_n :=
@@ -292,10 +281,9 @@ Definition residuosity_of_adversary_zero
      state_fdist := adv_choose adv ;
      decide := fun c x => adv_decide c x |}.
 
-(* The real arm of the IND-CPA experiment is the first reduction run against
-   the residue law: an encryption of m under generator y is y ^+ m times the
-   r-th power of a uniform unit.  It is the starting object of the chain
-   below. *)
+(* An encryption of m under generator y is y ^+ m times the r-th power of a
+   uniform unit.  The real arm is therefore the first reduction against the
+   residue law, where the chain opens. *)
 Lemma real_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
@@ -308,11 +296,9 @@ rewrite residuosity_acceptE /residue_fdist /=; congr (Pr _ _).
 by congr (_ >>= _); apply/funext => c; rewrite !fdistmap_comp.
 Qed.
 
-(* The zero arm is the second reduction run against the residue law: at
-   plaintext zero the generator power is 1, so an encryption is the r-th power
-   of a uniform unit alone.  The plaintext carries the annotation
-   (0 : plain AHE) because the ring 'Z_n fixes the modulus and leaves the
-   block size r to be named. *)
+(* At plaintext zero an encryption is the r-th power of a uniform unit alone.
+   The zero arm is therefore the second reduction against the residue law, at
+   plaintext (0 : plain AHE). *)
 Lemma zero_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
@@ -326,10 +312,9 @@ congr (_ >>= _); apply/funext => c; rewrite !fdistmap_comp.
 by congr (fdistmap _ _); apply/funext => u; rewrite /benaloh_enc expr0 /= mul1r.
 Qed.
 
-(* Under the unit law the two reductions accept with the same probability,
-   because multiplication by the unit val y ^+ (adv_plain c) fixes the uniform
-   law.  That multiplier is the value of a group power, a unit whatever y and
-   m are, so no order condition on the generator is read here. *)
+(* Under the unit law the two reductions accept alike, multiplication by val
+   y ^+ (adv_plain c) fixing the uniform law.  That multiplier is a unit
+   whatever y and m are, so the generator needs no order condition. *)
 Lemma unit_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   residuosity_accept (residuosity_of_adversary y adv) unit_fdist
@@ -353,19 +338,16 @@ Qed.
    name the chain below reads at. *)
 Local Notation accept := (residuosity_accept (R:=R)).
 
-(* The two labels of the Benaloh reduction, one per residuosity call:
-   residuosity_y for the call through the reduction that multiplies its
-   challenge by the generator power the adversary's plaintext names,
-   residuosity_0 for the call through the reduction that hands its challenge
-   over unchanged.  A label names the reduction its hop invokes, so the loss
-   of a finished chain reads as the list of assumption calls its bound rests
-   on. *)
+(* The two labels, one per residuosity call: residuosity_y for the
+   multiplying reduction, residuosity_0 for the plain one.  A label names the
+   reduction its hop invokes, so a finished loss lists the assumption
+   calls. *)
 Variant benaloh_label := residuosity_y | residuosity_0.
 
 (* What each label claims: the two acceptance probabilities its residuosity
-   call moves between, and the epsilon that call assumes.  A hop's cost,
-   target and justification are each checked against the claim of its label,
-   so no step can record a residuosity call it did not make. *)
+   call moves between, and the epsilon that call assumes.  Each hop's cost,
+   target and justification is checked against its label's claim, so no step
+   invents a call. *)
 Definition benaloh_claim (residuosity : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme)
     (l : benaloh_label) : claim R :=
@@ -384,8 +366,7 @@ Local Open Scope epshop_scope.
 
 (* The closed form of the loss the chain below accumulates: one residuosity
    epsilon per hop, twice the assumed epsilon.  The chain returns its bound by
-   this identity, and the factor two in every Benaloh bound of this file comes
-   from here. *)
+   this identity, and every factor two in this file comes from here. *)
 Lemma residuosity_totalE (residuosity : benaloh_residuosity_assumption) :
   benaloh_residuosity_epsilon residuosity
   + benaloh_residuosity_epsilon residuosity
@@ -414,8 +395,8 @@ Hypothesis admissible_0 :
   residuosity_admissible residuosity (residuosity_of_adversary_zero adv).
 
 (* The two reductions the chain moves between, under the short names its
-   steps read at: the multiplying one at the key's generator, and the one
-   that passes the challenge through unchanged. *)
+   steps read at.  D_y multiplies at the key's generator, D_0 passes the
+   challenge through unchanged. *)
 Local Notation D_y := (residuosity_of_adversary (priv_gen dk) adv).
 Local Notation D_0 := (residuosity_of_adversary_zero adv).
 Local Notation eps := (benaloh_residuosity_epsilon residuosity).
@@ -438,12 +419,10 @@ Definition benaloh_chain :=
             (* the gap between the two arms, at the two calls it spent *)
             bound (2 * eps) by residuosity_totalE residuosity }.
 
-(* At every private key, an adversary whose two residuosity reductions the
-   residuosity class admits has IND-CPA advantage at most twice the assumed
-   residuosity epsilon, the gap between the real and the zero acceptance
-   probabilities.  One call carries the real arm from the residue law to the
-   unit law and a second carries the zero arm back, both terms
-   assumption-conditional, so the whole bound is computational. *)
+(* An adversary whose two reductions the class admits has IND-CPA advantage
+   at most twice the residuosity epsilon.  Both terms are
+   assumption-conditional, one residuosity call per arm, so the whole bound is
+   computational. *)
 Lemma benaloh_residuosity_epsilon_le :
   indcpa_epsilon (R:=R) (S:=benaloh_indcpa_scheme)
     (pub_of_priv dk) adv
@@ -460,7 +439,7 @@ End benaloh_chain.
 (* The IND-CPA class the derived assumption carries: the adversaries whose two
    residuosity reductions the residuosity class admits.  The first quantifier
    runs over the whole unit group of Z/nZ because the class is fixed before
-   any key is, and that group is a finite type, so the test is Boolean. *)
+   any key. *)
 Definition benaloh_residuosity_admissible
     (residuosity : benaloh_residuosity_assumption)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) : bool :=
@@ -483,10 +462,8 @@ exact: benaloh_residuosity_epsilon_le (admissible_y _) admissible_0.
 Qed.
 
 (* The IND-CPA assumption of Benaloh, derived rather than assumed: the class
-   above, twice the residuosity epsilon, and the lemma above as the record's
-   proof field.  Every computational bound the DSDP files read off at Benaloh
-   passes through this record, so each of those bounds is a multiple of the
-   r-th residuosity epsilon, at two residuosity calls per key. *)
+   above, twice the residuosity epsilon, and the lemma.  Every Benaloh bound
+   in the DSDP files is a multiple of the r-th residuosity epsilon. *)
 Definition benaloh_indcpa_assumption
     (residuosity : benaloh_residuosity_assumption) :
     indcpa_epsilon_assumption (R:=R) benaloh_indcpa_scheme :=
@@ -496,10 +473,8 @@ Definition benaloh_indcpa_assumption
        @benaloh_residuosity_admissible_epsilon_le residuosity |}.
 
 (* At the zero-epsilon residuosity assumption the derived class admits every
-   adversary whose verdict ignores the ciphertext, since both reductions hand
-   such an adversary a challenge it never reads.  The class is therefore
-   inhabited at a record that exists, at epsilon zero, so a bound restricted
-   to it has an adversary to read it at. *)
+   adversary whose verdict ignores the ciphertext.  The class is inhabited at
+   a proved epsilon zero, so a bound restricted to it has an adversary. *)
 Lemma benaloh_residuosity_admissible_cipher_constant
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   adv_decide_cipher_constant adv ->
@@ -514,13 +489,10 @@ by move: (Hc c) => /forallP/(_ (val y ^+ adv_plain c * x))
                    /forallP/(_ (val y ^+ adv_plain c * z)).
 Qed.
 
-(* For every private key and every adversary the residuosity class admits, the
-   probability of accepting an encryption of the chosen plaintext under the
-   key's generator and the probability of accepting an encryption of zero
-   differ by at most twice the residuosity epsilon.  The key ranges over every
-   BenalohPrivKey record, so the bound is universal over keys rather than
-   averaged over a key-generation law, and the adversary holds the public key
-   alone. *)
+(* At every key, an admitted adversary's real and zero acceptance
+   probabilities differ by at most twice the residuosity epsilon.  The key
+   ranges over every BenalohPrivKey record, so the bound is universal over
+   keys rather than averaged. *)
 Lemma benaloh_indcpa_epsilon_le (residuosity : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   benaloh_residuosity_admissible residuosity adv ->
@@ -569,13 +541,13 @@ Definition f_size_benaloh k : R :=
   (#|plain (Benaloh_AHEnc (n k) (r_gt1 k))|%:R : R)^-1.
 
 (* The assumed residuosity-advantage sequence: the epsilon residuosity k
-   assumes at each k, which every computational bound along the sequence is a
-   multiple of. *)
+   assumes at each k.  Every computational bound along the sequence is a
+   multiple of it. *)
 Definition f_residuosity_benaloh k : R :=
   benaloh_residuosity_epsilon (residuosity k).
 
 (* The derived IND-CPA advantage sequence: twice the residuosity advantage at
-   k, the two residuosity calls the reduction spends at one key. *)
+   k.  The reduction spends two residuosity calls at one key. *)
 Definition f_adv_benaloh k : R :=
   indcpa_assumption_epsilon
     (benaloh_indcpa_assumption (r_gt1 k) (residuosity k)).
@@ -593,16 +565,14 @@ Hypothesis f_residuosity_benaloh_negligible :
   negligible_fun f_residuosity_benaloh.
 
 (* The derived IND-CPA advantage is negligible, twice a negligible family
-   being negligible.  What a sequence of IND-CPA assumptions had to take as a
-   hypothesis is here a consequence of the residuosity hypothesis, at the
-   cost of the factor two the reduction spends. *)
+   being negligible.  The residuosity hypothesis now implies what a sequence
+   of IND-CPA assumptions had to take, at a factor two. *)
 Lemma f_adv_benaloh_negligible : negligible_fun f_adv_benaloh.
 Proof. exact: negligible_fun_double f_residuosity_benaloh_negligible. Qed.
 
-(* The inverse plaintext cardinality along the sequence is negligible: the
-   plaintext space at k is Z/(r k)Z, so block-size growth is plaintext
-   growth.  This is the scheme-side summand of every guessing bound of the
-   shape 1/#|plain| + 2 * eps read off along the sequence. *)
+(* The inverse plaintext cardinality along the sequence is negligible, the
+   plaintext space at k being Z/(r k)Z.  It is the scheme-side summand of
+   every guessing bound of the shape 1/#|plain| + 2 * eps. *)
 Lemma f_size_benaloh_negligible : negligible_fun f_size_benaloh.
 Proof.
 rewrite /f_size_benaloh.

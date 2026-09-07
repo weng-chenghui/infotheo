@@ -153,10 +153,8 @@ Qed.
 Let InputRV_proj_dsdp : forall t, InputRV t = dsdp_proj_input (CondRV t).
 Proof. by move=> t. Qed.
 
-(* On the fiber, the joint law of the relay inputs with the conditioning
-   tuple agrees with their joint law with Alice's input and weights.  The
-   output adds nothing there, since the constraint already determines
-   it. *)
+(* On the fiber, VarRV has the same joint law with CondRV as with InputRV.
+   The output S adds nothing there, since the constraint determines it. *)
 Let joint_eq_input_dsdp :
   forall (cond : msg * msg * msg * msg * msg) (var : msg * msg),
     var \in dsdp_fiber_fn cond ->
@@ -204,12 +202,9 @@ apply/idP/idP => H.
     by move: Heq => /(f_equal (fun x => x + u1 * v1)); rewrite !subrK.
 Qed.
 
-(* The fiber holds m input pairs whenever Alice's weight on Charlie lies
-   strictly between 0 and both primes, since such a weight is invertible
-   modulo m.  The count is the same m at every view value, which is what
-   turns it into a conditional entropy of log m, and the weight is a
-   public protocol parameter, so this is a condition on how the protocol
-   is configured. *)
+(* The fiber has exactly m input pairs when Alice's weight on Charlie is a
+   unit modulo m.  The count does not depend on the view value, so the
+   conditional entropy is log m. *)
 Lemma dsdp_fiber_card (u1 u2 u3 v1 s : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   #|dsdp_fiber u1 u2 u3 v1 s| = m.
@@ -247,7 +242,7 @@ by rewrite (cond_prob_zero_outside_constraint Hconstraint Hcond_pos).
 Qed.
 
 (* An input pair inside the fiber has conditional probability 1 / m given
-   the view value, so the relay inputs are uniform on the fiber. *)
+   the view value.  The relay inputs are therefore uniform on the fiber. *)
 Lemma Pr_dsdp_sol_uniform (u1 u2 u3 v1 s : msg) (v2 v3 : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   `Pr[CondRV = (v1, u1, u2, u3, s)] != 0 ->
@@ -311,8 +306,8 @@ Definition dsdp_g (var : msg * msg) (inp : msg * msg * msg * msg) : msg :=
   let '(v1, u1, u2, u3) := inp in
   (u1 * v1 + u2 * v2 + u3 * v3)%R.
 
-(* The fiber of the DSDP constraint is the set of relay input pairs that
-   dsdp_g sends to the output value s. *)
+(* The fiber of the DSDP constraint is the preimage of the output s under
+   dsdp_g. *)
 Lemma dsdp_fiber_eq_abstract (v1 u1 u2 u3 s : msg) :
   dsdp_fiber u1 u2 u3 v1 s =
   [set x' : msg * msg | dsdp_g x' (v1, u1, u2, u3) == s].
@@ -335,11 +330,9 @@ move: Heq; rewrite subr_eq addrC => /eqP ->.
 by rewrite addrA.
 Qed.
 
-(* Conditioning on Alice's input, her three weights and the output, the
-   plaintext part of her view, the relay inputs keep log m bits of
-   uncertainty.  The counting axis bounds the plaintexts, while her key,
-   her masks and the ciphertexts are bounded on the hopping axis.
-   [3-party] *)
+(* Given Alice's plaintext view, the relay inputs keep log m bits of
+   uncertainty.  The counting axis bounds the plaintexts, and the hopping
+   axis bounds her key and the ciphertexts.  [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -386,10 +379,9 @@ Qed.
 
 (* card_msg and card_msg_pair are inherited from outer section *)
 
-(* The relay inputs are uniform on a space of size m ^ 2 before any
-   conditioning, so their joint entropy is log (m * m).  Against
-   dsdp_centropy_uniform, which leaves log m given Alice's plaintext
-   view, this says the run reveals exactly half of that joint entropy. *)
+(* Before any conditioning the relay inputs are uniform on m ^ 2 pairs, so
+   their joint entropy is log (m * m).  Conditioning on Alice's plaintext
+   view leaves log m, so the run reveals half of it. *)
 Lemma dsdp_var_entropy :
   `p_VarRV = fdist_uniform card_msg_pair ->
   `H `p_VarRV = log (m%:R * m%:R : R).
@@ -540,9 +532,9 @@ apply/idP/idP => H.
     by move: Heq => /eqP; rewrite -subr_eq0 opprB addrA subrK subr_eq0 => /eqP.
 Qed.
 
-(* When u3 is left-regular, an input pair inside the fiber has
-   conditional probability 1 / #|R| given the view value, so the relay
-   inputs are uniform on the fiber. *)
+(* When u3 is left-regular, an input pair inside the fiber has conditional
+   probability 1 / #|R|.  The relay inputs are therefore uniform on the
+   fiber. *)
 Lemma Pr_dsdp_sol_uniform_ring (u1 u2 u3 v1 s v2 v3 : R) :
   GRing.lreg u3 ->
   `Pr[CondRV_r = (v1, u1, u2, u3, s)] != 0 ->
@@ -603,8 +595,8 @@ Proof. by rewrite muln_gt0 prime_gt0 // prime_gt0. Qed.
 Let card_ffun_msg : #|{ffun 'I_n_relay.+1 -> msg}| = (m ^ n_relay.+1).-1.+1.
 Proof. by rewrite prednK ?expn_gt0 ?m_gt0 // card_ffun !card_ord Zp_cast. Qed.
 
-(* The set of relay input vectors whose weighted sum equals the target
-   s - u0 * v0, the N-party form of dsdp_fiber. *)
+(* The set of relay input vectors with weighted sum s - u0 * v0.  This is
+   the N-party form of dsdp_fiber. *)
 Definition dsdp_fiber_n (u_rel : {ffun 'I_n_relay.+1 -> msg}) (target : msg)
     : {set {ffun 'I_n_relay.+1 -> msg}} :=
   @linear_fiber_nd p_minus_2 q_minus_2 n_relay u_rel target.
@@ -709,17 +701,14 @@ Qed.
 Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
   let '(_, _, u_rel, _) := c in u_rel.
 
-(* The last relay's weight, read off the conditioning tuple.  Held
-   strictly between 0 and min(p, q) it is invertible modulo m, and that
-   is what leaves the relay inputs uniform given the view. *)
+(* The last relay's weight, read off the conditioning tuple.  Between 0 and
+   min(p, q) it is invertible modulo m, so the relay inputs stay uniform. *)
 Definition last_relay_weight (c : CondT_n) : msg :=
   (let '(_, _, u_rel, _) := c in u_rel) ord_max.
 
-(* Conditioning on the N-party view, Alice's input and weight, the vector
-   of relay weights and the output, the relay inputs keep
-   log (m ^ n_relay) bits of uncertainty, one coordinate less than their
-   joint entropy whatever the number of relays.  The 3-party
-   dsdp_centropy_uniform is this statement at n_relay = 1.  [N-party] *)
+(* Given the N-party view, the relay inputs keep log (m ^ n_relay) bits of
+   uncertainty.  That is one coordinate less than their joint entropy, at any
+   number of relays.  [N-party] *)
 Theorem dsdp_centropy_uniform_n :
   (forall t, (0 < val (last_relay_weight (CondRV t)))%N) ->
   (forall t, (val (last_relay_weight (CondRV t)) < minn p q)%N) ->

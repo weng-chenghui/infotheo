@@ -183,8 +183,8 @@ Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation rand_of_renc := (@scheme_rand_of_renc I).
 (* Alice's input, the three protocol weights with Charlie's weight
-   invertible, and the three private keys: the instance's fields, under the
-   names the DSDP protocol gives them. *)
+   invertible, and the three private keys.  These are instance fields, under
+   the names the DSDP protocol gives them. *)
 Local Notation v1 := (inst_v1 I).
 Local Notation u1 := (inst_u1 I).
 Local Notation u2 := (inst_u2 I).
@@ -192,11 +192,9 @@ Local Notation u3 := (inst_u3 I).
 Local Notation dk_a := (inst_dk_a I).
 Local Notation dk_b := (inst_dk_b I).
 Local Notation dk_c := (inst_dk_c I).
-(* Bob's and Charlie's second-hop coins, held as indices into Renc so that a
-   uniformly sampled coin ranges over a finType and rand_of_renc carries an
-   index to the randomness the protocol encrypts with.  The w_ prefix marks
-   the index side of that split: rb1, rc1, ra1 and ra2 below are rand AHE
-   values, these two are indices. *)
+(* Bob's and Charlie's second-hop coins, held as indices into Renc and sent to
+   randomness by rand_of_renc.  The w_ prefix marks the index side: rb1, rc1,
+   ra1 and ra2 are rand AHE values. *)
 Local Notation w_rb2 := (inst_rb2 I).
 Local Notation w_rc2 := (inst_rc2 I).
 
@@ -212,9 +210,9 @@ Let DI := Standard_DSDP_Interface AHE.
 Definition trace_dataT : finType :=
   ((plain AHE + cipher AHE) + unit + unit)%type.
 
-(* The encoding of one datum of the standard interface into that finite image,
-   applied entrywise to a trace so that a trace becomes a value of a finType
-   and a predictor on it can be quantified over. *)
+(* The encoding of one datum of the standard interface into that finite image.
+   Applied entrywise, it makes a trace a finType value that a predictor can
+   range over. *)
 Definition trace_data_of_di_data (x : di_data DI) : trace_dataT :=
   match x with
   | inl (inl (inl m)) => inl (inl (inl m))
@@ -243,14 +241,14 @@ Let pbob_inst := @pbob DI decode pkey_of_dk dk_b v2 rb1 (rand_of_renc w_rb2).
 Let pcharlie_inst :=
   @pcharlie DI decode pkey_of_dk dk_c v3 rc1 (rand_of_renc w_rc2).
 
-(* The three piSMC programs of the DSDP protocol at the standard interface of
-   an AHE scheme, the program list every statement below runs. *)
+(* The three piSMC programs of DSDP at the standard interface of an AHE
+   scheme.  Every statement below runs this program list. *)
 Definition dsdp_procs_std : seq (proc (di_data DI)) :=
   erase_aprocs [aprocs palice_inst ; pbob_inst ; pcharlie_inst].
 
-(* The traces of the fifteen-round run at the standard interface: eleven
-   entries for Alice, four for Bob and three for Charlie, each ciphertext in
-   the form the programs build it. *)
+(* The traces of the fifteen-round run: eleven entries for Alice, four for
+   Bob, three for Charlie.  Each ciphertext appears in the form the programs
+   build it. *)
 Lemma dsdp_run_tracesE :
   (run_interp 15 dsdp_procs_std).2 =
   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
@@ -315,9 +313,9 @@ rewrite -Ht3.
 by cbv -[enc Emul Epow dec pub_of_priv].
 Qed.
 
-(* The same traces with every ciphertext normalised to a single encryption:
-   a combine's randomness is the homomorphic combination of the randomness of
-   its arguments. *)
+(* The same traces with every ciphertext normalised to a single encryption.
+   A combine's randomness is the homomorphic combination of its arguments'
+   randomness. *)
 Lemma dsdp_run_traces_encE :
   (run_interp 15 dsdp_procs_std).2 =
   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
@@ -347,10 +345,9 @@ Arguments dsdp_procs_std : clear implicits.
 Section dsdp_alice_trace_rv.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, Alice's input, the three
-   protocol weights, Bob's and Charlie's private keys, and Charlie's
-   second-hop coin as an index into the coin space. *)
+(* The scheme data, Alice's input, the three weights, Bob's and Charlie's
+   private keys, and Charlie's second-hop coin.  These are instance fields,
+   under the names the corrupted-Alice development gives them. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation card_renc := (scheme_card_renc I).
@@ -390,9 +387,9 @@ Local Notation predictor := (predictor I).
 Local Notation alice_simulator := (alice_simulator (R:=R) (I:=I)).
 Local Notation alice_ideal := (alice_ideal (R:=R) I).
 
-(* Alice's executed trace read off a value of her hopping tuple: the leaked
-   output, Charlie's re-encryption of it, the two received ciphertexts, the
-   two masks, the four weights, and the erased key mark. *)
+(* Alice's executed trace read off a value of her hopping tuple.  It holds the
+   leaked output, Charlie's re-encryption, two ciphertexts, two masks, four
+   weights, and the key mark. *)
 Definition alice_trace_of_hop_tuple
     (v : alice_hop_tupleT I) :
     15.-bseq trace_dataT :=
@@ -410,9 +407,8 @@ Definition alice_trace_of_hop_tuple
         inl (inr tt)].
 
 (* The DSDP protocol: the three piSMC programs at the coordinates of one
-   sample.  The name says which protocol the process list is, so that a
-   security statement can open at the protocol itself rather than at a random
-   variable derived from it. *)
+   sample.  The name lets a security statement open at the protocol
+   itself. *)
 Definition dsdp_protocol (s : alice_sampleT I) :
     seq (proc (di_data DI)) :=
   dsdp_procs_std I (V2 s) (V3 s) (R2 s) (R3 s) (rand_of_renc (Rho2 s))
@@ -427,11 +423,8 @@ Lemma trace_of_run_size
            (nth [::] (run_interp 15 (procs s)).2 n( i ))) <= 15)%N.
 Proof. by rewrite size_map; exact: size_traces_nth. Qed.
 
-(* The encoded trace party i sees in a run of the process list procs by the
-   interpreter, as a random variable on the sample space.  This is what an
-   adversary sitting at that party collects when the protocol is executed at
-   the sampled inputs, so the interpreter's run enters a hopping argument as
-   its first game. *)
+(* The encoded trace party i sees in a run of procs, as a random variable.
+   The interpreter's run enters a hopping argument as its first game. *)
 Definition trace_of_run
     (procs : alice_sampleT I -> seq (proc (di_data DI)))
     (i : party_id) :
@@ -439,8 +432,8 @@ Definition trace_of_run
      15.-bseq trace_dataT} :=
   fun s => Bseq (trace_of_run_size procs i s).
 
-(* Alice's encoded executed trace as a random variable on the sample space:
-   what the interpreter hands her in a run of the DSDP protocol. *)
+(* Alice's encoded executed trace as a random variable on the sample space.
+   The interpreter hands it to her in a run of the DSDP protocol. *)
 Definition AliceTrace :
     {RV (alice_sample_fdist (R:=R) I) ->
      15.-bseq trace_dataT} :=
@@ -472,8 +465,8 @@ by move=> ?; rewrite /= Sout_runE reenc_plainE.
 Qed.
 
 (* The real executed-trace law is the deterministic image of the real
-   hopping-tuple law: Alice's trace holds no coordinate her hopping tuple
-   does not determine. *)
+   hopping-tuple law.  Her hopping tuple determines every coordinate of
+   Alice's trace. *)
 Lemma alice_trace_realE :
   `p_ [% V2, V3, AliceTrace]
   = fdistmap (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))
@@ -488,9 +481,8 @@ Definition alice_trace_simulator (s : plain AHE) :
     R.-fdist (15.-bseq trace_dataT) :=
   fdistmap alice_trace_of_hop_tuple (alice_simulator s).
 
-(* The joint law of the honest inputs and the simulated encoded trace: the
-   honest input law bound to the trace simulator fed the leaked output
-   computed from the sampled inputs. *)
+(* The joint law of the honest inputs and the simulated encoded trace.  The
+   honest input law is bound to the trace simulator fed the leaked output. *)
 Definition alice_trace_ideal :
     R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT) :=
   `p_ [% V2, V3] >>= (fun vv =>
@@ -515,10 +507,9 @@ End dsdp_alice_trace_rv.
 Section dsdp_alice_trace_centropy.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, Alice's input, the three
-   protocol weights, Bob's private key, and Charlie's second-hop coin as an
-   index into the coin space. *)
+(* The scheme data, Alice's input, the three weights, Bob's private key, and
+   Charlie's second-hop coin.  These are instance fields, under the names the
+   corrupted-Alice development gives them. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation rand_of_renc := (@scheme_rand_of_renc I).
@@ -529,9 +520,9 @@ Local Notation u3 := (inst_u3 I).
 Local Notation dk_b := (inst_dk_b I).
 Local Notation w_rc2 := (inst_rc2 I).
 
-(* Each abbreviation pins, under the name it abbreviates, the parameters that
-   dsdp_alice_hop_secrecy.v discharges; the shadowing is not recursive,
-   since the right-hand side resolves against the constant. *)
+(* Each abbreviation pins the parameters that dsdp_alice_hop_secrecy.v
+   discharges.  The right-hand side resolves against the constant, so the
+   shadowing terminates. *)
 Local Notation P := (alice_sample_fdist (R:=R) I).
 Local Notation pkey_of_dk := (inst_pkey_of_party I).
 Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
@@ -546,20 +537,18 @@ Local Notation charlie_real_cipher := (charlie_real_cipher (R:=R) (I:=I)).
 Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 
-(* The part of Alice's hopping tuple her executed trace shows: the two masks,
-   the leaked output and the two received ciphertexts. *)
+(* The part of Alice's hopping tuple her trace shows: two masks, the leaked
+   output, two received ciphertexts. *)
 Definition alice_trace_tupleT : finType :=
   ((plain AHE * plain AHE) * plain AHE * cipher AHE * cipher AHE)%type.
 
-(* The trace-visible part of Alice's hopping tuple as a random variable on the
-   sample space: the two masks, the leaked output, and the two received
-   ciphertexts of the real experiment, both slots carrying real
-   encryptions. *)
+(* The trace-visible part of Alice's hopping tuple as a random variable.  Both
+   ciphertext slots carry real encryptions. *)
 Definition AliceTraceTuple : {RV P -> alice_trace_tupleT} :=
   [% [% R2, R3], Sout, bob_real_cipher, charlie_real_cipher].
 
-(* The sample coordinates other than Alice's two combine randomnesses: the two
-   honest inputs, the two masks and the two hop encryption randomnesses. *)
+(* The sample coordinates besides Alice's two combine randomnesses: two honest
+   inputs, two masks, two hop encryption randomnesses. *)
 Definition alice_sample_restT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE) * (Renc * Renc))%type.
 
@@ -679,9 +668,9 @@ Proof.
 by [].
 Qed.
 
-(* Alice's executed trace read off the trace-visible tuple: the leaked output,
-   Charlie's re-encryption of it, the two received ciphertexts, the two masks,
-   the four weights, and the erased key mark. *)
+(* Alice's executed trace read off the trace-visible tuple.  It holds the
+   leaked output, Charlie's re-encryption, two ciphertexts, two masks, four
+   weights, and the key mark. *)
 Definition trace_of_trace_tuple (q : alice_trace_tupleT) :
     15.-bseq (trace_dataT I) :=
   [bseq inl (inl (inl q.1.1.2));
@@ -743,10 +732,8 @@ by rewrite (inde_centropy_eq combine_rand_trace_indep).
 Qed.
 
 (* Bob's ciphertext slot of Alice's executed trace, decrypted with Bob's own
-   private key, which names Bob's input on every sample.  It sits outside the
-   attack model the hop bounds are stated in, which grants the public keys
-   alone, and it is the witness that those bounds cannot be widened to every
-   adversary. *)
+   private key.  It witnesses that the hop bounds hold only for adversaries
+   granted the public keys alone. *)
 Definition bob_decrypt_predictor : predictor I (alice_traceT I) :=
   (* Both default branches are unreachable on the traces this predictor is
      run against.  Every trace in the image of trace_of_trace_tuple carries a
@@ -758,8 +745,7 @@ Definition bob_decrypt_predictor : predictor I (alice_traceT I) :=
            is Some m then m else 0.
 
 (* Bob's input is a deterministic function of Alice's executed trace.
-   Correctness of decryption makes it one: Alice's trace carries Bob's
-   ciphertext, and a holder of dk_b reads the plaintext off it. *)
+   Alice's trace carries Bob's ciphertext, and dk_b decrypts it. *)
 Lemma alice_trace_decode_V2E :
   V2 = bob_decrypt_predictor `o AliceTrace.
 Proof.
@@ -768,11 +754,8 @@ by rewrite /comp_RV /bob_decrypt_predictor /= dec_correct.
 Qed.
 
 (* Conditioning on Alice's executed trace leaves no uncertainty about Bob's
-   input, so the Shannon reading of the real trace is degenerate.  The
-   statements about the real trace that carry content are the guessing bounds,
-   which quantify over predictors holding the public keys alone, while
-   conditional entropy quantifies over nothing and so charges the decryptor as
-   well. *)
+   input.  The guessing bounds carry the content, since they grant a predictor
+   the public keys alone. *)
 Corollary centropy_V2_trace_eq0 : `H( V2 | AliceTrace ) = 0.
 Proof. by rewrite {1}alice_trace_decode_V2E centropy_RV_comp0. Qed.
 
@@ -781,9 +764,8 @@ End dsdp_alice_trace_centropy.
 Section dsdp_alice_trace_avg.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's scheme data under the names the corrupted-Alice development
-   gives them, read through the coercion: the AHE scheme and the cardinality
-   of its coin space. *)
+(* The AHE scheme and the cardinality of its coin space.  Both are read off
+   the instance through the coercion. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation card_renc := (scheme_card_renc I).
 
@@ -794,9 +776,8 @@ Local Notation alice_trace_ideal_coin w :=
   (alice_trace_ideal (R:=R) (inst_with_rc2 I w)).
 
 (* The ideal trace joint law with a uniformly sampled re-encryption coin.  The
-   coin the simulator re-encrypts with is drawn rather than fixed, which makes
-   the raw-trace simulation bound of the section below a statement about the
-   protocol rather than about one of its executions. *)
+   Drawing that coin makes the raw-trace simulation bound a statement about
+   the protocol. *)
 Definition alice_trace_ideal_avg :
     R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT) :=
   fdist_uniform card_renc >>= (fun w =>
@@ -808,9 +789,8 @@ End dsdp_alice_trace_avg.
 Section dsdp_alice_raw_trace.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The instance's fields under the names the corrupted-Alice development
-   gives them: the scheme data through the coercion, and Alice's private
-   key. *)
+(* The scheme data and Alice's private key.  These are instance fields, under
+   the names the corrupted-Alice development gives them. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation dk_a := (inst_dk_a I).
 
@@ -818,10 +798,9 @@ Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation trace_dataT := (trace_dataT I).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 
-(* The fixed-key decoding of one encoded trace datum: plaintexts and
-   ciphertexts restored as themselves, the private-key mark restored as dk,
-   the public-key mark as pk.  There is no global inverse: the encoding
-   erases which key value each mark carried. *)
+(* Fixed-key decoding of one encoded trace datum: plaintexts and ciphertexts
+   kept, the key marks sent to dk and pk.  There is no global inverse: the
+   encoding erases which key value each mark carried. *)
 Definition di_data_of_trace_data (dk : priv_key AHE) (pk : pub_key AHE)
     (x : trace_dataT) : di_data DI :=
   match x with

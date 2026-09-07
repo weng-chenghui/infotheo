@@ -104,12 +104,9 @@ Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
 
-(* A corrupted Alice who fixes her query to e_1 makes the first relay's
-   input a function of her view, so that input keeps zero bits of
-   uncertainty given the view.  The weights are Alice's to choose, and
-   this choice reads a relay's input off the protocol output, which is
-   what restricts the secrecy bounds of dsdp_entropy.v to an honest
-   query.  [N-party] *)
+(* At the query e_1 the first relay's input keeps zero bits of uncertainty
+   given Alice's view.  Alice chooses the weights, so the secrecy bounds of
+   dsdp_entropy.v need an honest query.  [N-party] *)
 Theorem US_e1_centropy_VS0_eq0 {A : finType}
     (View : {RV P -> A}) (g : A -> msg)
     (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
@@ -179,18 +176,15 @@ Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' Charlie `o V3.
 (* Bob's input under his own key, his opening message to Alice. *)
 Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
 
-(* Alice's whole honest view in the dot-product model: her key, the
-   output S, her own input and her three weights, her two masks, and the
-   three ciphertexts of the run.  Bob's input reaches this view only
+(* Alice's whole honest view in the dot-product model: her key, S, V1, her
+   weights, her masks and the ciphertexts.  Bob's input reaches this view only
    inside S and inside his own ciphertext. *)
 Definition AliceDotpView :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
 
-(* A corrupted Alice who fixes her query to U2 = 1 and U3 = 0 reads Bob's
-   input off her view, which then keeps zero bits of uncertainty about
-   it.  The three ciphertexts stay opaque, so the plaintext output alone
-   carries V2 and the collapse owes nothing to breaking an encryption.
-   [3-party] *)
+(* At U2 = 1 and U3 = 0 Bob's input keeps zero bits of uncertainty given
+   Alice's view.  The three ciphertexts stay opaque, so this owes nothing to
+   breaking an encryption.  [3-party] *)
 Theorem US_e1_centropy_V2_eq0 :
   U2 = (fun _ => 1) -> U3 = (fun _ => 0) ->
   `H( V2 | AliceDotpView ) = 0.

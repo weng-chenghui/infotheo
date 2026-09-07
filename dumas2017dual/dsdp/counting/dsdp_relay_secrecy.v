@@ -87,13 +87,12 @@ Local Notation R3 := (R3 I).
 Local Notation Dk_b := (Dk_b I).
 Local Notation Dk_c := (Dk_c I).
 
-(* The count #|msg| = m of the plaintext ring, named so that the uniform
-   laws below discharge in a shape a caller can supply. *)
+(* The count #|msg| = m of the plaintext ring.  The uniform laws below
+   discharge in this shape. *)
 Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
 
-(* Bob's input under Alice's query weight U2.  The weights are Alice's,
-   so this is where Bob's input meets a factor of her choosing, and it
-   reaches the aggregate only through D2. *)
+(* Bob's input under Alice's query weight U2.  It reaches the aggregate only
+   through D2. *)
 Let VU2 : {RV P -> msg} := V2 \* U2.
 
 (* Charlie's input under Alice's query weight U3, reaching the aggregate only
@@ -115,9 +114,8 @@ Let D2 : {RV P -> msg} := VU2 \+ R2.
    masks.  Alice recovers the output by stripping R2 and R3 from it. *)
 Let D3 : {RV P -> msg} := VU3R \+ D2.
 
-(* Alice's second combine, encrypted under Charlie's key and sent to Bob.  It
-   sits in Bob's view as opaque data, and the R3 mask inside it keeps V3
-   independent of that view on its own. *)
+(* Alice's second combine, encrypted under Charlie's key and sent to Bob.
+   The mask R3 inside it keeps V3 independent of Bob's view. *)
 Let E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
 
 (* Alice's first combine, encrypted under Bob's key.  Bob holds the matching
@@ -128,9 +126,9 @@ Let E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
    Charlie decrypts it and answers Alice under Alice's key. *)
 Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
-(* Bob's full real view: his key, his own input V2, the Charlie-key combine
-   Alice sends him and which he can only multiply into, and the Bob-key
-   combine he decrypts to D2. *)
+(* Bob's full real view: his key, V2, the Charlie-key combine and the Bob-key
+   combine.  He multiplies into the first combine and decrypts the second to
+   D2. *)
 Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
 
 (* Charlie's full real view: his key, his own input V3, and the aggregate
@@ -163,10 +161,8 @@ have H := inde_RV_comp charlie_view_of idfun charlie_inputs_indep_V1.
 by rewrite /comp_RV /= in H *.
 Qed.
 
-(* Given Bob's whole view, Alice's input keeps log m bits of uncertainty,
-   the full entropy of the plaintext ring, and that quantity is positive.
-   A corrupted Bob is bounded here whatever his running time.
-   [3-party] *)
+(* Given Bob's whole view, Alice's input keeps log m bits of uncertainty.
+   A corrupted Bob is bounded here whatever his running time.  [3-party] *)
 Theorem bob_privacy_V1 :
   `H(V1 | BobView) = log (m%:R : R) /\ `H(V1 | BobView) > 0.
 Proof.
@@ -178,10 +174,9 @@ rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
 Qed.
 
-(* Given Charlie's whole view, Alice's input keeps log m bits of
-   uncertainty, the full entropy of the plaintext ring, and that quantity
-   is positive.  A corrupted Charlie is bounded here whatever his running
-   time.  [3-party] *)
+(* Given Charlie's whole view, Alice's input keeps log m bits of uncertainty.
+   A corrupted Charlie is bounded here whatever his running time.
+   [3-party] *)
 Theorem charlie_privacy_V1 :
   `H(V1 | CharlieView) = log (m%:R : R) /\ `H(V1 | CharlieView) > 0.
 Proof.
@@ -193,9 +188,8 @@ rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
 Qed.
 
-(* V3 is uniform on the plaintext ring, the record's pV3_unif field.  The
-   bound on Bob's view about V3 is measured against this law and against
-   Alice's mask R3, which stays outside his view. *)
+(* V3 is uniform on the plaintext ring, by the record's pV3_unif field.  The
+   bound on Bob's view about V3 rests on this law and on Alice's mask R3. *)
 Let pV3_unif : `p_ V3 = fdist_uniform card_msg := dsdp_random_inputs.pV3_unif I.
 Let pR3_unif : `p_ R3 = fdist_uniform card_msg := dsdp_random_inputs.pR3_unif I.
 Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] :=
@@ -203,8 +197,8 @@ Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] :=
 Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
   dsdp_random_inputs.bob_data_indep_charlie I.
 
-(* VU3R _|_ V3: the masked plaintext V3 * U3 + R3 is independent of V3,
-   since R3 is uniform and independent of the pair it masks. *)
+(* VU3R _|_ V3: the masked plaintext V3 * U3 + R3 hides V3.  R3 is uniform
+   and independent of the pair it masks. *)
 Let VU3R_indep_V3 : P |= VU3R _|_ V3.
 Proof.
 have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
@@ -214,9 +208,9 @@ exact: (@lemma_3_5' R T msg msg P VU3 R3 V3 R3_indep_VU3_V3
         (Zp_trunc m).+1 card_TZ pR3_adj).
 Qed.
 
-(* [% Dk_b, V2, D2] _|_ [% V3, VU3R]: Bob's key, his own input and the
-   combine he decrypts are independent of Charlie's input paired with the
-   masked term Alice sends him. *)
+(* [% Dk_b, V2, D2] _|_ [% V3, VU3R]: Bob's clean data is independent of
+   Charlie's input and the masked term.  Alice sends that masked term to
+   Bob. *)
 Let clean_indep_V3_VU3R : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3R].
 Proof.
 have H := @inde_RV_comp _ _ P _ _ _ _ [% Dk_b, V2, D2] [% V3, VU3, R3]
@@ -224,8 +218,8 @@ have H := @inde_RV_comp _ _ P _ _ _ _ [% Dk_b, V2, D2] [% V3, VU3, R3]
 by rewrite /comp_RV /VU3R /add_RV /= in H *.
 Qed.
 
-(* [% Dk_b, V2, D2, VU3R] _|_ V3: Bob's data together with the masked
-   term he receives is independent of Charlie's input. *)
+(* [% Dk_b, V2, D2, VU3R] _|_ V3: Bob's data with the masked term he
+   receives is independent of Charlie's input. *)
 Let bob_inputs_indep_V3 : P |= [% Dk_b, V2, D2, VU3R] _|_ V3.
 Proof.
 apply cinde_RV_unit.
@@ -246,10 +240,9 @@ have H := inde_RV_comp
 by rewrite /comp_RV /= in H *.
 Qed.
 
-(* Given Bob's whole view, Charlie's input keeps log m bits of
-   uncertainty, the full entropy of the plaintext ring, and that quantity
-   is positive.  The independence comes from Alice's mask R3, so the
-   bound holds whatever Bob's running time.  [3-party] *)
+(* Given Bob's whole view, Charlie's input keeps log m bits of uncertainty.
+   The independence comes from Alice's mask R3, so the bound holds whatever
+   Bob's running time.  [3-party] *)
 Theorem bob_privacy_V3 :
   `H(V3 | BobView) = log (m%:R : R) /\ `H(V3 | BobView) > 0.
 Proof.
@@ -261,9 +254,9 @@ rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
 Qed.
 
-(* V2 is uniform on the plaintext ring, the record's pV2_unif field.  The
-   bound on Charlie's view about V2 is measured against this law and
-   against Alice's mask R2, which stays outside his view. *)
+(* V2 is uniform on the plaintext ring, by the record's pV2_unif field.  The
+   bound on Charlie's view about V2 rests on this law and on Alice's mask
+   R2. *)
 Let pV2_unif : `p_ V2 = fdist_uniform card_msg := dsdp_random_inputs.pV2_unif I.
 Let pR2_unif : `p_ R2 = fdist_uniform card_msg := dsdp_random_inputs.pR2_unif I.
 Let R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2] :=
@@ -273,8 +266,7 @@ Let R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]] :=
 Let Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3] :=
   dsdp_random_inputs.Dk_c_V3_indep_V2_E_charlie_d3 I.
 
-(* D2 _|_ [% VU3R, V2]: the masked plaintext V2 * U2 + R2 is independent
-   of the pair Alice's second combine and Bob's input form, since R2 is
+(* D2 _|_ [% VU3R, V2]: the masked plaintext V2 * U2 + R2 hides V2.  R2 is
    uniform and independent of that pair. *)
 Let D2_indep_VU3R_V2 : P |= D2 _|_ [%VU3R, V2].
 Proof.
@@ -285,8 +277,8 @@ exact: (@lemma_3_5' R T _ msg P VU2 R2 [%VU3R, V2] R2_indep_VU2_VU3R_V2
         (Zp_trunc m).+1 card_TZ pR2_adj).
 Qed.
 
-(* D3 _|_ V2: the aggregate VU3R + D2 is independent of Bob's input,
-   since D2 is uniform and independent of the pair [% VU3R, V2]. *)
+(* D3 _|_ V2: the aggregate VU3R + D2 is independent of Bob's input.  D2 is
+   uniform and independent of the pair [% VU3R, V2]. *)
 Let D3_indep_V2 : P |= D3 _|_ V2.
 Proof.
 have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
@@ -321,10 +313,9 @@ split.
 by apply cinde_RV_unit; rewrite inde_RV_sym; exact: E_charlie_d3_indep_V2.
 Qed.
 
-(* Given Charlie's whole view, Bob's input keeps log m bits of
-   uncertainty, the full entropy of the plaintext ring, and that quantity
-   is positive.  The independence comes from Alice's mask R2, so the
-   bound holds whatever Charlie's running time.  [3-party] *)
+(* Given Charlie's whole view, Bob's input keeps log m bits of uncertainty.
+   The independence comes from Alice's mask R2, so the bound holds whatever
+   Charlie's running time.  [3-party] *)
 Theorem charlie_privacy_V2 :
   `H(V2 | CharlieView) = log (m%:R : R) /\ `H(V2 | CharlieView) > 0.
 Proof.
