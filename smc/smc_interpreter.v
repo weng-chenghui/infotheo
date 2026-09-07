@@ -59,6 +59,17 @@ Inductive proc : Type :=
 (* Default process for out-of-bounds access *)
 Definition default_proc : proc := Fail.
 
+(* TODO: the result of step is a nameless 4-tuple read by .1.1.1, .1.1.2,
+   .1.2 and .2 throughout this file and smc_interpreter_sound.v.  The record
+   below names the four components; adopting it means re-running the
+   soundness proofs that destructure the tuple.
+     Record step_result := {
+       step_proc  : proc ;       (* the party's next process *)
+       step_trace : seq data ;   (* its trace after the step *)
+       step_seed  : seq data ;   (* its remaining seed stream *)
+       step_fired : bool }.      (* whether the step made progress *)
+   *)
+
 (* Step function for process list.  [Sample f] consumes the head of the
    running party's seed stream and passes it to the continuation; an
    exhausted stream blocks the party instead of fabricating a value. *)
@@ -490,13 +501,6 @@ case Hi: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] /=.
 - by left.
 - by left.
 Qed.
-
-(* A Sample draw is the substitution of the stream head into the
-   continuation.  The rest of the run proceeds on the shortened stream. *)
-Lemma interp_sampleE h (f g : data -> proc data) r0 rest :
-  interp h.+1 [:: Recv 1 g; Sample f] [:: [::]; [::]] [:: [::]; r0 :: rest]
-  = interp h [:: Recv 1 g; f r0] [:: [::]; [::]] [:: [::]; rest].
-Proof. by []. Qed.
 
 End sampling.
 
