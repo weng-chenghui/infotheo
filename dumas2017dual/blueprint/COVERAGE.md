@@ -16,7 +16,7 @@ the order MODULES lists them:
 - `computational_security/negligible.v`
 - `computational_security/indcpa_game.v`
 - `computational_security/epshop.v`
-- `computational_security/epshop_family.v`
+- `computational_security/epshop_sequence.v`
 - `dumas2017dual/dsdp/hopping/dsdp_instance.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v`

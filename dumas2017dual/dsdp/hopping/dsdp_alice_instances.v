@@ -6,7 +6,7 @@ Require Import proba.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption residuosity_game.
 Require Import idealized_ahe paillier_fdist_instance.
-Require Import negligible epshop epshop_family.
+Require Import negligible epshop epshop_sequence.
 Require Import indcpa_game idealized_indcpa_scheme.
 Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance.

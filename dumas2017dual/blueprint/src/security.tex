@@ -1403,7 +1403,7 @@ single member of it can carry.
 
 \begin{definition}[A dictionary all of whose labels lose a negligible sequence]
   \label{def:negligible_claims}
-  \rocq{infotheo.computational_security.epshop_family.negligibleClaims}
+  \rocq{infotheo.computational_security.epshop_sequence.negligibleClaims}
   \rocqok
   \uses{def:claim,def:negligible_fun}
   A sequence of dictionaries $C_k$ indexed by the security parameter, together
@@ -1422,7 +1422,7 @@ single member of it can carry.
 
 \begin{lemma}[The total of a label list along the security parameter]
   \label{lem:loss_eval_negligible}
-  \rocq{infotheo.computational_security.epshop_family.loss_eval_negligible}
+  \rocq{infotheo.computational_security.epshop_sequence.loss_eval_negligible}
   \rocqok
   \uses{def:negligible_claims,def:loss,lem:negligible_fun_sum}
   The total of any list of labels of such a dictionary is a negligible
@@ -1437,7 +1437,7 @@ single member of it can carry.
 
 \begin{theorem}[A sequence of programs has a negligible advantage]
   \label{thm:advantage_negligible}
-  \rocq{infotheo.computational_security.epshop_family.advantage_negligible}
+  \rocq{infotheo.computational_security.epshop_sequence.advantage_negligible}
   \rocqok
   \uses{def:negligible_claims,def:chain_result,def:negligible_fun,lem:loss_eval_negligible}
   Let $P$ be a program at every security parameter, over a dictionary all of

@@ -9,7 +9,7 @@ Require Import extra_proba extra_entropy.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption.
 Require Import dsdp_interface dsdp_program dsdp_pismc.
-Require Import negligible epshop epshop_family.
+Require Import negligible epshop epshop_sequence.
 Require Import indcpa_game.
 Require Import dsdp_instance.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
