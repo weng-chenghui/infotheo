@@ -224,6 +224,25 @@ At the end of the ladder both slots encrypt zero and the fiber bound applies.
 Throughout, $m$ is the size of the plaintext space and the plaintext carrier is a
 finite commutative unit ring.
 
+\begin{definition}[The encryption coins of one run]
+  \label{def:dsdp_enc_coins}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_enc_coins,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.card_dsdp_enc_coins,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_enc_coins_fdist}
+  \rocqok
+  \uses{def:protocol_flow}
+  A coin record holds the six coin indices one DSDP execution consumes: the two
+  under which Bob and Charlie encrypt their inputs to Alice, the two Alice
+  encrypts her combines under, Bob's second-hop coin, and Charlie's
+  re-encryption coin. Its law is the uniform distribution on the record.
+  \[ c = \big(\rho_2, \rho_3,\ \alpha_1, \alpha_2,\ \beta, \gamma\big),
+     \qquad \mathcal{L}(c) = \mathcal{U}\big(\mathrm{Renc}^6\big) \]
+  Uniformity of the record says three things at once about the six coins: each
+  is uniform, they are independent, and each is fresh where it is drawn. That
+  is what a reduction reads when it hands one coordinate to the challenger and
+  keeps the other five.
+\end{definition}
+
 \begin{definition}[The corrupted-Alice experiment]
   \label{def:alice_experiment}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sampleT,
@@ -238,14 +257,17 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RC1,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA1,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RB2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RC2,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Sout,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.SoutE}
   \rocqok
-  \uses{def:party_views}
-  The experiment is the uniform distribution on the product of eight
+  \uses{def:party_views,def:dsdp_enc_coins}
+  The experiment is the uniform distribution on the product of five
   coordinates: the two honest inputs $V_2, V_3$, Alice's two mask plaintexts
-  $R_2, R_3$, the randomness $\rho_2, \rho_3$ of the two ciphertexts she
-  receives, and the randomness $\alpha_1, \alpha_2$ of her two outgoing combines.
+  $R_2, R_3$, and one coin record of Definition~\ref{def:dsdp_enc_coins}, whose
+  six components are read off it as $\rho_2, \rho_3, \alpha_1, \alpha_2, \beta,
+  \gamma$.
   Alice's own input $v_1$ and her three weights $u_1, u_2, u_3$ are parameters of
   the experiment rather than sampled coordinates. The output she learns is the
   weighted scalar product of her weights with the two honest inputs.
@@ -258,6 +280,7 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.bob_zero_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_real_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_zero_cipher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_reenc_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tupleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_real,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_bob_zero,
@@ -267,15 +290,21 @@ finite commutative unit ring.
        infotheo.computational_security.indcpa_game.accept_ge0}
   \rocqok
   \uses{def:alice_experiment}
-  Alice's tuple carries her two masks, her two combine randomnesses, the
-  output $S$, and the two ciphertexts she receives. Three tuples differ only
-  in the plaintexts of those two ciphertexts.
+  Alice's tuple carries her two masks, her two combine coins, the output $S$,
+  the two ciphertexts she receives from the relays, and Charlie's
+  re-encryption of the aggregate under Alice's own key. Three tuples differ
+  only in the plaintexts of the two relay ciphertexts.
   \[ \hoptuple{0} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, V_2, \rho_2),\; \Enc(\pk_C, V_3, \rho_3)\big) \]
+       \Enc(\pk_B, V_2, \rho_2),\; \Enc(\pk_C, V_3, \rho_3),\; C_\gamma\big) \]
   \[ \hoptuple{1} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, V_3, \rho_3)\big) \]
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, V_3, \rho_3),\; C_\gamma\big) \]
   \[ \hoptuple{2} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3)\big) \]
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3),\; C_\gamma\big) \]
+  \[ C_\gamma = \Enc(\pk_A,\; S - u_1 v_1 + R_2 + R_3,\; \gamma) \]
+  The eighth slot is the message Charlie returns to Alice, encrypted under her
+  own key, and it is the same random variable in all three tuples: its
+  plaintext is a function of the output Alice is allowed to learn and of her
+  two masks, so no hop replaces it and it carries no relay input of its own.
   $\hoptuple{0}$ is Alice's real tuple and $\hoptuple{2}$ the all-zero
   endpoint. $G_i$ is the joint law of the honest input pair beside
   $\hoptuple{i}$, and $\gamma_i(D)$ the probability that a distinguisher $D$
@@ -380,16 +409,18 @@ $V_3$.
   \uses{def:alice_hop_ladder,lem:exist_pr_sol,lem:cinde_diagonal_bound}
   When Alice's third weight $u_3$ is a unit of the plaintext ring, every
   predictor reading the all-zero tuple matches Bob's input with probability at
-  most $1/m$. The all-zero tuple is independent of the honest inputs, hence
-  conditionally independent of $V_2$ given the output, and conditioned on the
-  output alone $V_2$ is uniform.
+  most $1/m$. The all-zero tuple is a function of the leaked output and of a
+  spectator independent of the honest inputs, hence conditionally independent
+  of $V_2$ given the output, and conditioned on the output alone $V_2$ is
+  uniform.
   \[ u_3 \in R^{\times} \;\Longrightarrow\;
        \Pr[\,g(\hoptuple{2}) = V_2\,] \le 1/m \]
 \end{lemma}
 
 \begin{definition}[The distinguisher of a predictor]
   \label{def:distinguisher_of_predictor}
-  \rocq{infotheo.computational_security.indcpa_game.distinguisher_of_predictor,
+  \rocq{infotheo.computational_security.indcpa_game.predictor,
+       infotheo.computational_security.indcpa_game.distinguisher_of_predictor,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.guess_V2_acceptE}
   \rocqok
   \uses{def:alice_hop_ladder}
@@ -443,15 +474,20 @@ functionality on the other, rather than quantified over all input vectors.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal}
   \rocqok
   \uses{def:alice_hop_ladder}
-  From a value $s$ of the output, the simulator draws uniform masks, uniform
-  combine randomness, and one encryption of zero under each of Bob's and
-  Charlie's keys, and returns $s$ unchanged. The ideal-world law samples the
-  honest input pair, computes its output, and returns that pair with a simulated
-  tuple.
-  \[ \Sim(s) = \big(\mathcal{U}, \mathcal{U}, s,
-       \Enc(\pk_B, 0), \Enc(\pk_C, 0)\big),\qquad
-     \Ideal = \big[(v_2,v_3) \sim \mathcal{U};\ t \sim \Sim(S(v_2,v_3));\
+  From a value $s$ of the output, the simulator draws two uniform masks and one
+  uniform coin record, and assembles the all-zero tuple: $s$ unchanged, an
+  encryption of zero under each relay key, and Charlie's re-encryption under
+  Alice's key of $s$ net of her own term and plus her masks. The ideal-world
+  law samples the honest input pair, computes its output, and returns that pair
+  beside a simulated tuple.
+  \[ \Sim(s) = \big(R_2, R_3, \alpha_1, \alpha_2, s,\;
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3),\;
+       \Enc(\pk_A, s - u_1 v_1 + R_2 + R_3, \gamma)\big) \]
+  \[ \Ideal = \big[(v_2,v_3) \sim \mathcal{U};\ t \sim \Sim(S(v_2,v_3));\
        (v_2, v_3, t)\big] \]
+  The masks and the six coins are drawn uniformly and independently of the
+  honest inputs, so $s$ is the only thing the simulator reads and the output
+  slot and the re-encryption slot are the only places it appears.
 \end{definition}
 
 \begin{lemma}[The all-zero endpoint is the simulator]
@@ -512,6 +548,26 @@ The hopping tuple is an abstraction of what Alice sees. Identifying it with the
 trace the piSMC interpreter returns when it runs the three DSDP party programs
 carries the three bounds above to the executed protocol.
 
+\begin{definition}[Drawing a coin inside a program]
+  \label{def:interpreter_sample}
+  \rocq{infotheo.smc.smc_interpreter.Sample,
+       infotheo.smc.smc_interpreter.step_sample,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_seeds}
+  \rocqok
+  \uses{def:protocol_flow,def:dsdp_enc_coins}
+  A party program draws its encryption randomness at a $\mathrm{Sample}$ node.
+  Each party carries a seed stream beside its trace, and a step at a
+  $\mathrm{Sample}$ substitutes the head of that party's stream into the
+  continuation, advances the stream, and appends nothing to the trace.
+  \[ \mathrm{step}\big(\mathrm{Sample}\ f,\ \mathit{tr},\ r :: \mathit{sd}\big)
+       = \big(f(r),\ \mathit{tr},\ \mathit{sd}\big) \]
+  The three DSDP streams are the six coins of one record, two per party in the
+  order that party encrypts. A drawn coin reaches the trace only through the
+  ciphertext its continuation builds, so Alice's trace is the image of the
+  sampled coins through the programs and holds no coin of any party as an entry
+  of its own.
+\end{definition}
+
 \begin{definition}[Alice's executed trace]
   \label{def:alice_trace}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_dataT,
@@ -519,15 +575,16 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_std,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_protocol,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_of_run,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_traceT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTrace,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tuple}
   \rocqok
-  \uses{def:protocol_flow,def:alice_hop_ladder}
+  \uses{def:protocol_flow,def:alice_hop_ladder,def:interpreter_sample}
   The DSDP protocol is the triple of party programs at the coordinates of one
   sample of the experiment, and $\mathrm{trace\_of\_run}(\mathit{ps}, i)$ is the
   message log the interpreter returns for party $i$ when it runs the process
   list $\mathit{ps}$ at a sample, encoded as a bounded sequence of at most
-  fifteen entries, each a plaintext, a ciphertext, or a private key. Alice's
+  eighteen entries, each a plaintext, a ciphertext, or a private key. Alice's
   trace is that reader at the DSDP protocol and at Alice.
   \[ \mathrm{AliceTrace} = \mathrm{trace\_of\_run}(\mathrm{dsdp\_protocol},
        \mathrm{Alice}) \]
@@ -589,6 +646,25 @@ carries the three bounds above to the executed protocol.
   The encoding therefore takes nothing from Alice and withholds nothing from her: a
   predictor reading either format succeeds on exactly the same samples, so a
   bound at the encoded trace is a bound at the trace the protocol produces.
+\end{lemma}
+
+\begin{lemma}[Alice's trace holds her own key only]
+  \label{lem:raw_trace_priv_keys}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_priv_keys,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_priv_keysE}
+  \rocqok
+  \uses{lem:raw_trace_decode,lem:trace_of_hop_tuple}
+  Reading the private keys off a raw interpreter trace keeps the key marks and
+  drops every other entry. At Alice's raw trace the result is the one-element
+  list of her own key.
+  \[ \mathrm{priv\_keys}\big(\mathrm{AliceRawTrace}(s)\big)
+       = [\,\mathrm{dk}_A\,] \]
+  That a corrupted Alice holds no relay's private key is the premise the two
+  hops of Chapter~\ref{ch:hopping} are stated under, and here it is an equation
+  about the executed run rather than a condition imposed on the adversary. The
+  boundary is sharp on the other side: a party that does hold Bob's key reads
+  his input off the same trace with probability one,
+  by Theorem~\ref{thm:decrypt_lower_bound}.
 \end{lemma}
 
 \begin{theorem}[Guessing from the raw interpreter trace]
@@ -681,6 +757,24 @@ $e$-th residuosity assumption.
   reals, and a sum over a list lands in it as soon as each entry does. A
   chain totals one loss term per label of its loss, so a bound read off such
   a total is negligible as soon as each label's loss sequence is.
+\end{lemma}
+
+\begin{lemma}[An inverse of an exponentially growing sequence is negligible]
+  \label{lem:negligible_fun_inv_exp2}
+  \rocq{infotheo.computational_security.negligible.negligible_fun_inv_exp2,
+       infotheo.computational_security.negligible.negligible_fun_inv_ge_exp2,
+       infotheo.computational_security.negligible.negligible_fun_inv_expnn,
+       infotheo.computational_security.negligible.negligible_fun_inv_ge_expnn}
+  \rocqok
+  \uses{def:negligible_fun}
+  A sequence of naturals that dominates $2^k$, and one that dominates
+  $(k+2)^{k+2}$, have negligible inverses.
+  \[ \big(\forall k,\ 2^k \le f(k)\big) \;\Longrightarrow\;
+     \mathrm{negl}\big(k \mapsto 1/f(k)\big) \]
+  This is where the security parameter becomes a bit length. A scheme sequence
+  whose modulus at $k$ has $k$ bits discharges the unconditional term of every
+  bound read along it here, so that term is a consequence of the key length
+  rather than a hypothesis carried beside the scheme.
 \end{lemma}
 
 \begin{definition}[An adversary class and the advantage it assumes]
@@ -963,7 +1057,7 @@ $e$-th residuosity assumption.
 \begin{corollary}[The bound at a Paillier instance]
   \label{cor:alice_guess_paillier}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_at_dcrE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_dcrE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:paillier_setting,def:dcr_assumption,def:paillier_indcpa_assumption}
   At one Paillier instance of modulus $p q$, a trace predictor whose two
@@ -979,7 +1073,7 @@ $e$-th residuosity assumption.
   decisional composite residuosity and nothing further, at the loss
   Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is
   two keys, Bob's and Charlie's, times two residuosity calls per key, the
-  identity \texttt{paillier\_epsilon\_at\_dcrE}. What is assumed here is
+  identity \texttt{paillier\_epsilon\_dcrE}. What is assumed here is
   $\mathcal{B}$, and the class premises restrict which predictors the bound
   covers. The bound holds at each fixed modulus on its own, with no growth
   condition on $p$ and $q$. The sequence statements below read it along a
@@ -989,7 +1083,7 @@ $e$-th residuosity assumption.
 \begin{corollary}[The bound at a Benaloh instance]
   \label{cor:alice_guess_benaloh}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_at_residuosityE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_residuosityE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:benaloh_setting,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   At one Benaloh instance whose plaintext space has $r = p q$ elements, a
@@ -1003,7 +1097,7 @@ $e$-th residuosity assumption.
   which asks only $1 < r$. The computational side is $r$-th residuosity at
   the loss Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor
   four again two keys times two residuosity calls per key, the identity
-  \texttt{benaloh\_epsilon\_at\_residuosityE}.
+  \texttt{benaloh\_epsilon\_residuosityE}.
 \end{corollary}
 
 \section{epsHop, the language a multi-hop bound is written in}
@@ -1524,19 +1618,57 @@ single member of it can carry.
   \texttt{decrypt\_guess\_V2\_premise\_free\_lt}.
 \end{corollary}
 
+\begin{definition}[The key material of a scheme sequence]
+  \label{def:keygen_sequence}
+  \rocq{infotheo.computational_security.indcpa_scheme_sequence.keygen_sequence}
+  \rocqok
+  \uses{def:indcpa_epsilon}
+  Key material for a sequence of schemes $\mathcal{S}_k$ is a nonempty finite
+  seed space at each $k$ together with the private key a seed generates there.
+  \[ \mathcal{K} = \Big(k \mapsto \mathrm{Seed}_k,\
+       k \mapsto \big(\mathrm{Seed}_k \to \mathrm{priv}(\mathcal{S}_k)\big)\Big) \]
+  A private key is a bare type, over which no distribution is well-typed, so
+  the seed space is where a key generation law would live and a party's key is
+  named by a seed rather than drawn. Nonemptiness is recorded in the successor
+  form the uniform law on a finite type takes.
+\end{definition}
+
+\begin{definition}[A sequence of IND-CPA schemes]
+  \label{def:indcpa_scheme_sequence}
+  \rocq{infotheo.computational_security.indcpa_scheme_sequence.indcpa_scheme_sequence,
+       infotheo.computational_security.indcpa_scheme_sequence.f_size_scheme,
+       infotheo.computational_security.indcpa_scheme_sequence.f_adv_scheme}
+  \rocqok
+  \uses{def:keygen_sequence,def:indcpa_assumption,def:negligible_fun}
+  A scheme sequence is an IND-CPA scheme at each security parameter, the
+  assumption made at it, key material along it, and the two negligibility facts
+  every bound read along it carries, as one record.
+  \[ \mathcal{Q} = \Big(k \mapsto \mathcal{S}_k,\ k \mapsto \mathcal{A}_k,\
+       \mathcal{K},\
+       \mathrm{negl}\big(k \mapsto \tfrac{1}{m_k}\big),\
+       \mathrm{negl}\big(k \mapsto \varepsilon_{\mathrm{cpa},k}\big)\Big) \]
+  The assumption at $k$ is made about the scheme value the record carries, so
+  the two name one coin space. At this layer $k$ is read as a key length: each
+  concrete sequence below carries the bit length of its modulus at $k$ and
+  derives $\mathrm{negl}(k \mapsto 1/m_k)$ from it, which puts that fact where
+  the scheme is built rather than where a bound is stated.
+\end{definition}
+
 \begin{definition}[One DSDP instance]
   \label{def:dsdp_instance}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_instance}
   \rocqok
   \uses{def:alice_trace}
   An instance is an IND-CPA scheme $\mathcal{S}$, the four weights with $u_3$ a
-  unit of the plaintext ring, the three private keys, and the two hop coins:
-  exactly the parameters every corrupted-Alice trace bound is stated at, so
-  every such bound applies at one instance unchanged. The scheme enters as one
-  component, so an instance and the assumption made about it name the same
-  scheme.
+  unit of the plaintext ring, and the three private keys: exactly the
+  parameters every corrupted-Alice trace bound is stated at, so every such
+  bound applies at one instance unchanged. The scheme enters as one component,
+  so an instance and the assumption made about it name the same scheme.
   \[ \mathcal{I} = \big(\mathcal{S},\
-       v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C,\ w_B, w_C\big) \]
+       v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C\big) \]
+  The encryption coins are drawn by the run, at the $\mathrm{Sample}$ nodes of
+  Definition~\ref{def:interpreter_sample}, so they are coordinates of the
+  experiment rather than fields of the instance.
   The real field stays outside the record. One sequence of instances lives over
   one $R$, which only the assumption record and the probabilities mention.
 \end{definition}
@@ -1574,6 +1706,28 @@ single member of it can carry.
   because a statement made at one security parameter needs the instance and the
   assumption there and neither of them, so only the statements that let the
   parameter grow carry an asymptotic value.
+\end{definition}
+
+\begin{definition}[The DSDP sequence a scheme sequence builds]
+  \label{def:mk_dsdp_instance_sequence}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_alice_data,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_instance,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_instance_sequence,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_asymptotic}
+  \rocqok
+  \uses{def:indcpa_scheme_sequence,def:dsdp_instance_sequence,def:dsdp_asymptotic}
+  The corrupted-Alice data along a scheme sequence $\mathcal{Q}$ is Alice's
+  input, her three weights with $u_3$ a unit at every $k$, and the three seeds
+  the parties' keys are generated from. From $\mathcal{Q}$ and one such record
+  the instance at $k$, the sequence of instances, and an asymptotic value for
+  that sequence are read off.
+  \[ \mathcal{I}_k = \big(\mathcal{S}_k,\
+       v_{1,k}, u_{1,k}, u_{2,k}, u_{3,k},\
+       \kappa_k(s_A), \kappa_k(s_B), \kappa_k(s_C)\big) \]
+  The asymptotic value adds no hypothesis: its two fields are the two
+  negligibility fields of $\mathcal{Q}$. What a file stating a bound in the
+  security parameter would otherwise assume beside its scheme variable is
+  therefore discharged at the scheme sequence.
 \end{definition}
 
 \begin{theorem}[The trace guessing sequence is negligible]
@@ -1663,6 +1817,27 @@ single member of it can carry.
   weaker than a statement quantified over every test.
 \end{theorem}
 
+\begin{definition}[The idealized scheme sequence]
+  \label{def:idealized_scheme_sequence}
+  \rocq{infotheo.computational_security.idealized_indcpa_scheme.idealized_scheme,
+       infotheo.computational_security.idealized_indcpa_scheme.card_plain_idealized,
+       infotheo.computational_security.idealized_indcpa_scheme.idealized_keygen,
+       infotheo.computational_security.idealized_indcpa_scheme.idealized_size_negligible,
+       infotheo.computational_security.idealized_indcpa_scheme.idealized_scheme_sequence}
+  \rocqok
+  \uses{def:indcpa_scheme_sequence,def:cipher_constant_assumption,lem:negligible_fun_inv_exp2}
+  The idealized scheme at $k$ is the idealized AHE scheme over the plaintext
+  ring $\mathbb{Z}_{(k+2)^{k+2}}$, its key material a one-element seed space
+  and the zero private key, and its assumption the cipher-constant one.
+  \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = (k+2)^{k+2}, \qquad
+     \varepsilon_{\mathrm{cpa},k} = 0 \]
+  It inhabits Definition~\ref{def:indcpa_scheme_sequence} under no assumption
+  at all: the assumed advantage is zero at every $k$ and the plaintext
+  cardinality outgrows every polynomial, so both negligibility fields are
+  proved where the sequence is built. A bound read along it keeps only its
+  unconditional term.
+\end{definition}
+
 \begin{definition}[The idealized witnesses]
   \label{def:idealized_setting}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_inputs,
@@ -1670,7 +1845,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.idealized_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.idealized_instance_sequence}
   \rocqok
-  \uses{def:cipher_constant_assumption,def:negligible_fun}
+  \uses{def:cipher_constant_assumption,def:negligible_fun,def:idealized_scheme_sequence}
   Both axes are inhabited at every modulus. The counting witness is the
   uniform law on the five coordinates of $\mathbb{Z}_{pq}$ carrying the three
   plaintext inputs and the two masks, with Alice's three weights held at the
@@ -1690,16 +1865,39 @@ single member of it can carry.
   met by an actual sequence of moduli.
 \end{definition}
 
+\begin{definition}[The Paillier scheme sequence]
+  \label{def:paillier_scheme_sequence}
+  \rocq{infotheo.computational_security.paillier_indcpa_scheme.paillier_sequence,
+       infotheo.computational_security.paillier_indcpa_scheme.f_size_paillier_negligible,
+       infotheo.computational_security.paillier_indcpa_scheme.f_adv_paillier_negligible,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_scheme_sequence}
+  \rocqok
+  \uses{def:indcpa_scheme_sequence,def:dcr_assumption,def:paillier_indcpa_assumption,lem:negligible_fun_inv_exp2}
+  A Paillier sequence is two factors $p_k, q_k$ above one, a decisional
+  composite residuosity record at their product, the bit length of that
+  product, negligibility of the assumed residuosity advantage, and key
+  material.
+  \[ 2^k \le p_k q_k, \qquad
+     \mathrm{negl}\big(k \mapsto \varepsilon_{\mathrm{dcr},k}\big) \]
+  The bit-length field is what makes $k$ a key length here: the plaintext space
+  at $k$ is $\mathbb{Z}_{p_k q_k}$, so $\mathrm{negl}(k \mapsto 1/m_k)$ follows
+  from it by Lemma~\ref{lem:negligible_fun_inv_exp2}. Reading the record as a
+  scheme sequence therefore assumes residuosity and that bit length and nothing
+  else, both negligibility fields of
+  Definition~\ref{def:indcpa_scheme_sequence} being derived, the
+  assumption-conditional one at twice $\varepsilon_{\mathrm{dcr},k}$.
+\end{definition}
+
 \begin{definition}[The Paillier instance sequence]
   \label{def:paillier_setting}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_instance_sequence}
   \rocqok
-  \uses{def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption}
+  \uses{def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption,def:paillier_scheme_sequence,def:mk_dsdp_instance_sequence}
   The sequence whose $k$-th instance is the Paillier scheme at the modulus
   $p_k q_k$ carrying Alice's plaintext input, her three query weights with
-  $u_3$ a unit of the plaintext ring, the three private keys and the two
-  encryption coins, and whose assumption at $k$ is the IND-CPA record
+  $u_3$ a unit of the plaintext ring and the three private keys their seeds
+  generate, and whose assumption at $k$ is the IND-CPA record
   Definition~\ref{def:paillier_indcpa_assumption} derives from one decisional
   composite residuosity record $\mathcal{B}_k$.
   \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k, \qquad
@@ -1719,8 +1917,8 @@ single member of it can carry.
 \begin{corollary}[The Paillier readings]
   \label{cor:paillier_security}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_assumption_at_dcrE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_at_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_assumption_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_dcrE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_pq_le}
   \rocqok
@@ -1736,8 +1934,8 @@ single member of it can carry.
   The unconditional term is discharged at the plaintext cardinality of the
   Paillier packaging, read as $p q$, with no number theory beyond $1 < p, q$
   entering. The computational term is decisional composite residuosity:
-  \texttt{paillier\_assumption\_at\_dcrE} and
-  \texttt{paillier\_epsilon\_at\_dcrE} identify the record every
+  \texttt{paillier\_assumption\_dcrE} and
+  \texttt{paillier\_epsilon\_dcrE} identify the record every
   assumption-conditional bound along the sequence is read at with the one
   derived from $\mathcal{B}_k$, and its advantage with
   $2\varepsilon_{\mathrm{dcr},k}$, both by conversion rather than by a rewrite
@@ -1749,15 +1947,38 @@ single member of it can carry.
   Theorem~\ref{thm:alice_guess_negligible} consumes.
 \end{corollary}
 
+\begin{definition}[The Benaloh scheme sequence]
+  \label{def:benaloh_scheme_sequence}
+  \rocq{infotheo.computational_security.benaloh_indcpa_scheme.benaloh_sequence,
+       infotheo.computational_security.benaloh_indcpa_scheme.f_size_benaloh_negligible,
+       infotheo.computational_security.benaloh_indcpa_scheme.f_adv_benaloh_negligible,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_scheme_sequence}
+  \rocqok
+  \uses{def:indcpa_scheme_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption,lem:negligible_fun_inv_exp2}
+  A Benaloh sequence is a ciphertext modulus $n_k$ and a plaintext block size
+  $r_k$, both above one, an $r_k$-th residuosity record at $n_k$, a bit length
+  for each of the two, negligibility of the assumed residuosity advantage, and
+  key material.
+  \[ 2^k \le r_k, \qquad 2^k \le n_k, \qquad
+     \mathrm{negl}\big(k \mapsto \varepsilon_{\mathrm{res},k}\big) \]
+  The two bit lengths measure different things and the record keeps them apart.
+  The block size is the plaintext space, so $2^k \le r_k$ is what
+  $\mathrm{negl}(k \mapsto 1/m_k)$ is derived from; the modulus is what a
+  Benaloh key is, so $2^k \le n_k$ is the key length. Reading the record as a
+  scheme sequence derives both negligibility fields of
+  Definition~\ref{def:indcpa_scheme_sequence}, the assumption-conditional one
+  at twice $\varepsilon_{\mathrm{res},k}$.
+\end{definition}
+
 \begin{definition}[The Benaloh instance sequence]
   \label{def:benaloh_setting}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_instance_sequence}
   \rocqok
-  \uses{def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
+  \uses{def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption,def:benaloh_scheme_sequence,def:mk_dsdp_instance_sequence}
   The sequence whose $k$-th instance is the Benaloh scheme at ciphertext
-  modulus $n_k$ and block size $r_k$, carrying the same weights, keys and
-  coins as the Paillier sequence, and whose assumption at $k$ is the IND-CPA
+  modulus $n_k$ and block size $r_k$, carrying the same weights and keys as
+  the Paillier sequence, and whose assumption at $k$ is the IND-CPA
   record Definition~\ref{def:benaloh_indcpa_assumption} derives from one
   higher residuosity record $\mathcal{B}_k$ at modulus $n_k$ and exponent
   $r_k$.
@@ -1775,8 +1996,8 @@ single member of it can carry.
 \begin{corollary}[The Benaloh readings]
   \label{cor:benaloh_security}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_assumption_at_residuosityE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_at_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_assumption_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_residuosityE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_pq_le}
   \rocqok
@@ -1793,8 +2014,8 @@ single member of it can carry.
   spelling reads that block size as $p q$, which is what makes it the same
   number the counting axis measures. The computational term is $r$-th
   residuosity at the ciphertext modulus $n_k$:
-  \texttt{benaloh\_assumption\_at\_residuosityE} and
-  \texttt{benaloh\_epsilon\_at\_residuosityE} identify the record every
+  \texttt{benaloh\_assumption\_residuosityE} and
+  \texttt{benaloh\_epsilon\_residuosityE} identify the record every
   assumption-conditional bound along the sequence is read at with the one
   derived from $\mathcal{B}_k$, and its advantage with
   $2\varepsilon_{\mathrm{res},k}$, both by conversion. The factor four is two

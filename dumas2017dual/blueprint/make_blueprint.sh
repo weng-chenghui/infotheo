@@ -37,6 +37,7 @@ MODULES=(
   computational_security/epshop_sequence.v
   # The data every corrupted-Alice bound is stated over: one instance, a
   # sequence of instances, and the two negligibility facts about a sequence.
+  smc/smc_interpreter.v
   dumas2017dual/dsdp/hopping/dsdp_instance.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
