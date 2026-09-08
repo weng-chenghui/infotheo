@@ -69,8 +69,9 @@ basename and resolve by suffix.
   `_CoqProject` load order.
   `dsdp_random_inputs` (the record `dsdp_random_inputs` carrying the sample space with
   its law, the eleven random inputs with each one independent of the joint of the other
-  ten and the five uniform laws, the seven independence laws relay secrecy consumes, and
-  the uniform witness `uniform_inputs`),
+  ten and the five uniform laws, the six coins the run draws jointly independent of those
+  eleven, the seven independence laws relay secrecy consumes, and the uniform witness
+  `uniform_inputs`),
   `dsdp_entropy_trace` (trace-based entropy), `dsdp_entropy` (fiber cardinality
   `dsdp_fiber_card`, the conditional entropy `dsdp_centropy_uniform` and its N-party form
   `dsdp_centropy_uniform_n`), `dsdp_malicious_dotp` (the degenerate dot-product query,

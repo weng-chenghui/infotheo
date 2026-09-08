@@ -15,9 +15,11 @@ Require Import homomorphic_encryption.
 (* 3-party DSDP run at the plaintext modulus p * q, after du2002's            *)
 (* scalar_product_random_inputs: one sample space with one law on it, the     *)
 (* eleven random inputs of the run, the independence of each against the      *)
-(* joint of the other ten, and the uniformity of the three plaintext inputs   *)
-(* and the two masks.  Every message and every party view of a run is a       *)
-(* deterministic function of those eleven, so the record carries the whole    *)
+(* joint of the other ten, the uniformity of the three plaintext inputs and   *)
+(* the two masks, and the six coins the encryptions of the run draw, jointly  *)
+(* independent of the eleven.  Every message is a deterministic function of   *)
+(* those eleven, and a party view is a deterministic function of those eleven *)
+(* together with the coins that party draws, so the record carries the whole  *)
 (* probabilistic content of the counting axis, and a bound proved from its    *)
 (* fields holds against a party of any running time.                          *)
 (*                                                                            *)
@@ -79,6 +81,12 @@ Require Import homomorphic_encryption.
 (*                              constants                                     *)
 (* uniform_V1_indep .. uniform_Dk_c_indep == the eleven each-against-the-rest *)
 (*                              facts at that law                             *)
+(*            uniform_coinT == the one-element coin space this inhabitant     *)
+(*                              draws its six coins from                      *)
+(* uniform_coin_ra1 .. uniform_coin_rc2 == the six coins as constants of the  *)
+(*                              sample space                                  *)
+(*      uniform_coins_indep == the six coins against the eleven inputs at     *)
+(*                              that law                                      *)
 (* uniform_pV1_unif .. uniform_pR3_unif == uniformity of the three plaintext  *)
 (*                              inputs and the two masks                      *)
 (* ```                                                                        *)
@@ -106,9 +114,9 @@ Local Open Scope fdist_scope.
    V1 I would not typecheck. *)
 Set Strict Implicit.
 
-(* The counting side of one 3-party DSDP run at modulus p * q: one law and
-   eleven random inputs.  Each input is independent of the other ten, and the
-   three plaintext inputs and the two masks are uniform. *)
+(* The counting side of one 3-party DSDP run: one law, eleven random inputs,
+   and the six coins the run draws.  Each input is independent of the other
+   ten, the six coins jointly of the eleven, and five inputs are uniform. *)
 Record dsdp_random_inputs (R : realType) (p q : nat)
     (p_gt1 : (1 < p)%N) (q_gt1 : (1 < q)%N) := {
   (* The finite sample space of one run. *)
@@ -139,6 +147,21 @@ Record dsdp_random_inputs (R : realType) (p q : nat)
   Dk_b : {RV (sample_fdist) -> (Bob.-key Dec 'Z_(p * q))} ;
   (* Charlie's private key. *)
   Dk_c : {RV (sample_fdist) -> (Charlie.-key Dec 'Z_(p * q))} ;
+
+  (* The finite type the six encryption coins take their values in. *)
+  coinT : finType ;
+  (* The coin of Alice's first combine. *)
+  coin_ra1 : {RV (sample_fdist) -> coinT} ;
+  (* The coin of Alice's second combine. *)
+  coin_ra2 : {RV (sample_fdist) -> coinT} ;
+  (* The coin of Bob's encryption of his input to Alice. *)
+  coin_rb1 : {RV (sample_fdist) -> coinT} ;
+  (* The coin of Bob's encryption of the aggregate to Charlie. *)
+  coin_rb2 : {RV (sample_fdist) -> coinT} ;
+  (* The coin of Charlie's encryption of his input to Alice. *)
+  coin_rc1 : {RV (sample_fdist) -> coinT} ;
+  (* The coin of Charlie's re-encryption of the answer to Alice. *)
+  coin_rc2 : {RV (sample_fdist) -> coinT} ;
 
   (* [% V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V1. *)
   V1_indep : sample_fdist |=
@@ -174,6 +197,12 @@ Record dsdp_random_inputs (R : realType) (p q : nat)
   Dk_c_indep : sample_fdist |=
     [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b] _|_ Dk_c ;
 
+  (* The six coins are jointly independent of the eleven inputs, so adjoining a
+     party's own coins to its view leaves every other input at its entropy. *)
+  coins_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c]
+    _|_ [% coin_ra1, coin_ra2, coin_rb1, coin_rb2, coin_rc1, coin_rc2] ;
+
   (* V1 is uniform on the plaintext ring 'Z_(p * q). *)
   pV1_unif : `p_ V1 = fdist_uniform (card_Zp_pq_prednK p_gt1 q_gt1) ;
   (* V2 is uniform on the plaintext ring 'Z_(p * q). *)
@@ -205,8 +234,8 @@ Variable I : dsdp_random_inputs R p_gt1 q_gt1.
 Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
-(* The law and the eleven inputs of the record, the names every statement
-   below is written in. *)
+(* The law and the eleven random inputs of the record, the names every
+   statement below is written in.  No statement here reads a coin. *)
 Local Notation P := (sample_fdist I).
 Local Notation V1 := (V1 I).
 Local Notation V2 := (V2 I).
@@ -494,6 +523,23 @@ Definition uniform_Dk_b : {RV P -> (Bob.-key Dec msg)} :=
 Definition uniform_Dk_c : {RV P -> (Charlie.-key Dec msg)} :=
   fun _ => @KeyOf Charlie Dec _ 0.
 
+(* The coin space of this inhabitant, a single value.  No bound reads a
+   coin's law, so one coin value inhabits the record's six coin fields. *)
+Definition uniform_coinT : finType := 'I_1.
+
+(* The coin of Alice's first combine, a constant of the sample space. *)
+Definition uniform_coin_ra1 : {RV P -> uniform_coinT} := fun _ => ord0.
+(* The coin of Alice's second combine, a constant of the sample space. *)
+Definition uniform_coin_ra2 : {RV P -> uniform_coinT} := fun _ => ord0.
+(* The coin of Bob's encryption of his input, a constant. *)
+Definition uniform_coin_rb1 : {RV P -> uniform_coinT} := fun _ => ord0.
+(* The coin of Bob's encryption of the aggregate, a constant. *)
+Definition uniform_coin_rb2 : {RV P -> uniform_coinT} := fun _ => ord0.
+(* The coin of Charlie's encryption of his input, a constant. *)
+Definition uniform_coin_rc1 : {RV P -> uniform_coinT} := fun _ => ord0.
+(* The coin of Charlie's re-encryption of the answer, a constant. *)
+Definition uniform_coin_rc2 : {RV P -> uniform_coinT} := fun _ => ord0.
+
 Lemma uniform_V1_indep (w1 w2 w3 : msg) :
   P |=
     [% uniform_V2, uniform_V3, uniform_U1 w1, uniform_U2 w2,
@@ -663,6 +709,26 @@ Lemma uniform_Dk_c_indep (w1 w2 w3 : msg) :
   _|_ uniform_Dk_c.
 Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
 
+(* The six coins are constants of the sample space, so they are independent
+   of the eleven inputs. *)
+Lemma uniform_coins_indep (w1 w2 w3 : msg) :
+  P |=
+    [% uniform_V1, uniform_V2, uniform_V3, uniform_U1 w1,
+       uniform_U2 w2, uniform_U3 w3, uniform_R2, uniform_R3,
+       uniform_Dk_a, uniform_Dk_b, uniform_Dk_c]
+  _|_ [% uniform_coin_ra1, uniform_coin_ra2, uniform_coin_rb1,
+         uniform_coin_rb2, uniform_coin_rc1, uniform_coin_rc2].
+Proof.
+(* inde_const_RV takes the constant on the left and as a literal const_RV, so
+   the six-coin tuple is folded into one constant before it applies. *)
+rewrite inde_RV_sym.
+have -> : [% uniform_coin_ra1, uniform_coin_ra2, uniform_coin_rb1,
+             uniform_coin_rb2, uniform_coin_rc1, uniform_coin_rc2]
+        = const_RV P (ord0, ord0, ord0, ord0, ord0, ord0)
+          :> {RV P -> _} by [].
+exact: inde_const_RV.
+Qed.
+
 Lemma uniform_pV1_unif : `p_ uniform_V1 = fdist_uniform uniform_card_msg.
 Proof. by have [_ _ unif] := uniform_split (ord5 0). Qed.
 
@@ -680,7 +746,7 @@ Proof. by have [_ _ unif] := uniform_split (ord5 4). Qed.
 
 (* An inhabitant of the record at any modulus with both factors above one.
    The three inputs and two masks are five uniform coordinates, and the
-   weights and keys are constants. *)
+   weights, keys and coins are constants. *)
 Definition uniform_inputs (w1 w2 w3 : msg) :
     dsdp_random_inputs R p_gt1 q_gt1 := {|
   sampleT := uniform_sampleT ;
@@ -696,6 +762,13 @@ Definition uniform_inputs (w1 w2 w3 : msg) :
   Dk_a := uniform_Dk_a ;
   Dk_b := uniform_Dk_b ;
   Dk_c := uniform_Dk_c ;
+  coinT := uniform_coinT ;
+  coin_ra1 := uniform_coin_ra1 ;
+  coin_ra2 := uniform_coin_ra2 ;
+  coin_rb1 := uniform_coin_rb1 ;
+  coin_rb2 := uniform_coin_rb2 ;
+  coin_rc1 := uniform_coin_rc1 ;
+  coin_rc2 := uniform_coin_rc2 ;
   V1_indep := uniform_V1_indep w1 w2 w3 ;
   V2_indep := uniform_V2_indep w1 w2 w3 ;
   V3_indep := uniform_V3_indep w1 w2 w3 ;
@@ -707,6 +780,7 @@ Definition uniform_inputs (w1 w2 w3 : msg) :
   Dk_a_indep := uniform_Dk_a_indep w1 w2 w3 ;
   Dk_b_indep := uniform_Dk_b_indep w1 w2 w3 ;
   Dk_c_indep := uniform_Dk_c_indep w1 w2 w3 ;
+  coins_indep := uniform_coins_indep w1 w2 w3 ;
   pV1_unif := uniform_pV1_unif ;
   pV2_unif := uniform_pV2_unif ;
   pV3_unif := uniform_pV3_unif ;
