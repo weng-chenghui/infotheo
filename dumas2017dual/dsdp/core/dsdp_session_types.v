@@ -31,7 +31,7 @@ Let priv_keyT := di_priv_keyT DI.
 Let e := di_data_of_cipher DI.
 
 (* Per-instance decoder: turn a received ciphertext into a plaintext.
-   Standard supplies [dec dk]; the symbolic instance supplies [HE_dec].
+   Standard supplies [dec dk], the symbolic instance supplies [party_D dk].
    Threaded as a parameter because the carrier-free [DSDP_Interface] record
    does not bundle a bare decryption primitive. *)
 Variable decode : priv_keyT -> cipherT -> option msgT.

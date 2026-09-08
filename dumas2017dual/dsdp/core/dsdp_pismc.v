@@ -16,8 +16,8 @@ Section smc_dsdp_program.
    and a parameter-free symbolic instance. *)
 Variable DI : DSDP_Interface.
 
-(* Per-instance decoder for recv-and-decrypt (Standard supplies the scheme's
-   [dec]; the symbolic instance supplies [HE_dec]). *)
+(* Per-instance decoder for recv-and-decrypt.  Standard supplies the scheme's
+   [dec], the symbolic instance supplies [party_D]. *)
 Variable decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI).
 
 (* Extract types from the interface *)
