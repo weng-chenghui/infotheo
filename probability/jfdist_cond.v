@@ -410,6 +410,17 @@ rewrite fdist_prodE /= mulrAC mulfV ?mul1r //.
 by move: a0; rewrite fdist_prod1.
 Qed.
 
+(* Independent X and Y make the conditional law of Y given X the law of Y.
+   The premise on x excludes the zero-mass value, where jfdist_cond instead
+   returns a uniform law. *)
+Lemma jfdist_cond_inde {R : realType} (U A B : finType) (P : R.-fdist U)
+    (X : {RV P -> A}) (Y : {RV P -> B}) (x : A) :
+  P |= X _|_ Y -> `p_ X x != 0 -> (`p_[% X, Y]) `(| x ) = `p_ Y.
+Proof.
+move=> XY Hx; rewrite (inde_dist_of_RV2 XY).
+by apply/esym/jfdist_cond_prod; rewrite fdist_prod1.
+Qed.
+
 Lemma jcPr_fdistX_prod {R : realType} (A B : finType) (P : R.-fdist A) (W : A -> R.-fdist B) a b :
   P a <> 0 -> \Pr_(fdistX (P `X W))[ [set b] | [set a] ] = W a b.
 Proof.
