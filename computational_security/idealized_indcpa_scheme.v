@@ -21,6 +21,10 @@ Require Import negligible indcpa_game indcpa_scheme_sequence.
 (* ```                                                                        *)
 (*            card_renc_ord1 == the one-element coin space has successor      *)
 (*                              cardinality                                   *)
+(*    renc_of_rand_idealized == the coin index a randomness stands for, the   *)
+(*                              single coin                                   *)
+(*   rand_of_rencK_idealized == the idealized coin map is a section of that   *)
+(*                              index map                                     *)
 (*   idealized_indcpa_scheme == the idealized AHE scheme as an IND-CPA        *)
 (*                              scheme, at a plaintext ring                   *)
 (*          idealized_scheme == that scheme at the plaintext ring             *)
@@ -47,14 +51,27 @@ Local Open Scope ring_scope.
 Fact card_renc_ord1 : #|'I_1| = #|'I_1|.-1.+1.
 Proof. by rewrite card_ord. Qed.
 
+(* The idealized coin space has one element, so every randomness stands for
+   that element. *)
+Definition renc_of_rand_idealized (msgT : finComUnitRingType) :
+  rand (Idealized_HETypes msgT) -> 'I_1 := fun _ => ord0.
+
+(* Reading the single idealized coin's randomness back names it again. *)
+Lemma rand_of_rencK_idealized (msgT : finComUnitRingType) :
+  cancel (fun _ : 'I_1 => 0 : rand (Idealized_HETypes msgT))
+         (@renc_of_rand_idealized msgT).
+Proof. by move=> r; rewrite [RHS]ord1. Qed.
+
 (* The idealized AHE scheme is an IND-CPA scheme whose encryption returns the
    plaintext. *)
 Definition idealized_indcpa_scheme (msgT : finComUnitRingType) :
     indcpa_scheme := {|
-  scheme_AHE          := Idealized_HETypes msgT ;
-  scheme_renc         := 'I_1 ;
-  scheme_card_renc    := card_renc_ord1 ;
-  scheme_rand_of_renc := fun _ => 0 |}.
+  scheme_AHE           := Idealized_HETypes msgT ;
+  scheme_renc          := 'I_1 ;
+  scheme_card_renc     := card_renc_ord1 ;
+  scheme_rand_of_renc  := fun _ => 0 ;
+  scheme_renc_of_rand  := @renc_of_rand_idealized msgT ;
+  scheme_rand_of_rencK := @rand_of_rencK_idealized msgT |}.
 
 (* The idealized scheme at the security parameter k, over a plaintext space of
    cardinality (k+2)^(k+2).  That cardinality is what leaves the guessing
