@@ -187,20 +187,17 @@ Lemma step_complete n m (sds : n.-tuple (seq data)) (l : lens n m) ps ps'
 Proof.
 move Hps: (extract l ps) => psl H.
 case: H Hps => /=.
-- move=> i x p [] Hps.
-  split; apply /val_inj;
-    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
-- move=> i x [] Hps.
-  split; apply /val_inj;
-    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
+- by move=> i x p [] Hps; split; apply/val_inj;
+    rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
+- by move=> i x [] Hps; split; apply/val_inj;
+    rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
 - move=> i j x pi pj [] Hi Hj.
   rewrite /result_procs /result_traces !map_extract.
-  split; apply /val_inj; congr ([:: _; _]);
+  split; apply/val_inj; congr ([:: _; _]);
     rewrite /= tnth_map tnth_mktuple /= /step;
     by rewrite -tnth_nth (Hi,Hj) -tnth_nth (Hi,Hj) eqxx.
-- move=> i f r sd Hsd [] Hps.
-  split; apply /val_inj;
-    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps Hsd.
+- by move=> i f r sd Hsd [] Hps; split; apply/val_inj;
+    rewrite /= tnth_mktuple /= /step -tnth_nth Hps Hsd.
 Qed.
 
 (* Characterization of a 2-party reduction at indices a, b: it must be a
@@ -476,20 +473,17 @@ Lemma step_trace_extends (ps : seq (proc data)) tr sd i :
   \/ exists d, (step ps tr sd i).1.1.2 = d :: tr /\ trace_datum ps i sd d.
 Proof.
 rewrite /step /trace_datum.
-case Hi: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] /=.
+case Hi: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] /=;
+  try by left.
 - by right; exists d; split=> //; left; exists p.
-- case: (nth (default_proc data) ps n) => [*|*|m g|*|*| |] /=; try by left.
-  by case: ifP => _; left.
+- by left; case: (nth (default_proc data) ps n) => [*|*|*|*|*| |]//=; case: ifP.
 - case Hn: (nth (default_proc data) ps n) => [x q|m w q|m g|g|x| |] /=;
     try by left.
   case: ifP => [/eqP Hm|_]; last by left.
-  by right; exists w; split=> //; right; right; left; exists n, q;
-    rewrite Hn Hm.
+  by right; exists w; split=> //; do 2 right; left; exists n, q; rewrite Hn Hm.
 - case: sd => [|r sd']; first by left.
   by right; exists r; split=> //; do 3 right; exists f, sd'.
 - by right; exists d; split=> //; right; left.
-- by left.
-- by left.
 Qed.
 
 End sampling.
