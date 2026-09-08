@@ -155,20 +155,25 @@ Let dsdp_run_seeds : seq (seq data) :=
 (* Protocol definition using interp directly with explicit traces *)
 Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] dsdp_run_seeds.
 
-(* Protocol execution result: running dsdp for 18 steps produces the expected
-   final state with all parties finished and their respective traces.
-   In the idealized scheme, enc(pk, m, r) = m, so ciphertexts are just messages. *)
+(* The eighteen-round run at the idealized interface, with the drawn coin at
+   every slot a Sample writes.  The idealized scheme ignores a coin's value,
+   so every coin entry is the same [rd runit]. *)
 Lemma dsdp_ok :
   dsdp 18 =
   ([:: Finish; Finish; Finish],
    [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
            e (v3 * u3 + r3 + (v2 * u2 + r2));
+           rd runit; rd runit;
            e v3;
            e v2;
            d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
-       [:: e (v3 * u3 + r3);
-           e (v2 * u2 + r2); d v2; k dk_b];
-       [:: e (v3 * u3 + r3 + (v2 * u2 + r2)); d v3; k dk_c]
+       [:: rd runit;
+           e (v3 * u3 + r3);
+           e (v2 * u2 + r2);
+           rd runit; d v2; k dk_b];
+       [:: rd runit;
+           e (v3 * u3 + r3 + (v2 * u2 + r2));
+           rd runit; d v3; k dk_c]
    ],
    [:: [::]; [::]; [::]]).
 Proof. reflexivity. Qed.
@@ -182,15 +187,15 @@ Definition dsdp_traces : dsdp_tracesT :=
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
   let '(s, u3, u2, u1, v1) :=
-    if tnth trs 0 is Bseq [:: inl (inl (inl s)); _; _; _;
-                           _; _; inl (inl (inl u3)); inl (inl (inl u2));
+    if tnth trs 0 is Bseq [:: inl (inl (inl s)); _; _; _; _;
+                           _; _; _; inl (inl (inl u3)); inl (inl (inl u2));
                            inl (inl (inl u1)); inl (inl (inl v1)); _] _
     then (s, u3, u2, u1, v1) else (0, 0, 0, 0, 0) in
   let '(v2) :=
-    if tnth trs 1 is Bseq [:: _; _; inl (inl (inl v2)); _] _
+    if tnth trs 1 is Bseq [:: _; _; _; _; inl (inl (inl v2)); _] _
     then (v2) else (0) in
   let '(_v3) :=
-    if tnth trs 2 is Bseq [:: _; inl (inl (inl v3)); _] _
+    if tnth trs 2 is Bseq [:: _; _; _; inl (inl (inl v3)); _] _
     then (v3) else (0) in
   s = v3 * u3 + v2 * u2 + v1 * u1.
 
@@ -200,12 +205,17 @@ Lemma dsdp_traces_ok :
     [tuple
        [bseq d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
              e (v3 * u3 + r3 + (v2 * u2 + r2));
+             rd runit; rd runit;
              e v3;
              e v2;
              d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
-       [bseq e (v3 * u3 + r3);
-             e (v2 * u2 + r2); d v2; k dk_b];
-       [bseq e (v3 * u3 + r3 + (v2 * u2 + r2)); d v3; k dk_c]].
+       [bseq rd runit;
+             e (v3 * u3 + r3);
+             e (v2 * u2 + r2);
+             rd runit; d v2; k dk_b];
+       [bseq rd runit;
+             e (v3 * u3 + r3 + (v2 * u2 + r2));
+             rd runit; d v3; k dk_c]].
 Proof. by apply/val_inj/(inj_map val_inj); rewrite interp_traces_ok. Qed.
 
 (* Protocol correctness:

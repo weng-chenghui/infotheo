@@ -18,8 +18,9 @@ Require Import proba jfdist_cond entropy graphoid.
 (* ```                                                                        *)
 (*                                                                            *)
 (* Each party carries a seed stream beside its trace.  A Sample draws the     *)
-(* head of that stream and writes nothing to the trace, so every trace        *)
-(* entry is the program's image of the drawn values.                          *)
+(* head of that stream and records the drawn value in the party's trace.      *)
+(* A party's trace therefore holds every value it drew beside the program's   *)
+(* image of them.                                                             *)
 (*                                                                            *)
 (* The reduction relation below is read at a fixed seed assignment, so an     *)
 (* rsteps models at most one draw per party; interp consumes the stream.      *)
@@ -70,9 +71,8 @@ Definition default_proc : proc := Fail.
        step_fired : bool }.      (* whether the step made progress *)
    *)
 
-(* Step function for process list.  [Sample f] consumes the head of the
-   running party's seed stream and passes it to the continuation; an
-   exhausted stream blocks the party instead of fabricating a value. *)
+(* One round of a single party's process.  A Sample draws the head of that
+   party's seed stream and records the drawn value in the party's trace. *)
 Definition step (ps : seq proc) (trace seed : seq data) (i : nat) :=
   let p := nth default_proc ps i in
   let nop := (p, trace, seed, false) in
@@ -92,7 +92,7 @@ Definition step (ps : seq proc) (trace seed : seq data) (i : nat) :=
   | Init d next =>
       (next, d::trace, seed, true)
   | Sample f =>
-      if seed is r :: seed' then (f r, trace, seed', true) else nop
+      if seed is r :: seed' then (f r, r :: trace, seed', true) else nop
   | Ret d =>
       (Finish, d :: trace, seed, true)
   | Finish => nop
@@ -151,7 +151,7 @@ Inductive rstep {n} (sds : n.-tuple (seq data)) : forall {m}, lens n m ->
     rstep sds [tuple i; j] [tuple Send j x pi; Recv i pj] [tuple pi; pj x]
           [tuple nil; [:: x]]
   | rsample i f r sd : sds !_ i = r :: sd ->
-    rstep sds [tuple i] [tuple Sample f] [tuple f r] [tuple nil].
+    rstep sds [tuple i] [tuple Sample f] [tuple f r] [tuple [:: r]].
 
 (* Reflexive transitive closure of rstep *)
 Inductive rsteps {n} (sds : n.-tuple (seq data)) :
@@ -447,11 +447,11 @@ Arguments Ret {data}.
 Section sampling.
 Variable data : Type.
 
-(* A Sample substitutes the head of the party's stream into its continuation,
-   advances the stream, and leaves the trace alone. *)
+(* A Sample substitutes the head of the party's stream into its
+   continuation. It advances the stream and records the drawn value. *)
 Lemma step_sample (ps : seq (proc data)) tr i f r sd :
   nth (default_proc data) ps i = Sample f ->
-  step ps tr (r :: sd) i = (f r, tr, sd, true).
+  step ps tr (r :: sd) i = (f r, r :: tr, sd, true).
 Proof. by rewrite /step => ->. Qed.
 
 (* An exhausted stream blocks the party rather than fabricating a value. *)
@@ -460,32 +460,20 @@ Lemma step_sample_nil (ps : seq (proc data)) tr i f :
   step ps tr [::] i = (Sample f, tr, [::], false).
 Proof. by rewrite /step => ->. Qed.
 
-(* One step's trace is a function of the process list and the party index
-   alone.  A drawn value reaches a later trace only through the
-   continuation. *)
-Lemma step_trace_seed_indep (ps : seq (proc data)) tr sd1 sd2 i :
-  (step ps tr sd1 i).1.1.2 = (step ps tr sd2 i).1.1.2.
-Proof.
-rewrite /step.
-case: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] //.
-- by case: (nth (default_proc data) ps n) => [*|*|m g|*|*| |] //=; case: ifP.
-- by case: (nth (default_proc data) ps n) => [*|m w q|*|*|*| |] //=; case: ifP.
-- by case: sd1 => [|r1 sd1']; case: sd2.
-Qed.
-
-(* A datum reaches party i's trace only by an Init or Ret of i, or a Send
-   to i. *)
-Definition trace_datum (ps : seq (proc data)) (i : nat) (d : data) : Prop :=
+(* A datum reaches party i's trace by an Init or Ret of i, or a
+   Send to i. A Sample of i drawing its stream head is a fourth source. *)
+Definition trace_datum (ps : seq (proc data)) (i : nat) (sd : seq data)
+    (d : data) : Prop :=
   (exists p, nth (default_proc data) ps i = Init d p)
   \/ nth (default_proc data) ps i = Ret d
-  \/ (exists frm p, nth (default_proc data) ps frm = Send i d p).
+  \/ (exists frm p, nth (default_proc data) ps frm = Send i d p)
+  \/ (exists f sd', nth (default_proc data) ps i = Sample f /\ sd = d :: sd').
 
-(* One step either leaves the trace alone or prepends a single datum licensed
-   by an Init, Ret or Send node.  A Sample falls in the first case, so a drawn
-   value is never a trace entry. *)
+(* One step either leaves the trace alone or prepends one datum.
+   An Init, Ret, Send or Sample node licenses that datum. *)
 Lemma step_trace_extends (ps : seq (proc data)) tr sd i :
   (step ps tr sd i).1.1.2 = tr
-  \/ exists d, (step ps tr sd i).1.1.2 = d :: tr /\ trace_datum ps i d.
+  \/ exists d, (step ps tr sd i).1.1.2 = d :: tr /\ trace_datum ps i sd d.
 Proof.
 rewrite /step /trace_datum.
 case Hi: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] /=.
@@ -495,8 +483,10 @@ case Hi: (nth (default_proc data) ps i) => [d p|n d p|n f|f|d| |] /=.
 - case Hn: (nth (default_proc data) ps n) => [x q|m w q|m g|g|x| |] /=;
     try by left.
   case: ifP => [/eqP Hm|_]; last by left.
-  by right; exists w; split=> //; right; right; exists n, q; rewrite Hn Hm.
-- by case: sd => [|r sd']; left.
+  by right; exists w; split=> //; right; right; left; exists n, q;
+    rewrite Hn Hm.
+- case: sd => [|r sd']; first by left.
+  by right; exists r; split=> //; do 3 right; exists f, sd'.
 - by right; exists d; split=> //; right; left.
 - by left.
 - by left.

@@ -128,7 +128,7 @@ Definition reduction_spec_traces {n} (r : reduction_spec n) :
   | RSinit _ x _ => [tuple [:: x]]
   | RSret _ x => [tuple [:: x]]
   | RScomm _ _ x _ _ => [tuple nil; [:: x]]
-  | RSsample _ _ _ => [tuple nil]
+  | RSsample _ _ x => [tuple [:: x]]
   end.
 
 (* The seed condition of a sampling reduction: the drawing party's stream
