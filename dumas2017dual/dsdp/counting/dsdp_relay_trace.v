@@ -58,6 +58,9 @@ Import Num.Theory.
 (* dsdp_procs_symbolic, dsdp_seeds_symbolic : the three DSDP programs at one  *)
 (*   sample's inputs and the six coin coordinates that seed them.             *)
 (* dsdp_run_traces_symbolicE : the three traces of the eighteen-round run.    *)
+(* symbolic_trace_size : eighteen rounds bound every party's trace.           *)
+(* symbolic_trace_of_run : the trace party i sees in the run, as a random     *)
+(*   variable.                                                                *)
 (* BobTrace, CharlieTrace : each relay's trace as a random observation.       *)
 (* bob_trace_of_viewE, charlie_trace_of_viewE : the trace is a deterministic  *)
 (*   image of the view; bob_trace_of_viewK and its sibling invert it.         *)
@@ -199,26 +202,25 @@ rewrite /dsdp_procs_symbolic /dsdp_seeds_symbolic
 by case: (Dk_a t) => ka; case: (Dk_b t) => kb; case: (Dk_c t) => kc.
 Qed.
 
-(* Eighteen rounds bound Bob's trace, as they bound every trace of the run. *)
-Lemma bob_trace_size (t : T) :
+(* Eighteen rounds bound every party's trace of the symbolic run.  The bound
+   packages a trace as a bounded sequence. *)
+Lemma symbolic_trace_size (i : party_id) (t : T) :
   (size (nth [::] (run_interp 18 (dsdp_procs_symbolic t)
-                     (dsdp_seeds_symbolic t)).1.2 n( Bob )) <= 18)%N.
+                     (dsdp_seeds_symbolic t)).1.2 n( i )) <= 18)%N.
 Proof. exact: size_traces_nth. Qed.
+
+(* The trace party i sees in the symbolic run, as a random variable.  The
+   corrupted-relay bounds are re-read at this observation. *)
+Definition symbolic_trace_of_run (i : party_id) :
+    {RV P -> 18.-bseq symbolic_datum} :=
+  fun t => Bseq (symbolic_trace_size i t).
 
 (* Bob's trace at the symbolic cipher model, as a random observation.  It is
    the object the executed protocol hands a corrupted Bob. *)
-Definition BobTrace : {RV P -> 18.-bseq symbolic_datum} :=
-  fun t => Bseq (bob_trace_size t).
-
-(* Eighteen rounds bound Charlie's trace as well. *)
-Lemma charlie_trace_size (t : T) :
-  (size (nth [::] (run_interp 18 (dsdp_procs_symbolic t)
-                     (dsdp_seeds_symbolic t)).1.2 n( Charlie )) <= 18)%N.
-Proof. exact: size_traces_nth. Qed.
+Definition BobTrace := symbolic_trace_of_run Bob.
 
 (* Charlie's trace at the symbolic cipher model as a random observation. *)
-Definition CharlieTrace : {RV P -> 18.-bseq symbolic_datum} :=
-  fun t => Bseq (charlie_trace_size t).
+Definition CharlieTrace := symbolic_trace_of_run Charlie.
 
 (* A coin drawn at one sample of the space.  The readers below return it on
    the branch no trace of the run reaches. *)
@@ -268,8 +270,8 @@ Qed.
    view dsdp_relay_secrecy.v bounds. *)
 Lemma bob_trace_of_viewE : BobTrace = bob_trace_of_view `o BobView.
 Proof.
-apply: funext => t; apply/val_inj; rewrite /BobTrace.
-move: (bob_trace_size t).
+apply: funext => t; apply/val_inj; rewrite /BobTrace /symbolic_trace_of_run.
+move: (symbolic_trace_size Bob t).
 by rewrite dsdp_run_traces_symbolicE.
 Qed.
 
@@ -316,8 +318,9 @@ Proof. by case=> [[[[[k] v3] [x]] c1] c2]. Qed.
 Lemma charlie_trace_of_viewE :
   CharlieTrace = charlie_trace_of_view `o CharlieView.
 Proof.
-apply: funext => t; apply/val_inj; rewrite /CharlieTrace.
-move: (charlie_trace_size t).
+apply: funext => t;
+  apply/val_inj; rewrite /CharlieTrace /symbolic_trace_of_run.
+move: (symbolic_trace_size Charlie t).
 by rewrite dsdp_run_traces_symbolicE.
 Qed.
 
