@@ -116,7 +116,7 @@ Let m_gt1 : (1 < m)%N := pq_gt1 p_gt1 q_gt1.
 Let unif_neq0 (X : {RV P -> msg})
     (HX : `p_ X = fdist_uniform card_msg_prednK) (v : msg) : `p_ X v != 0.
 Proof.
-by rewrite HX fdist_uniformE invr_eq0 pnatr_eq0 -lt0n card_msg ltnW.
+by rewrite HX fdist_uniformE invr_eq0 pnatr_eq0 -lt0n card_msg (ltnW m_gt1).
 Qed.
 
 (* Bob's input under Alice's query weight U2.  It reaches the aggregate only

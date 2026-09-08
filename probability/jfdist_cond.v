@@ -417,7 +417,7 @@ Lemma jfdist_cond_inde {R : realType} (U A B : finType) (P : R.-fdist U)
     (X : {RV P -> A}) (Y : {RV P -> B}) (x : A) :
   P |= X _|_ Y -> `p_ X x != 0 -> (`p_[% X, Y]) `(| x ) = `p_ Y.
 Proof.
-by move=> XY Hx; rewrite (inde_dist_of_RV2 XY) -jfdist_cond_prod// fdist_prod1.
+by move=> XY x0; rewrite (inde_dist_of_RV2 XY) -jfdist_cond_prod// fdist_prod1.
 Qed.
 
 Lemma jcPr_fdistX_prod {R : realType} (A B : finType) (P : R.-fdist A) (W : A -> R.-fdist B) a b :
