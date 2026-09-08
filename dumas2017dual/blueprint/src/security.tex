@@ -326,8 +326,12 @@ finite commutative unit ring.
   \rocqok
   A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
   a challenge plaintext $p_A$ read off the state, and a decision taken on the
-  state and one challenge ciphertext. Encryption randomness is uniform. The
-  challenger at hidden bit $b$ is the encryption law of $p_A$ at $b = 1$ and the
+  state and one challenge ciphertext. Encryption randomness is uniform, drawn
+  as a coin index whose map to randomness carries a left inverse. Every
+  statement over the scheme record therefore ranges over injective index maps,
+  which is what lets a randomness recorded in a party's trace be read back as
+  the coin naming it.
+  The challenger at hidden bit $b$ is the encryption law of $p_A$ at $b = 1$ and the
   encryption law of zero at $b = 0$, and the experiment at $b$ is the law of the
   adversary's decision against that challenge. The advantage of $A$ at a public
   key is the gap between its acceptance probability at the two bits.
@@ -558,14 +562,17 @@ carries the three bounds above to the executed protocol.
   A party program draws its encryption randomness at a $\mathrm{Sample}$ node.
   Each party carries a seed stream beside its trace, and a step at a
   $\mathrm{Sample}$ substitutes the head of that party's stream into the
-  continuation, advances the stream, and appends nothing to the trace.
+  continuation, advances the stream, and records the drawn value at the head of
+  that party's trace.
   \[ \mathrm{step}\big(\mathrm{Sample}\ f,\ \mathit{tr},\ r :: \mathit{sd}\big)
-       = \big(f(r),\ \mathit{tr},\ \mathit{sd}\big) \]
+       = \big(f(r),\ r :: \mathit{tr},\ \mathit{sd}\big) \]
   The three DSDP streams are the six coins of one record, two per party in the
-  order that party encrypts. A drawn coin reaches the trace only through the
-  ciphertext its continuation builds, so Alice's trace is the image of the
-  sampled coins through the programs and holds no coin of any party as an entry
-  of its own.
+  order that party encrypts. A party's trace holds every coin that party drew,
+  beside the image of those coins through its program, so Alice's trace holds
+  her two combine coins and no coin of another party. The observation the
+  bounds below are stated at therefore contains the randomness Alice drew
+  herself, so an adversary reading it is granted her coins along with her
+  messages.
 \end{definition}
 
 \begin{definition}[Alice's executed trace]
@@ -584,8 +591,8 @@ carries the three bounds above to the executed protocol.
   sample of the experiment, and $\mathrm{trace\_of\_run}(\mathit{ps}, i)$ is the
   message log the interpreter returns for party $i$ when it runs the process
   list $\mathit{ps}$ at a sample, encoded as a bounded sequence of at most
-  eighteen entries, each a plaintext, a ciphertext, or a private key. Alice's
-  trace is that reader at the DSDP protocol and at Alice.
+  eighteen entries, each a plaintext, a ciphertext, a coin, or a key mark.
+  Alice's trace is that reader at the DSDP protocol and at Alice.
   \[ \mathrm{AliceTrace} = \mathrm{trace\_of\_run}(\mathrm{dsdp\_protocol},
        \mathrm{Alice}) \]
 \end{definition}
@@ -638,9 +645,9 @@ carries the three bounds above to the executed protocol.
   Alice's raw trace is the message log the interpreter records for her at a
   sample, before the encoding into the finite carrier a distribution is formed
   on. Decoding one encoded entry at a fixed key pair returns a plaintext as
-  itself, a ciphertext as itself, and the private-key mark as that key; at
-  Alice's own key pair the round trip is exact, her trace carrying no
-  public-key mark to constrain.
+  itself, a ciphertext as itself, a coin as the randomness it names, and the
+  private-key mark as that key. At Alice's own key pair the round trip is
+  exact, her trace carrying no public-key mark to constrain.
   \[ \mathrm{map}\ \delta_{\mathrm{dk}_A}\ (\mathrm{AliceTrace}(s))
        = \mathrm{AliceRawTrace}(s) \]
   The encoding therefore takes nothing from Alice and withholds nothing from her: a
@@ -706,17 +713,21 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[Trace and tuple leave the same uncertainty]
   \label{thm:centropy_trace_tuple}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tuple,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTraceTuple,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_trace_tupleE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tuple,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.hop_tuple_of_alice_trace,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tupleK,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_hop_tupleE}
   \rocqok
-  \uses{lem:trace_of_hop_tuple}
-  Conditioning on Alice's executed trace leaves the same uncertainty about
-  Bob's input as conditioning on her hop-$0$ tuple. The equality holds for all
-  weights.
+  \uses{def:alice_trace,lem:trace_of_hop_tuple}
+  Alice's executed trace and her hop-$0$ tuple carry the same eight values, the
+  trace writing her two combine coins at slots $2$ and $3$, and
+  $\mathrm{hop\_tuple\_of\_alice\_trace}$ reads those eight slots back.
+  Encoding the tuple into a trace is left-invertible, so conditioning on either
+  object leaves the same uncertainty about Bob's input, for all weights.
   \[ \HH(V_2 \mid \mathrm{AliceTrace}) = \HH(V_2 \mid \hoptuple{0}) \]
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}; with
+  The equality is a relabelling of one object as the other, and no coordinate
+  of the trace is claimed to be uninformative about Bob's input.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}. With
   Theorem~\ref{thm:centropy_trace_eq0} it puts the zero at the tuple as well.
 \end{theorem}
 
@@ -1361,7 +1372,7 @@ pending obligation, and a bound is read off it by projection.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_hop_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop_tuple_distinguisher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain}
   \rocqok
@@ -1374,7 +1385,7 @@ pending obligation, and a bound is read off it by projection.
   protocol and not the tuple $\hoptuple{0}$.
   \[ \mathrm{start}\ \gamma_\tau(D_g) \]
   \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
-       \texttt{accept\_trace\_tupleE} \]
+       \texttt{accept\_hop\_tupleE} \]
   The step to $\gamma_0$ carries no label and adds nothing to the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift
@@ -1417,7 +1428,7 @@ pending obligation, and a bound is read off it by projection.
   $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
   trace-level ideal law.
   \[ \mathrm{same\ to}\ \gamma_0(D \circ \tau)\ \mathrm{by}\
-       \texttt{accept\_trace\_tupleE},
+       \texttt{accept\_hop\_tupleE},
      \qquad
      \mathrm{same\ to}\ \Pr_{\Ideal^\tau}[D]\ \mathrm{by}\
        \texttt{accept\_trace\_ideal\_tupleE} \]
@@ -1556,10 +1567,10 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_decode_V2E}
   \rocqok
   \uses{def:alice_trace}
-  The predictor $\delta$ reads Bob's ciphertext off slot $3$ of Alice's trace
+  The predictor $\delta$ reads Bob's ciphertext off slot $5$ of Alice's trace
   and decrypts it with Bob's private key. Correctness of decryption makes Bob's
   input a function of the trace.
-  \[ \delta(t) = \Dec(dk_B,\, t_3),\qquad V_2 = \delta \circ \mathrm{AliceTrace} \]
+  \[ \delta(t) = \Dec(dk_B,\, t_5),\qquad V_2 = \delta \circ \mathrm{AliceTrace} \]
   It holds a private key, so it lies outside the attack model the hop ladder
   bounds, which grants the public keys alone.
 \end{definition}
