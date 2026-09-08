@@ -2,7 +2,8 @@
 # scope that do NOT have a \rocq{} node. Regenerated 2026-08-18, when the
 # SSProve modules left the codebase and the computational chapters were
 # retargeted at dsdp/hopping/, and revised 2026-09-08 for the scheme-sequence
-# and sampled-coin refactor. Anti-drift ratchet: a NEW declaration must
+# and sampled-coin refactor and 2026-09-09 for the coin-carrying relay views
+# and the trace of the symbolic run. Anti-drift ratchet: a NEW declaration must
 # get a \rocq node or be added here; renames surface as dangling refs.
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
@@ -188,6 +189,31 @@ dsdp_random_inputs:uniform_sample_fdist
 dsdp_random_inputs:uniform_split
 dsdp_random_inputs:uniform_view_input
 dsdp_random_inputs:uniform_view_mask
+# dsdp_random_inputs: the coin space the uniform witness works over and the six
+# constants it holds the coins at; the blueprint cites uniform_coins_indep, the
+# law those constants satisfy, at def:idealized_setting.
+dsdp_random_inputs:uniform_coinT
+dsdp_random_inputs:uniform_coin_ra1
+dsdp_random_inputs:uniform_coin_ra2
+dsdp_random_inputs:uniform_coin_rb1
+dsdp_random_inputs:uniform_coin_rb2
+dsdp_random_inputs:uniform_coin_rc1
+dsdp_random_inputs:uniform_coin_rc2
+# dsdp_relay_trace: the program list and the seed streams the symbolic run is
+# taken at, the party-indexed size bound that packages a trace as a bounded
+# sequence, the two named relay traces, which are symbolic_trace_of_run at Bob
+# and at Charlie, and the four encoders and readers of the trace-view recoding;
+# the blueprint cites the run at def:symbolic_run and the recoding at
+# lem:relay_trace_of_view, not the maps either is built from.
+dsdp_relay_trace:dsdp_procs_symbolic
+dsdp_relay_trace:dsdp_seeds_symbolic
+dsdp_relay_trace:symbolic_trace_size
+dsdp_relay_trace:BobTrace
+dsdp_relay_trace:CharlieTrace
+dsdp_relay_trace:bob_trace_of_view
+dsdp_relay_trace:bob_view_of_trace
+dsdp_relay_trace:charlie_trace_of_view
+dsdp_relay_trace:charlie_view_of_trace
 # dsdp_instance: the key table read off three private keys, the six-fold
 # product the coin record borrows its finite structure from, and the two
 # summand sequences a bound along an instance sequence is written from; the

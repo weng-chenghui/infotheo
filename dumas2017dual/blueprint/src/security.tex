@@ -66,10 +66,11 @@ $S = u_1 v_1 + u_2 v_2 + u_3 v_3$ and returns it to Alice.
   \label{def:party_views}
   \rocqok
   A corrupted party's view is everything it sees: its own key and inputs, the
-  ciphertexts it receives, and, for Alice, the decrypted output $S$. Alice's view
-  carries her key, her inputs and masks, the output $S$, and the three ciphertext
-  hops; a relay's view carries its key, its own input, and the ciphertexts it
-  forwards.
+  random tape it draws, the ciphertexts it receives, and, for Alice, the
+  decrypted output $S$. Alice's view carries her key, her inputs and masks, the
+  output $S$, her two combine coins, and the three ciphertext hops. Each
+  relay's view carries its key, its own input, the ciphertexts it receives, and
+  the two coins it draws.
 \end{definition}
 
 \begin{lemma}[Protocol correctness]
@@ -115,12 +116,14 @@ degenerate query that violates it lets Alice read a relay's input outright.
   Proved in \texttt{dsdp\_entropy.v} over the two primes, the sample law and
   the eleven random inputs, with their uniformity and their independence
   assumed and the conditioner's $S$ computed from the inputs rather than left
-  free. Those hypotheses are exactly the fields of the record
-  \texttt{dsdp\_random\_inputs}, which \texttt{uniform\_inputs} inhabits at
-  every modulus. Because the each-against-the-rest independence reaches
-  Alice's three weights, the equality covers honest sampling, where her
-  weights are independent of her input and of one another. At
-  every modulus the equality is exact and holds against an adversary of any
+  free. Those hypotheses are fields of the record
+  \texttt{dsdp\_random\_inputs}, which also carries the six coins one run
+  draws and their joint independence of the eleven, and which
+  \texttt{uniform\_inputs} inhabits at every modulus. Because the
+  each-against-the-rest independence reaches Alice's three weights, the
+  equality covers honest sampling, where her weights are independent of her
+  input and of one another. At every modulus the equality is exact and holds
+  against an adversary of any
   running time.
 \end{theorem}
 \begin{proof}
@@ -1852,6 +1855,7 @@ single member of it can carry.
 \begin{definition}[The idealized witnesses]
   \label{def:idealized_setting}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_inputs,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_coins_indep,
        infotheo.computational_security.idealized_indcpa_scheme.idealized_indcpa_scheme,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.idealized_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.idealized_instance_sequence}
@@ -1860,9 +1864,12 @@ single member of it can carry.
   Both axes are inhabited at every modulus. The counting witness is the
   uniform law on the five coordinates of $\mathbb{Z}_{pq}$ carrying the three
   plaintext inputs and the two masks, with Alice's three weights held at the
-  constants $0$, $0$, $1$ and the three keys constant as well. A weight drawn
-  uniformly takes the value $0$ at some sample, and Charlie's weight has to be
-  invertible at every sample, which is why the weights stay outside the sample
+  constants $0$, $0$, $1$ and the three keys constant as well. The six coins
+  are held at a one-point space, so their joint independence of the eleven
+  inputs is proved where the witness is built and assumes nothing. A weight
+  drawn uniformly takes the value $0$ at some sample, and Charlie's weight has
+  to be invertible at every sample, which is why the weights stay outside the
+  sample
   space. The hopping witness is \texttt{idealized\_instance\_sequence}, the
   idealized scheme at the composite modulus $p_k q_k$ with $p_k$ a prime above
   $(k+2)^{k+2}$ and $q_k$ a prime above $p_k$, under the cipher-constant
@@ -2152,7 +2159,9 @@ no cryptographic assumption.
   Assuming Alice's input $V_1$ is a priori uniform and each relay's data is
   independent of $V_1$, the relay's view carries the full $\log m$ bits of
   uncertainty about $V_1$, which is positive. Alice's input enters no message a
-  relay sees, so a corrupted relay learns nothing about it.
+  relay sees, so a corrupted relay learns nothing about it. Each view holds the
+  two coins that relay draws beside its key, its input and the ciphertexts it
+  receives, and the bound stays at $\log m$ with them in it.
   \[ \HH(V_1 \mid \mathrm{RelayView}) = \log m > 0 \]
   Proved in \texttt{dsdp\_relay\_secrecy.v} as \texttt{bob\_privacy\_V1}
   and \texttt{charlie\_privacy\_V1}. The uniformity of $V_1$ is a field of the
@@ -2173,14 +2182,24 @@ no cryptographic assumption.
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.BobView_indep_V1,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.CharlieView_indep_V1}
   \rocqok
-  Each relay's view is a deterministic image (its key, its input, the forwarded
-  ciphertexts) of data assumed independent of $V_1$, hence independent of $V_1$.
+  The coin-free part of each relay's view, its key with its input and the
+  ciphertexts it receives, is a deterministic image of data assumed independent
+  of $V_1$, and the two coins that relay draws are independent of that part
+  taken together with $V_1$, so the view carrying its coins is independent of
+  $V_1$.
   \[ \mathrm{RelayView} \perp V_1 \]
 \end{lemma}
 \begin{proof}
   \rocqok
-  Push the assumed input-independence through the deterministic view map
-  (\texttt{inde\_RV\_comp}, an Infotheo library fact).
+  Push the assumed input-independence through the deterministic view map,
+  \texttt{inde\_RV\_comp}, which leaves the coin-free part independent of
+  $V_1$. The field \texttt{coins\_indep} of the inputs record makes the six
+  coins of a run jointly independent of the eleven inputs, and an
+  \texttt{inde\_RV\_comp} image of it makes the relay's own two coins
+  independent of the pair of $V_1$ with that part. Contraction,
+  \texttt{inde\_RV\_contraction}, joins the two into independence of $V_1$
+  from the part with its coins, and a last \texttt{inde\_RV\_comp} reorders
+  that tuple into the view.
 \end{proof}
 
 \chapter{Bob learns nothing about Charlie's input}
@@ -2193,7 +2212,9 @@ no cryptographic assumption.
   With $V_3$ and the mask $R_3$ a priori uniform and independent as stated, Bob's
   view carries the full $\log m$ bits of uncertainty about Charlie's input $V_3$.
   The Charlie-ciphertext Bob forwards carries $V_3 U_3 + R_3$, masked by Alice's
-  fresh one-time pad $R_3$, so Bob's view is independent of $V_3$.
+  fresh one-time pad $R_3$, so Bob's view is independent of $V_3$. Bob's two
+  coins are in that view, and the record makes the six coins of a run jointly
+  independent of the eleven inputs, so they leave the bound where it is.
   \[ \HH(V_3 \mid \mathrm{BobView}) = \log m > 0 \]
   Proved in \texttt{dsdp\_relay\_secrecy.v} as \texttt{bob\_privacy\_V3}.
   The uniformity of $V_3$ and of $R_3$ are fields of the inputs record
@@ -2220,7 +2241,8 @@ no cryptographic assumption.
   Charlie's view carries the full $\log m$ bits of uncertainty about Bob's input
   $V_2$. Charlie's decrypted aggregate $D_3$ carries $V_2 U_2$ masked by Alice's
   fresh pad $R_2$, so the ciphertext Charlie returns to Alice is independent of
-  $V_2$.
+  $V_2$. Charlie's two coins are in that view under the same coin law, and they
+  leave the bound where it is.
   \[ \HH(V_2 \mid \mathrm{CharlieView}) = \log m > 0 \]
   Proved in \texttt{dsdp\_relay\_secrecy.v} as
   \texttt{charlie\_privacy\_V2}. The uniformity of $V_2$ and of $R_2$ are
@@ -2247,3 +2269,100 @@ no cryptographic assumption.
   needs no cryptographic assumption.
   \[ R \text{ uniform},\ R \perp X \;\Longrightarrow\; (X + R) \perp X \]
 \end{lemma}
+
+\chapter{The relay bounds at the executed trace}
+
+The three bounds above are stated at a tuple standing for what a relay observes.
+Running the three DSDP party programs at a symbolic cipher and reading the trace
+the interpreter writes for a relay makes that tuple the object the executed
+protocol hands it.
+
+\begin{definition}[The symbolic DSDP interface]
+  \label{def:symbolic_interface}
+  \rocq{infotheo.dumas2017dual.dsdp.core.dsdp_interface.Symbolic_DSDP_Interface}
+  \rocqok
+  \uses{def:protocol_flow}
+  % library: dsdp_interface.v is cited in prose and is outside the coqdoc
+  %   MODULES scope, so its symbolic plumbing takes no exclude entry.
+  The symbolic instance of the DSDP interface takes plaintexts in the plaintext
+  ring, a ciphertext as a plaintext under a party label, coins in a bare finite
+  type, and a private key as a party key mark. Encryption ignores its coin and
+  returns the labelled plaintext, and decryption returns that plaintext at the
+  party the label names and at a decryption key.
+  \[ \mathrm{party\_E}(i, x, r) = (i, x), \qquad
+     \mathrm{party\_D}\big((i, \mathrm{Dec}, k), (i, x)\big)
+       = \mathrm{Some}\ x \]
+  The three piSMC programs that run at it are the programs of
+  Definition~\ref{def:protocol_flow}, instantiated at this interface rather
+  than at a scheme. Every carrier is finite, so a trace of a run at it is a
+  sequence over a finite alphabet and needs no encoding into one.
+\end{definition}
+
+\begin{definition}[The symbolic run and its three traces]
+  \label{def:symbolic_run}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.dsdp_run_traces_symbolicE}
+  \rocqok
+  \uses{def:symbolic_interface,def:interpreter_sample}
+  The interpreter runs the three programs for eighteen rounds on seed streams
+  read off the six coin coordinates of one sample, two per party. It writes
+  thirteen entries for Alice, six for Bob and five for Charlie, newest first.
+  Bob's six are his second coin $r_{b2}$, the Charlie-key combine and the
+  Bob-key combine he receives, his first coin $r_{b1}$, his input $V_2$ and his
+  key mark $k_b$. Charlie's five are his second coin, the aggregate ciphertext
+  Bob forwards, his first coin, his input $V_3$ and his key mark.
+  \[ \mathrm{BobTrace} = \big[\, r_{b2},\ (\mathrm{Charlie},\ V_3 U_3 + R_3),\
+     (\mathrm{Bob},\ V_2 U_2 + R_2),\ r_{b1},\ V_2,\ k_b \,\big] \]
+  \[ \mathrm{CharlieTrace} = \big[\, r_{c2},\
+     (\mathrm{Charlie},\ V_3 U_3 + R_3 + V_2 U_2 + R_2),\ r_{c1},\ V_3,\ k_c
+     \,\big] \]
+  Alice's thirteen entries are stated by the same equality and no bound is read
+  at them. Her axis is the hopping one, at the real scheme, where
+  Lemma~\ref{lem:trace_of_hop_tuple} states the matching identity.
+\end{definition}
+
+\begin{lemma}[A relay's trace is its view recoded]
+  \label{lem:relay_trace_of_view}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.symbolic_trace_of_run,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_of_viewE,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_of_viewE,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_of_viewK,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_of_viewK}
+  \rocqok
+  \uses{def:symbolic_run,def:party_views}
+  The trace the interpreter produces for a relay is the image of that relay's
+  view under a map $\rho$, and a reader $\rho'$ inverts $\rho$ on the left, so
+  the trace and the view are the same observation written twice.
+  \[ \mathrm{RelayTrace} = \rho \circ \mathrm{RelayView}, \qquad
+     \rho' \circ \rho = \mathrm{id} \]
+  The reader is total, returning a fixed tuple on the entry shapes no trace of
+  the run takes, and $\rho$ is where the coins of
+  Definition~\ref{def:party_views} earn their place: the trace records them, so
+  a view without them could not be the same observation.
+\end{lemma}
+
+\begin{theorem}[The relay bounds at the trace]
+  \label{thm:relay_trace_privacy}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_privacy_V1,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_privacy_V3,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_privacy_V1,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_privacy_V2,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V1_bob_traceE,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V3_bob_traceE,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V1_charlie_traceE,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V2_charlie_traceE}
+  \rocqok
+  \uses{lem:relay_trace_of_view,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2}
+  Conditioning on a relay's trace is conditioning on its view, by the identity
+  of Lemma~\ref{lem:relay_trace_of_view}, so each bound of the three chapters
+  above is read at the trace the executed protocol hands that relay.
+  \[ \HH(V_1 \mid \mathrm{BobTrace}) = \log m > 0, \qquad
+     \HH(V_3 \mid \mathrm{BobTrace}) = \log m > 0 \]
+  \[ \HH(V_1 \mid \mathrm{CharlieTrace}) = \log m > 0, \qquad
+     \HH(V_2 \mid \mathrm{CharlieTrace}) = \log m > 0 \]
+  These four are at the symbolic cipher model, where a ciphertext exposes its
+  plaintext and no ciphertext depends on a coin, so the coin slots the trace
+  records are independent components of it rather than the randomness any
+  ciphertext in it was built with. Alice's trace theorems of
+  Chapter~\ref{ch:trace_link} are at the real scheme instead, which is why hers
+  carry an assumption-conditional term and these four carry none.
+\end{theorem}
