@@ -202,6 +202,26 @@ Proof.
 by rewrite mutual_info_RVE (inde_cond_entropy BobView_indep_V1) subrr.
 Qed.
 
+(* The same independence with the arguments exchanged.  Conditioning is
+   written on the left argument, so the secret comes first here. *)
+Let BobView_indep_V1_sym : P |= V1 _|_ BobView.
+Proof. by rewrite inde_RV_sym; exact: BobView_indep_V1. Qed.
+
+(* Conditioning on Alice's input leaves Bob's view at its own law.  A
+   corrupted Bob sees one distribution whatever Alice holds, which is perfect
+   secrecy of V1 at his view. *)
+Corollary jfdist_cond_V1_BobViewE (v : msg) :
+  (`p_[% V1, BobView]) `(| v ) = `p_ BobView.
+Proof.
+exact: (jfdist_cond_inde BobView_indep_V1_sym (unif_neq0 pV1_unif v)).
+Qed.
+
+(* Bob's view is at statistical distance zero between any two values of
+   Alice's input.  No tester, of any running time, separates the two runs. *)
+Corollary statdist_cond_V1_BobView_eq0 (v v' : msg) :
+  statdist ((`p_[% V1, BobView]) `(| v )) ((`p_[% V1, BobView]) `(| v' )) = 0.
+Proof. by apply/eqP; rewrite statdist_eq0 !jfdist_cond_V1_BobViewE. Qed.
+
 (* Given Charlie's whole view, Alice's input keeps log m bits of uncertainty.
    A corrupted Charlie is bounded here whatever his running time.
    [3-party] *)
@@ -223,6 +243,26 @@ Corollary mutual_info_V1_CharlieView_eq0 : `I(V1 ; CharlieView) = 0.
 Proof.
 by rewrite mutual_info_RVE (inde_cond_entropy CharlieView_indep_V1) subrr.
 Qed.
+
+(* The same independence with the arguments exchanged. *)
+Let CharlieView_indep_V1_sym : P |= V1 _|_ CharlieView.
+Proof. by rewrite inde_RV_sym; exact: CharlieView_indep_V1. Qed.
+
+(* Conditioning on Alice's input leaves Charlie's view at its own law.  A
+   corrupted Charlie sees one distribution whatever Alice holds, which is
+   perfect secrecy of V1 at his view. *)
+Corollary jfdist_cond_V1_CharlieViewE (v : msg) :
+  (`p_[% V1, CharlieView]) `(| v ) = `p_ CharlieView.
+Proof.
+exact: (jfdist_cond_inde CharlieView_indep_V1_sym (unif_neq0 pV1_unif v)).
+Qed.
+
+(* Charlie's view is at statistical distance zero between any two values of
+   Alice's input.  No tester, of any running time, separates the two runs. *)
+Corollary statdist_cond_V1_CharlieView_eq0 (v v' : msg) :
+  statdist ((`p_[% V1, CharlieView]) `(| v ))
+           ((`p_[% V1, CharlieView]) `(| v' )) = 0.
+Proof. by apply/eqP; rewrite statdist_eq0 !jfdist_cond_V1_CharlieViewE. Qed.
 
 (* V3 is uniform on the plaintext ring, by the record's pV3_unif field.  The
    bound on Bob's view about V3 rests on this law and on Alice's mask R3. *)
@@ -296,6 +336,26 @@ Corollary mutual_info_V3_BobView_eq0 : `I(V3 ; BobView) = 0.
 Proof.
 by rewrite mutual_info_RVE (inde_cond_entropy BobView_indep_V3) subrr.
 Qed.
+
+(* The same independence with the arguments exchanged. *)
+Let BobView_indep_V3_sym : P |= V3 _|_ BobView.
+Proof. by rewrite inde_RV_sym; exact: BobView_indep_V3. Qed.
+
+(* Conditioning on Charlie's input leaves Bob's view at its own law.  Bob sees
+   one distribution whatever Charlie holds, by the mask R3 that never enters
+   his view. *)
+Corollary jfdist_cond_V3_BobViewE (v : msg) :
+  (`p_[% V3, BobView]) `(| v ) = `p_ BobView.
+Proof.
+exact: (jfdist_cond_inde BobView_indep_V3_sym (unif_neq0 pV3_unif v)).
+Qed.
+
+(* Bob's view is at statistical distance zero between any two values of
+   Charlie's input.  No tester, of any running time, separates the two
+   runs. *)
+Corollary statdist_cond_V3_BobView_eq0 (v v' : msg) :
+  statdist ((`p_[% V3, BobView]) `(| v )) ((`p_[% V3, BobView]) `(| v' )) = 0.
+Proof. by apply/eqP; rewrite statdist_eq0 !jfdist_cond_V3_BobViewE. Qed.
 
 (* V2 is uniform on the plaintext ring, by the record's pV2_unif field.  The
    bound on Charlie's view about V2 rests on this law and on Alice's mask
@@ -373,5 +433,25 @@ Corollary mutual_info_V2_CharlieView_eq0 : `I(V2 ; CharlieView) = 0.
 Proof.
 by rewrite mutual_info_RVE (inde_cond_entropy CharlieView_indep_V2) subrr.
 Qed.
+
+(* The same independence with the arguments exchanged. *)
+Let CharlieView_indep_V2_sym : P |= V2 _|_ CharlieView.
+Proof. by rewrite inde_RV_sym; exact: CharlieView_indep_V2. Qed.
+
+(* Conditioning on Bob's input leaves Charlie's view at its own law.  Charlie
+   sees one distribution whatever Bob holds, by the mask R2 that never enters
+   his view. *)
+Corollary jfdist_cond_V2_CharlieViewE (v : msg) :
+  (`p_[% V2, CharlieView]) `(| v ) = `p_ CharlieView.
+Proof.
+exact: (jfdist_cond_inde CharlieView_indep_V2_sym (unif_neq0 pV2_unif v)).
+Qed.
+
+(* Charlie's view is at statistical distance zero between any two values of
+   Bob's input.  No tester, of any running time, separates the two runs. *)
+Corollary statdist_cond_V2_CharlieView_eq0 (v v' : msg) :
+  statdist ((`p_[% V2, CharlieView]) `(| v ))
+           ((`p_[% V2, CharlieView]) `(| v' )) = 0.
+Proof. by apply/eqP; rewrite statdist_eq0 !jfdist_cond_V2_CharlieViewE. Qed.
 
 End dsdp_relay_secrecy.
