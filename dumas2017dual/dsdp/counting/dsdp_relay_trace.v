@@ -271,8 +271,7 @@ Qed.
 Lemma bob_trace_of_viewE : BobTrace = bob_trace_of_view `o BobView.
 Proof.
 apply: funext => t; apply/val_inj; rewrite /BobTrace /symbolic_trace_of_run.
-move: (symbolic_trace_size Bob t).
-by rewrite dsdp_run_traces_symbolicE.
+by move: (symbolic_trace_size Bob t); rewrite dsdp_run_traces_symbolicE.
 Qed.
 
 (* Bob's trace and his view leave the same uncertainty about Alice's input. *)
@@ -318,10 +317,9 @@ Proof. by case=> [[[[[k] v3] [x]] c1] c2]. Qed.
 Lemma charlie_trace_of_viewE :
   CharlieTrace = charlie_trace_of_view `o CharlieView.
 Proof.
-apply: funext => t;
-  apply/val_inj; rewrite /CharlieTrace /symbolic_trace_of_run.
-move: (symbolic_trace_size Charlie t).
-by rewrite dsdp_run_traces_symbolicE.
+apply: funext => t; apply/val_inj.
+rewrite /CharlieTrace /symbolic_trace_of_run.
+by move: (symbolic_trace_size Charlie t); rewrite dsdp_run_traces_symbolicE.
 Qed.
 
 (* Charlie's trace and his view leave the same uncertainty about Alice's

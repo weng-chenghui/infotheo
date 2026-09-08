@@ -215,28 +215,23 @@ Let adjoin_coins (A : finType) (X : {RV P -> A}) (S : {RV P -> msg})
     (C1 C2 : {RV P -> coinT I}) :
   P |= X _|_ S -> P |= [% S, X] _|_ [% C1, C2] -> P |= [% X, C1, C2] _|_ S.
 Proof.
-move=> view0 hc.
-have h1 : P |= S _|_ X by rewrite inde_RV_sym.
-have H := inde_RV_contraction h1 hc.
-rewrite inde_RV_sym.
-have H2 := inde_RV_comp idfun
-  (fun w : (A * (coinT I * coinT I))%type => ((w.1, w.2.1), w.2.2)) H.
-by rewrite /comp_RV /= in H2 *.
+move=> /inde_RV_sym h1 hc; rewrite inde_RV_sym.
+exact: (inde_RV_comp idfun
+  (fun w : (A * (coinT I * coinT I))%type => ((w.1, w.2.1), w.2.2))
+  (inde_RV_contraction h1 hc)).
 Qed.
 
 (* BobView _|_ V1: Bob's whole view is independent of Alice's input. *)
 Lemma BobView_indep_V1 : P |= BobView _|_ V1.
 Proof.
 apply: adjoin_coins.
-  have H := inde_RV_comp bob_view_of_clean_data idfun bob_inputs_indep_V1.
-  by rewrite /comp_RV /= in H *.
-have H := inde_RV_comp
+  exact: (inde_RV_comp bob_view_of_clean_data idfun bob_inputs_indep_V1).
+exact: (inde_RV_comp
   (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.1.1,
      (((w.1.2, w.1.1.1.1.1.1.1.1.1.2),
        E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2)),
       E' Bob (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2 + w.1.1.1.1.2))))
-  (fun c : coins6 => (c.1.1.1.2, c.1.1.2)) coins_indep.
-by rewrite /comp_RV /= in H *.
+  (fun c : coins6 => (c.1.1.1.2, c.1.1.2)) coins_indep).
 Qed.
 
 (* CharlieView _|_ V1: Charlie's whole view is independent of Alice's
@@ -244,17 +239,15 @@ Qed.
 Lemma CharlieView_indep_V1 : P |= CharlieView _|_ V1.
 Proof.
 apply: adjoin_coins.
-  have H := inde_RV_comp charlie_view_of_clean_data idfun
-    charlie_inputs_indep_V1.
-  by rewrite /comp_RV /= in H *.
-have H := inde_RV_comp
+  exact: (inde_RV_comp charlie_view_of_clean_data idfun
+            charlie_inputs_indep_V1).
+exact: (inde_RV_comp
   (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.1.1,
      ((w.2, w.1.1.1.1.1.1.1.1.2),
       E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2
                   + (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2
                      + w.1.1.1.1.2)))))
-  (fun c : coins6 => (c.1.2, c.2)) coins_indep.
-by rewrite /comp_RV /= in H *.
+  (fun c : coins6 => (c.1.2, c.2)) coins_indep).
 Qed.
 
 (* Given Bob's whole view, Alice's input keeps log m bits of uncertainty.
@@ -409,18 +402,16 @@ Qed.
 Let BobView_indep_V3 : P |= BobView _|_ V3.
 Proof.
 apply: adjoin_coins.
-  have H := inde_RV_comp
+  exact: (inde_RV_comp
     (fun w : (((Bob.-key Dec msg * msg) * msg) * msg)%type =>
        (((w.1.1.1, w.1.1.2), E' Charlie w.2), E' Bob w.1.2))
-    idfun bob_inputs_indep_V3.
-  by rewrite /comp_RV /= in H *.
-have H := inde_RV_comp
+    idfun bob_inputs_indep_V3).
+exact: (inde_RV_comp
   (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.2,
      (((w.1.2, w.1.1.1.1.1.1.1.1.1.2),
        E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2)),
       E' Bob (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2 + w.1.1.1.1.2))))
-  (fun c : coins6 => (c.1.1.1.2, c.1.1.2)) coins_indep.
-by rewrite /comp_RV /= in H *.
+  (fun c : coins6 => (c.1.1.1.2, c.1.1.2)) coins_indep).
 Qed.
 
 (* Given Bob's whole view, Charlie's input keeps log m bits of uncertainty.
@@ -521,14 +512,13 @@ apply: adjoin_coins.
   split.
     by apply cinde_RV_unit; exact: Dk_c_V3_indep_V2_E.
   by apply cinde_RV_unit; rewrite inde_RV_sym; exact: E_charlie_d3_indep_V2.
-have H := inde_RV_comp
+exact: (inde_RV_comp
   (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.1.2,
      ((w.2, w.1.1.1.1.1.1.1.1.2),
       E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2
                   + (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2
                      + w.1.1.1.1.2)))))
-  (fun c : coins6 => (c.1.2, c.2)) coins_indep.
-by rewrite /comp_RV /= in H *.
+  (fun c : coins6 => (c.1.2, c.2)) coins_indep).
 Qed.
 
 (* Given Charlie's whole view, Bob's input keeps log m bits of uncertainty.

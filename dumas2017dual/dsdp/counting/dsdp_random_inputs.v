@@ -724,8 +724,7 @@ Proof.
 rewrite inde_RV_sym.
 have -> : [% uniform_coin_ra1, uniform_coin_ra2, uniform_coin_rb1,
              uniform_coin_rb2, uniform_coin_rc1, uniform_coin_rc2]
-        = const_RV P (ord0, ord0, ord0, ord0, ord0, ord0)
-          :> {RV P -> _} by [].
+        = const_RV P (ord0, ord0, ord0, ord0, ord0, ord0) :> {RV P -> _} by [].
 exact: inde_const_RV.
 Qed.
 
