@@ -49,6 +49,16 @@ Import Num.Theory.
 (*   mask R3, which Bob never sees.                                           *)
 (* charlie_privacy_V2 : H(V2 | CharlieView) = log m and it is positive, by    *)
 (*   Alice's mask R2, which Charlie never sees.                               *)
+(* mutual_info_V1_BobView_eq0 and three siblings : I(secret ; view) = 0, the  *)
+(*   same four bounds read as leakage rather than as uncertainty.             *)
+(* jfdist_cond_V1_BobViewE and three siblings : conditioning on the secret    *)
+(*   leaves the view at its own law, and statdist_cond_V1_BobView_eq0 and its *)
+(*   siblings read that law as distance 0 between two values of the secret.   *)
+(* dist_of_RV2_V1_BobView_prod, statdist_V1_BobView_prod_eq0 and              *)
+(*   adv_max_V1_BobView_prod_eq0 : the joint law of V1 and BobView is the     *)
+(*   product of its marginals, at distance 0, and the maximal advantage over  *)
+(*   all testers is 0.  Those testers read V1 beside the view, so the last is *)
+(*   a distance between two laws rather than a bound on an attack on DSDP.    *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -221,6 +231,31 @@ Qed.
 Corollary statdist_cond_V1_BobView_eq0 (v v' : msg) :
   statdist ((`p_[% V1, BobView]) `(| v )) ((`p_[% V1, BobView]) `(| v' )) = 0.
 Proof. by apply/eqP; rewrite statdist_eq0 !jfdist_cond_V1_BobViewE. Qed.
+
+(* The joint law of Alice's input and Bob's view is the product of the two
+   marginals.  Factorization is the distribution-level form of independence,
+   and what a distance to a product is measured against. *)
+Corollary dist_of_RV2_V1_BobView_prod :
+  `p_[% V1, BobView] = (`p_ V1 `x `p_ BobView)%fdist.
+Proof.
+have := mutual_info_V1_BobView_eq0.
+by rewrite /mutual_info_RV => /mutual_info0P; rewrite fst_RV2 snd_RV2.
+Qed.
+
+(* The joint law and the product of the marginals are at statistical distance
+   zero.  This is the same independence written as a distance, the quantity a
+   tester bound is stated in. *)
+Corollary statdist_V1_BobView_prod_eq0 :
+  statdist (`p_[% V1, BobView]) (`p_ V1 `x `p_ BobView)%fdist = 0.
+Proof. by apply/eqP; rewrite statdist_eq0 dist_of_RV2_V1_BobView_prod. Qed.
+
+(* The maximal advantage over all testers of the pair is zero.  Its testers
+   read Alice's input beside Bob's view, so what it bounds is a distance
+   between two laws. *)
+Corollary adv_max_V1_BobView_prod_eq0 :
+  \big[Num.max/0]_(D : tester _)
+     adv D (`p_[% V1, BobView]) (`p_ V1 `x `p_ BobView)%fdist = 0.
+Proof. by rewrite statdist_test_max statdist_V1_BobView_prod_eq0. Qed.
 
 (* Given Charlie's whole view, Alice's input keeps log m bits of uncertainty.
    A corrupted Charlie is bounded here whatever his running time.
