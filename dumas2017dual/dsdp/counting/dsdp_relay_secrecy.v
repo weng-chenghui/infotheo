@@ -5,6 +5,8 @@ Require Import entropy graphoid.
 Require Import spp_proba extra_proba extra_entropy extra_algebra.
 Require Import homomorphic_encryption.
 Require Import dsdp_random_inputs.
+Require Import jfdist_cond.
+Require Import statdist.
 
 Import GRing.Theory.
 Import Num.Theory.
@@ -98,6 +100,16 @@ Let card_msg_prednK : #|msg| = m.-1.+1 := card_Zp_pq_prednK p_gt1 q_gt1.
 (* The modulus is above one, which is what makes log m positive. *)
 Let m_gt1 : (1 < m)%N := pq_gt1 p_gt1 q_gt1.
 
+(* A uniform input gives every value mass 1/m, which is nonzero because the
+   modulus is above one.  Positivity is what the conditional law of a view
+   needs, and the only place a uniformity field is read. *)
+Let unif_neq0 (X : {RV P -> msg})
+    (HX : `p_ X = fdist_uniform card_msg_prednK) (v : msg) : `p_ X v != 0.
+Proof.
+rewrite HX fdist_uniformE; apply: invr_neq0.
+by rewrite pnatr_eq0 -lt0n card_msg ltnW.
+Qed.
+
 (* Bob's input under Alice's query weight U2.  It reaches the aggregate only
    through D2. *)
 Let VU2 : {RV P -> msg} := V2 \* U2.
@@ -182,6 +194,14 @@ rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
 Qed.
 
+(* Bob's whole view carries no information about Alice's input.  Zero mutual
+   information is the leakage reading of the log m conditional entropy, and
+   holds whatever Bob's running time. *)
+Corollary mutual_info_V1_BobView_eq0 : `I(V1 ; BobView) = 0.
+Proof.
+by rewrite mutual_info_RVE (inde_cond_entropy BobView_indep_V1) subrr.
+Qed.
+
 (* Given Charlie's whole view, Alice's input keeps log m bits of uncertainty.
    A corrupted Charlie is bounded here whatever his running time.
    [3-party] *)
@@ -194,6 +214,14 @@ have H_logm : `H(V1 | CharlieView) = log (m%:R : R).
 split; first exact: H_logm.
 rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
+Qed.
+
+(* Charlie's whole view carries no information about Alice's input.  Zero
+   mutual information is the leakage reading of the log m conditional
+   entropy, and holds whatever Charlie's running time. *)
+Corollary mutual_info_V1_CharlieView_eq0 : `I(V1 ; CharlieView) = 0.
+Proof.
+by rewrite mutual_info_RVE (inde_cond_entropy CharlieView_indep_V1) subrr.
 Qed.
 
 (* V3 is uniform on the plaintext ring, by the record's pV3_unif field.  The
@@ -259,6 +287,14 @@ have H_logm : `H(V3 | BobView) = log (m%:R : R).
 split; first exact: H_logm.
 rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
+Qed.
+
+(* Bob's whole view carries no information about Charlie's input.  The
+   independence behind it is Alice's mask R3, so the bound owes nothing to an
+   encryption staying unbroken. *)
+Corollary mutual_info_V3_BobView_eq0 : `I(V3 ; BobView) = 0.
+Proof.
+by rewrite mutual_info_RVE (inde_cond_entropy BobView_indep_V3) subrr.
 Qed.
 
 (* V2 is uniform on the plaintext ring, by the record's pV2_unif field.  The
@@ -328,6 +364,14 @@ have H_logm : `H(V2 | CharlieView) = log (m%:R : R).
 split; first exact: H_logm.
 rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
+Qed.
+
+(* Charlie's whole view carries no information about Bob's input.  The
+   independence behind it is Alice's mask R2, so the bound owes nothing to an
+   encryption staying unbroken. *)
+Corollary mutual_info_V2_CharlieView_eq0 : `I(V2 ; CharlieView) = 0.
+Proof.
+by rewrite mutual_info_RVE (inde_cond_entropy CharlieView_indep_V2) subrr.
 Qed.
 
 End dsdp_relay_secrecy.
