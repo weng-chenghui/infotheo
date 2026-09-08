@@ -36,8 +36,8 @@ Require Import dsdp_alice_hop_secrecy.
 (* Every section runs over one instance of dsdp_instance.v, whose fields are  *)
 (* the scheme, the weights and the three private keys.  The six encryption    *)
 (* coins are sample coordinates, handed to the interpreter as the parties'    *)
-(* seed streams.  Adversaries are modeled as functions, without a             *)
-(* running-time bound.                                                        *)
+(* seed streams, and each party's trace records the two coins it drew.        *)
+(* Adversaries are modeled as functions, without a running-time bound.        *)
 (*                                                                            *)
 (* Coins are held as indices into a finite coin space, because rand of        *)
 (* he_types.v is a bare Type carrying no distribution and a uniformly sampled *)
@@ -53,10 +53,12 @@ Require Import dsdp_alice_hop_secrecy.
 (* Execution and trace construction                                           *)
 (*                                                                            *)
 (*               trace_dataT == the finite observation type for traces, which *)
-(*                              keeps messages and ciphertexts but hides key  *)
-(*                              values behind marks                           *)
+(*                              keeps messages, ciphertexts and coin indices  *)
+(*                              but hides key values behind marks             *)
 (*     trace_data_of_di_data == encodes raw interpreter data as finite trace  *)
 (*                              observations                                  *)
+(*             trace_default == the public-key mark, returned by every        *)
+(*                              out-of-range read of a trace                  *)
 (*            dsdp_procs_std == the DSDP programs for an additively           *)
 (*                              homomorphic encryption scheme                 *)
 (*               dsdp_seeds c == the seed streams one coin record supplies to *)
@@ -98,46 +100,14 @@ Require Import dsdp_alice_hop_secrecy.
 (*                                                                            *)
 (* Why the trace preserves the relevant information                           *)
 (*                                                                            *)
-(*         alice_trace_tuple == the record of the part of the hopping         *)
-(*                              tuple that Alice's trace reveals              *)
-(*           AliceTraceTuple == that trace-visible information in the real    *)
-(*                              experiment                                    *)
-(*        alice_sample_restT == the sampled data other than Alice's private   *)
-(*                              combine coins                                 *)
-(*           AliceSampleRest == those remaining sample values as one random   *)
-(*                              observation                                   *)
-(*          AliceCombineCoins == Alice's two private combine coins as one     *)
-(*                              random observation                            *)
-(* combine_coins_rest_uniformE ==                                             *)
-(*                              separates the uniform sample into Alice's     *)
-(*                              combine coins and all remaining data          *)
-(*     combine_coins_uniformE == Alice's combine coins are uniformly sampled  *)
-(*      sample_rest_uniformE == all remaining sample data is uniformly        *)
-(*                              sampled                                       *)
-(*   combine_coins_rest_indep == Alice's combine coins carry no information   *)
-(*                              about the remaining sampled data              *)
-(* v2_trace_tuple_of_sample_rest ==                                           *)
-(*                              reconstructs Bob's input and the visible      *)
-(*                              trace information without the combine coins   *)
-(*  combine_coins_trace_indep == Alice's combine coins carry no information   *)
-(*                              about Bob's input together with the visible   *)
-(*                              trace information                             *)
-(*   hop_tuple_of_coins_trace == rebuilds the hopping tuple from the private   *)
-(*                              combine coins and visible trace information   *)
-(*   coins_trace_of_hop_tuple == separates a hopping tuple into those private  *)
-(*                              coins and visible trace information           *)
-(* alice_hop_tuple_coins_traceE ==                                             *)
-(*                              expresses the hopping tuple through this      *)
-(*                              private-and-visible split                     *)
-(*      trace_of_trace_tuple == reconstructs Alice's trace from the visible   *)
-(*                              trace information                             *)
 (*          trace_data_plain == reads a plaintext from a trace entry          *)
 (*         trace_data_cipher == reads a ciphertext from a trace entry         *)
-(*      trace_tuple_of_trace == reads the visible information back from an    *)
+(*           trace_data_coin == reads a coin from a trace entry               *)
+(*  hop_tuple_of_alice_trace == reads Alice's hopping tuple back off her      *)
 (*                              encoded trace                                 *)
-(*        alice_trace_tupleE == proves that Alice's trace depends only on the *)
-(*                              trace-visible information                     *)
-(*  centropy_V2_trace_tupleE == Alice's trace and hopping tuple leave the     *)
+(* alice_trace_of_hop_tupleK == encoding the hopping tuple into a trace       *)
+(*                              is left-invertible                            *)
+(*    centropy_V2_hop_tupleE == Alice's trace and hopping tuple leave the     *)
 (*                              same uncertainty about Bob's input            *)
 (*     bob_decrypt_predictor == reads Bob's ciphertext off the trace and      *)
 (*                              decrypts it with Bob's private key            *)
@@ -177,11 +147,12 @@ Local Open Scope sproc_scope.
 
 Section dsdp_alice_trace_link.
 Variable I : dsdp_instance.
-(* The scheme the instance runs on, its coin space and its coin decoding,
-   read off the instance through the coercion. *)
+(* The scheme the instance runs on, its coin space and both directions of its
+   coin map.  These are read off the instance through the coercion. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation renc_of_rand := (@scheme_renc_of_rand I).
 (* Alice's input, the three protocol weights with Charlie's weight
    invertible, and the three private keys.  These are instance fields, under
    the names the DSDP protocol gives them. *)
@@ -199,23 +170,27 @@ Local Notation pkey_of_dk := (inst_pkey_of_party I).
 
 Let DI := Standard_DSDP_Interface AHE.
 
-(* The finite image of the interpreter's data carrier.  Plaintexts and
-   ciphertexts are kept and the key and coin sorts erased to marks, in the
-   summand order of std_data. *)
+(* The finite image of the interpreter's data carrier, keeping plaintexts,
+   ciphertexts and coins.  A value a party drew survives encoding, while the
+   key it encrypted under does not. *)
 Definition trace_dataT : finType :=
-  ((plain AHE + cipher AHE) + unit + unit)%type.
+  (plain AHE + cipher AHE + unit + (Renc + unit))%type.
 
 (* The encoding of one datum of the standard interface into that finite image.
-   Applied entrywise, it makes a trace a finType value that a predictor can
-   range over. *)
+   A randomness goes to the coin index naming it, so a sampled entry ranges
+   over a finType. *)
 Definition trace_data_of_di_data (x : di_data DI) : trace_dataT :=
   match x with
   | inl (inl (inl m)) => inl (inl (inl m))
   | inl (inl (inr c)) => inl (inl (inr c))
   | inl (inr _) => inl (inr tt)
-  | inr (inl _) => inr tt
-  | inr (inr _) => inr tt
+  | inr (inl _) => inr (inr tt)
+  | inr (inr r) => inr (inl (renc_of_rand r))
   end.
+
+(* The element every out-of-range read of a trace returns, the public-key
+   mark. *)
+Definition trace_default : trace_dataT := inr (inr tt).
 
 (* Alice's executed-trace carrier: the eighteen-round bounded sequence of
    encoded trace data. *)
@@ -249,31 +224,37 @@ Definition dsdp_seeds (c : dsdp_enc_coins I) : seq (seq (di_data DI)) :=
       [:: rd (rand_of_renc (coin_rb1 c)); rd (rand_of_renc (coin_rb2 c))];
       [:: rd (rand_of_renc (coin_rc1 c)); rd (rand_of_renc (coin_rc2 c))]].
 
-(* The traces of the eighteen-round run: eleven entries for Alice, four for
-   Bob, three for Charlie.  Each ciphertext appears in the form the programs
-   build it, under the coin the party drew. *)
+(* The traces of the eighteen-round run: thirteen entries for Alice, six for
+   Bob, five for Charlie.  Each party's trace carries the two coins it drew,
+   and every ciphertext keeps the form the programs build. *)
 Lemma dsdp_run_tracesE (c : dsdp_enc_coins I) :
   (run_interp 18 dsdp_procs_std (dsdp_seeds c)).1.2 =
   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
           e (enc (pkey_of_dk Alice)
                  (v3 * u3 + r3 + (v2 * u2 + r2))
                  (rand_of_renc (coin_rc2 c)));
+          rd (rand_of_renc (coin_ra2 c));
+          rd (rand_of_renc (coin_ra1 c));
           e (enc (pkey_of_dk Charlie) v3 (rand_of_renc (coin_rc1 c)));
           e (enc (pkey_of_dk Bob) v2 (rand_of_renc (coin_rb1 c)));
           d r3; d r2; d u3; d u2; d u1; d v1; kd dk_a];
-      [:: e (Emul (Epow (enc (pkey_of_dk Charlie) v3
+      [:: rd (rand_of_renc (coin_rb2 c));
+          e (Emul (Epow (enc (pkey_of_dk Charlie) v3
                              (rand_of_renc (coin_rc1 c))) u3)
                   (enc (pkey_of_dk Charlie) r3 (rand_of_renc (coin_ra2 c))));
           e (Emul (Epow (enc (pkey_of_dk Bob) v2
                              (rand_of_renc (coin_rb1 c))) u2)
                   (enc (pkey_of_dk Bob) r2 (rand_of_renc (coin_ra1 c))));
+          rd (rand_of_renc (coin_rb1 c));
           d v2; kd dk_b];
-      [:: e (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3
+      [:: rd (rand_of_renc (coin_rc2 c));
+          e (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3
                                    (rand_of_renc (coin_rc1 c))) u3)
                         (enc (pkey_of_dk Charlie) r3
                              (rand_of_renc (coin_ra2 c))))
                   (enc (pkey_of_dk Charlie) (v2 * u2 + r2)
                        (rand_of_renc (coin_rb2 c))));
+          rd (rand_of_renc (coin_rc1 c));
           d v3; kd dk_c]].
 Proof.
 (* The evaluation is staged, one opening per stage, and runs under cbv with
@@ -334,20 +315,26 @@ Lemma dsdp_run_traces_encE (c : dsdp_enc_coins I) :
           e (enc (pkey_of_dk Alice)
                  (v3 * u3 + r3 + (v2 * u2 + r2))
                  (rand_of_renc (coin_rc2 c)));
+          rd (rand_of_renc (coin_ra2 c));
+          rd (rand_of_renc (coin_ra1 c));
           e (enc (pkey_of_dk Charlie) v3 (rand_of_renc (coin_rc1 c)));
           e (enc (pkey_of_dk Bob) v2 (rand_of_renc (coin_rb1 c)));
           d r3; d r2; d u3; d u2; d u1; d v1; kd dk_a];
-      [:: e (enc (pkey_of_dk Charlie) (v3 * u3 + r3)
+      [:: rd (rand_of_renc (coin_rb2 c));
+          e (enc (pkey_of_dk Charlie) (v3 * u3 + r3)
                  (rand_mul (rand_pow (rand_of_renc (coin_rc1 c)) u3)
                            (rand_of_renc (coin_ra2 c))));
           e (enc (pkey_of_dk Bob) (v2 * u2 + r2)
                  (rand_mul (rand_pow (rand_of_renc (coin_rb1 c)) u2)
                            (rand_of_renc (coin_ra1 c))));
+          rd (rand_of_renc (coin_rb1 c));
           d v2; kd dk_b];
-      [:: e (enc (pkey_of_dk Charlie) (v3 * u3 + r3 + (v2 * u2 + r2))
+      [:: rd (rand_of_renc (coin_rc2 c));
+          e (enc (pkey_of_dk Charlie) (v3 * u3 + r3 + (v2 * u2 + r2))
                  (rand_mul (rand_mul (rand_pow (rand_of_renc (coin_rc1 c)) u3)
                                      (rand_of_renc (coin_ra2 c)))
                            (rand_of_renc (coin_rb2 c))));
+          rd (rand_of_renc (coin_rc1 c));
           d v3; kd dk_c]].
 Proof. by rewrite dsdp_run_tracesE !Epow_encE !Emul_encE. Qed.
 
@@ -400,13 +387,15 @@ Local Notation alice_simulator := (alice_simulator (R:=R) (I:=I)).
 Local Notation alice_ideal := (alice_ideal (R:=R) I).
 
 (* Alice's executed trace read off a value of her hopping tuple.  It holds the
-   leaked output, Charlie's re-encryption, two ciphertexts, two masks, four
-   weights, and the key mark. *)
+   output, her two coins, three ciphertexts, two masks, four weights, and the
+   key mark. *)
 Definition alice_trace_of_hop_tuple
     (v : alice_hop_tuple I) :
     18.-bseq trace_dataT :=
   [bseq inl (inl (inl (hop_output v)));
         inl (inl (inr (hop_reenc_cipher v)));
+        inr (inl (hop_coin_a2 v));
+        inr (inl (hop_coin_a1 v));
         inl (inl (inr (hop_charlie_cipher v)));
         inl (inl (inr (hop_bob_cipher v)));
         inl (inl (inl (hop_mask3 v)));
@@ -471,7 +460,7 @@ rewrite /AliceTrace /trace_of_run.
 move: (trace_of_run_size dsdp_protocol (fun s => dsdp_seeds (EncCoins s))
          Alice s).
 rewrite /dsdp_protocol dsdp_run_tracesE.
-by move=> ?; rewrite /= Sout_runE reenc_plainE.
+by move=> ?; rewrite /= Sout_runE reenc_plainE !scheme_rand_of_rencK.
 Qed.
 
 (* The real executed-trace law is the deterministic image of the real
@@ -514,268 +503,26 @@ Qed.
 
 End dsdp_alice_trace_rv.
 
-(* The part of Alice's hopping tuple her trace shows: two masks, the leaked
-   output, two received ciphertexts, and a re-encryption.  It is the hopping
-   tuple without the two combine coins she keeps to herself. *)
-Record alice_trace_tuple (S : indcpa_scheme) := {
-  (* Alice's first mask *)
-  trace_mask2 : plain (scheme_AHE S) ;
-  (* Alice's second mask *)
-  trace_mask3 : plain (scheme_AHE S) ;
-  (* the weighted output Alice is allowed to learn *)
-  trace_output : plain (scheme_AHE S) ;
-  (* Bob's ciphertext to Alice *)
-  trace_bob_cipher : cipher (scheme_AHE S) ;
-  (* Charlie's ciphertext to Alice *)
-  trace_charlie_cipher : cipher (scheme_AHE S) ;
-  (* Charlie's re-encryption of the aggregate under Alice's key *)
-  trace_reenc_cipher : cipher (scheme_AHE S) }.
-
-Section alice_trace_tuple_finite.
-Variable S : indcpa_scheme.
-Local Notation AHE := (scheme_AHE S).
-
-(* The six-fold product the trace-visible tuple is in bijection with.  The
-   finite structure lives on the product and the record borrows it. *)
-Definition alice_trace_prodT :=
-  (plain AHE * plain AHE * plain AHE
-   * cipher AHE * cipher AHE * cipher AHE)%type.
-
-(* The six slots read off the record, in the order the record lists them. *)
-Definition prod_of_alice_trace_tuple (q : alice_trace_tuple S) :
-    alice_trace_prodT :=
-  (trace_mask2 q, trace_mask3 q, trace_output q,
-   trace_bob_cipher q, trace_charlie_cipher q, trace_reenc_cipher q).
-
-(* The record rebuilt from those six slots. *)
-Definition alice_trace_tuple_of_prod (t : alice_trace_prodT) :
-    alice_trace_tuple S :=
-  let: (m2, m3, s, c2, c3, c4) := t in
-  {| trace_mask2 := m2 ; trace_mask3 := m3 ; trace_output := s ;
-     trace_bob_cipher := c2 ; trace_charlie_cipher := c3 ;
-     trace_reenc_cipher := c4 |}.
-
-(* Reading the six slots off the record and rebuilding it loses nothing. *)
-Lemma prod_of_alice_trace_tupleK :
-  cancel prod_of_alice_trace_tuple alice_trace_tuple_of_prod.
-Proof. by case. Qed.
-
-HB.instance Definition _ :=
-  Equality.copy (alice_trace_tuple S) (can_type prod_of_alice_trace_tupleK).
-HB.instance Definition _ :=
-  Choice.copy (alice_trace_tuple S) (can_type prod_of_alice_trace_tupleK).
-HB.instance Definition _ :=
-  Countable.copy (alice_trace_tuple S) (can_type prod_of_alice_trace_tupleK).
-HB.instance Definition _ : isFinite (alice_trace_tuple S) :=
-  CanIsFinite prod_of_alice_trace_tupleK.
-
-End alice_trace_tuple_finite.
-
 Section dsdp_alice_trace_centropy.
 Context {R : realType}.
 Variable I : dsdp_instance.
-(* The scheme data, Alice's input, the three weights, and Bob's private key.
-   These are instance fields, under the names the corrupted-Alice development
-   gives them. *)
+(* The scheme data, its coin decoding, and Bob's private key.  These are
+   instance fields, under the names the corrupted-Alice development gives
+   them. *)
 Local Notation AHE := (scheme_AHE I).
 Local Notation Renc := (scheme_renc I).
 Local Notation rand_of_renc := (@scheme_rand_of_renc I).
-Local Notation v1 := (inst_v1 I).
-Local Notation u1 := (inst_u1 I).
-Local Notation u2 := (inst_u2 I).
-Local Notation u3 := (inst_u3 I).
 Local Notation dk_b := (inst_dk_b I).
 
-(* Each abbreviation pins the parameters that dsdp_alice_hop_secrecy.v
-   discharges.  The right-hand side resolves against the constant, so the
-   shadowing terminates. *)
-Local Notation P := (alice_sample_fdist (R:=R) I).
+(* Each abbreviation pins the parameters that the earlier sections and
+   dsdp_alice_hop_secrecy.v discharge.  The right-hand side resolves against
+   the constant, so the shadowing terminates. *)
 Local Notation pkey_of_dk := (inst_pkey_of_party I).
 Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
-Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
-Local Notation R2 := (sample_R2 (R:=R) (I:=I)).
-Local Notation R3 := (sample_R3 (R:=R) (I:=I)).
-Local Notation RB1 := (RB1 (R:=R) (I:=I)).
-Local Notation RC1 := (RC1 (R:=R) (I:=I)).
-Local Notation RA1 := (RA1 (R:=R) (I:=I)).
-Local Notation RA2 := (RA2 (R:=R) (I:=I)).
-Local Notation RB2 := (RB2 (R:=R) (I:=I)).
-Local Notation RC2 := (RC2 (R:=R) (I:=I)).
-Local Notation Sout := (Sout (R:=R) (I:=I)).
-Local Notation bob_real_cipher := (bob_real_cipher (R:=R) (I:=I)).
-Local Notation charlie_real_cipher := (charlie_real_cipher (R:=R) (I:=I)).
-Local Notation charlie_reenc_cipher := (charlie_reenc_cipher (R:=R) (I:=I)).
+Local Notation trace_default := (trace_default I).
+Local Notation alice_trace_of_hop_tuple := (@alice_trace_of_hop_tuple I).
 Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
-
-(* The trace-visible part of Alice's hopping tuple as a random variable.  All
-   three ciphertext slots carry real encryptions. *)
-Definition AliceTraceTuple : {RV P -> alice_trace_tuple I} :=
-  fun t => {| trace_mask2 := R2 t ; trace_mask3 := R3 t ;
-              trace_output := Sout t ;
-              trace_bob_cipher := bob_real_cipher t ;
-              trace_charlie_cipher := charlie_real_cipher t ;
-              trace_reenc_cipher := charlie_reenc_cipher t |}.
-
-(* The sample coordinates besides Alice's two combine coins: two inputs, two
-   masks, and the four coins she does not draw. *)
-Definition alice_sample_restT : finType :=
-  ((plain AHE * plain AHE) * (plain AHE * plain AHE)
-   * (Renc * Renc * Renc * Renc))%type.
-
-(* The random variable of those coordinates. *)
-Definition AliceSampleRest : {RV P -> alice_sample_restT} :=
-  fun t => (t.1.1, t.1.2, (RB1 t, RC1 t, RB2 t, RC2 t)).
-
-(* The random variable of Alice's two combine coins. *)
-Definition AliceCombineCoins : {RV P -> (Renc * Renc)} :=
-  fun t => (RA1 t, RA2 t).
-
-Let card_combine_coins : #|((Renc * Renc)%type : finType)|
-            = #|((Renc * Renc)%type : finType)|.-1.+1.
-Proof. exact: fdist_card_prednK (`p_ AliceCombineCoins). Qed.
-
-Let card_sample_rest : #|alice_sample_restT| = #|alice_sample_restT|.-1.+1.
-Proof. exact: fdist_card_prednK (`p_ AliceSampleRest). Qed.
-
-Let card_combine_rand_rest :
-  #|(((Renc * Renc) * alice_sample_restT)%type : finType)|
-  = #|(((Renc * Renc) * alice_sample_restT)%type : finType)|.-1.+1.
-Proof.
-exact: fdist_card_prednK (`p_ [% AliceCombineCoins, AliceSampleRest]).
-Qed.
-
-(* Alice's combine coins and the other sample coordinates are jointly
-   uniform. *)
-Lemma combine_coins_rest_uniformE :
-  `p_ [% AliceCombineCoins, AliceSampleRest]
-  = (fdist_uniform card_combine_coins) `x (fdist_uniform card_sample_rest).
-Proof.
-rewrite -(fdist_uniform_prod card_combine_coins card_sample_rest
-           card_combine_rand_rest)
-        /dist_of_RV alice_sample_fdistE.
-apply: fdistmap_bij_uniform.
-exists (fun p : (Renc * Renc) * alice_sample_restT =>
-          (p.2.1.1, p.2.1.2,
-           {| coin_rb1 := p.2.2.1.1.1 ; coin_rc1 := p.2.2.1.1.2 ;
-              coin_ra1 := p.1.1 ; coin_ra2 := p.1.2 ;
-              coin_rb2 := p.2.2.1.2 ; coin_rc2 := p.2.2.2 |})).
-  by move=> [[vv ms] [rb1 rc1 ra1 ra2 rb2 rc2]].
-by move=> [[ra1 ra2] [[vv ms] [[[rb1 rc1] rb2] rc2]]].
-Qed.
-
-(* Alice's combine coins are uniform. *)
-Lemma combine_coins_uniformE :
-  `p_ AliceCombineCoins = fdist_uniform card_combine_coins.
-Proof.
-by rewrite -(fst_RV2 AliceCombineCoins AliceSampleRest)
-   combine_coins_rest_uniformE fdist_prod1.
-Qed.
-
-(* The other sample coordinates are uniform. *)
-Lemma sample_rest_uniformE :
-  `p_ AliceSampleRest = fdist_uniform card_sample_rest.
-Proof.
-by rewrite -(snd_RV2 AliceCombineCoins AliceSampleRest)
-   combine_coins_rest_uniformE fdist_prod2.
-Qed.
-
-(* Alice's combine coins are independent of the other sample
-   coordinates. *)
-Lemma combine_coins_rest_indep : P |= AliceCombineCoins _|_ AliceSampleRest.
-Proof.
-by apply: inde_RV_of_prod;
-   rewrite combine_coins_rest_uniformE combine_coins_uniformE
-           sample_rest_uniformE.
-Qed.
-
-(* Bob's input and the trace-visible tuple, rebuilt from the sample
-   coordinates other than Alice's combine coins. *)
-Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
-    (plain AHE * alice_trace_tuple I) :=
-  (* The output slot is written with uncurry applied to an explicit pair
-     because Sout is itself uncurry (dsdp_output ...) composed with
-     [% V2, V3].  The curried spelling is not convertible and breaks the
-     proof below. *)
-  (u.1.1.1,
-   {| trace_mask2 := u.1.2.1 ; trace_mask3 := u.1.2.2 ;
-      trace_output := uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2) ;
-      trace_bob_cipher :=
-        enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1.1.1) ;
-      trace_charlie_cipher :=
-        enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.1.1.2) ;
-      trace_reenc_cipher :=
-        enc (pkey_of_dk Alice)
-          (uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2)
-             - u1 * v1 + u.1.2.1 + u.1.2.2)
-          (rand_of_renc u.2.2) |}).
-
-(* Alice's two combine coins are independent of Bob's input taken
-   jointly with everything her executed trace shows. *)
-Lemma combine_coins_trace_indep :
-  P |= [% RA1, RA2] _|_ [% V2, AliceTraceTuple].
-Proof.
-(* The pair function must stay eta-expanded: [prod] has no definitional eta,
-   so [idfun] does not typecheck here. *)
-exact: (inde_RV_comp (fun p : Renc * Renc => (p.1, p.2))
-          v2_trace_tuple_of_sample_rest combine_coins_rest_indep).
-Qed.
-
-(* Alice's hopping tuple rebuilt from her combine coins and the
-   trace-visible tuple. *)
-Definition hop_tuple_of_coins_trace
-    (p : ((Renc * Renc) * alice_trace_tuple I)) :
-    alice_hop_tuple I :=
-  {| hop_mask2 := trace_mask2 p.2 ; hop_mask3 := trace_mask3 p.2 ;
-     hop_coin_a1 := p.1.1 ; hop_coin_a2 := p.1.2 ;
-     hop_output := trace_output p.2 ;
-     hop_bob_cipher := trace_bob_cipher p.2 ;
-     hop_charlie_cipher := trace_charlie_cipher p.2 ;
-     hop_reenc_cipher := trace_reenc_cipher p.2 |}.
-
-(* The combine coins and the trace-visible tuple read back off a
-   hopping tuple. *)
-Definition coins_trace_of_hop_tuple
-    (v : alice_hop_tuple I) :
-    ((Renc * Renc) * alice_trace_tuple I) :=
-  ((hop_coin_a1 v, hop_coin_a2 v),
-   {| trace_mask2 := hop_mask2 v ; trace_mask3 := hop_mask3 v ;
-      trace_output := hop_output v ;
-      trace_bob_cipher := hop_bob_cipher v ;
-      trace_charlie_cipher := hop_charlie_cipher v ;
-      trace_reenc_cipher := hop_reenc_cipher v |}).
-
-(* The two relabellings are mutually inverse. *)
-Lemma hop_tuple_of_coins_traceK :
-  cancel hop_tuple_of_coins_trace coins_trace_of_hop_tuple.
-Proof. by case=> [[ra1 ra2] [m2 m3 s c2 c3 c4]]. Qed.
-
-(* Alice's hopping tuple is her combine coins together with the
-   trace-visible tuple. *)
-Lemma alice_hop_tuple_coins_traceE :
-  alice_tuple_real
-  = hop_tuple_of_coins_trace `o [% [% RA1, RA2], AliceTraceTuple].
-Proof.
-(* The combine coins are spelled as the pair combine_coins_trace_indep is
-   stated at.  The record keeps its two coin fields apart, so
-   [AliceCombineCoins] is convertible with that pair here as well. *)
-by [].
-Qed.
-
-(* Alice's executed trace read off the trace-visible tuple.  It holds the
-   leaked output, Charlie's re-encryption, two ciphertexts, two masks, four
-   weights, and the key mark. *)
-Definition trace_of_trace_tuple (q : alice_trace_tuple I) :
-    18.-bseq (trace_dataT I) :=
-  [bseq inl (inl (inl (trace_output q)));
-        inl (inl (inr (trace_reenc_cipher q)));
-        inl (inl (inr (trace_charlie_cipher q)));
-        inl (inl (inr (trace_bob_cipher q)));
-        inl (inl (inl (trace_mask3 q)));
-        inl (inl (inl (trace_mask2 q)));
-        inl (inl (inl u3)); inl (inl (inl u2));
-        inl (inl (inl u1)); inl (inl (inl v1));
-        inl (inr tt)].
 
 (* The plaintext carried by a trace entry, zero at any other sort. *)
 Definition trace_data_plain (x : trace_dataT I) :
@@ -789,39 +536,41 @@ Definition trace_data_cipher (x : trace_dataT I) :
   if x is inl (inl (inr c)) then c
   else enc (pkey_of_dk Alice) 0 (rand_of_renc (renc_default I)).
 
-(* The trace-visible tuple read back off an encoded trace, at the six
-   positions the encoding writes it to. *)
-Definition trace_tuple_of_trace
-    (b : 18.-bseq (trace_dataT I)) :
-    alice_trace_tuple I :=
-  let s := bseqval b in
-  {| trace_mask2 := trace_data_plain (nth (inr tt) s 5) ;
-     trace_mask3 := trace_data_plain (nth (inr tt) s 4) ;
-     trace_output := trace_data_plain (nth (inr tt) s 0) ;
-     trace_bob_cipher := trace_data_cipher (nth (inr tt) s 3) ;
-     trace_charlie_cipher := trace_data_cipher (nth (inr tt) s 2) ;
-     trace_reenc_cipher := trace_data_cipher (nth (inr tt) s 1) |}.
+(* The coin carried by a trace entry, the pinned default coin at any other
+   sort. *)
+Definition trace_data_coin (x : trace_dataT I) :
+    Renc :=
+  if x is inr (inl r) then r else renc_default I.
 
-(* Encoding the trace-visible tuple into a trace is left-invertible: every
-   slot of that tuple appears literally in the trace. *)
-Lemma trace_of_trace_tupleK :
-  cancel trace_of_trace_tuple trace_tuple_of_trace.
+(* Alice's hopping tuple read back off her executed trace, at the eight slots
+   the encoding writes it to. *)
+Definition hop_tuple_of_alice_trace
+    (b : 18.-bseq (trace_dataT I)) :
+    alice_hop_tuple I :=
+  let s := bseqval b in
+  {| hop_output := trace_data_plain (nth trace_default s 0) ;
+     hop_reenc_cipher := trace_data_cipher (nth trace_default s 1) ;
+     hop_coin_a2 := trace_data_coin (nth trace_default s 2) ;
+     hop_coin_a1 := trace_data_coin (nth trace_default s 3) ;
+     hop_charlie_cipher := trace_data_cipher (nth trace_default s 4) ;
+     hop_bob_cipher := trace_data_cipher (nth trace_default s 5) ;
+     hop_mask3 := trace_data_plain (nth trace_default s 6) ;
+     hop_mask2 := trace_data_plain (nth trace_default s 7) |}.
+
+(* Encoding Alice's hopping tuple into her trace is left-invertible, so the
+   trace and the tuple carry the same information. *)
+Lemma alice_trace_of_hop_tupleK :
+  cancel alice_trace_of_hop_tuple hop_tuple_of_alice_trace.
 Proof. by case. Qed.
 
-(* Alice's executed trace is the image of the trace-visible tuple. *)
-Lemma alice_trace_tupleE :
-  AliceTrace = trace_of_trace_tuple `o AliceTraceTuple.
-Proof. by rewrite alice_trace_of_hop_tupleE. Qed.
-
 (* Conditioning on Alice's executed trace leaves the same uncertainty about
-   Bob's input as conditioning on her hopping tuple. *)
-Theorem centropy_V2_trace_tupleE :
+   Bob's input as conditioning on her hopping tuple.  The two objects carry
+   the same eight values, so the equation is a relabelling. *)
+Theorem centropy_V2_hop_tupleE :
   `H( V2 | AliceTrace ) = `H( V2 | alice_tuple_real ).
 Proof.
-rewrite alice_trace_tupleE (can_centropy_eq trace_of_trace_tupleK).
-rewrite alice_hop_tuple_coins_traceE
-        (can_centropy_eq hop_tuple_of_coins_traceK).
-by rewrite (inde_centropy_eq combine_coins_trace_indep).
+by rewrite alice_trace_of_hop_tupleE
+   (can_centropy_eq alice_trace_of_hop_tupleK).
 Qed.
 
 (* Bob's ciphertext slot of Alice's executed trace, decrypted with Bob's own
@@ -829,20 +578,20 @@ Qed.
    granted the public keys alone. *)
 Definition bob_decrypt_predictor : predictor I (alice_traceT I) :=
   (* Both default branches are unreachable on the traces this predictor is
-     run against.  Every trace in the image of trace_of_trace_tuple carries a
-     ciphertext at slot 3, so the fixed zero encryption trace_data_cipher
-     returns at any other sort is never read, and dec_correct sends that
-     ciphertext to Some, so the plaintext zero returned on None is never
-     returned either. *)
-  fun b => if dec dk_b (trace_data_cipher (nth (inr tt) (bseqval b) 3))
+     run against.  Every trace in the image of alice_trace_of_hop_tuple
+     carries a ciphertext at slot 5, so the fixed zero encryption
+     trace_data_cipher returns at any other sort is never read, and
+     dec_correct sends that ciphertext to Some, so the plaintext zero returned
+     on None is never returned either. *)
+  fun b => if dec dk_b (trace_data_cipher (nth trace_default (bseqval b) 5))
            is Some m then m else 0.
 
 (* Bob's input is a deterministic function of Alice's executed trace.
-   Alice's trace carries Bob's ciphertext, and dk_b decrypts it. *)
+   Alice's trace carries Bob's ciphertext at slot 5, and dk_b decrypts it. *)
 Lemma alice_trace_decode_V2E :
   V2 = bob_decrypt_predictor `o AliceTrace.
 Proof.
-rewrite alice_trace_tupleE; apply/boolp.funext => t.
+rewrite alice_trace_of_hop_tupleE; apply/boolp.funext => t.
 by rewrite /comp_RV /bob_decrypt_predictor /= dec_correct.
 Qed.
 
@@ -860,6 +609,7 @@ Variable I : dsdp_instance.
 (* The scheme data and Alice's private key.  These are instance fields, under
    the names the corrupted-Alice development gives them. *)
 Local Notation AHE := (scheme_AHE I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
 Local Notation dk_a := (inst_dk_a I).
 
 Local Notation DI := (Standard_DSDP_Interface AHE).
@@ -871,16 +621,17 @@ Local Notation R3 := (sample_R3 (R:=R) (I:=I)).
 Local Notation EncCoins := (EncCoins (R:=R) (I:=I)).
 Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 
-(* Fixed-key decoding of one encoded trace datum: plaintexts and ciphertexts
-   kept, the key marks sent to dk and pk.  There is no global inverse: the
-   encoding erases which key value each mark carried. *)
+(* Fixed-key decoding of one encoded trace datum: plaintexts, ciphertexts and
+   coins kept, the two key marks restored.  A coin entry decodes to the
+   randomness it names, so the raw interpreter trace stays recoverable. *)
 Definition di_data_of_trace_data (dk : priv_key AHE) (pk : pub_key AHE)
     (x : trace_dataT) : di_data DI :=
   match x with
   | inl (inl (inl m)) => di_data_of_plain DI m
   | inl (inl (inr c)) => di_data_of_cipher DI c
   | inl (inr _) => di_data_of_priv_key DI dk
-  | inr _ => di_data_of_pub_key DI pk
+  | inr (inl r) => di_data_of_rand DI (rand_of_renc r)
+  | inr (inr _) => di_data_of_pub_key DI pk
   end.
 
 (* Decoding at Alice's own key pair, the only setting in which the encoding
@@ -904,7 +655,7 @@ Lemma alice_raw_trace_decodeE (pk : pub_key AHE)
   map (di_data_of_trace_data dk_a pk) (AliceTrace s) = alice_raw_trace s.
 Proof.
 rewrite -map_comp /alice_raw_trace /dsdp_protocol.
-by rewrite dsdp_run_tracesE.
+by rewrite dsdp_run_tracesE /= !scheme_rand_of_rencK.
 Qed.
 
 (* The private keys a raw interpreter trace carries, in the order the trace
@@ -913,9 +664,9 @@ Qed.
 Definition trace_priv_keys (tr : seq (di_data DI)) : seq (priv_key AHE) :=
   pmap (di_get_priv_key DI) tr.
 
-(* Alice's executed trace holds her own private key and no other.  The key
-   erasure of trace_dataT discards exactly that constant, so a keygen argument
-   needs no further hypothesis. *)
+(* Alice's executed trace holds her own private key and no other.  The two
+   coin entries are dropped here, so a keygen argument reading this list needs
+   no further hypothesis. *)
 Lemma alice_raw_trace_priv_keysE (s : alice_sampleT I) :
   trace_priv_keys (alice_raw_trace s) = [:: dk_a].
 Proof.

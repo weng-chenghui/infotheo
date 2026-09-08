@@ -29,7 +29,7 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* IND-CPA adversary at Bob's key and at Charlie's, and hop0_advantageE and   *)
 (* hop1_advantageE identify the gap each ciphertext replacement spans with    *)
 (* the advantage of the corresponding reduction, so a hop line spends one     *)
-(* key's assumption and no more.  accept_trace_tupleE and                     *)
+(* key's assumption and no more.  accept_hop_tupleE and                       *)
 (* accept_trace_ideal_tupleE carry a test between Alice's executed trace and  *)
 (* her hopping tuple at either end of a trace program, at no loss, which is   *)
 (* what lets the interpreter's own run stand as the first game.               *)
@@ -105,7 +105,7 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*   hop_tuple_distinguisher == a trace test lifted to the hopping tuple      *)
 (*       bob_trace_adversary == the Bob-key reduction of a trace test         *)
 (*   charlie_trace_adversary == its Charlie-key counterpart                   *)
-(*       accept_trace_tupleE == a trace test accepts as often as its lift     *)
+(*         accept_hop_tupleE == a trace test accepts as often as its lift     *)
 (*  accept_trace_ideal_tupleE == the same at the simulated trace              *)
 (*   alice_trace_guess_V2_pr == the probability a trace predictor returns     *)
 (*                              Bob's input                                   *)
@@ -578,7 +578,7 @@ Definition charlie_trace_adversary
 
 (* A trace test accepts as often as its lift on the hopping tuple.  The step
    loses nothing, so the interpreter's own run stands as the first game. *)
-Lemma accept_trace_tupleE
+Lemma accept_hop_tupleE
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   accept D (`p_ [% V2, V3, AliceTrace])
   = accept (hop_tuple_distinguisher D) (`p_ [% V2, V3, alice_tuple_real]).
@@ -588,7 +588,7 @@ Qed.
 
 (* A trace test accepts the simulated trace as often as its lift accepts the
    all-zero tuple.  The step loses nothing at the simulator end, as
-   accept_trace_tupleE does at the protocol end. *)
+   accept_hop_tupleE does at the protocol end. *)
 Lemma accept_trace_ideal_tupleE
     (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   accept D alice_trace_ideal
@@ -709,7 +709,7 @@ Definition alice_trace_chain :=
     start (accept (distinguisher_of_predictor predict)
              (`p_ [% V2, V3, AliceTrace])) ;
     (* her trace is a deterministic image of her hopping tuple *)
-    same to (accept tuple_distinguisher G0) by accept_trace_tupleE _ ;
+    same to (accept tuple_distinguisher G0) by accept_hop_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
     hop cpa_bob (eps_bob tuple_distinguisher)
       to (accept tuple_distinguisher G1)
@@ -735,7 +735,7 @@ End alice_trace_chain.
    at the trace the interpreter hands Alice when it runs the DSDP protocol at
    a sample, steps to her hopping tuple at no loss, replaces the two
    ciphertext slots, and steps to the simulated trace at no loss.  The two
-   steps that lose nothing are accept_trace_tupleE and its simulator-side
+   steps that lose nothing are accept_hop_tupleE and its simulator-side
    twin, so the loss is the two hop labels and nothing else, and the gap
    result the chain returns on its own is the trace-level simulation bound: a
    test told the executed protocol apart from the simulation only as often as
@@ -755,7 +755,7 @@ Definition alice_trace_sim_chain :=
     (* the trace of a run of the protocol by the interpreter *)
     start (accept D (`p_ [% V2, V3, AliceTrace])) ;
     (* her trace is a deterministic image of her hopping tuple *)
-    same to (accept tuple_distinguisher G0) by accept_trace_tupleE _ ;
+    same to (accept tuple_distinguisher G0) by accept_hop_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
     hop cpa_bob (eps_bob tuple_distinguisher)
       to (accept tuple_distinguisher G1)
@@ -917,10 +917,10 @@ have H0 : Pr P [set t | (lifted `o alice_tuple_real) t == V2 t] = 1.
   by apply/setP => t; rewrite !inE eqxx.
 (* all_zero_guess_V2_le_invm is stated at alice_tuple_all_zero and used here
    at alice_tuple_bob_zero.  The reduction that carries it across is that
-   trace_of_trace_tuple is a literal bseq, so nth 3 discards Charlie's slot,
-   the only slot the two tuples differ in; Bob's slot is bob_zero_cipher in
-   both.  Renumbering the trace slots or making trace_of_trace_tuple opaque
-   breaks this step. *)
+   alice_trace_of_hop_tuple is a literal bseq, so nth 5 discards slots 0 to 4,
+   Charlie's ciphertext at 4 being the only slot the two tuples differ in;
+   Bob's slot is bob_zero_cipher in both.  Renumbering the trace slots or
+   making alice_trace_of_hop_tuple opaque breaks this step. *)
 have H1 : Pr P [set t | (lifted `o alice_tuple_bob_zero) t == V2 t]
           <= #|plain AHE|%:R^-1.
   exact: (all_zero_guess_V2_le_invm lifted).
@@ -1163,7 +1163,7 @@ exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]{ fun k =>
                     AliceTrace (R:=R) (I:=I k)])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (tuple_distinguisher k) (G0 k))
-      by accept_trace_tupleE _ ;
+      by accept_hop_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
        which the class membership of the Bob-key reduction licenses *)
     hop cpa_bob (eps k) to (accept (tuple_distinguisher k) (G1 k))
@@ -1204,7 +1204,7 @@ exact: (result_sound (\epsilon[ alice_claims_admissible_at k ]{
                     AliceTrace (R:=R) (I:=I k)])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (tuple_distinguisher k) (G0 k))
-      by accept_trace_tupleE _ ;
+      by accept_hop_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
        which the class membership of the Bob-key reduction licenses *)
     hop cpa_bob (eps k) to (accept (tuple_distinguisher k) (G1 k))
@@ -1331,7 +1331,7 @@ exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]{ fun k =>
                     AliceTrace (R:=R) (I:=I k)])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G0 k))
-      by accept_trace_tupleE _ ;
+      by accept_hop_tupleE _ ;
     (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
        which the class membership of the Bob-key reduction licenses *)
     hop cpa_bob (eps k)
