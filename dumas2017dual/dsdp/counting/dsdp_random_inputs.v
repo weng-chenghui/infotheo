@@ -16,8 +16,9 @@ Require Import homomorphic_encryption.
 (* scalar_product_random_inputs: one sample space with one law on it, the     *)
 (* eleven random inputs of the run, the independence of each against the      *)
 (* joint of the other ten, the uniformity of the three plaintext inputs and   *)
-(* the two masks, and the six coins the encryptions of the run draw, jointly  *)
-(* independent of the eleven.  Every message is a deterministic function of   *)
+(* the two masks, and the six coins the run draws, plaintext-ring elements    *)
+(* no ciphertext of the idealized scheme depends on, jointly independent of   *)
+(* the eleven.  Every message is a deterministic function of                  *)
 (* those eleven, and a party view is a deterministic function of those eleven *)
 (* together with the coins that party draws, so the record carries the whole  *)
 (* probabilistic content of the counting axis, and a bound proved from its    *)
@@ -81,8 +82,6 @@ Require Import homomorphic_encryption.
 (*                              constants                                     *)
 (* uniform_V1_indep .. uniform_Dk_c_indep == the eleven each-against-the-rest *)
 (*                              facts at that law                             *)
-(*            uniform_coinT == the one-element coin space this inhabitant     *)
-(*                              draws its six coins from                      *)
 (* uniform_coin_ra1 .. uniform_coin_rc2 == the six coins as constants of the  *)
 (*                              sample space                                  *)
 (*      uniform_coins_indep == the six coins against the eleven inputs at     *)
@@ -148,20 +147,20 @@ Record dsdp_random_inputs (R : realType) (p q : nat)
   (* Charlie's private key. *)
   Dk_c : {RV (sample_fdist) -> (Charlie.-key Dec 'Z_(p * q))} ;
 
-  (* The finite type the six encryption coins take their values in. *)
-  coinT : finType ;
+  (* The six coins are idealized randomness, elements of the plaintext ring,
+     and no ciphertext of the idealized scheme depends on one of them. *)
   (* The coin of Alice's first combine. *)
-  coin_ra1 : {RV (sample_fdist) -> coinT} ;
+  coin_ra1 : {RV (sample_fdist) -> ('Z_(p * q))} ;
   (* The coin of Alice's second combine. *)
-  coin_ra2 : {RV (sample_fdist) -> coinT} ;
+  coin_ra2 : {RV (sample_fdist) -> ('Z_(p * q))} ;
   (* The coin of Bob's encryption of his input to Alice. *)
-  coin_rb1 : {RV (sample_fdist) -> coinT} ;
+  coin_rb1 : {RV (sample_fdist) -> ('Z_(p * q))} ;
   (* The coin of Bob's encryption of the aggregate to Charlie. *)
-  coin_rb2 : {RV (sample_fdist) -> coinT} ;
+  coin_rb2 : {RV (sample_fdist) -> ('Z_(p * q))} ;
   (* The coin of Charlie's encryption of his input to Alice. *)
-  coin_rc1 : {RV (sample_fdist) -> coinT} ;
+  coin_rc1 : {RV (sample_fdist) -> ('Z_(p * q))} ;
   (* The coin of Charlie's re-encryption of the answer to Alice. *)
-  coin_rc2 : {RV (sample_fdist) -> coinT} ;
+  coin_rc2 : {RV (sample_fdist) -> ('Z_(p * q))} ;
 
   (* [% V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V1. *)
   V1_indep : sample_fdist |=
@@ -523,22 +522,21 @@ Definition uniform_Dk_b : {RV P -> (Bob.-key Dec msg)} :=
 Definition uniform_Dk_c : {RV P -> (Charlie.-key Dec msg)} :=
   fun _ => @KeyOf Charlie Dec _ 0.
 
-(* The coin space of this inhabitant, a single value.  No bound reads a
-   coin's law, so one coin value inhabits the record's six coin fields. *)
-Definition uniform_coinT : finType := 'I_1.
+(* No bound reads a coin's law, so the six coins of this inhabitant are the
+   zero of the plaintext ring. *)
 
 (* The coin of Alice's first combine, a constant of the sample space. *)
-Definition uniform_coin_ra1 : {RV P -> uniform_coinT} := fun _ => ord0.
+Definition uniform_coin_ra1 : {RV P -> msg} := fun _ => 0.
 (* The coin of Alice's second combine, a constant of the sample space. *)
-Definition uniform_coin_ra2 : {RV P -> uniform_coinT} := fun _ => ord0.
+Definition uniform_coin_ra2 : {RV P -> msg} := fun _ => 0.
 (* The coin of Bob's encryption of his input, a constant. *)
-Definition uniform_coin_rb1 : {RV P -> uniform_coinT} := fun _ => ord0.
+Definition uniform_coin_rb1 : {RV P -> msg} := fun _ => 0.
 (* The coin of Bob's encryption of the aggregate, a constant. *)
-Definition uniform_coin_rb2 : {RV P -> uniform_coinT} := fun _ => ord0.
+Definition uniform_coin_rb2 : {RV P -> msg} := fun _ => 0.
 (* The coin of Charlie's encryption of his input, a constant. *)
-Definition uniform_coin_rc1 : {RV P -> uniform_coinT} := fun _ => ord0.
+Definition uniform_coin_rc1 : {RV P -> msg} := fun _ => 0.
 (* The coin of Charlie's re-encryption of the answer, a constant. *)
-Definition uniform_coin_rc2 : {RV P -> uniform_coinT} := fun _ => ord0.
+Definition uniform_coin_rc2 : {RV P -> msg} := fun _ => 0.
 
 Lemma uniform_V1_indep (w1 w2 w3 : msg) :
   P |=
@@ -724,7 +722,7 @@ Proof.
 rewrite inde_RV_sym.
 have -> : [% uniform_coin_ra1, uniform_coin_ra2, uniform_coin_rb1,
              uniform_coin_rb2, uniform_coin_rc1, uniform_coin_rc2]
-        = const_RV P (ord0, ord0, ord0, ord0, ord0, ord0) :> {RV P -> _} by [].
+        = const_RV P (0, 0, 0, 0, 0, 0) :> {RV P -> _} by [].
 exact: inde_const_RV.
 Qed.
 
@@ -761,7 +759,6 @@ Definition uniform_inputs (w1 w2 w3 : msg) :
   Dk_a := uniform_Dk_a ;
   Dk_b := uniform_Dk_b ;
   Dk_c := uniform_Dk_c ;
-  coinT := uniform_coinT ;
   coin_ra1 := uniform_coin_ra1 ;
   coin_ra2 := uniform_coin_ra2 ;
   coin_rb1 := uniform_coin_rb1 ;

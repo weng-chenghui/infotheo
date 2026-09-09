@@ -11,13 +11,12 @@ Local Open Scope ring_scope.
 
 Section smc_dsdp_program.
 
-(* Parameterize by a standalone DSDP interface.
-   The same protocol text drives the cryptographic (Standard) instance below
-   and a parameter-free symbolic instance. *)
+(* Parameterize by a standalone DSDP interface, so one protocol text serves
+   every instance of it. *)
 Variable DI : DSDP_Interface.
 
-(* Per-instance decoder for recv-and-decrypt.  Standard supplies the scheme's
-   [dec], the symbolic instance supplies [party_D]. *)
+(* Per-instance decoder for recv-and-decrypt, which the Standard instance
+   supplies as the scheme's [dec]. *)
 Variable decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI).
 
 (* Extract types from the interface *)
@@ -38,8 +37,8 @@ Let Emul := di_emul DI.
 Let Epow := di_epow DI.
 
 (* The plaintext ring operations of the interface, used by the final Ret.  They
-   let the procs typecheck at a symbolic instance whose plaintexts carry no
-   ring structure. *)
+   come from [DI] rather than from a ring structure on the plaintexts, so the
+   procs stay generic in the interface. *)
 Let dadd := di_add DI.
 Let dsub := di_sub DI.
 Let dmul := di_mul DI.

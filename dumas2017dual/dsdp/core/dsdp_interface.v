@@ -18,7 +18,6 @@ Import Num.Theory.
 (*   Recv_param      - Single parametric receive combinator                   *)
 (*   DSDP_Interface  - Record bundling data type and operations               *)
 (*   Standard_DSDP_Interface - Canonical sum-type implementation              *)
-(*   Symbolic_DSDP_Interface - Party-labeled sum-type implementation          *)
 (*                                                                            *)
 (* The data carrier also holds an encryption coin, so a party can draw its    *)
 (* own randomness from its seed stream instead of receiving it as a program   *)
@@ -230,82 +229,6 @@ Definition Standard_DSDP_Interface : DSDP_Interface := {|
 |}.
 
 End Standard_DSDP_Interface.
-
-(* ========================================================================== *)
-(* Symbolic DSDP Interface using Party-Labeled Encryption                     *)
-(* ========================================================================== *)
-
-Section Symbolic_DSDP_Interface.
-
-Variable msg : finComNzRingType.
-Variable coinT : finType.
-
-(* The sum carrier the symbolic programs send: plaintext, party-labeled
-   ciphertext, private key, public key or coin.  It is finite, so a trace
-   needs no encoding alphabet. *)
-Definition symbolic_data :=
-  (msg + party_enc party_id msg + party_pkey party_id msg
-   + (party_id + coinT))%type.
-Definition symbolic_data_of_plain (x : msg) : symbolic_data :=
-  inl (inl (inl x)).
-Definition symbolic_data_of_cipher (x : party_enc party_id msg) :
-    symbolic_data := inl (inl (inr x)).
-Definition symbolic_data_of_priv_key (x : party_pkey party_id msg) :
-    symbolic_data := inl (inr x).
-Definition symbolic_data_of_pub_key (x : party_id) : symbolic_data :=
-  inr (inl x).
-Definition symbolic_data_of_rand (x : coinT) : symbolic_data := inr (inr x).
-Definition symbolic_get_cipher (x : symbolic_data) :
-    option (party_enc party_id msg) :=
-  if x is inl (inl (inr v)) then Some v else None.
-Definition symbolic_get_rand (x : symbolic_data) : option coinT :=
-  if x is inr (inr r) then Some r else None.
-Definition symbolic_get_priv_key (x : symbolic_data) :
-    option (party_pkey party_id msg) :=
-  if x is inl (inr k) then Some k else None.
-
-(* Recv-and-decrypt: extract ciphertext, decrypt with the symbolic decoder
-   [party_D], continue with plaintext *)
-Definition symbolic_Recv_dec (frm : nat) (dk : party_pkey party_id msg)
-    (f : msg -> proc symbolic_data) : proc symbolic_data :=
-  Recv_param symbolic_data
-    (obind (@party_D party_id msg dk) \o symbolic_get_cipher) frm f.
-
-(* Recv-for-HE: extract the ciphertext and continue with it.  The party label
-   it carries is the sender's public key, which never travels. *)
-Definition symbolic_Recv_enc (frm : nat)
-    (f : party_enc party_id msg -> proc symbolic_data) : proc symbolic_data :=
-  Recv_param symbolic_data symbolic_get_cipher frm f.
-
-(** The DSDP interface whose ciphertexts are party-labeled plaintexts and
-    whose coins are a bare finite type.  The programs run at it with no
-    scheme, so a trace is a finite datum. *)
-Definition Symbolic_DSDP_Interface : DSDP_Interface := {|
-  di_msgT := msg ;
-  di_cipherT := party_enc party_id msg ;
-  di_randT := coinT ;
-  di_priv_keyT := party_pkey party_id msg ;
-  di_pub_keyT := party_id ;
-  di_data := symbolic_data ;
-  di_data_of_plain := symbolic_data_of_plain ;
-  di_data_of_cipher := symbolic_data_of_cipher ;
-  di_data_of_priv_key := symbolic_data_of_priv_key ;
-  di_data_of_pub_key := symbolic_data_of_pub_key ;
-  di_data_of_rand := symbolic_data_of_rand ;
-  di_get_cipher := symbolic_get_cipher ;
-  di_get_rand := symbolic_get_rand ;
-  di_get_priv_key := symbolic_get_priv_key ;
-  di_encrypt := (fun p m _ => @party_E party_id msg p m) ;
-  di_emul := @party_Emul party_id msg ;
-  di_epow := @party_Epow party_id msg ;
-  di_add := +%R ;
-  di_sub := (fun a b => a - b) ;
-  di_mul := *%R ;
-  di_Recv_dec := symbolic_Recv_dec ;
-  di_Recv_enc := symbolic_Recv_enc ;
-|}.
-
-End Symbolic_DSDP_Interface.
 
 (* ========================================================================== *)
 (* Correctness Lemmas for Standard Interface                                  *)

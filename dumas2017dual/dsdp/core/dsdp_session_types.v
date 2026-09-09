@@ -13,12 +13,10 @@ Import Prenex Implicits.
 (* ========================================================================== *)
 
 (* Session-typed versions using sproc from smc_session_types.
-   These wrappers are parameterized over a standalone DSDP_Interface [DI],
-   so the very same skeletons drive the cryptographic (Standard) instance and
-   a parameter-free symbolic instance.  Only the handler under each lambda
-   depends on [DI]; the [SRecv .. DT_Enc]/[SSend .. DT_Enc] skeleton is
-   independent of [DI], so the session environments — and hence the duality
-   proofs — are unchanged. *)
+   These wrappers are parameterized over a standalone DSDP_Interface [DI].
+   Only the handler under each lambda depends on [DI]; the
+   [SRecv .. DT_Enc]/[SSend .. DT_Enc] skeleton is independent of [DI], so the
+   session environments — and hence the duality proofs — are unchanged. *)
 
 Section smc_dsdp_session_types.
 
@@ -30,10 +28,10 @@ Let msgT := di_msgT DI.
 Let priv_keyT := di_priv_keyT DI.
 Let e := di_data_of_cipher DI.
 
-(* Per-instance decoder: turn a received ciphertext into a plaintext.
-   Standard supplies [dec dk], the symbolic instance supplies [party_D dk].
-   Threaded as a parameter because the carrier-free [DSDP_Interface] record
-   does not bundle a bare decryption primitive. *)
+(* Per-instance decoder: turn a received ciphertext into a plaintext, which
+   the Standard instance supplies as [dec dk].  Threaded as a parameter
+   because the carrier-free [DSDP_Interface] record does not bundle a bare
+   decryption primitive. *)
 Variable decode : priv_keyT -> cipherT -> option msgT.
 
 (* Receive encrypted - pattern match data, use SFail on mismatch *)

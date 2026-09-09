@@ -39,7 +39,7 @@ Import Num.Theory.
 (* bound a corrupted Alice.  Alice draws the masks R2 and R3 and strips them  *)
 (* again in palice of dsdp_program.v.                                         *)
 (*                                                                            *)
-(* In this symbolic cipher model the encryption exposes its plaintext and     *)
+(* At the idealized scheme a ciphertext is its plaintext and the encryption   *)
 (* ignores its coin, so the two coins a relay records are independent         *)
 (* components its view carries rather than the coins any ciphertext in that   *)
 (* view was built with.  Adjoining them enlarges the conditioner and leaves   *)
@@ -198,8 +198,7 @@ Local Notation inputs11 := (msg * msg * msg * msg * msg * msg * msg * msg *
 
 (* The value type of the six coins jointly, which a relay's own pair is read
    off. *)
-Local Notation coins6 := (coinT I * coinT I * coinT I * coinT I *
-  coinT I * coinT I)%type.
+Local Notation coins6 := (msg * msg * msg * msg * msg * msg)%type.
 
 (* The eleven inputs are independent of the six coins, the record field every
    coin step below is an image of. *)
@@ -212,12 +211,12 @@ Let coins_indep :
    Contraction puts the coins beside the view, and one reassociation
    left-nests them into it. *)
 Let adjoin_coins (A : finType) (X : {RV P -> A}) (S : {RV P -> msg})
-    (C1 C2 : {RV P -> coinT I}) :
+    (C1 C2 : {RV P -> msg}) :
   P |= X _|_ S -> P |= [% S, X] _|_ [% C1, C2] -> P |= [% X, C1, C2] _|_ S.
 Proof.
 move=> /inde_RV_sym h1 hc; rewrite inde_RV_sym.
 exact: (inde_RV_comp idfun
-  (fun w : (A * (coinT I * coinT I))%type => ((w.1, w.2.1), w.2.2))
+  (fun w : (A * (msg * msg))%type => ((w.1, w.2.1), w.2.2))
   (inde_RV_contraction h1 hc)).
 Qed.
 

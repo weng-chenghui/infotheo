@@ -2273,47 +2273,33 @@ no cryptographic assumption.
 \chapter{The relay bounds at the executed trace}
 
 The three bounds above are stated at a tuple standing for what a relay observes.
-Running the three DSDP party programs at a symbolic cipher and reading the trace
-the interpreter writes for a relay makes that tuple the object the executed
-protocol hands it.
+Running the three DSDP party programs at the idealized scheme, where a
+ciphertext is its plaintext, and reading the trace the interpreter writes for a
+relay makes that tuple the object the executed protocol hands it.
 
-\begin{definition}[The symbolic DSDP interface]
-  \label{def:symbolic_interface}
-  \rocq{infotheo.dumas2017dual.dsdp.core.dsdp_interface.Symbolic_DSDP_Interface}
+\begin{definition}[The run at the idealized scheme and its three traces]
+  \label{def:ideal_run}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.dsdp_run_traces_idealE}
   \rocqok
-  \uses{def:protocol_flow}
-  % library: dsdp_interface.v is cited in prose and is outside the coqdoc
-  %   MODULES scope, so its symbolic plumbing takes no exclude entry.
-  The symbolic instance of the DSDP interface takes plaintexts in the plaintext
-  ring, a ciphertext as a plaintext under a party label, coins in a bare finite
-  type, and a private key as a party key mark. Encryption ignores its coin and
-  returns the labelled plaintext, and decryption returns that plaintext at the
-  party the label names and at a decryption key.
-  \[ \mathrm{party\_E}(i, x, r) = (i, x), \qquad
-     \mathrm{party\_D}\big((i, \mathrm{Dec}, k), (i, x)\big)
-       = \mathrm{Some}\ x \]
-  The three piSMC programs that run at it are the programs of
-  Definition~\ref{def:protocol_flow}, instantiated at this interface rather
-  than at a scheme. Every carrier is finite, so a trace of a run at it is a
-  sequence over a finite alphabet and needs no encoding into one.
-\end{definition}
-
-\begin{definition}[The symbolic run and its three traces]
-  \label{def:symbolic_run}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.dsdp_run_traces_symbolicE}
-  \rocqok
-  \uses{def:symbolic_interface,def:interpreter_sample}
+  \uses{def:protocol_flow,def:interpreter_sample}
+  The three piSMC programs of Definition~\ref{def:protocol_flow} run at the
+  idealized homomorphic scheme, where plaintext, randomness, ciphertext and
+  both keys are the plaintext ring, encryption returns its plaintext and
+  decryption returns its ciphertext. Every carrier is therefore finite, so a
+  trace of the run is a sequence over a finite alphabet and needs no encoding
+  into one.
+  \[ \mathrm{enc}(pk, x, r) = x, \qquad \mathrm{dec}(dk, c) = \mathrm{Some}\ c \]
   The interpreter runs the three programs for eighteen rounds on seed streams
   read off the six coin coordinates of one sample, two per party. It writes
   thirteen entries for Alice, six for Bob and five for Charlie, newest first.
-  Bob's six are his second coin $r_{b2}$, the Charlie-key combine and the
-  Bob-key combine he receives, his first coin $r_{b1}$, his input $V_2$ and his
-  key mark $k_b$. Charlie's five are his second coin, the aggregate ciphertext
-  Bob forwards, his first coin, his input $V_3$ and his key mark.
-  \[ \mathrm{BobTrace} = \big[\, r_{b2},\ (\mathrm{Charlie},\ V_3 U_3 + R_3),\
-     (\mathrm{Bob},\ V_2 U_2 + R_2),\ r_{b1},\ V_2,\ k_b \,\big] \]
+  Bob's six are his second coin $r_{b2}$, the two combines he receives, his
+  first coin $r_{b1}$, his input $V_2$ and his key $k_b$. Charlie's five are
+  his second coin, the aggregate ciphertext Bob forwards, his first coin, his
+  input $V_3$ and his key.
+  \[ \mathrm{BobTrace} = \big[\, r_{b2},\ V_3 U_3 + R_3,\
+     V_2 U_2 + R_2,\ r_{b1},\ V_2,\ k_b \,\big] \]
   \[ \mathrm{CharlieTrace} = \big[\, r_{c2},\
-     (\mathrm{Charlie},\ V_3 U_3 + R_3 + V_2 U_2 + R_2),\ r_{c1},\ V_3,\ k_c
+     V_3 U_3 + R_3 + V_2 U_2 + R_2,\ r_{c1},\ V_3,\ k_c
      \,\big] \]
   Alice's thirteen entries are stated by the same equality and no bound is read
   at them. Her axis is the hopping one, at the real scheme, where
@@ -2322,13 +2308,13 @@ protocol hands it.
 
 \begin{lemma}[A relay's trace is its view recoded]
   \label{lem:relay_trace_of_view}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.symbolic_trace_of_run,
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.ideal_trace_of_run,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_of_viewE,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_of_viewE,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_of_viewK,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_of_viewK}
   \rocqok
-  \uses{def:symbolic_run,def:party_views}
+  \uses{def:ideal_run,def:party_views}
   The trace the interpreter produces for a relay is the image of that relay's
   view under a map $\rho$, and a reader $\rho'$ inverts $\rho$ on the left, so
   the trace and the view are the same observation written twice.
@@ -2359,8 +2345,8 @@ protocol hands it.
      \HH(V_3 \mid \mathrm{BobTrace}) = \log m > 0 \]
   \[ \HH(V_1 \mid \mathrm{CharlieTrace}) = \log m > 0, \qquad
      \HH(V_2 \mid \mathrm{CharlieTrace}) = \log m > 0 \]
-  These four are at the symbolic cipher model, where a ciphertext exposes its
-  plaintext and no ciphertext depends on a coin, so the coin slots the trace
+  These four are at the idealized scheme, where a ciphertext is its plaintext
+  and no ciphertext depends on a coin, so the coin slots the trace
   records are independent components of it rather than the randomness any
   ciphertext in it was built with. Alice's trace theorems of
   Chapter~\ref{ch:trace_link} are at the real scheme instead, which is why hers
