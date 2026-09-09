@@ -308,7 +308,29 @@ Definition stype_step (ps : seq (stype dtype)) i :=
   | STEnd => (p, false)
   end.
 
+Definition isSTEnd (x : stype dtype) := if x is STEnd then true else false.
+
+Definition stype_stuck (ps : seq (stype dtype)) i :=
+  let p := nth STEnd ps i in
+  match p with
+  | STRecv j ti k =>
+      match nth STEnd ps j with
+      | STSend i' tj _ => (i == i') && (ti != tj)
+      | STRecv i' tj _ => (i == i')
+      | STEnd => true
+      end
+  | STSend j ti k =>
+      match nth STEnd ps j with
+      | STRecv i' tj _ => (i == i') && (ti != tj)
+      | STSend i' tj _ => (i == i')
+      | STEnd => true
+      end
+  | STEnd => false
+  end.
+
 End duality.
+
+Arguments isSTEnd {dtype}.
 
 (******************************************************************************)
 (** * Existential Process Wrapper (aproc)                                     *)
@@ -403,13 +425,90 @@ Fixpoint stypes_interp h (ps : seq (stype dtype)) :=
     if has snd ps_c then stypes_interp h (unzip1 ps_c) else ps
   else [::].
 
-Definition isSTEnd (x : stype dtype) := if x is STEnd then true else false.
+Lemma stypes_interp_stuck h ps :
+  has (stype_stuck ps) (iota 0 (size ps)) ->
+  size (stypes_interp h ps) = size ps ->
+  ~~ all isSTEnd (stypes_interp h ps).
+Proof.
+elim: h ps => [|h IH] ps /hasP[i]; rewrite mem_iota leq0n add0n /= => Hi Hs.
+  by move=> Hsz; rewrite -Hsz ltn0 in Hi.
+case: ifP => Hhas Hsz.
+  rewrite IH // !size_map size_iota //.
+  apply/hasP; exists i.
+    by rewrite mem_iota add0n Hi.
+  move: Hs.
+  rewrite /stype_stuck /unzip1 -map_comp (nth_map i) ?size_iota //.
+  rewrite nth_iota // add0n /= /stype_step.
+  case Hnthi: nth => //= [n dt p | n dt p].
+  - case/boolP: (n < size ps) => Hn; last first.
+      rewrite nth_default /=; last by rewrite leqNgt.
+      by rewrite nth_default // !size_map size_iota leqNgt.
+    case Hnth : nth => //= [n' dt' p' | n' dt' p' |].
+    + move/eqP => in'; subst n'.
+      by rewrite (nth_map i) ?size_iota// nth_iota//= add0n Hnth Hnthi /= eqxx.
+    + move=> /andP[] /eqP in' dtdt'; subst n'.
+      rewrite eqxx (negbTE dtdt') /=.
+      rewrite (nth_map i) ?size_iota// nth_iota//= add0n Hnth Hnthi /= eqxx.
+      by rewrite eq_sym (negbTE dtdt') /= eqxx.
+    + move=> _.
+      by rewrite (nth_map i) ?size_iota// nth_iota//= add0n Hnth.
+  - case/boolP: (n < size ps) => Hn; last first.
+      rewrite nth_default /=; last by rewrite leqNgt.
+      by rewrite nth_default // !size_map size_iota leqNgt.
+    case Hnth : nth => //= [n' dt' p' | n' dt' p' |].
+    + move=> /andP[] /eqP in' dtdt'; subst n'.
+      rewrite eqxx (negbTE dtdt') /=.
+      rewrite (nth_map i) ?size_iota// nth_iota//= add0n Hnth Hnthi /= eqxx.
+      by rewrite eq_sym (negbTE dtdt') /= eqxx.
+    + move/eqP => in'; subst n'.
+      by rewrite (nth_map i) ?size_iota// nth_iota//= add0n Hnth Hnthi /= eqxx.
+    + move=> _.
+      by rewrite (nth_map i) ?size_iota// nth_iota//= add0n Hnth.
+rewrite -has_predC.
+apply/hasP; exists (nth STEnd ps i).
+  by rewrite mem_nth.
+move: Hs.
+rewrite /stype_stuck.
+by case: nth.
+Qed.
 
 Definition stypes_interp_fuel (ps : seq (stype dtype)) :=
   sumn (map senv_depth ps) + 1.
 
 Definition stypes_compat ps :=
   all isSTEnd (stypes_interp (stypes_interp_fuel ps) ps).
+
+Lemma stypes_interp_fuel_step ps :
+  let ps' := [seq stype_step ps i | i <- iota 0 (size ps)] in
+  has snd ps' ->
+  stypes_interp_fuel (unzip1 ps') <= sumn [seq senv_depth i | i <- ps].
+Proof.
+move=> /= Hh.
+rewrite /stypes_interp_fuel addn1 -ltnS.
+move: Hh; rewrite has_map => /hasP[] /= i.
+rewrite mem_iota leq0n add0n /= => Hi psi.
+rewrite -{3}(map_nth_iota_id STEnd ps) !sumnE.
+rewrite !big_map (bigD1_seq i) /=; first last.
+- exact: iota_uniq.
+- by rewrite mem_iota leq0n.
+rewrite [X in _ < X.+1](bigD1_seq i) /=; first last.
+- exact: iota_uniq.
+- by rewrite mem_iota leq0n.
+rewrite ltnS -addSn leq_add //.
+  move: psi; rewrite /stype_step.
+  case: (nth STEnd ps i) => [p d s|p d s|] //=.
+  - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+    by case: ifP.
+  - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+    by case: ifP.
+apply: leq_sum => j _.
+rewrite /stype_step.
+case: (nth STEnd ps j) => [p d s|p d s|] //=.
+- case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+  by case: ifP.
+- case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
+  by case: ifP.
+Qed.
 
 Lemma stypes_interp_fuel_ok ps h :
   h >= stypes_interp_fuel ps ->
@@ -422,40 +521,43 @@ move Heqh': (sumn _) => h'.
 rewrite ltnS => hh' /=.
 set ps' := map _ _.
 case: ifP => // Hh.
-have Hh' : stypes_interp_fuel (unzip1 ps') <= h'.
-  rewrite /stypes_interp_fuel addn1.
-  rewrite -ltnS -{}Heqh' {hh' IH}.
-  subst ps'.
-  move: Hh; rewrite has_map => /hasP[] /= i.
-  rewrite mem_iota leq0n add0n /= => Hi psi.
-  rewrite -{3}(map_nth_iota_id STEnd ps) !sumnE.
-  rewrite !big_map (bigD1_seq i) /=; first last.
-    exact: iota_uniq.
-    by rewrite mem_iota leq0n.
-  rewrite [X in _ < X.+1](bigD1_seq i) /=; first last.
-    exact: iota_uniq.
-    by rewrite mem_iota leq0n.
-  rewrite ltnS -addSn leq_add //.
-    move: psi; rewrite /stype_step.
-    case: (nth STEnd ps i) => [p d s|p d s|] //=.
-    - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
-      by case: ifP.
-    - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
-      by case: ifP.
-  apply: leq_sum => j _.
-  rewrite /stype_step.
-  case: (nth STEnd ps j) => [p d s|p d s|] //=.
-  - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
-    by case: ifP.
-  - case: (nth STEnd ps p) => [p' d' s'|p' d' s'|] //=.
-    by case: ifP.
+have := stypes_interp_fuel_step Hh.
+rewrite Heqh' => Hh'.
 rewrite IH; [|by rewrite ltnS|].
   rewrite [RHS]IH //.
 exact: leq_trans hh'.
 Qed.
 
-Definition aprocs_compat data (ps : seq (aproc dtype data)) :=
+Lemma stypes_interp_fuel_size ps h :
+  h >= stypes_interp_fuel ps ->
+  size (stypes_interp h ps) = size ps.
+Proof.
+elim: h ps => [|h IH] /= ps.
+  by rewrite /stypes_interp_fuel addn1.
+rewrite /stypes_interp_fuel addn1 ltnS => Hfuel.
+case: ifP => // /stypes_interp_fuel_step Hh.
+by rewrite IH ?(size_map,size_iota) // (leq_trans Hh).
+Qed.
+
+Lemma stypes_compat_not_stuck ps :
+  stypes_compat ps ->
+  ~~ has (stype_stuck ps) (iota 0 (size ps)).
+Proof.
+rewrite /stypes_compat => Hcompat.
+apply/negP => /(stypes_interp_stuck (h:=stypes_interp_fuel ps)).
+by rewrite Hcompat stypes_interp_fuel_size // => /(_ erefl).
+Qed.
+
+Variable data : Type.
+
+Definition aprocs_compat (ps : seq (aproc dtype data)) :=
   stypes_compat (map aproc_env ps).
+
+Lemma aprocs_compat_not_stuck ps :
+  aprocs_compat ps ->
+  ~~ has (stype_stuck (map aproc_env ps)) (iota 0 (size ps)).
+Proof. by move/stypes_compat_not_stuck; rewrite size_map. Qed.
+
 End stypes_compat.
 
 (******************************************************************************)
@@ -1184,39 +1286,15 @@ apply: eq_map => p /=.
 by rewrite aproc_skip_nocomm_env.
 Qed.
 
-(* Failed attempt at preservation:
-   the parallel nature of stypes_interp makes it unpractical directly *)
-Lemma aprocs_rstep_preserve n m (l : lens n m)
-      (aps : n.-tuple (aproc dtype data)) aps' tr :
-  rstep l (map_tuple erase_aproc (extract l aps))
-        (map_tuple erase_aproc aps') tr ->
-  all inert_nocomm (erase_aprocs aps) ->
-  aprocs_compat aps ->
-  aprocs_compat (inject l aps aps').
-Proof.
-inversion 1; subst.
-- clear H8 H6 H4 H2.
-  case: aps' H H7 => -[] // a [] //= ? _ [] Hp.
-  subst p.
-  case: l H5 {H3} => -[] // j [] //= _ [] Ha.
-  move/all_nthP/(_ j).
-  rewrite size_map {1}size_tuple => /(_ Fail (ltn_ord j)).
-  by rewrite -tnth_nth tnth_map -Ha.
-- clear H8 H6 H4 H2.
-  case: aps' H H7 => -[] // a [] //= ? _ [] Hp.
-  case: l H5 {H3} => -[] // j [] //= _ [] Ha.
-  move/all_nthP/(_ j).
-  rewrite size_map {1}size_tuple => /(_ Fail (ltn_ord j)).
-  by rewrite -tnth_nth tnth_map -Ha.
-- clear H8 H6 H4 H2.
-  case: aps' H H7 => -[] // a [] // b [] //= z _ {z}.
-  have Hl := Eqdep_dec.inj_pair2_eq_dec _ PeanoNat.Nat.eq_dec _ _ _ _ H3.
-  subst l.
-  move=> [Ha Hb] _ Hcompat.
-Abort.
-
-(* In progress attempt at preservation.
-   The main case remains to formalize, but is proved on paper. *)
+(* Preservation:
+   If the processes aps have compatible session types, then, if
+   * we first normalize all processes for non-communicating reductions
+   * and then apply a parallel reduction step for communication
+   * and the resulting processes are not Fail
+   then the resulting process still have compatible session types.
+   The non-failure condition is needed because we have Fail in the language.
+   If we only use it for type mismatch, then we shall be able to prove
+   that no process reduces to Fail. *)
 Lemma aprocs_step_preserve (aps : seq (aproc dtype data)) :
   aprocs_compat aps ->
   let aps1 := map aproc_skip_nocomm aps in
@@ -1245,12 +1323,14 @@ move/aprocs_compat_skip_nocomm: Hcompat.
 rewrite /aprocs_compat /stypes_compat -/aps1.
 set h := stypes_interp_fuel _.
 set h' := stypes_interp_fuel _.
+have Haps1 : aps1 = map (tnth (in_tuple aps1)) (ord_tuple (size aps1)).
+  by rewrite -[LHS]in_tupleE {1}(tuple_map_ord (in_tuple aps1)).
+simpl in Haps1.
 have hh' : (h' <= h)%N.
   subst h h' aps'.
   rewrite /stypes_interp_fuel !sumnE.
-  rewrite 4!big_map -/aps1.
-  rewrite -[in X in _ <= X + 1](in_tupleE aps1).
-  rewrite (tuple_map_ord (in_tuple aps1)) 2![X in _ <= X + 1]big_map.
+  rewrite 4!big_map -/aps1 [in X in _ <= X + 1]Haps1.
+  rewrite 2![X in _ <= X + 1]big_map.
   rewrite leq_add //.
   apply: leq_sum => i _.
   case: fuel_senv_decreases => /= p [_] [_].
@@ -1267,16 +1347,14 @@ case: ifPn; last first.
   rewrite /is_true => all_aps1.
   rewrite -[RHS]all_aps1; congr all.
   have Henv : map aproc_env aps' = map aproc_env aps1.
-    rewrite -[in RHS](in_tupleE aps1).
-    rewrite (tuple_map_ord (in_tuple aps1)) -map_comp -[RHS]map_comp.
+    rewrite [in RHS]Haps1 -[LHS]map_comp -[RHS]map_comp.
     apply: eq_map => i /=.
     case: fuel_senv_decreases => /= ap [Her] [_] ->.
     rewrite (tnth_nth (aproc_default data dtype)) /=.
     case: ifP => // /andP[Hstep Hcomm].
     move: all_aps1.
-    rewrite -{1}(in_tupleE aps1).
-    rewrite (tuple_map_ord (in_tuple aps1)) 2!all_map => /allP/(_ i).
-    rewrite val_ord_tuple mem_enum => /(_ isT) /=.
+    rewrite {1}Haps1 /= 2!all_map => /allP/(_ i).
+    rewrite mem_enum => /(_ isT) /=.
     rewrite (tnth_nth (aproc_default data dtype)) /=.
     move: Hcomm.
     rewrite (nth_map (aproc_default data dtype)) //.
@@ -1298,7 +1376,165 @@ case: ifPn; last first.
   have <- : enum 'I_(size aps1) = ord_tuple (size aps1) by [].
   apply: mem_nth.
   by rewrite size_map size_enum_ord.
-Abort.
+move=> Hhas Hall1.
+rewrite stypes_interp_fuel_ok //.
+rewrite -(stypes_interp_fuel_ok (h:=h1)); last first.
+  rewrite -ltnS -Hh /h.
+  rewrite /stypes_interp_fuel !sumnE 4!big_map.
+  rewrite [X in _ < X + 1]big_map.
+  rewrite [in X in _ < X + 1]Haps1 /= big_map.
+  move: Hhas; rewrite has_map size_map => /hasP[i].
+  rewrite mem_iota leq0n add0n /= => Hi Hstep.
+  rewrite !big_enum.
+  rewrite (bigD1 (Ordinal Hi)) // [in X in _ < X + 1](bigD1 (Ordinal Hi)) //=.
+  rewrite !addn1 -!addSn leq_add //.
+    rewrite ltnS.
+    case: fuel_senv_decreases => pa [ha] [sa] /= ->.
+    case: ifPn.
+      case/andP => _.
+      rewrite (tnth_nth (aproc_default _ _)) /=.
+      rewrite (nth_map (aproc_default _ _)) //.
+      by case: nth => pa1 [ha1] [sa1] [].
+    rewrite (nth_map (aproc_default _ _)) //.
+    move: Hstep.
+    rewrite /stype_step (nth_map (aproc_default _ _)) //.
+    have : inert_nocomm (erase_aproc (nth (aproc_default _ _) aps1 i)).
+      rewrite (nth_map (aproc_default _ _)); last by rewrite size_map in Hi.
+      by rewrite erase_aproc_skip_nocomm inert_nocomm_red_skip_nocomm.
+    move: (Hnf); rewrite /all_nonfail 2!all_map => /allP/(_ i).
+    rewrite mem_iota leq0n add0n Hi /= => /(_ isT).
+    rewrite /aproc_env /erase_aproc /step.
+    rewrite (nth_map (aproc_default _ _)) //.
+    case: nth => /= pa1 [ha1] [sa1] p /=.
+    case: ha1 sa1 / p => //= ha1 sa1 src dt d k.
+    - case/boolP: (src \in iota 0 (size aps1));
+        rewrite mem_iota leq0n add0n /= => Hsrc; last first.
+        by rewrite (nth_default STEnd) // size_map; rewrite -leqNgt in Hsrc.
+      rewrite (nth_map (aproc_default _ _)) //.
+      rewrite (nth_map (aproc_default _ _) STEnd) //.
+      move: Hnf; rewrite /all_nonfail 2!all_map => /allP/(_ src).
+      rewrite mem_iota leq0n add0n Hsrc /= => /(_ isT).
+      have : inert_nocomm (erase_aproc (nth (aproc_default _ _) aps1 src)).
+        rewrite (nth_map (aproc_default _ _)).
+          by rewrite erase_aproc_skip_nocomm inert_nocomm_red_skip_nocomm.
+        by rewrite size_map in Hsrc.
+      rewrite /aproc_env /erase_aproc /step /aproc_proc.
+      rewrite (nth_map (aproc_default _ _) (default_proc _)) //.
+      case: nth => pa2 [ha2] [sa2] p2 /=.
+      case: ha2 sa2 / p2 => //=.
+      move=> ha3 sa3 src' dt' k'.
+      case: ifP => //.
+      by rewrite eq_sym => ->.
+    - move=> _.
+      case/boolP: (src < (size aps1)) => Hsrc; last first.
+        by rewrite (nth_default STEnd) // size_map; rewrite -leqNgt in Hsrc.
+      rewrite (nth_map (aproc_default _ _)) //.
+      rewrite (nth_map (aproc_default _ _) (default_proc _)) //.
+      move: Hnf; rewrite /all_nonfail 2!all_map => /allP/(_ src).
+      rewrite mem_iota leq0n add0n Hsrc /= => /(_ isT).
+      have : inert_nocomm (erase_aproc (nth (aproc_default _ _) aps1 src)).
+        rewrite (nth_map (aproc_default _ _)).
+          by rewrite erase_aproc_skip_nocomm inert_nocomm_red_skip_nocomm.
+        by rewrite size_map in Hsrc.
+      rewrite /aproc_env /erase_aproc /step /aproc_proc.
+      rewrite (nth_map (aproc_default _ _) (default_proc _)) //.
+      case: nth => pa2 [ha2] [sa2] p2 /=.
+      case: ha2 sa2 / p2 => //=.
+      move=> ha3 sa3 src' dt' d' k'.
+      case: ifP => //=.
+      by rewrite eq_sym => /andP[->].
+  apply: leq_sum => j _.
+  case: fuel_senv_decreases => pa [ha] [sa] /= ->.
+  rewrite (tnth_nth (aproc_default _ _)) /=.
+  rewrite (nth_map (aproc_default _ _)) //.
+  case: ifP => // /andP[_].
+  by case: nth => pa1 [ha1] [sa1] [].
+rewrite /is_true -[RHS]Hall1.
+congr all; congr stypes_interp.
+rewrite -map_comp -[RHS]map_comp.
+rewrite [in RHS]size_map -val_enum_ord -[RHS]map_comp.
+apply: eq_map => i /=.
+set pss1 := unzip1 _ in Hall1.
+have Hstuck : ~~ has (stype_stuck pss1) (iota 0 (size pss1)).
+  apply: stypes_compat_not_stuck.
+  rewrite /stypes_compat.
+  rewrite stypes_interp_fuel_ok // in Hall1.
+  apply: (leq_trans (stypes_interp_fuel_step Hhas)).
+  by rewrite -ltnS -Hh -addn1.
+move: (Hstuck); rewrite -all_predC => /allP/(_ i).
+rewrite mem_iota leq0n add0n /= /pss1 /unzip1 2!size_map size_iota.
+rewrite (size_map aproc_env) ltn_ord -map_comp => /(_ isT).
+rewrite /stype_stuck /= (nth_map (val i)); last by rewrite size_iota.
+rewrite nth_iota //= add0n.
+case: fuel_senv_decreases => pa [ha] [sa] /= ->.
+rewrite /stype_step (nth_map (aproc_default _ _) STEnd) //=.
+have : inert_nocomm (erase_aproc (nth (aproc_default _ _) aps1 i)).
+  rewrite (nth_map (aproc_default _ _)).
+    by rewrite erase_aproc_skip_nocomm inert_nocomm_red_skip_nocomm.
+  by move: (ltn_ord i); rewrite [X in _ < X]size_map.
+move: (Hnf); rewrite /all_nonfail 2!all_map => /allP/(_ i).
+rewrite mem_iota leq0n add0n ltn_ord /= => /(_ isT).
+rewrite /step (nth_map (aproc_default _ _)) //=.
+case Hnthi: nth => /= [pa1 [ha1 [sa1 p]]] /=.
+case: ha1 sa1 / p Hnthi => //= ha1 sa1 src dt.
+- move=> d k Hnthi.
+  case/boolP: (src < size aps1) => Hsrc; last first.
+    move=> _ _.
+    rewrite nth_default /=; last by rewrite size_map leqNgt.
+    by rewrite nth_default /=; last by rewrite size_map size_iota leqNgt.
+  rewrite (nth_map (aproc_default _ _)) //.
+  rewrite (nth_map (aproc_default _ _) STEnd) //.
+  move: Hnf; rewrite /all_nonfail 2!all_map => /allP/(_ src).
+  rewrite mem_iota leq0n add0n Hsrc /= => /(_ isT).
+  have : inert_nocomm (erase_aproc (nth (aproc_default _ _) aps1 src)).
+    rewrite (nth_map (aproc_default _ _)).
+      by rewrite erase_aproc_skip_nocomm inert_nocomm_red_skip_nocomm.
+    by rewrite size_map in Hsrc.
+  rewrite /aproc_env /erase_aproc /step /aproc_proc.
+  rewrite (nth_map (aproc_default _ _) (default_proc _)) //=.
+  case Hnth: nth => [pa2 [ha2 [sa2 p2]]] /=.
+  case: ha2 sa2 / p2 Hnth => //=.
+  move=> ha3 sa3 src' dt' k' Hnth.
+  case: ifP => //=; last by rewrite eq_sym => ->.
+  move/eqP => ?; subst src'; rewrite eqxx /=.
+  rewrite (nth_map (aproc_default _ _)) // Hnthi /= eqxx /=.
+  case: ifP => //=.
+  rewrite (nth_map (val i)); last by rewrite size_iota.
+  rewrite nth_iota //= add0n.
+  rewrite (nth_map (aproc_default _ _)) // Hnth /=.
+  rewrite (nth_map (aproc_default _ _)) // Hnthi /=.
+  rewrite eqxx eq_sym => dtdt'.
+  by rewrite dtdt' /= eqxx eq_sym dtdt'.
+- move=> k Hnthi.
+  case/boolP: (src < size aps1) => Hsrc; last first.
+    move=> _ _.
+    rewrite nth_default /=; last by rewrite size_map leqNgt.
+    by rewrite nth_default /=; last by rewrite size_map size_iota leqNgt.
+  rewrite (nth_map (aproc_default _ _)) //.
+  rewrite (nth_map (aproc_default _ _) STEnd) //.
+  move: Hnf; rewrite /all_nonfail 2!all_map => /allP/(_ src).
+  rewrite mem_iota leq0n add0n Hsrc /= => /(_ isT).
+  have : inert_nocomm (erase_aproc (nth (aproc_default _ _) aps1 src)).
+    rewrite (nth_map (aproc_default _ _)).
+      by rewrite erase_aproc_skip_nocomm inert_nocomm_red_skip_nocomm.
+    by rewrite size_map in Hsrc.
+  rewrite /aproc_env /erase_aproc /step /aproc_proc.
+  rewrite (nth_map (aproc_default _ _) (default_proc _)) //=.
+  case Hnth: nth => [pa2 [ha2 [sa2 p2]]] /=.
+  case: ha2 sa2 / p2 Hnth => //=.
+  move=> ha3 sa3 src' dt' d' k' Hnth.
+  case: ifP => //=; last by rewrite eq_sym => ->.
+  move/eqP => ?; subst src'; rewrite eqxx /=.
+  rewrite (nth_map (aproc_default _ _)) // Hnthi /= eqxx /=.
+  case: ifP => //=.
+  rewrite (nth_map (val i)); last by rewrite size_iota.
+  rewrite nth_iota //= add0n.
+  rewrite (nth_map (aproc_default _ _)) // Hnth /=.
+  rewrite (nth_map (aproc_default _ _)) // Hnthi /=.
+  rewrite eqxx eq_sym => dtdt'.
+  by rewrite dtdt' /= eqxx eq_sym dtdt'.
+Qed.
+
 End preservation.
 
 (******************************************************************************)
