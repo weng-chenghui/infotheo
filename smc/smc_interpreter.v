@@ -118,52 +118,90 @@ Fixpoint interp h (ps : seq proc) (traces : seq (seq data))
 Definition run_interp h procs seeds :=
   interp h procs (nseq (size procs) [::]) seeds.
 
+End interp.
+
+Arguments Finish {data}.
+Arguments Fail {data}.
+Arguments Init {data}.
+Arguments Send {data}.
+Arguments Recv {data}.
+Arguments Sample {data}.
+Arguments Ret {data}.
+
+Section reduction.
+Variable data : eqType.
+
+Local Notation proc := (@proc data).
+
 Local Open Scope tuple_ext_scope.
 Local Open Scope fset_scope.
 
 (* Lenses (from qecc) name the subset of parties a reduction touches. *)
 Section lens.
-Variables n m : nat.
+Context {n m : nat}.
 (* A choice of m party indices among n, addressing a sub-tuple. *)
 Definition lens : Type := m.-tuple 'I_n.
-Variables (l : lens) (T : Type).
+Variable l : lens.
+
+Section extract.
+Variable T : Type.
 (* Read the m selected entries out of a full n-tuple. *)
 Definition extract (t : n.-tuple T) := map_tuple (tnth t) l.
 (* Write m new entries back into a full n-tuple at the selected positions. *)
 Definition inject (t : n.-tuple T) (t' : m.-tuple T) :=
   [tuple nth (t !_ i) t' (index i l) | i < n].
-End lens.
+End extract.
 
 (* extract commutes with a pointwise map: lets the soundness proof push
    data transformations through the lens. *)
-Lemma map_extract n m A B (l : lens n m) (f : A -> B) v :
-  map_tuple f (extract l v) = extract l (map_tuple f v).
+Lemma map_extract A B (f : A -> B) v :
+  map_tuple f (extract v) = extract (map_tuple f v).
 Proof. by apply: eq_from_tnth => i; rewrite !tnth_map. Qed.
+
+Definition cat_seqs (tr1 tr2 : n.-tuple (seq data)) :=
+  [tuple tr1 !_ i ++ tr2 !_ i | i < n].
+Definition empty_seqs := [tuple (@nil data) | _ < n].
+Definition inject_seqs := inject empty_seqs.
+
+Lemma cat_empty_seqs s : cat_seqs empty_seqs s = s.
+Proof. by apply: eq_from_tnth => i; rewrite !tnth_mktuple. Qed.
+Lemma cat_seqs_empty s : cat_seqs s empty_seqs = s.
+Proof. by apply: eq_from_tnth => i; rewrite !tnth_mktuple cats0. Qed.
+Lemma cat_seqsA s1 s2 s3 :
+  cat_seqs s1 (cat_seqs s2 s3) = cat_seqs (cat_seqs s1 s2) s3.
+Proof.  by apply: eq_from_tnth => i; rewrite !tnth_mktuple catA. Qed.
+End lens.
+Arguments lens : clear implicits.
 
 (* Relational reduction - single step reductions.
    The relation is read at one seed assignment, so a sampling party draws that
    stream's head.  A run therefore models at most one draw per party. *)
-Inductive rstep {n} (sds : n.-tuple (seq data)) : forall {m}, lens n m ->
-      m.-tuple proc -> m.-tuple proc -> m.-tuple (seq data) -> Prop :=
-  | rinit i x p : rstep sds [tuple i] [tuple Init x p] [tuple p] [tuple [:: x]]
-  | rret i x : rstep sds [tuple i] [tuple Ret x] [tuple Finish] [tuple [:: x]]
+Inductive rstep {n} : forall {m}, lens n m ->
+      m.-tuple proc -> m.-tuple proc ->
+      m.-tuple (seq data) -> m.-tuple (seq data) -> Prop :=
+  | rinit i x p :
+    rstep [tuple i] [tuple Init x p] [tuple p] [tuple [::]] [tuple [:: x]]
+  | rret i x :
+    rstep [tuple i] [tuple Ret x] [tuple Finish] [tuple [::]] [tuple [:: x]]
   | rcomm i j x pi pj :
-    rstep sds [tuple i; j] [tuple Send j x pi; Recv i pj] [tuple pi; pj x]
-          [tuple nil; [:: x]]
-  | rsample i f r sd : sds !_ i = r :: sd ->
-    rstep sds [tuple i] [tuple Sample f] [tuple f r] [tuple nil].
+    rstep [tuple i; j] [tuple Send j x pi; Recv i pj] [tuple pi; pj x]
+          [tuple [::]; [::]] [tuple nil; [:: x]]
+  | rsample i f r :
+    rstep [tuple i] [tuple Sample f] [tuple f r] [tuple [:: r]] [tuple nil].
 
 (* Reflexive transitive closure of rstep *)
-Inductive rsteps {n} (sds : n.-tuple (seq data)) :
-      n.-tuple proc -> n.-tuple proc -> n.-tuple (seq data) -> Prop :=
-  | rone m (l : lens n m) ps ps' traces :
-    rstep sds l (extract l ps) ps' traces ->
-    rsteps sds ps (inject l ps ps') (inject l [tuple nil | _ < n] traces)
-  | rrefl ps : rsteps sds ps ps [tuple nil | _ < n]
-  | rtrans ps1 ps2 ps3 tr1 tr2 tr3 :
-    rsteps sds ps1 ps2 tr1 -> rsteps sds ps2 ps3 tr2 ->
-    tr3 = [tuple tr2 !_ i ++ tr1 !_ i | i < n] ->
-    rsteps sds ps1 ps3 tr3.
+Inductive rsteps {n} :
+      n.-tuple proc -> n.-tuple proc ->
+      n.-tuple (seq data) -> n.-tuple (seq data) -> Prop :=
+  | rone m (l : lens n m) ps ps' sds traces :
+    rstep l (extract l ps) ps' sds traces ->
+    rsteps ps (inject l ps ps') (inject_seqs l sds) (inject_seqs l traces)
+  | rrefl ps : rsteps ps ps empty_seqs empty_seqs
+  | rtrans ps1 ps2 ps3 sds1 sds2 sds3 tr1 tr2 tr3 :
+    rsteps ps1 ps2 sds1 tr1 -> rsteps ps2 ps3 sds2 tr2 ->
+    sds3 = cat_seqs sds1 sds2 ->
+    tr3 = cat_seqs tr2 tr1 ->
+    rsteps ps1 ps3 sds3 tr3.
 
 (* One party's step result: the surviving process, its trace, the remaining
    seed stream, and whether it fired. *)
@@ -175,32 +213,38 @@ Definition result_procs n (res : n.-tuple step_resultT) :=
 (* Project the accumulated trace out of each party's step result. *)
 Definition result_traces n (res : n.-tuple step_resultT) :=
   map_tuple (fun r : step_resultT => r.1.1.2) res.
+(* Project the accumulated seed out of each party's step result. *)
+Definition result_seeds n (res : n.-tuple step_resultT) :=
+  map_tuple (fun r : step_resultT => r.1.2) res.
 
 (* The step function does all possible reductions at once, at the seed
    assignment the relation is read at. *)
-Lemma step_complete n m (sds : n.-tuple (seq data)) (l : lens n m) ps ps'
-    traces' :
-  rstep sds l (extract l ps) ps' traces' ->
-  let res := extract l [tuple step ps nil (sds !_ i) i | i < n] in
+Lemma step_complete n m (l : lens n m) ps ps' sds sds' traces' :
+  rstep l (extract l ps) ps' sds traces' ->
+  let seeds := cat_seqs (inject_seqs l sds) sds' in
+  let res := extract l [tuple step ps nil (seeds !_ i) i | i < n] in
   result_procs res = ps' /\
-  result_traces res = traces'.
+  result_traces res = traces' /\
+  result_seeds res = extract l sds'.
 Proof.
 move Hps: (extract l ps) => psl H.
 case: H Hps => /=.
 - move=> i x p [] Hps.
-  split; apply /val_inj;
-    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
+  do! split; apply /val_inj => /=;
+    by rewrite /= !tnth_mktuple /= /step -tnth_nth Hps //= eqxx.
 - move=> i x [] Hps.
-  split; apply /val_inj;
-    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
+  do! split; apply /val_inj;
+    by rewrite /= !tnth_mktuple /= /step -tnth_nth Hps //= eqxx.
 - move=> i j x pi pj [] Hi Hj.
   rewrite /result_procs /result_traces !map_extract.
-  split; apply /val_inj; congr ([:: _; _]);
-    rewrite /= tnth_map tnth_mktuple /= /step;
-    by rewrite -tnth_nth (Hi,Hj) -tnth_nth (Hi,Hj) eqxx.
-- move=> i f r sd Hsd [] Hps.
-  split; apply /val_inj;
-    by rewrite /= tnth_mktuple /= /step -tnth_nth Hps Hsd.
+  do! split; apply /val_inj; congr ([:: _; _]);
+    rewrite /= !(tnth_mktuple,tnth_map) /= /step;
+    rewrite -tnth_nth ?(Hi,Hj) -tnth_nth ?(Hi,Hj) /= !eqxx //=.
+  by case: ifP.
+- move=> i f r Hps.
+  move: (f_equal (fun t => tnth t 0) Hps); rewrite tnth_map /= !tnth0 => Hpsi.
+  do! split; apply /val_inj;
+    by rewrite /= !tnth_mktuple /= /step -tnth_nth Hpsi //= eqxx.
 Qed.
 
 (* Characterization of a 2-party reduction at indices a, b: it must be a
@@ -211,35 +255,123 @@ Variant rstep2_spec n (ps : n.-tuple proc) (a b : 'I_n) : Prop :=
     : rstep2_spec ps a b.
 
 (* Invert a 2-party rstep into the Send/Recv pair that produced it. *)
-Lemma rstep2P n (sds : n.-tuple (seq data)) (ps : n.-tuple proc)
-    (a b : 'I_n) ps' traces :
-  rstep sds [tuple a; b] (extract [tuple a; b] ps) ps' traces ->
+Lemma rstep2P n (ps : n.-tuple proc)
+    (a b : 'I_n) ps' sds traces :
+  rstep [tuple a; b] (extract [tuple a; b] ps) ps' sds traces ->
   rstep2_spec ps a b.
 Proof.
 inversion 1; subst.
 exact: (Rstep2Comm (esym H3) (esym H4)).
 Qed.
 
+Fixpoint compat_seq (A : eqType) (s1 s2 : seq A) :=
+  match s1, s2 with
+  | a1 :: t1, a2 :: t2 => (a1 == a2) && compat_seq t1 t2
+  | _, _ => true
+  end.
+
+Definition compat_seqs {n} (A : eqType) (ss1 ss2 : n.-tuple (seq A)) :=
+    [forall i, compat_seq (ss1 !_ i) (ss2 !_ i)].
+
+Lemma compat_seqC (A : eqType) (s1 s2 : seq A) :
+  compat_seq s1 s2 = compat_seq s2 s1.
+Proof. by elim: s1 s2 => [|a s1 IH] [|b s2] //=; rewrite eq_sym IH. Qed.
+
+Lemma compat_seqsC n (A : eqType) (s1 s2 : n.-tuple (seq A)) :
+  compat_seqs s1 s2 = compat_seqs s2 s1.
+Proof.
+apply/forallP => /=; case: ifP => [/forallP H i | /forallP Hn H].
+- by rewrite compat_seqC.
+- by apply: Hn => i; rewrite compat_seqC.
+Qed.
+
+Lemma compat_cat_seq (A : eqType) (s1 s2 s3 s4 : seq A) :
+  compat_seq (s1 ++ s2) (s3 ++ s4) -> compat_seq s1 s3.
+Proof. by elim: s1 s3 => // a s1 IH [|b s3] //= /andP[->] /IH. Qed.
+
+Lemma compat_cat_seqs n (ss1 ss2 ss3 ss4 : n.-tuple _) :
+  compat_seqs (cat_seqs ss1 ss2) (cat_seqs ss3 ss4) ->
+  compat_seqs ss1 ss3.
+Proof.
+move=> Hc; apply/forallP => /= i.
+move/forallP/(_ i): Hc; rewrite !tnth_mktuple; exact: compat_cat_seq.
+Qed.
+
+Lemma compat_cat_seq_tail (A : eqType) (ss ss1 ss2 : seq A) :
+  compat_seq (ss ++ ss1) (ss ++ ss2) = compat_seq ss1 ss2.
+Proof. by elim: ss => // a ss IH /=; rewrite eqxx IH. Qed.
+
+Lemma compat_cat_seqs_tail n (ss ss1 ss2 : n.-tuple _) :
+  compat_seqs (cat_seqs ss ss1) (cat_seqs ss ss2) =
+  compat_seqs ss1 ss2.
+Proof.
+apply/forallP => /=; case: ifP => [/forallP H i | /forallP Hn H].
+- by rewrite !tnth_mktuple compat_cat_seq_tail.
+- by apply: Hn => i; move: (H i); rewrite !tnth_mktuple compat_cat_seq_tail.
+Qed.
+
+Lemma cat_seqs_injectC n m p
+      (l : lens n m) (l' : lens n p) ss1 ss2 :
+  {in l & l', forall a b, a != b} ->
+  cat_seqs (inject_seqs l ss1) (inject_seqs l' ss2) =
+  cat_seqs (inject_seqs l' ss2) (inject_seqs l ss1).
+Proof.
+move=> ll'.
+apply: eq_from_tnth => i; rewrite !tnth_mktuple.
+case/boolP: (i \in l') => il'.
+  have il : i \notin l.
+    apply/negP => il; move/(_ i i): ll'.
+    by rewrite il il' eqxx => /(_ isT isT).
+  rewrite nth_default /= ?cats0 //.
+  by rewrite leqNgt size_tuple -[X in (_ < X)%N](size_tuple l) index_mem.
+rewrite (nth_default _ (n:=index i l')) ?cats0 //.
+by rewrite leqNgt size_tuple -[X in (_ < X)%N](size_tuple l') index_mem.
+Qed.
+
+Lemma compat_cat_inject_seqs n m p
+      (l : lens n m) (l' : lens n p) ss1 ss2 ss3 ss4 :
+  {in l & l', forall a b, a != b} ->
+  compat_seqs (cat_seqs (inject_seqs l ss1) ss2)
+              (cat_seqs (inject_seqs l' ss3) ss4) ->
+  compat_seqs ss2 (inject_seqs l' ss3).
+Proof.
+move=> ll' Hcompat.
+apply/forallP => i; move/forallP/(_ i): Hcompat; rewrite !tnth_mktuple /=.
+case/boolP: (i \in l') => il'.
+  have il : i \notin l.
+    apply/negP => il; move/(_ i i): ll'.
+    by rewrite il il' eqxx => /(_ isT isT).
+  rewrite nth_default /=.
+    rewrite -{1}(cats0 (ss2 !_ i)).
+    exact: compat_cat_seq.
+  by rewrite leqNgt size_tuple -[X in (_ < X)%N](size_tuple l) index_mem.
+rewrite (nth_default _ (n:=index i l')).
+by move=> _; rewrite compat_seqC.  
+by rewrite leqNgt size_tuple -[X in (_ < X)%N](size_tuple l') index_mem.
+Qed.
+
 (* Two reductions fireable from one state are either identical or act on
    disjoint party indices.  That disjointness lets the soundness proof
    compose per-party reductions in any order. *)
-Lemma rstep_disjoint n m p (sds : n.-tuple (seq data)) (ps : n.-tuple proc)
-  (l1 : lens n m) (l2 : lens n p) psl1 psl2 ps1 tr1 ps2 tr2 :
+Lemma rstep_disjoint n m p (ps : n.-tuple proc)
+  (l1 : lens n m) (l2 : lens n p) psl1 psl2 ps1 sds1 tr1 ps2 sds2 tr2 :
   psl1 = extract l1 ps -> psl2 = extract l2 ps ->
-  rstep sds l1 psl1 ps1 tr1 -> rstep sds l2 psl2 ps2 tr2 ->
-  l1 == l2 :> seq _ /\ ps1 = ps2 :> seq _ /\ tr1 = tr2 :> seq _
+  compat_seqs (inject_seqs l1 sds1) (inject_seqs l2 sds2) ->
+  rstep l1 psl1 ps1 sds1 tr1 -> rstep l2 psl2 ps2 sds2 tr2 ->
+  l1 == l2 :> seq _ /\ ps1 = ps2 :> seq _ /\
+  sds1 = sds2 :> seq _ /\ tr1 = tr2 :> seq _
   \/ {in l1 & l2, forall a b, a != b}.
   (* [disjoint l1 & l2] *)
 Proof.
-move=> Hpsl1 Hpsl2 Hred1 Hred2.
+move=> Hpsl1 Hpsl2 Hsds Hred1 Hred2.
 (* Fallback: the constructor equality is consumed as a view in destructuring
    position, so goal-level congr does not apply.  The equation between the two
    indices is kept as [Eii'] instead of being substituted, because two sampling
    reductions at one index need it to compare their seed streams. *)
-case: Hred1 Hpsl1 =>
-  [i j pi | i x | i j x pi pj | i f r sd Hsd] /(congr1 val) /= [] Hpi;
+case: Hred1 Hpsl1 Hsds =>
+  [i j pi | i x | i j x pi pj | i f r] /(congr1 val) /= [] Hpi;
 case: Hred2 Hpsl2 =>
-  [i' j' pi' | i' x' | i' j' x' pi' pj' | i' f' r' sd' Hsd']
+  [i' j' pi' | i' x' | i' j' x' pi' pj' | i' f' r']
     /(congr1 val) /=[];
   (have [Eii'|ii' Hpi'] := eqVneq i i'; [rewrite -Eii' -Hpi // => -[]
    | right => a b; rewrite !inE; try by do! move /eqP ->]).
@@ -258,8 +390,10 @@ case: Hred2 Hpsl2 =>
   + by rewrite ij -Hpi' in Hpj.
  move=> /orP[] /eqP-> /eqP->; apply/eqP => ij; by rewrite -ij -(Hpi,H) in Hpi'.
  move=> /eqP-> /orP[] /eqP->; apply/eqP => ij; by rewrite ij -(Hpi',H) in Hpi.
-move=> Eff'; rewrite Eii' Hsd' in Hsd; case: Hsd => Err' _.
-by left; rewrite Eff' Err'.
+move=> Eff'; rewrite Eff' Eii'.
+clear.
+move/forallP/(_ i').
+by rewrite !tnth_mktuple /= eqxx /= andbT => /eqP ->; left.
 Qed.
 
 Lemma extract_inject_disj n m m' A
@@ -295,50 +429,48 @@ have Hps2 : (size ps2 <= index i l')%N.
 by rewrite !(nth_default _ (n:=index i l')).
 Qed.
 
-Definition concat_traces n (tr1 tr2 : n.-tuple (seq data)) :=
-  [tuple tr1 !_ i ++ tr2 !_ i | i < n].
-Definition empty_traces {n} := [tuple (@nil data) | _ < n].
-
 (* Alternative definition of reduction, better for induction *)
-Inductive rstepl {n} (sds : n.-tuple (seq data)) :
-      n.-tuple proc -> n.-tuple proc -> n.-tuple (seq data) -> Prop :=
-  | rnil ps : rstepl sds ps ps [tuple nil | _ < n]
-  | rcons m (l : lens n m) ps ps1 ps2 tr1 tr2 tr3 :
-    rstep sds l (extract l ps) ps1 tr1 ->
-    rstepl sds (inject l ps ps1) ps2 tr2 ->
-    tr3 = concat_traces tr2 (inject l empty_traces tr1) ->
-    rstepl sds ps ps2 tr3.
+Inductive rstepl {n} :
+      n.-tuple proc -> n.-tuple proc ->
+      n.-tuple (seq data) -> n.-tuple (seq data) -> Prop :=
+  | rnil ps : rstepl ps ps empty_seqs empty_seqs
+  | rcons m (l : lens n m) ps ps1 ps2 sds1 sds2 sds3 tr1 tr2 tr3 :
+    rstep l (extract l ps) ps1 sds1 tr1 ->
+    rstepl (inject l ps ps1) ps2 sds2 tr2 ->
+    sds3 = cat_seqs (inject_seqs l sds1) sds2 ->
+    tr3 = cat_seqs tr2 (inject_seqs l tr1) ->
+    rstepl ps ps2 sds3 tr3.
 
-Lemma rconcat n (sds : n.-tuple (seq data)) (ps ps1 ps2 : n.-tuple proc)
-    tr1 tr2 :
-  rstepl sds ps ps1 tr1 -> rstepl sds ps1 ps2 tr2 ->
-  rstepl sds ps ps2 (concat_traces tr2 tr1).
+Lemma rconcat n (ps ps1 ps2 : n.-tuple proc) sds1 sds2 tr1 tr2 :
+  rstepl ps ps1 sds1 tr1 -> rstepl ps1 ps2 sds2 tr2 ->
+  rstepl ps ps2 (cat_seqs sds1 sds2) (cat_seqs tr2 tr1).
 Proof.
-elim: ps ps1 tr1 / => [ps Hr|].
-  rewrite (_ : concat_traces _ _ = tr2) //.
-  by apply: eq_from_tnth => i; rewrite !tnth_mktuple cats0.
-move=> m l ps ps1 ps3 tr3 tr4 tr' Hr Hrl1 IH Htr' Hrl2.
+elim: ps ps1 sds1 tr1 / => [ps Hr|].
+  by rewrite cat_empty_seqs cat_seqs_empty.
+move=> m l ps ps1 ps3 sds1 sds2' sds3 tr1 tr2' tr3  Hr Hrl1 IH Hsds Htr Hrl2.
 apply: (rcons Hr).
-  exact: (IH Hrl2).
-by apply: eq_from_tnth => i; rewrite Htr' !tnth_mktuple catA.
+- exact: (IH Hrl2).
+- by rewrite Hsds cat_seqsA.
+- by rewrite Htr cat_seqsA.
 Qed.
 
 (* Equiavalence of of rsteps and rstepl *)
-Lemma rstepsP n (sds : n.-tuple (seq data)) (ps1 ps2 : n.-tuple proc) tr :
-  rsteps sds ps1 ps2 tr <-> rstepl sds ps1 ps2 tr.
+Lemma rstepsP n (ps1 ps2 : n.-tuple proc) sds tr :
+  rsteps ps1 ps2 sds tr <-> rstepl ps1 ps2 sds tr.
 Proof.
 split.
-- elim: ps1 ps2 tr/ =>
-    [m l ps ps1 tr1 Hr | ps | ps ps1 ps3 tr1 tr3 tr4 Hr1 IH1 Hr2 IH2 ->].
+- elim: ps1 ps2 sds tr/ =>
+    [m l ps ps1 sds1 tr1 Hr | ps
+    | ps ps1 ps3 sds1 sds3 sds4 tr1 tr3 tr4 Hr1 IH1 Hr2 IH2 -> ->].
   + apply: (rcons Hr).
-      exact: rnil.
-    apply: eq_from_tnth => i.
-    by rewrite !tnth_mktuple.
+    * exact: rnil.
+    * by rewrite cat_seqs_empty.
+    * by rewrite cat_empty_seqs.
   + exact: rnil.
   + exact: (rconcat IH1 IH2).
-elim: ps1 ps2 tr / => [ps |].
+elim: ps1 ps2 sds tr / => [ps |].
   exact: rrefl.
-move=> m l ps ps1 ps2 tr1 tr2 tr' Hr Hrl1 IH ->.
+move=> m l ps ps1 ps2 sds1 sds2 sds' tr1 tr2 tr' Hr Hrl1 IH ->.
 exact: (rtrans (rone Hr) IH).
 Qed.
 
@@ -357,92 +489,98 @@ Qed.
    However, as sound as we have termination, we get confluence,
    and we also proved that the pismc sublanguage is terminating. *)
 Lemma rstepl_normalisation n (sds : n.-tuple (seq data))
-    (ps ps1 ps2 : n.-tuple proc) tr1 tr2 :
-  rstepl sds ps ps1 tr1 ->
-  (forall m (l : lens n m) ps' tr', ~ rstep sds l (extract l ps1) ps' tr') ->
-  rstepl sds ps ps2 tr2 ->
-  exists tr3, rstepl sds ps2 ps1 tr3 /\ tr1 = concat_traces tr3 tr2.
+    (ps ps1 ps2 : n.-tuple proc) sds1 sds2 tr1 tr2 :
+  rstepl ps ps1 sds1 tr1 ->
+  (forall m (l : lens n m) ps' sds' tr',
+      ~ rstep l (extract l ps1) ps' sds' tr') ->
+  rstepl ps ps2 sds2 tr2 ->
+  compat_seqs sds1 sds2 ->
+  exists sds3 tr3, rstepl ps2 ps1 sds3 tr3 /\
+              sds1 = cat_seqs sds2 sds3 /\ tr1 = cat_seqs tr3 tr2.
 Proof.
 move=> Hr1 Hterm.
-pose tr0 := @empty_traces n.
-elim: ps ps1 tr1 / Hr1 ps2 tr2 Hterm =>
-  [ps | m l ps ps1 ps3 tr1 tr3 tr4 Hr Hrl1 IH ->] /= ps2 tr2 Hterm Hr2.
-  exists tr2.
-  case: ps ps2 tr2 / Hr2 Hterm => [ps Hterm |].
-    do! split => //.
-      exact: rnil.
-    by apply eq_from_tnth => i; rewrite !tnth_mktuple.
-  move=> m l ps ps1 ps2 t1 tr2 tr3 Hr _ _ Hterm.
-  elim: (Hterm _ _ _ _ Hr).
-elim: ps ps2 tr2 / Hr2 ps1 ps3 tr1 tr3 Hr Hrl1 IH Hterm =>
-    [ps | m' l' ps ps2 ps3' tr2 tr3' tr4' Hr' Hrl2 IH' ->]
-    /= ps1 ps3 tr1 tr3 Hr1 Hrl1 IH Hterm.
-  pose tr3' := concat_traces tr3 (inject l empty_traces tr1).
-  exists tr3'.
+pose tr0 := @empty_seqs n.
+elim: ps ps1 sds1 tr1 / Hr1 ps2 sds2 tr2 Hterm =>
+  [ps | m l ps ps1 ps3 sds1 sds3 sds4 tr1 tr3 tr4 Hr Hrl1 IH -> ->] /=
+  ps2 sds2 tr2 Hterm Hr2 Hcompat.
+  exists sds2, tr2.
+  case: ps ps2 sds2 tr2 / Hr2 Hterm Hcompat => [ps Hterm |].
+    rewrite cat_empty_seqs; do! split => //; exact: rnil.
+  move=> m l ps ps1 ps2 sds1 sds2 sds3 t1 tr2 tr3 Hr _ _ _ Hterm.
+  by case: (Hterm _ _ _ _ _ Hr).
+elim: ps ps2 sds2 tr2 / Hr2 ps1 ps3 sds1 sds3 tr1 tr3 Hr Hrl1 IH Hterm Hcompat=>
+    [ps | m' l' ps ps2 ps3' sds2 sds3' sds4' tr2 tr3' tr4' Hr' Hrl2 IH' -> ->]
+    /= ps1 ps3 sds1 sds3 tr1 tr3 Hr1 Hrl1 IH Hterm Hcompat.
+  pose tr3' := cat_seqs tr3 (inject_seqs l tr1).
+  pose sds3' := cat_seqs (inject_seqs l sds1) sds3.
+  exists sds3', tr3'.
   do! split => //.
   - exact: (rcons Hr1 Hrl1).
-  - by apply: eq_from_tnth => i; rewrite !tnth_mktuple cats0.
-case:(rstep_disjoint (erefl (extract l ps)) (erefl (extract l' ps)) Hr1 Hr').
+  - by rewrite cat_empty_seqs.
+  - by rewrite cat_seqs_empty.
+case:(rstep_disjoint (erefl (extract l ps)) (erefl (extract l' ps)) _ Hr1 Hr').
+    exact: compat_cat_seqs Hcompat.  
   case => /eqP ll'.
   have mm' : m = m'.
     by rewrite -(size_tuple l) -(size_tuple l') -ll'.
-  case: m' / mm' l' ps2 tr2 ll' Hr' Hrl2 IH' => l' ps2 tr2 ll' Hr' Hrl2 IH'.
+  case: m' / mm' l' ps2 sds2 tr2 ll' Hr' Hrl2 IH' Hcompat
+      => l' ps2 sds2 tr2 ll' Hr' Hrl2 IH' Hcompat.
   have {}ll' : l = l' by apply: val_inj.
   rewrite -ll' in Hr' *.
-  case => ps12 tr12.
+  case => ps12 [sds12 tr12].
   have {}ps12 : ps1 = ps2 by apply: val_inj.
+  have {}sds12 : sds1 = sds2 by apply: val_inj.
   have {}tr12 : tr1 = tr2 by apply: val_inj.
-  subst l' ps2 tr2.
-  case: (IH _ _ Hterm Hrl2) => tr1' [Hrl3] Htr3.
-  exists tr1'.
-  do! split => //.
-  by apply: eq_from_tnth => i; rewrite !(tnth_mktuple,catA,Htr3).
+  subst l' ps2 sds2 tr2.
+  case: (IH _ _ _ Hterm Hrl2) => [|sds1' [tr1'] [Hrl3] [-> ->]].
+    by rewrite compat_cat_seqs_tail in Hcompat.
+  exists sds1', tr1'.
+  by rewrite !cat_seqsA.
 move=> /= ll'.
 rewrite extract_inject_disj in IH'; last first.
   by move=> a b Ha Hb; rewrite eq_sym; apply: ll'.
-pose tr2' := inject l' tr0 tr2.
+pose sds2' := inject_seqs l' sds2.
+pose tr2' := inject_seqs l' tr2.
 have Hrll' :
-  rstepl sds (inject l ps ps1) (inject l' (inject l ps ps1) ps2) tr2'.
+  rstepl (inject l ps ps1) (inject l' (inject l ps ps1) ps2) sds2' tr2'.
   apply: (rcons (l:=l')).
-      rewrite extract_inject_disj //.
-      exact: Hr'.
-    exact: rnil.
-  by apply: eq_from_tnth => i; rewrite !tnth_mktuple.
-case: (IH _ _ Hterm Hrll').
-move => tr3a [Hrl3] Htr3.
+  - rewrite extract_inject_disj //.
+  - exact: Hr'.
+  - exact: rnil.
+  - by rewrite cat_seqs_empty.
+  - by rewrite cat_empty_seqs.
+case: (IH _ _ _ Hterm Hrll').
+  by apply: compat_cat_inject_seqs Hcompat.
+move => sds3a [tr3a] [Hrl3] [Hsds3 Htr3].
+subst sds3 tr3.
 rewrite injectC_disj // in Hrl3.
-have [] // := IH' _ _ _ _ Hr1 Hrl3.
-- move=> ps5 tr5 Hterm' Hrl5.
-  rewrite injectC_disj // in Hrl5.
+have [] // := IH' _ _ _ _ _ _ Hr1 Hrl3.
+- move=> ps5 sds5 tr5 Hterm' Hrl5 Hcompat5.
+  rewrite injectC_disj // in Hrl5; last first.
+    by move=> a b /[swap]; rewrite eq_sym; exact: ll'.
   have Hrl5' := rconcat Hrll' Hrl5.
-  case: (IH _ _ Hterm Hrl5') => tr6 [Hrl53] Htr6.
-  exists tr6; split => //.
-  move: Htr6; rewrite Htr3 => H.
-  apply: eq_from_tnth => i; move/(f_equal (fun t => tnth t i)): H.
-  by rewrite !tnth_mktuple catA => /cat_inj_left.
-- by move=> a b Ha Hb; rewrite eq_sym; apply: ll'.
-move=> tr3b [Hrl3'] Htr3b.
-exists tr3b; split => //.
-apply: eq_from_tnth => i.
-move/(f_equal (fun t => tnth t i)): Htr3b.
-rewrite Htr3 !tnth_mktuple catA => <-.
-case/boolP: (i \in l) => il.
-  rewrite nth_default ?cats0 //.
-  rewrite size_tuple -{1}(size_tuple l') leqNgt index_mem.
-  apply/negP => il'.
-  by move: (ll' i i); rewrite il il' eqxx => /(_ isT isT).
-symmetry; rewrite nth_default ?cats0 //.
-by rewrite size_tuple -{1}(size_tuple l) leqNgt index_mem.
+  case: (IH _ _ _ Hterm Hrl5') => [|sds6 [tr6] [Hrl53] [Hsds6 Htr6]].
+    subst sds2'.
+    by rewrite compat_cat_seqs_tail Hcompat5.
+  exists sds6, tr6; do! split => //.
+  + apply: eq_from_tnth => i.
+    move/(f_equal (fun t => tnth t i)): Hsds6; rewrite !tnth_mktuple.
+    by rewrite -catA; elim: nth => //= a s {}IH [].
+  + apply: eq_from_tnth => i.
+    rewrite -[LHS]revK -[RHS]revK; congr rev.
+    move/(f_equal (fun t => rev (tnth t i))): Htr6; rewrite !tnth_mktuple.
+    rewrite !rev_cat -catA -(rev_cat (tnth tr6 _)).
+    by elim: rev => //= a s {}IH [].
+- move: Hcompat.
+  subst sds2'.
+  by rewrite cat_seqsA cat_seqs_injectC // -cat_seqsA compat_cat_seqs_tail.
+move=> sds3b [tr3b] [Hrl3'] [Hsds3b] Htr3b.
+exists sds3b, tr3b; do! split => //.
+  by rewrite -cat_seqsA -Hsds3b !cat_seqsA -cat_seqs_injectC.
+by rewrite cat_seqsA -Htr3b -!cat_seqsA cat_seqs_injectC.
 Qed.
-End interp.
 
-Arguments Finish {data}.
-Arguments Fail {data}.
-Arguments Init {data}.
-Arguments Send {data}.
-Arguments Recv {data}.
-Arguments Sample {data}.
-Arguments Ret {data}.
+End reduction.
 
 Section sampling.
 Variable data : Type.
@@ -627,4 +765,3 @@ Definition all_final (ps : seq (proc data)) : bool :=
   all is_final ps.
 
 End termination.
-
