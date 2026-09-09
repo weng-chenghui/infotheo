@@ -77,8 +77,8 @@ HB.instance Definition _ := hasDecEq.Build dsdp_dtype dsdp_dtype_eqP.
 
 (** The DSDP data types and operations as one record.
 
-    The carriers are fields rather than an AHEncType parameter, so a symbolic
-    instance stands beside the cryptographic one. *)
+    The carriers are fields rather than an AHEncType parameter, so an
+    instance is a choice of carriers and operations. *)
 Record DSDP_Interface := MkDSDP_Interface {
   (* Carrier types *)
   di_msgT      : Type ;  (* plaintext scalars *)
