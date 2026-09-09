@@ -93,8 +93,7 @@ Require Import extra_proba.
 (* ```                                                                        *)
 (*              indcpa_scheme == an encryption scheme, a finite coin space,   *)
 (*                               its nonemptiness, and the map from a coin    *)
-(*                               index to the randomness encryption consumes, *)
-(*                               together with a left inverse of that map     *)
+(*                               index to the randomness encryption consumes  *)
 (*            card_renc_gt0 S == the coin space of S is nonempty              *)
 (*             renc_default S == the coin of S the pinned nonemptiness names  *)
 (* indcpa_epsilon_assumption == a Boolean adversary class, one epsilon, and   *)
@@ -196,9 +195,9 @@ Notation "x '<-' m ';' f" := (m >>= (fun x => f))
    distribution at a value. *)
 Notation "'ret' a" := (fdist1 a) (at level 0) : fdist_scope.
 
-(* The six data every epsilon is measured at: the scheme, its nonempty coin
-   space, and the invertible coin map.  An assumption is made about a value of
-   this record. *)
+(* The four data every epsilon is measured at: the scheme, its coin type,
+   that type's nonemptiness, and the coin map.  An assumption is made about a
+   value of this record. *)
 Record indcpa_scheme := {
   (* the additively homomorphic encryption scheme *)
   scheme_AHE          : AHEncType ;
@@ -207,13 +206,7 @@ Record indcpa_scheme := {
   (* nonemptiness, one pinned proof, in the form fdist_uniform takes *)
   scheme_card_renc    : #|scheme_renc| = #|scheme_renc|.-1.+1 ;
   (* the randomness a coin index stands for *)
-  scheme_rand_of_renc : scheme_renc -> rand scheme_AHE ;
-  (* The coin index a piece of encryption randomness stands for, the inverse
-     direction of the coin decoding. *)
-  scheme_renc_of_rand : rand scheme_AHE -> scheme_renc ;
-  (* Reading a coin's randomness back gives the coin. A coin is
-     therefore determined by the randomness it names. *)
-  scheme_rand_of_rencK : cancel scheme_rand_of_renc scheme_renc_of_rand }.
+  scheme_rand_of_renc : scheme_renc -> rand scheme_AHE }.
 
 (* The coin space of a scheme is nonempty, its pinned cardinality read in the
    form an ordinal index takes. *)

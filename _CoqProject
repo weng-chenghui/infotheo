@@ -159,6 +159,5 @@ dumas2017dual/dsdp/hopping/dsdp_alice_main.v
 dumas2017dual/dsdp/hopping/dsdp_alice_instances.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
 dumas2017dual/dsdp/counting/dsdp_relay_secrecy.v
-dumas2017dual/dsdp/counting/dsdp_relay_trace.v
 
 -R . infotheo

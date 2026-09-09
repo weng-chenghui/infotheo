@@ -104,11 +104,7 @@ Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 (*     rand_of_renc_paillier == the coin map, the identity                    *)
 (*        card_renc_paillier == the successor form of that cardinality, in    *)
 (*                              one pinned proof term                         *)
-(*     renc_of_rand_paillier == the coin index a randomness stands for, the   *)
-(*                              identity                                      *)
-(*    rand_of_rencK_paillier == the coin map of this instantiation is a       *)
-(*                              section of that index map                     *)
-(*    paillier_indcpa_scheme == the six data above as one indcpa_scheme       *)
+(*    paillier_indcpa_scheme == the four data above as one indcpa_scheme      *)
 (*                              value, at modulus p q                         *)
 (*       enc_fdist_paillierE == the IND-CPA challenger at this packaging      *)
 (*                              encrypts with paillier_enc under uniform      *)
@@ -220,24 +216,13 @@ Definition rand_of_renc_paillier : renc_paillier -> rand AHE := idfun.
 Lemma card_renc_paillier : #|renc_paillier| = #|renc_paillier|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
-(* Paillier coins are the randomness itself, so reading an index back is the
-   identity. *)
-Definition renc_of_rand_paillier : rand AHE -> renc_paillier := idfun.
-
-(* Reading a Paillier coin's randomness back names the coin again. *)
-Lemma rand_of_rencK_paillier :
-  cancel rand_of_renc_paillier renc_of_rand_paillier.
-Proof. by []. Qed.
-
 (* The Paillier scheme as one indcpa_scheme: the packaging at modulus p q,
    its coin type, cardinality, and coin map.  The DSDP files instantiate the
    game here, so every Paillier bound is read at this record. *)
 Definition paillier_indcpa_scheme : indcpa_scheme :=
   {| scheme_AHE := AHE ; scheme_renc := renc_paillier ;
      scheme_card_renc := card_renc_paillier ;
-     scheme_rand_of_renc := rand_of_renc_paillier ;
-     scheme_renc_of_rand := renc_of_rand_paillier ;
-     scheme_rand_of_rencK := rand_of_rencK_paillier |}.
+     scheme_rand_of_renc := rand_of_renc_paillier |}.
 
 (* The IND-CPA challenger at this packaging is the Paillier encryption of
    paillier_enc.v under uniform unit-group randomness.  Every advantage below

@@ -58,7 +58,6 @@ Let data := di_data DI.
 Let d := di_data_of_plain DI.
 Let e := di_data_of_cipher DI.
 Let k := di_data_of_priv_key DI.
-Let rd := di_data_of_rand DI.
 
 (* HE operations from the scheme *)
 Let Emul := @Emul AHE.
@@ -89,8 +88,7 @@ Variables (rb1 rb2 rc1 rc2 ra1 ra2 : randT).
 (* Private keys *)
 Variables (dk_a : priv_keyT) (dk_b : priv_keyT) (dk_c : priv_keyT).
 
-(* The three traces of one DSDP run.  Each party's trace holds the two coins
-   it drew, at the positions the run writes them. *)
+(* Protocol traces - now include randomness in encryption calls *)
 (* Randomness arguments follow the executed run: a combine's randomness is
    the homomorphic combination of its arguments' randomness, per
    [dsdp_run_traces_encE] of dsdp_alice_trace_link.v.  Bob's Charlie-key
@@ -100,18 +98,14 @@ Definition dsdp_traces : dsdp_tracesT :=
   [tuple
      [bseq d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
            e (E alice (v3 * u3 + r3 + (v2 * u2 + r2)) rc2);
-           rd ra2; rd ra1;
            e (E charlie v3 rc1);
            e (E bob v2 rb1);
            d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
-     [bseq rd rb2;
-           e (E charlie (v3 * u3 + r3) (rand_mul (rand_pow rc1 u3) ra2));
+     [bseq e (E charlie (v3 * u3 + r3) (rand_mul (rand_pow rc1 u3) ra2));
            e (E bob (v2 * u2 + r2) (rand_mul (rand_pow rb1 u2) ra1));
-           rd rb1; d v2; k dk_b];
-     [bseq rd rc2;
-           e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))
-             (rand_mul (rand_mul (rand_pow rc1 u3) ra2) rb2));
-           rd rc1; d v3; k dk_c]].
+           d v2; k dk_b];
+     [bseq e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))
+             (rand_mul (rand_mul (rand_pow rc1 u3) ra2) rb2)); d v3; k dk_c]].
 
 (* Protocol correctness is now proved algebraically using ring arithmetic.
    The final result S = v3*u3 + r3 + (v2*u2 + r2) - r2 - r3 + u1*v1

@@ -66,11 +66,10 @@ $S = u_1 v_1 + u_2 v_2 + u_3 v_3$ and returns it to Alice.
   \label{def:party_views}
   \rocqok
   A corrupted party's view is everything it sees: its own key and inputs, the
-  random tape it draws, the ciphertexts it receives, and, for Alice, the
-  decrypted output $S$. Alice's view carries her key, her inputs and masks, the
-  output $S$, her two combine coins, and the three ciphertext hops. Each
-  relay's view carries its key, its own input, the ciphertexts it receives, and
-  the two coins it draws.
+  ciphertexts it receives, and, for Alice, the decrypted output $S$. Alice's view
+  carries her key, her inputs and masks, the output $S$, and the three ciphertext
+  hops; a relay's view carries its key, its own input, and the ciphertexts it
+  forwards.
 \end{definition}
 
 \begin{lemma}[Protocol correctness]
@@ -116,14 +115,12 @@ degenerate query that violates it lets Alice read a relay's input outright.
   Proved in \texttt{dsdp\_entropy.v} over the two primes, the sample law and
   the eleven random inputs, with their uniformity and their independence
   assumed and the conditioner's $S$ computed from the inputs rather than left
-  free. Those hypotheses are fields of the record
-  \texttt{dsdp\_random\_inputs}, which also carries the six coins one run
-  draws and their joint independence of the eleven, and which
-  \texttt{uniform\_inputs} inhabits at every modulus. Because the
-  each-against-the-rest independence reaches Alice's three weights, the
-  equality covers honest sampling, where her weights are independent of her
-  input and of one another. At every modulus the equality is exact and holds
-  against an adversary of any
+  free. Those hypotheses are exactly the fields of the record
+  \texttt{dsdp\_random\_inputs}, which \texttt{uniform\_inputs} inhabits at
+  every modulus. Because the each-against-the-rest independence reaches
+  Alice's three weights, the equality covers honest sampling, where her
+  weights are independent of her input and of one another. At
+  every modulus the equality is exact and holds against an adversary of any
   running time.
 \end{theorem}
 \begin{proof}
@@ -227,25 +224,6 @@ At the end of the ladder both slots encrypt zero and the fiber bound applies.
 Throughout, $m$ is the size of the plaintext space and the plaintext carrier is a
 finite commutative unit ring.
 
-\begin{definition}[The encryption coins of one run]
-  \label{def:dsdp_enc_coins}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_enc_coins,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.card_dsdp_enc_coins,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_enc_coins_fdist}
-  \rocqok
-  \uses{def:protocol_flow}
-  A coin record holds the six coin indices one DSDP execution consumes: the two
-  under which Bob and Charlie encrypt their inputs to Alice, the two Alice
-  encrypts her combines under, Bob's second-hop coin, and Charlie's
-  re-encryption coin. Its law is the uniform distribution on the record.
-  \[ c = \big(\rho_2, \rho_3,\ \alpha_1, \alpha_2,\ \beta, \gamma\big),
-     \qquad \mathcal{L}(c) = \mathcal{U}\big(\mathrm{Renc}^6\big) \]
-  Uniformity of the record says three things at once about the six coins: each
-  is uniform, they are independent, and each is fresh where it is drawn. That
-  is what a reduction reads when it hands one coordinate to the challenger and
-  keeps the other five.
-\end{definition}
-
 \begin{definition}[The corrupted-Alice experiment]
   \label{def:alice_experiment}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sampleT,
@@ -255,22 +233,18 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.sample_V3,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.sample_R2,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.sample_R3,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.EncCoins,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RB1,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RC1,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Rho2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Rho3,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA1,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA2,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RB2,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RC2,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Sout,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.SoutE}
   \rocqok
-  \uses{def:party_views,def:dsdp_enc_coins}
-  The experiment is the uniform distribution on the product of five
+  \uses{def:party_views}
+  The experiment is the uniform distribution on the product of eight
   coordinates: the two honest inputs $V_2, V_3$, Alice's two mask plaintexts
-  $R_2, R_3$, and one coin record of Definition~\ref{def:dsdp_enc_coins}, whose
-  six components are read off it as $\rho_2, \rho_3, \alpha_1, \alpha_2, \beta,
-  \gamma$.
+  $R_2, R_3$, the randomness $\rho_2, \rho_3$ of the two ciphertexts she
+  receives, and the randomness $\alpha_1, \alpha_2$ of her two outgoing combines.
   Alice's own input $v_1$ and her three weights $u_1, u_2, u_3$ are parameters of
   the experiment rather than sampled coordinates. The output she learns is the
   weighted scalar product of her weights with the two honest inputs.
@@ -283,8 +257,7 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.bob_zero_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_real_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_zero_cipher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_reenc_cipher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tuple,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tupleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_real,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_bob_zero,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_all_zero,
@@ -293,21 +266,15 @@ finite commutative unit ring.
        infotheo.computational_security.indcpa_game.accept_ge0}
   \rocqok
   \uses{def:alice_experiment}
-  Alice's tuple carries her two masks, her two combine coins, the output $S$,
-  the two ciphertexts she receives from the relays, and Charlie's
-  re-encryption of the aggregate under Alice's own key. Three tuples differ
-  only in the plaintexts of the two relay ciphertexts.
+  Alice's tuple carries her two masks, her two combine randomnesses, the
+  output $S$, and the two ciphertexts she receives. Three tuples differ only
+  in the plaintexts of those two ciphertexts.
   \[ \hoptuple{0} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, V_2, \rho_2),\; \Enc(\pk_C, V_3, \rho_3),\; C_\gamma\big) \]
+       \Enc(\pk_B, V_2, \rho_2),\; \Enc(\pk_C, V_3, \rho_3)\big) \]
   \[ \hoptuple{1} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, V_3, \rho_3),\; C_\gamma\big) \]
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, V_3, \rho_3)\big) \]
   \[ \hoptuple{2} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3),\; C_\gamma\big) \]
-  \[ C_\gamma = \Enc(\pk_A,\; S - u_1 v_1 + R_2 + R_3,\; \gamma) \]
-  The eighth slot is the message Charlie returns to Alice, encrypted under her
-  own key, and it is the same random variable in all three tuples: its
-  plaintext is a function of the output Alice is allowed to learn and of her
-  two masks, so no hop replaces it and it carries no relay input of its own.
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3)\big) \]
   $\hoptuple{0}$ is Alice's real tuple and $\hoptuple{2}$ the all-zero
   endpoint. $G_i$ is the joint law of the honest input pair beside
   $\hoptuple{i}$, and $\gamma_i(D)$ the probability that a distinguisher $D$
@@ -329,12 +296,8 @@ finite commutative unit ring.
   \rocqok
   A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
   a challenge plaintext $p_A$ read off the state, and a decision taken on the
-  state and one challenge ciphertext. Encryption randomness is uniform, drawn
-  as a coin index whose map to randomness carries a left inverse. Every
-  statement over the scheme record therefore ranges over injective index maps,
-  which is what lets a randomness recorded in a party's trace be read back as
-  the coin naming it.
-  The challenger at hidden bit $b$ is the encryption law of $p_A$ at $b = 1$ and the
+  state and one challenge ciphertext. Encryption randomness is uniform. The
+  challenger at hidden bit $b$ is the encryption law of $p_A$ at $b = 1$ and the
   encryption law of zero at $b = 0$, and the experiment at $b$ is the law of the
   adversary's decision against that challenge. The advantage of $A$ at a public
   key is the gap between its acceptance probability at the two bits.
@@ -404,8 +367,9 @@ $V_3$.
 
 \begin{lemma}[Guessing at the all-zero endpoint]
   \label{lem:guess_all_zero}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceSpectatorPre,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.spectator_pre_indep,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceSpectator,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_of,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_indep,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_cinde,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_VarRV_cond_uniform,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_V2_cond_Sout,
@@ -416,10 +380,9 @@ $V_3$.
   \uses{def:alice_hop_ladder,lem:exist_pr_sol,lem:cinde_diagonal_bound}
   When Alice's third weight $u_3$ is a unit of the plaintext ring, every
   predictor reading the all-zero tuple matches Bob's input with probability at
-  most $1/m$. The all-zero tuple is a function of the leaked output and of a
-  spectator independent of the honest inputs, hence conditionally independent
-  of $V_2$ given the output, and conditioned on the output alone $V_2$ is
-  uniform.
+  most $1/m$. The all-zero tuple is independent of the honest inputs, hence
+  conditionally independent of $V_2$ given the output, and conditioned on the
+  output alone $V_2$ is uniform.
   \[ u_3 \in R^{\times} \;\Longrightarrow\;
        \Pr[\,g(\hoptuple{2}) = V_2\,] \le 1/m \]
 \end{lemma}
@@ -481,20 +444,15 @@ functionality on the other, rather than quantified over all input vectors.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal}
   \rocqok
   \uses{def:alice_hop_ladder}
-  From a value $s$ of the output, the simulator draws two uniform masks and one
-  uniform coin record, and assembles the all-zero tuple: $s$ unchanged, an
-  encryption of zero under each relay key, and Charlie's re-encryption under
-  Alice's key of $s$ net of her own term and plus her masks. The ideal-world
-  law samples the honest input pair, computes its output, and returns that pair
-  beside a simulated tuple.
-  \[ \Sim(s) = \big(R_2, R_3, \alpha_1, \alpha_2, s,\;
-       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3),\;
-       \Enc(\pk_A, s - u_1 v_1 + R_2 + R_3, \gamma)\big) \]
-  \[ \Ideal = \big[(v_2,v_3) \sim \mathcal{U};\ t \sim \Sim(S(v_2,v_3));\
+  From a value $s$ of the output, the simulator draws uniform masks, uniform
+  combine randomness, and one encryption of zero under each of Bob's and
+  Charlie's keys, and returns $s$ unchanged. The ideal-world law samples the
+  honest input pair, computes its output, and returns that pair with a simulated
+  tuple.
+  \[ \Sim(s) = \big(\mathcal{U}, \mathcal{U}, s,
+       \Enc(\pk_B, 0), \Enc(\pk_C, 0)\big),\qquad
+     \Ideal = \big[(v_2,v_3) \sim \mathcal{U};\ t \sim \Sim(S(v_2,v_3));\
        (v_2, v_3, t)\big] \]
-  The masks and the six coins are drawn uniformly and independently of the
-  honest inputs, so $s$ is the only thing the simulator reads and the output
-  slot and the re-encryption slot are the only places it appears.
 \end{definition}
 
 \begin{lemma}[The all-zero endpoint is the simulator]
@@ -555,29 +513,6 @@ The hopping tuple is an abstraction of what Alice sees. Identifying it with the
 trace the piSMC interpreter returns when it runs the three DSDP party programs
 carries the three bounds above to the executed protocol.
 
-\begin{definition}[Drawing a coin inside a program]
-  \label{def:interpreter_sample}
-  \rocq{infotheo.smc.smc_interpreter.Sample,
-       infotheo.smc.smc_interpreter.step_sample,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_seeds}
-  \rocqok
-  \uses{def:protocol_flow,def:dsdp_enc_coins}
-  A party program draws its encryption randomness at a $\mathrm{Sample}$ node.
-  Each party carries a seed stream beside its trace, and a step at a
-  $\mathrm{Sample}$ substitutes the head of that party's stream into the
-  continuation, advances the stream, and records the drawn value at the head of
-  that party's trace.
-  \[ \mathrm{step}\big(\mathrm{Sample}\ f,\ \mathit{tr},\ r :: \mathit{sd}\big)
-       = \big(f(r),\ r :: \mathit{tr},\ \mathit{sd}\big) \]
-  The three DSDP streams are the six coins of one record, two per party in the
-  order that party encrypts. A party's trace holds every coin that party drew,
-  beside the image of those coins through its program, so Alice's trace holds
-  her two combine coins and no coin of another party. The observation the
-  bounds below are stated at therefore contains the randomness Alice drew
-  herself, so an adversary reading it is granted her coins along with her
-  messages.
-\end{definition}
-
 \begin{definition}[Alice's executed trace]
   \label{def:alice_trace}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_dataT,
@@ -589,13 +524,13 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTrace,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tuple}
   \rocqok
-  \uses{def:protocol_flow,def:alice_hop_ladder,def:interpreter_sample}
+  \uses{def:protocol_flow,def:alice_hop_ladder}
   The DSDP protocol is the triple of party programs at the coordinates of one
   sample of the experiment, and $\mathrm{trace\_of\_run}(\mathit{ps}, i)$ is the
   message log the interpreter returns for party $i$ when it runs the process
   list $\mathit{ps}$ at a sample, encoded as a bounded sequence of at most
-  eighteen entries, each a plaintext, a ciphertext, a coin, or a key mark.
-  Alice's trace is that reader at the DSDP protocol and at Alice.
+  fifteen entries, each a plaintext, a ciphertext, or a private key. Alice's
+  trace is that reader at the DSDP protocol and at Alice.
   \[ \mathrm{AliceTrace} = \mathrm{trace\_of\_run}(\mathrm{dsdp\_protocol},
        \mathrm{Alice}) \]
 \end{definition}
@@ -648,33 +583,14 @@ carries the three bounds above to the executed protocol.
   Alice's raw trace is the message log the interpreter records for her at a
   sample, before the encoding into the finite carrier a distribution is formed
   on. Decoding one encoded entry at a fixed key pair returns a plaintext as
-  itself, a ciphertext as itself, a coin as the randomness it names, and the
-  private-key mark as that key. At Alice's own key pair the round trip is
-  exact, her trace carrying no public-key mark to constrain.
+  itself, a ciphertext as itself, and the private-key mark as that key; at
+  Alice's own key pair the round trip is exact, her trace carrying no
+  public-key mark to constrain.
   \[ \mathrm{map}\ \delta_{\mathrm{dk}_A}\ (\mathrm{AliceTrace}(s))
        = \mathrm{AliceRawTrace}(s) \]
   The encoding therefore takes nothing from Alice and withholds nothing from her: a
   predictor reading either format succeeds on exactly the same samples, so a
   bound at the encoded trace is a bound at the trace the protocol produces.
-\end{lemma}
-
-\begin{lemma}[Alice's trace holds her own key only]
-  \label{lem:raw_trace_priv_keys}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_priv_keys,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_priv_keysE}
-  \rocqok
-  \uses{lem:raw_trace_decode,lem:trace_of_hop_tuple}
-  Reading the private keys off a raw interpreter trace keeps the key marks and
-  drops every other entry. At Alice's raw trace the result is the one-element
-  list of her own key.
-  \[ \mathrm{priv\_keys}\big(\mathrm{AliceRawTrace}(s)\big)
-       = [\,\mathrm{dk}_A\,] \]
-  That a corrupted Alice holds no relay's private key is the premise the two
-  hops of Chapter~\ref{ch:hopping} are stated under, and here it is an equation
-  about the executed run rather than a condition imposed on the adversary. The
-  boundary is sharp on the other side: a party that does hold Bob's key reads
-  his input off the same trace with probability one,
-  by Theorem~\ref{thm:decrypt_lower_bound}.
 \end{lemma}
 
 \begin{theorem}[Guessing from the raw interpreter trace]
@@ -696,41 +612,37 @@ carries the three bounds above to the executed protocol.
   \texttt{alice\_raw\_trace\_guess\_V2\_le}.
 \end{theorem}
 
-\begin{theorem}[Simulation at the raw trace]
+\begin{theorem}[Simulation at the raw trace, averaged over the coin]
   \label{thm:raw_trace_simulation}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_raw_trace_sim_advantage_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_raw_trace_sim_advantage_avg_le}
   \rocqok
   \uses{thm:alice_trace_bounds,lem:raw_trace_decode}
-  A Boolean test tells the real raw trace from the simulated one no more often
-  than the two hop advantages of its decoded lift.
-  \[ \big| \Pr[\,D(\mathrm{Real})\,]
-       - \Pr[\,D(\mathrm{Ideal})\,] \big|
-     \le \epshopsum{D} \]
-  The programs draw the re-encryption coin, so the statement is one about the
-  protocol rather than about one of its executions, and both terms of the
-  bound are conditional on the IND-CPA assumption, one at Bob's key and one at
-  Charlie's.
+  With the re-encryption coin drawn uniformly, a Boolean test tells the real
+  raw trace from the simulated one, on average over that coin, no more often
+  than the average of the two per-coin hop advantages of its decoded lift.
+  \[ \big| \Pr[\,D(\mathrm{Real}^{\mathrm{avg}})\,]
+       - \Pr[\,D(\mathrm{Ideal}^{\mathrm{avg}})\,] \big|
+     \le \textstyle\sum_w \mathcal{U}(w)\,\epshopsum{D_w} \]
+  Drawing the coin makes the statement one about the protocol rather than about
+  one of its executions, and both terms of the bound are conditional on the
+  IND-CPA assumption, one at Bob's key and one at Charlie's.
   Proved in \texttt{dsdp\_alice\_main.v} as
-  \texttt{alice\_raw\_trace\_sim\_advantage\_le}.
+  \texttt{alice\_raw\_trace\_sim\_advantage\_avg\_le}.
 \end{theorem}
 
 \begin{theorem}[Trace and tuple leave the same uncertainty]
   \label{thm:centropy_trace_tuple}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tuple,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.hop_tuple_of_alice_trace,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tupleK,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_hop_tupleE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTraceTuple,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_trace_tupleE}
   \rocqok
-  \uses{def:alice_trace,lem:trace_of_hop_tuple}
-  Alice's executed trace and her hop-$0$ tuple carry the same eight values, the
-  trace writing her two combine coins at slots $2$ and $3$, and
-  $\mathrm{hop\_tuple\_of\_alice\_trace}$ reads those eight slots back.
-  Encoding the tuple into a trace is left-invertible, so conditioning on either
-  object leaves the same uncertainty about Bob's input, for all weights.
+  \uses{lem:trace_of_hop_tuple}
+  Conditioning on Alice's executed trace leaves the same uncertainty about
+  Bob's input as conditioning on her hop-$0$ tuple. The equality holds for all
+  weights.
   \[ \HH(V_2 \mid \mathrm{AliceTrace}) = \HH(V_2 \mid \hoptuple{0}) \]
-  The equality is a relabelling of one object as the other, and no coordinate
-  of the trace is claimed to be uninformative about Bob's input.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}. With
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}; with
   Theorem~\ref{thm:centropy_trace_eq0} it puts the zero at the tuple as well.
 \end{theorem}
 
@@ -1071,7 +983,7 @@ $e$-th residuosity assumption.
 \begin{corollary}[The bound at a Paillier instance]
   \label{cor:alice_guess_paillier}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_dcrE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_at_dcrE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:paillier_setting,def:dcr_assumption,def:paillier_indcpa_assumption}
   At one Paillier instance of modulus $p q$, a trace predictor whose two
@@ -1087,7 +999,7 @@ $e$-th residuosity assumption.
   decisional composite residuosity and nothing further, at the loss
   Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is
   two keys, Bob's and Charlie's, times two residuosity calls per key, the
-  identity \texttt{paillier\_epsilon\_dcrE}. What is assumed here is
+  identity \texttt{paillier\_epsilon\_at\_dcrE}. What is assumed here is
   $\mathcal{B}$, and the class premises restrict which predictors the bound
   covers. The bound holds at each fixed modulus on its own, with no growth
   condition on $p$ and $q$. The sequence statements below read it along a
@@ -1097,7 +1009,7 @@ $e$-th residuosity assumption.
 \begin{corollary}[The bound at a Benaloh instance]
   \label{cor:alice_guess_benaloh}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_residuosityE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_at_residuosityE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:benaloh_setting,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   At one Benaloh instance whose plaintext space has $r = p q$ elements, a
@@ -1111,7 +1023,7 @@ $e$-th residuosity assumption.
   which asks only $1 < r$. The computational side is $r$-th residuosity at
   the loss Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor
   four again two keys times two residuosity calls per key, the identity
-  \texttt{benaloh\_epsilon\_residuosityE}.
+  \texttt{benaloh\_epsilon\_at\_residuosityE}.
 \end{corollary}
 
 \section{epsHop, the language a multi-hop bound is written in}
@@ -1375,7 +1287,7 @@ pending obligation, and a bound is read off it by projection.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_hop_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop_tuple_distinguisher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain}
   \rocqok
@@ -1388,7 +1300,7 @@ pending obligation, and a bound is read off it by projection.
   protocol and not the tuple $\hoptuple{0}$.
   \[ \mathrm{start}\ \gamma_\tau(D_g) \]
   \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
-       \texttt{accept\_hop\_tupleE} \]
+       \texttt{accept\_trace\_tupleE} \]
   The step to $\gamma_0$ carries no label and adds nothing to the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift
@@ -1431,7 +1343,7 @@ pending obligation, and a bound is read off it by projection.
   $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
   trace-level ideal law.
   \[ \mathrm{same\ to}\ \gamma_0(D \circ \tau)\ \mathrm{by}\
-       \texttt{accept\_hop\_tupleE},
+       \texttt{accept\_trace\_tupleE},
      \qquad
      \mathrm{same\ to}\ \Pr_{\Ideal^\tau}[D]\ \mathrm{by}\
        \texttt{accept\_trace\_ideal\_tupleE} \]
@@ -1570,10 +1482,10 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_decode_V2E}
   \rocqok
   \uses{def:alice_trace}
-  The predictor $\delta$ reads Bob's ciphertext off slot $5$ of Alice's trace
+  The predictor $\delta$ reads Bob's ciphertext off slot $3$ of Alice's trace
   and decrypts it with Bob's private key. Correctness of decryption makes Bob's
   input a function of the trace.
-  \[ \delta(t) = \Dec(dk_B,\, t_5),\qquad V_2 = \delta \circ \mathrm{AliceTrace} \]
+  \[ \delta(t) = \Dec(dk_B,\, t_3),\qquad V_2 = \delta \circ \mathrm{AliceTrace} \]
   It holds a private key, so it lies outside the attack model the hop ladder
   bounds, which grants the public keys alone.
 \end{definition}
@@ -1674,15 +1586,13 @@ single member of it can carry.
   \rocqok
   \uses{def:alice_trace}
   An instance is an IND-CPA scheme $\mathcal{S}$, the four weights with $u_3$ a
-  unit of the plaintext ring, and the three private keys: exactly the
-  parameters every corrupted-Alice trace bound is stated at, so every such
-  bound applies at one instance unchanged. The scheme enters as one component,
-  so an instance and the assumption made about it name the same scheme.
+  unit of the plaintext ring, the three private keys, and the two hop coins:
+  exactly the parameters every corrupted-Alice trace bound is stated at, so
+  every such bound applies at one instance unchanged. The scheme enters as one
+  component, so an instance and the assumption made about it name the same
+  scheme.
   \[ \mathcal{I} = \big(\mathcal{S},\
-       v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C\big) \]
-  The encryption coins are drawn by the run, at the $\mathrm{Sample}$ nodes of
-  Definition~\ref{def:interpreter_sample}, so they are coordinates of the
-  experiment rather than fields of the instance.
+       v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C,\ w_B, w_C\big) \]
   The real field stays outside the record. One sequence of instances lives over
   one $R$, which only the assumption record and the probabilities mention.
 \end{definition}
@@ -1724,17 +1634,16 @@ single member of it can carry.
 
 \begin{definition}[The DSDP sequence a scheme sequence builds]
   \label{def:mk_dsdp_instance_sequence}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.dsdp_alice_data,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_instance,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_instance_sequence,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_instance.mk_dsdp_asymptotic}
   \rocqok
   \uses{def:indcpa_scheme_sequence,def:dsdp_instance_sequence,def:dsdp_asymptotic}
   The corrupted-Alice data along a scheme sequence $\mathcal{Q}$ is Alice's
   input, her three weights with $u_3$ a unit at every $k$, and the three seeds
-  the parties' keys are generated from. From $\mathcal{Q}$ and one such record
-  the instance at $k$, the sequence of instances, and an asymptotic value for
-  that sequence are read off.
+  the parties' keys are generated from. From $\mathcal{Q}$ and that data the
+  instance at $k$, the sequence of instances, and an asymptotic value for that
+  sequence are read off.
   \[ \mathcal{I}_k = \big(\mathcal{S}_k,\
        v_{1,k}, u_{1,k}, u_{2,k}, u_{3,k},\
        \kappa_k(s_A), \kappa_k(s_B), \kappa_k(s_C)\big) \]
@@ -1855,21 +1764,17 @@ single member of it can carry.
 \begin{definition}[The idealized witnesses]
   \label{def:idealized_setting}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_inputs,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_coins_indep,
        infotheo.computational_security.idealized_indcpa_scheme.idealized_indcpa_scheme,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.idealized_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.idealized_instance_sequence}
   \rocqok
-  \uses{def:cipher_constant_assumption,def:negligible_fun,def:idealized_scheme_sequence}
+  \uses{def:cipher_constant_assumption,def:negligible_fun}
   Both axes are inhabited at every modulus. The counting witness is the
   uniform law on the five coordinates of $\mathbb{Z}_{pq}$ carrying the three
   plaintext inputs and the two masks, with Alice's three weights held at the
-  constants $0$, $0$, $1$ and the three keys constant as well. The six coins
-  are held at a one-point space, so their joint independence of the eleven
-  inputs is proved where the witness is built and assumes nothing. A weight
-  drawn uniformly takes the value $0$ at some sample, and Charlie's weight has
-  to be invertible at every sample, which is why the weights stay outside the
-  sample
+  constants $0$, $0$, $1$ and the three keys constant as well. A weight drawn
+  uniformly takes the value $0$ at some sample, and Charlie's weight has to be
+  invertible at every sample, which is why the weights stay outside the sample
   space. The hopping witness is \texttt{idealized\_instance\_sequence}, the
   idealized scheme at the composite modulus $p_k q_k$ with $p_k$ a prime above
   $(k+2)^{k+2}$ and $q_k$ a prime above $p_k$, under the cipher-constant
@@ -1911,11 +1816,11 @@ single member of it can carry.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_instance_sequence}
   \rocqok
-  \uses{def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption,def:paillier_scheme_sequence,def:mk_dsdp_instance_sequence}
+  \uses{def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption}
   The sequence whose $k$-th instance is the Paillier scheme at the modulus
   $p_k q_k$ carrying Alice's plaintext input, her three query weights with
-  $u_3$ a unit of the plaintext ring and the three private keys their seeds
-  generate, and whose assumption at $k$ is the IND-CPA record
+  $u_3$ a unit of the plaintext ring, the three private keys and the two
+  encryption coins, and whose assumption at $k$ is the IND-CPA record
   Definition~\ref{def:paillier_indcpa_assumption} derives from one decisional
   composite residuosity record $\mathcal{B}_k$.
   \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k, \qquad
@@ -1935,8 +1840,8 @@ single member of it can carry.
 \begin{corollary}[The Paillier readings]
   \label{cor:paillier_security}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_assumption_dcrE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_assumption_at_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_epsilon_at_dcrE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.paillier_trace_guess_V2_admissible_pq_le}
   \rocqok
@@ -1952,8 +1857,8 @@ single member of it can carry.
   The unconditional term is discharged at the plaintext cardinality of the
   Paillier packaging, read as $p q$, with no number theory beyond $1 < p, q$
   entering. The computational term is decisional composite residuosity:
-  \texttt{paillier\_assumption\_dcrE} and
-  \texttt{paillier\_epsilon\_dcrE} identify the record every
+  \texttt{paillier\_assumption\_at\_dcrE} and
+  \texttt{paillier\_epsilon\_at\_dcrE} identify the record every
   assumption-conditional bound along the sequence is read at with the one
   derived from $\mathcal{B}_k$, and its advantage with
   $2\varepsilon_{\mathrm{dcr},k}$, both by conversion rather than by a rewrite
@@ -1993,10 +1898,10 @@ single member of it can carry.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_instance,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_instance_sequence}
   \rocqok
-  \uses{def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption,def:benaloh_scheme_sequence,def:mk_dsdp_instance_sequence}
+  \uses{def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   The sequence whose $k$-th instance is the Benaloh scheme at ciphertext
-  modulus $n_k$ and block size $r_k$, carrying the same weights and keys as
-  the Paillier sequence, and whose assumption at $k$ is the IND-CPA
+  modulus $n_k$ and block size $r_k$, carrying the same weights, keys and
+  coins as the Paillier sequence, and whose assumption at $k$ is the IND-CPA
   record Definition~\ref{def:benaloh_indcpa_assumption} derives from one
   higher residuosity record $\mathcal{B}_k$ at modulus $n_k$ and exponent
   $r_k$.
@@ -2014,8 +1919,8 @@ single member of it can carry.
 \begin{corollary}[The Benaloh readings]
   \label{cor:benaloh_security}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_assumption_residuosityE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_assumption_at_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_epsilon_at_residuosityE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_instances.benaloh_trace_guess_V2_admissible_pq_le}
   \rocqok
@@ -2032,8 +1937,8 @@ single member of it can carry.
   spelling reads that block size as $p q$, which is what makes it the same
   number the counting axis measures. The computational term is $r$-th
   residuosity at the ciphertext modulus $n_k$:
-  \texttt{benaloh\_assumption\_residuosityE} and
-  \texttt{benaloh\_epsilon\_residuosityE} identify the record every
+  \texttt{benaloh\_assumption\_at\_residuosityE} and
+  \texttt{benaloh\_epsilon\_at\_residuosityE} identify the record every
   assumption-conditional bound along the sequence is read at with the one
   derived from $\mathcal{B}_k$, and its advantage with
   $2\varepsilon_{\mathrm{res},k}$, both by conversion. The factor four is two
@@ -2159,9 +2064,7 @@ no cryptographic assumption.
   Assuming Alice's input $V_1$ is a priori uniform and each relay's data is
   independent of $V_1$, the relay's view carries the full $\log m$ bits of
   uncertainty about $V_1$, which is positive. Alice's input enters no message a
-  relay sees, so a corrupted relay learns nothing about it. Each view holds the
-  two coins that relay draws beside its key, its input and the ciphertexts it
-  receives, and the bound stays at $\log m$ with them in it.
+  relay sees, so a corrupted relay learns nothing about it.
   \[ \HH(V_1 \mid \mathrm{RelayView}) = \log m > 0 \]
   Proved in \texttt{dsdp\_relay\_secrecy.v} as \texttt{bob\_privacy\_V1}
   and \texttt{charlie\_privacy\_V1}. The uniformity of $V_1$ is a field of the
@@ -2182,24 +2085,14 @@ no cryptographic assumption.
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.BobView_indep_V1,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.CharlieView_indep_V1}
   \rocqok
-  The coin-free part of each relay's view, its key with its input and the
-  ciphertexts it receives, is a deterministic image of data assumed independent
-  of $V_1$, and the two coins that relay draws are independent of that part
-  taken together with $V_1$, so the view carrying its coins is independent of
-  $V_1$.
+  Each relay's view is a deterministic image (its key, its input, the forwarded
+  ciphertexts) of data assumed independent of $V_1$, hence independent of $V_1$.
   \[ \mathrm{RelayView} \perp V_1 \]
 \end{lemma}
 \begin{proof}
   \rocqok
-  Push the assumed input-independence through the deterministic view map,
-  \texttt{inde\_RV\_comp}, which leaves the coin-free part independent of
-  $V_1$. The field \texttt{coins\_indep} of the inputs record makes the six
-  coins of a run jointly independent of the eleven inputs, and an
-  \texttt{inde\_RV\_comp} image of it makes the relay's own two coins
-  independent of the pair of $V_1$ with that part. Contraction,
-  \texttt{inde\_RV\_contraction}, joins the two into independence of $V_1$
-  from the part with its coins, and a last \texttt{inde\_RV\_comp} reorders
-  that tuple into the view.
+  Push the assumed input-independence through the deterministic view map
+  (\texttt{inde\_RV\_comp}, an Infotheo library fact).
 \end{proof}
 
 \chapter{Bob learns nothing about Charlie's input}
@@ -2212,9 +2105,7 @@ no cryptographic assumption.
   With $V_3$ and the mask $R_3$ a priori uniform and independent as stated, Bob's
   view carries the full $\log m$ bits of uncertainty about Charlie's input $V_3$.
   The Charlie-ciphertext Bob forwards carries $V_3 U_3 + R_3$, masked by Alice's
-  fresh one-time pad $R_3$, so Bob's view is independent of $V_3$. Bob's two
-  coins are in that view, and the record makes the six coins of a run jointly
-  independent of the eleven inputs, so they leave the bound where it is.
+  fresh one-time pad $R_3$, so Bob's view is independent of $V_3$.
   \[ \HH(V_3 \mid \mathrm{BobView}) = \log m > 0 \]
   Proved in \texttt{dsdp\_relay\_secrecy.v} as \texttt{bob\_privacy\_V3}.
   The uniformity of $V_3$ and of $R_3$ are fields of the inputs record
@@ -2241,8 +2132,7 @@ no cryptographic assumption.
   Charlie's view carries the full $\log m$ bits of uncertainty about Bob's input
   $V_2$. Charlie's decrypted aggregate $D_3$ carries $V_2 U_2$ masked by Alice's
   fresh pad $R_2$, so the ciphertext Charlie returns to Alice is independent of
-  $V_2$. Charlie's two coins are in that view under the same coin law, and they
-  leave the bound where it is.
+  $V_2$.
   \[ \HH(V_2 \mid \mathrm{CharlieView}) = \log m > 0 \]
   Proved in \texttt{dsdp\_relay\_secrecy.v} as
   \texttt{charlie\_privacy\_V2}. The uniformity of $V_2$ and of $R_2$ are
@@ -2269,86 +2159,3 @@ no cryptographic assumption.
   needs no cryptographic assumption.
   \[ R \text{ uniform},\ R \perp X \;\Longrightarrow\; (X + R) \perp X \]
 \end{lemma}
-
-\chapter{The relay bounds at the executed trace}
-
-The three bounds above are stated at a tuple standing for what a relay observes.
-Running the three DSDP party programs at the idealized scheme, where a
-ciphertext is its plaintext, and reading the trace the interpreter writes for a
-relay makes that tuple the object the executed protocol hands it.
-
-\begin{definition}[The run at the idealized scheme and its three traces]
-  \label{def:ideal_run}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.dsdp_run_traces_idealE}
-  \rocqok
-  \uses{def:protocol_flow,def:interpreter_sample}
-  The three piSMC programs of Definition~\ref{def:protocol_flow} run at the
-  idealized homomorphic scheme, where plaintext, randomness, ciphertext and
-  both keys are the plaintext ring, encryption returns its plaintext and
-  decryption returns its ciphertext. Every carrier is therefore finite, so a
-  trace of the run is a sequence over a finite alphabet and needs no encoding
-  into one.
-  \[ \mathrm{enc}(pk, x, r) = x, \qquad \mathrm{dec}(dk, c) = \mathrm{Some}\ c \]
-  The interpreter runs the three programs for eighteen rounds on seed streams
-  read off the six coin coordinates of one sample, two per party. It writes
-  thirteen entries for Alice, six for Bob and five for Charlie, newest first.
-  Bob's six are his second coin $r_{b2}$, the two combines he receives, his
-  first coin $r_{b1}$, his input $V_2$ and his key $k_b$. Charlie's five are
-  his second coin, the aggregate ciphertext Bob forwards, his first coin, his
-  input $V_3$ and his key.
-  \[ \mathrm{BobTrace} = \big[\, r_{b2},\ V_3 U_3 + R_3,\
-     V_2 U_2 + R_2,\ r_{b1},\ V_2,\ k_b \,\big] \]
-  \[ \mathrm{CharlieTrace} = \big[\, r_{c2},\
-     V_3 U_3 + R_3 + V_2 U_2 + R_2,\ r_{c1},\ V_3,\ k_c
-     \,\big] \]
-  Alice's thirteen entries are stated by the same equality and no bound is read
-  at them. Her axis is the hopping one, at the real scheme, where
-  Lemma~\ref{lem:trace_of_hop_tuple} states the matching identity.
-\end{definition}
-
-\begin{lemma}[A relay's trace is its view recoded]
-  \label{lem:relay_trace_of_view}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.ideal_trace_of_run,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_of_viewE,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_of_viewE,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_of_viewK,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_of_viewK}
-  \rocqok
-  \uses{def:ideal_run,def:party_views}
-  The trace the interpreter produces for a relay is the image of that relay's
-  view under a map $\rho$, and a reader $\rho'$ inverts $\rho$ on the left, so
-  the trace and the view are the same observation written twice.
-  \[ \mathrm{RelayTrace} = \rho \circ \mathrm{RelayView}, \qquad
-     \rho' \circ \rho = \mathrm{id} \]
-  The reader is total, returning a fixed tuple on the entry shapes no trace of
-  the run takes, and $\rho$ is where the coins of
-  Definition~\ref{def:party_views} earn their place: the trace records them, so
-  a view without them could not be the same observation.
-\end{lemma}
-
-\begin{theorem}[The relay bounds at the trace]
-  \label{thm:relay_trace_privacy}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_privacy_V1,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.bob_trace_privacy_V3,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_privacy_V1,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.charlie_trace_privacy_V2,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V1_bob_traceE,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V3_bob_traceE,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V1_charlie_traceE,
-       infotheo.dumas2017dual.dsdp.counting.dsdp_relay_trace.centropy_V2_charlie_traceE}
-  \rocqok
-  \uses{lem:relay_trace_of_view,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2}
-  Conditioning on a relay's trace is conditioning on its view, by the identity
-  of Lemma~\ref{lem:relay_trace_of_view}, so each bound of the three chapters
-  above is read at the trace the executed protocol hands that relay.
-  \[ \HH(V_1 \mid \mathrm{BobTrace}) = \log m > 0, \qquad
-     \HH(V_3 \mid \mathrm{BobTrace}) = \log m > 0 \]
-  \[ \HH(V_1 \mid \mathrm{CharlieTrace}) = \log m > 0, \qquad
-     \HH(V_2 \mid \mathrm{CharlieTrace}) = \log m > 0 \]
-  These four are at the idealized scheme, where a ciphertext is its plaintext
-  and no ciphertext depends on a coin, so the coin slots the trace
-  records are independent components of it rather than the randomness any
-  ciphertext in it was built with. Alice's trace theorems of
-  Chapter~\ref{ch:trace_link} are at the real scheme instead, which is why hers
-  carry an assumption-conditional term and these four carry none.
-\end{theorem}

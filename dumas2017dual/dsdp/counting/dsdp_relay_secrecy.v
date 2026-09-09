@@ -25,10 +25,10 @@ Import Num.Theory.
 (******************************************************************************)
 (* Corrupted-relay secrecy in the DSDP protocol: the two relays' full real    *)
 (* views and the inputs those views leave uncertain, at one value of          *)
-(* dsdp_random_inputs.  The record's eleven random inputs and six coins are   *)
-(* the run, its uniformity fields, its seven derived laws and its coin law    *)
-(* are what the views are measured against, so a bound here holds at every    *)
-(* run the record inhabits, the uniform one of uniform_inputs included.       *)
+(* dsdp_random_inputs.  The record's eleven random inputs are the run, its    *)
+(* uniformity fields and its seven derived laws are what the views are        *)
+(* measured against, so a bound here holds at every run the record inhabits,  *)
+(* the uniform one of uniform_inputs included.                                *)
 (*                                                                            *)
 (* These are counting-axis bounds, so they hold against a relay of any        *)
 (* running time.  Each view is a deterministic function of data independent   *)
@@ -39,16 +39,10 @@ Import Num.Theory.
 (* bound a corrupted Alice.  Alice draws the masks R2 and R3 and strips them  *)
 (* again in palice of dsdp_program.v.                                         *)
 (*                                                                            *)
-(* At the idealized scheme a ciphertext is its plaintext and the encryption   *)
-(* ignores its coin, so the two coins a relay records are independent         *)
-(* components its view carries rather than the coins any ciphertext in that   *)
-(* view was built with.  Adjoining them enlarges the conditioner and leaves   *)
-(* every bound below at log m.                                                *)
-(*                                                                            *)
 (* BobView : Bob's key, his own input V2, the Charlie-key combine Alice sends *)
-(*   him, the Bob-key combine he decrypts, and the two coins he draws.        *)
-(* CharlieView : Charlie's key, his own input V3, the aggregate ciphertext    *)
-(*   Bob forwards to him, and the two coins he draws.                         *)
+(*   him, and the Bob-key combine he decrypts.                                *)
+(* CharlieView : Charlie's key, his own input V3, and the aggregate           *)
+(*   ciphertext Bob forwards to him.                                          *)
 (* bob_privacy_V1, charlie_privacy_V1 : H(V1 | view) = log m and it is        *)
 (*   positive, for either relay's view: Alice's input occurs in no message.   *)
 (* bob_privacy_V3 : H(V3 | BobView) = log m and it is positive, by Alice's    *)
@@ -89,8 +83,8 @@ Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 (* One 3-party run at this modulus, on the counting side: the sample space,
-   the law, the eleven random inputs and six coins, and the independence and
-   uniformity facts the two views below are measured against. *)
+   the law, the eleven random inputs, and the independence and uniformity
+   facts the two views below are measured against. *)
 Variable I : dsdp_random_inputs R p_gt1 q_gt1.
 
 Local Notation T := (sampleT I).
@@ -104,13 +98,6 @@ Local Notation R2 := (R2 I).
 Local Notation R3 := (R3 I).
 Local Notation Dk_b := (Dk_b I).
 Local Notation Dk_c := (Dk_c I).
-
-(* The two coins each relay draws, the components of its view that record
-   what it drew when it encrypted. *)
-Local Notation coin_rb1 := (coin_rb1 I).
-Local Notation coin_rb2 := (coin_rb2 I).
-Local Notation coin_rc1 := (coin_rc1 I).
-Local Notation coin_rc2 := (coin_rc2 I).
 
 (* The count #|msg| = m of the plaintext ring, the value form the entropy
    statements below read their log at. *)
@@ -167,15 +154,14 @@ Let E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
    Charlie decrypts it and answers Alice under Alice's key. *)
 Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
-(* Bob's full real view: his key, V2, the Charlie-key combine, the Bob-key
-   combine, and the two coins he draws.  He multiplies into the first combine
-   and decrypts the second to D2. *)
-Definition BobView :=
-  [% Dk_b, V2, E_charlie_vur3, E_bob_d2, coin_rb1, coin_rb2].
+(* Bob's full real view: his key, V2, the Charlie-key combine and the Bob-key
+   combine.  He multiplies into the first combine and decrypts the second to
+   D2. *)
+Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
 
-(* Charlie's full real view: his key, his input V3, the ciphertext Bob
-   forwards, and the two coins he draws. *)
-Definition CharlieView := [% Dk_c, V3, E_charlie_d3, coin_rc1, coin_rc2].
+(* Charlie's full real view: his key, his own input V3, and the aggregate
+   ciphertext he receives from Bob. *)
+Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
 
 Let pV1_unif : `p_ V1 = fdist_uniform card_msg_prednK :=
   dsdp_random_inputs.pV1_unif I.
@@ -184,69 +170,24 @@ Let bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1 :=
 Let charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1 :=
   dsdp_random_inputs.charlie_inputs_indep_V1 I.
 
-Let bob_view_of_clean_data
-    (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
+Let bob_view_of (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
   (((w.1.1.1, w.1.1.2), E' Charlie w.1.2), E' Bob w.2).
-Let charlie_view_of_clean_data
-    (w : ((Charlie.-key Dec msg * msg) * msg)%type) :=
+Let charlie_view_of (w : ((Charlie.-key Dec msg * msg) * msg)%type) :=
   ((w.1.1, w.1.2), E' Charlie w.2).
-
-(* The value type of the eleven inputs jointly.  A secret and a coin-free
-   view are both read off it. *)
-Local Notation inputs11 := (msg * msg * msg * msg * msg * msg * msg * msg *
-  (Alice.-key Dec msg) * (Bob.-key Dec msg) * (Charlie.-key Dec msg))%type.
-
-(* The value type of the six coins jointly, which a relay's own pair is read
-   off. *)
-Local Notation coins6 := (msg * msg * msg * msg * msg * msg)%type.
-
-(* The eleven inputs are independent of the six coins, the record field every
-   coin step below is an image of. *)
-Let coins_indep :
-  P |= [% V1, V2, V3, U1 I, U2, U3, R2, R3, Dk_a I, Dk_b, Dk_c]
-     _|_ [% coin_ra1 I, coin_ra2 I, coin_rb1, coin_rb2, coin_rc1, coin_rc2] :=
-  dsdp_random_inputs.coins_indep I.
-
-(* A relay's own two coins adjoin to a view already independent of a secret.
-   Contraction puts the coins beside the view, and one reassociation
-   left-nests them into it. *)
-Let adjoin_coins (A : finType) (X : {RV P -> A}) (S : {RV P -> msg})
-    (C1 C2 : {RV P -> msg}) :
-  P |= X _|_ S -> P |= [% S, X] _|_ [% C1, C2] -> P |= [% X, C1, C2] _|_ S.
-Proof.
-move=> /inde_RV_sym h1 hc; rewrite inde_RV_sym.
-exact: (inde_RV_comp idfun
-  (fun w : (A * (msg * msg))%type => ((w.1, w.2.1), w.2.2))
-  (inde_RV_contraction h1 hc)).
-Qed.
 
 (* BobView _|_ V1: Bob's whole view is independent of Alice's input. *)
 Lemma BobView_indep_V1 : P |= BobView _|_ V1.
 Proof.
-apply: adjoin_coins.
-  exact: (inde_RV_comp bob_view_of_clean_data idfun bob_inputs_indep_V1).
-exact: (inde_RV_comp
-  (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.1.1,
-     (((w.1.2, w.1.1.1.1.1.1.1.1.1.2),
-       E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2)),
-      E' Bob (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2 + w.1.1.1.1.2))))
-  (fun c : coins6 => (c.1.1.1.2, c.1.1.2)) coins_indep).
+have H := inde_RV_comp bob_view_of idfun bob_inputs_indep_V1.
+by rewrite /comp_RV /= in H *.
 Qed.
 
 (* CharlieView _|_ V1: Charlie's whole view is independent of Alice's
    input. *)
 Lemma CharlieView_indep_V1 : P |= CharlieView _|_ V1.
 Proof.
-apply: adjoin_coins.
-  exact: (inde_RV_comp charlie_view_of_clean_data idfun
-            charlie_inputs_indep_V1).
-exact: (inde_RV_comp
-  (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.1.1,
-     ((w.2, w.1.1.1.1.1.1.1.1.2),
-      E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2
-                  + (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2
-                     + w.1.1.1.1.2)))))
-  (fun c : coins6 => (c.1.2, c.2)) coins_indep).
+have H := inde_RV_comp charlie_view_of idfun charlie_inputs_indep_V1.
+by rewrite /comp_RV /= in H *.
 Qed.
 
 (* Given Bob's whole view, Alice's input keeps log m bits of uncertainty.
@@ -400,17 +341,11 @@ Qed.
 (* BobView _|_ V3: Bob's whole view is independent of Charlie's input. *)
 Let BobView_indep_V3 : P |= BobView _|_ V3.
 Proof.
-apply: adjoin_coins.
-  exact: (inde_RV_comp
-    (fun w : (((Bob.-key Dec msg * msg) * msg) * msg)%type =>
-       (((w.1.1.1, w.1.1.2), E' Charlie w.2), E' Bob w.1.2))
-    idfun bob_inputs_indep_V3).
-exact: (inde_RV_comp
-  (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.2,
-     (((w.1.2, w.1.1.1.1.1.1.1.1.1.2),
-       E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2)),
-      E' Bob (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2 + w.1.1.1.1.2))))
-  (fun c : coins6 => (c.1.1.1.2, c.1.1.2)) coins_indep).
+have H := inde_RV_comp
+  (fun w : (((Bob.-key Dec msg * msg) * msg) * msg)%type =>
+     (((w.1.1.1, w.1.1.2), E' Charlie w.2), E' Bob w.1.2))
+  idfun bob_inputs_indep_V3.
+by rewrite /comp_RV /= in H *.
 Qed.
 
 (* Given Bob's whole view, Charlie's input keeps log m bits of uncertainty.
@@ -502,22 +437,12 @@ Qed.
    input. *)
 Let CharlieView_indep_V2 : P |= CharlieView _|_ V2.
 Proof.
-apply: adjoin_coins.
-  (* [apply:] does not unify against cinde_RV_unit's conclusion here, so the
-     three steps keep the unrestricted [apply]. *)
-  apply cinde_RV_unit.
-  apply (mixing_rule (X := [%Dk_c, V3]) (Y := V2) (Z := unit_RV P)
-           (W := E_charlie_d3)).
-  split.
-    by apply cinde_RV_unit; exact: Dk_c_V3_indep_V2_E.
-  by apply cinde_RV_unit; rewrite inde_RV_sym; exact: E_charlie_d3_indep_V2.
-exact: (inde_RV_comp
-  (fun w : inputs11 => (w.1.1.1.1.1.1.1.1.1.2,
-     ((w.2, w.1.1.1.1.1.1.1.1.2),
-      E' Charlie (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2
-                  + (w.1.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2
-                     + w.1.1.1.1.2)))))
-  (fun c : coins6 => (c.1.2, c.2)) coins_indep).
+apply cinde_RV_unit.
+apply (mixing_rule (X := [%Dk_c, V3]) (Y := V2) (Z := unit_RV P)
+         (W := E_charlie_d3)).
+split.
+  by apply cinde_RV_unit; exact: Dk_c_V3_indep_V2_E.
+by apply cinde_RV_unit; rewrite inde_RV_sym; exact: E_charlie_d3_indep_V2.
 Qed.
 
 (* Given Charlie's whole view, Bob's input keeps log m bits of uncertainty.

@@ -11,17 +11,13 @@ Import Num.Theory.
 (* DSDP Data Interface                                                        *)
 (*                                                                            *)
 (* This file provides a unified interface for DSDP protocol data types,       *)
-(* eliminating duplication across dsdp_program.v, dsdp_pismc.v and            *)
-(* dsdp_correctness.v.                                                        *)
+(* eliminating duplication across dsdp_program.v, dsdp_correctness.v,         *)
+(* dsdp_program_alt_syntax.v, and dsdp_entropy_trace.v.                       *)
 (*                                                                            *)
 (* Components:                                                                *)
 (*   Recv_param      - Single parametric receive combinator                   *)
 (*   DSDP_Interface  - Record bundling data type and operations               *)
 (*   Standard_DSDP_Interface - Canonical sum-type implementation              *)
-(*                                                                            *)
-(* The data carrier also holds an encryption coin, so a party can draw its    *)
-(* own randomness from its seed stream instead of receiving it as a program   *)
-(* parameter.                                                                 *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -75,10 +71,12 @@ HB.instance Definition _ := hasDecEq.Build dsdp_dtype dsdp_dtype_eqP.
 (* DSDP Interface Record                                                      *)
 (* ========================================================================== *)
 
-(** The DSDP data types and operations as one record.
+(** Standalone record bundling all DSDP data types and operations.
 
-    The carriers are fields rather than an AHEncType parameter, so an
-    instance is a choice of carriers and operations. *)
+    This record carries its own message/cipher/randomness/key carriers as
+    fields (no AHEncType parameter), so a non-AHE symbolic instance can be
+    built alongside the standard cryptographic one.  It eliminates the need
+    to repeat data/conversion/operation definitions in every DSDP file. *)
 Record DSDP_Interface := MkDSDP_Interface {
   (* Carrier types *)
   di_msgT      : Type ;  (* plaintext scalars *)
@@ -97,15 +95,10 @@ Record DSDP_Interface := MkDSDP_Interface {
   di_data_of_cipher   : di_cipherT   -> di_data ;
   di_data_of_priv_key : di_priv_keyT -> di_data ;
   di_data_of_pub_key  : di_pub_keyT  -> di_data ;
-  di_data_of_rand     : di_randT     -> di_data ;
 
-  (* Extractors: get a ciphertext or a coin out of the data carrier *)
+  (* Extractor: get a ciphertext out of the data carrier *)
   di_get_cipher : di_data -> option di_cipherT ;
     (* the ciphertext a carrier holds, when it holds one *)
-  di_get_rand : di_data -> option di_randT ;
-    (* the encryption coin a carrier holds, when it holds one *)
-  di_get_priv_key : di_data -> option di_priv_keyT ;
-    (* the private key a carrier holds, when it holds one *)
 
   (* Encryption and homomorphic operations *)
   di_encrypt : di_pub_keyT -> di_msgT -> di_randT -> di_cipherT ;
@@ -142,10 +135,7 @@ Arguments di_data_of_plain : clear implicits.
 Arguments di_data_of_cipher : clear implicits.
 Arguments di_data_of_priv_key : clear implicits.
 Arguments di_data_of_pub_key : clear implicits.
-Arguments di_data_of_rand : clear implicits.
 Arguments di_get_cipher : clear implicits.
-Arguments di_get_rand : clear implicits.
-Arguments di_get_priv_key : clear implicits.
 Arguments di_encrypt : clear implicits.
 Arguments di_emul : clear implicits.
 Arguments di_epow : clear implicits.
@@ -174,28 +164,25 @@ Let D := @dec AHE.
    Naming: the std_data_of_* injectors mirror the interface's di_data_of_*
    X_of_Y total-conversion fields; the 5-segment *_priv_key/*_pub_key names
    carry the multi-word key sort, not grammar drift. *)
-Definition std_data :=
-  (msgT + encT + priv_keyT + (pub_keyT + randT))%type.
+Definition std_data := (msgT + encT + priv_keyT + pub_keyT)%type.
 Definition std_data_of_plain (x : msgT) : std_data := inl (inl (inl x)).
 Definition std_data_of_cipher (x : encT) : std_data := inl (inl (inr x)).
 Definition std_data_of_priv_key (x : priv_keyT) : std_data := inl (inr x).
-Definition std_data_of_pub_key (x : pub_keyT) : std_data := inr (inl x).
-Definition std_data_of_rand (x : randT) : std_data := inr (inr x).
+Definition std_data_of_pub_key (x : pub_keyT) : std_data := inr x.
 Definition std_get_cipher (x : std_data) : option encT :=
   if x is inl (inl (inr v)) then Some v else None.
-Definition std_get_rand (x : std_data) : option randT :=
-  if x is inr (inr r) then Some r else None.
-Definition std_get_priv_key (x : std_data) : option priv_keyT :=
-  if x is inl (inr k) then Some k else None.
 
 (* Recv-and-decrypt: extract ciphertext, decrypt, continue with plaintext *)
 Definition std_Recv_dec (frm : nat) (dk : priv_keyT)
     (f : msgT -> proc std_data) : proc std_data :=
   Recv_param std_data (obind (D dk) \o std_get_cipher) frm f.
 
-(* Recv-for-HE: extract the ciphertext and continue with it.  The receiver
-   already knows the sender's public key, so f computes homomorphically under
-   a key that never travels. *)
+(* Recv-for-HE: extract ciphertext, continue with it for HE computation *)
+(* We assume public key of the sender is known to the receiver,
+   so we don't explicitly send it along with the ciphertext.
+   Rather, the receiver uses the public key of the sender
+  to perform the HE computation inside the function f.
+*)
 Definition std_Recv_enc (frm : nat)
     (f : encT -> proc std_data) : proc std_data :=
   Recv_param std_data std_get_cipher frm f.
@@ -214,10 +201,7 @@ Definition Standard_DSDP_Interface : DSDP_Interface := {|
   di_data_of_cipher := std_data_of_cipher ;
   di_data_of_priv_key := std_data_of_priv_key ;
   di_data_of_pub_key := std_data_of_pub_key ;
-  di_data_of_rand := std_data_of_rand ;
   di_get_cipher := std_get_cipher ;
-  di_get_rand := std_get_rand ;
-  di_get_priv_key := std_get_priv_key ;
   di_encrypt := @enc AHE ;
   di_emul := @Emul AHE ;
   di_epow := @Epow AHE ;
@@ -267,4 +251,3 @@ Notation "'d_of' DI" := (di_data_of_plain DI) (at level 10, only parsing).
 Notation "'e_of' DI" := (di_data_of_cipher DI) (at level 10, only parsing).
 Notation "'priv_key_of' DI" := (di_data_of_priv_key DI) (at level 10, only parsing).
 Notation "'pub_key_of' DI" := (di_data_of_pub_key DI) (at level 10, only parsing).
-Notation "'rand_of' DI" := (di_data_of_rand DI) (at level 10, only parsing).

@@ -105,8 +105,20 @@ Definition pbob (xb : VX) (yb : TX) : @sproc sp_dtype data bob _ _ :=
 
 Variables (sa sb: VX) (ra yb: TX) (xa xb: VX).
 
-(* The three SPP programs packed as aprocs, which hides their differing
-   fuel and session-type indices. *)
+(* Session-typed processes packed via [aprocs ...].
+
+   Why not use [procs ...] directly with sproc?
+   - Each sproc has different type indices (party, fuel, session env)
+   - Coq unifies list element types BEFORE applying coercions
+   - sproc 0 n1 env1 and sproc 1 n2 env2 cannot unify
+   See: https://github.com/coq/coq/issues/10898
+
+   The aproc wrapper solves this:
+   - aproc existentially packages the indices, making all elements
+     have the same type: aproc sp_dtype data
+   - [> smc_saprocs] computes total fuel from packaged indices
+   - erase_aprocs converts to seq (proc data) for the interpreter
+   See also: https://github.com/coq/coq/issues/4593 (uniform inheritance) *)
 Definition smc_saprocs : seq (aproc sp_dtype data) :=
   [aprocs palice xa; pbob xb yb; pcoserv sa sb ra].
 
@@ -115,7 +127,7 @@ Definition smc_procs : seq (proc data) :=
   erase_aprocs smc_saprocs.
 
 Definition smc_scalar_product h :=
-  interp h smc_procs (nseq 3 [::]) (nseq 3 [::]).
+  interp h smc_procs (nseq 3 [::]).
 
 (* Fuel bound computed from program structure: 8 + 9 + 8 = 25
    - palice: 8 (Init + 2*Recv + Send + 2*Recv + Ret=2)
@@ -128,7 +140,7 @@ Lemma smc_max_fuel_ok : smc_max_fuel = [> smc_saprocs].
 Proof. reflexivity. Qed.
 
 Definition smc_scalar_product_traces :=
-  interp_traces [> smc_saprocs] smc_procs (nseq (size smc_procs) [::]).
+  interp_traces [> smc_saprocs] smc_procs.
 
 Definition smc_scalar_product_tracesT := smc_max_fuel.-bseq data.
 

@@ -11,13 +11,13 @@ Require Import smc_interpreter.
 (* Proves that the functional interpreter (step mapped over all parties)       *)
 (* is simulated by the relational semantics (rsteps).                         *)
 (*                                                                            *)
-(* Design: The SMC language has 7 constructors (Init, Send, Recv, Sample,     *)
-(* Ret, Finish, Fail), but from the interpreter's perspective only two things *)
+(* Design: The SMC language has 6 constructors (Init, Send, Recv, Ret,        *)
+(* Finish, Fail), but from the interpreter's perspective only two things      *)
 (* happen at each index: a reduction fires or nothing happens.                *)
-(* We introduce reduction_spec (4 constructors) to canonically package        *)
+(* We introduce reduction_spec (3 constructors) to canonically package       *)
 (* reductions, then index_class (2 constructors: Inert, Disjoint) to          *)
 (* classify each index.                                                       *)
-(* The 7→4→2 collapse eliminates the case explosion and Send/Recv symmetry.   *)
+(* The 6→3→2 collapse eliminates the case explosion and Send/Recv symmetry.   *)
 (*                                                                            *)
 (* The key property enabling composition is rstep_disjoint: any two fireable  *)
 (* reductions from the same state are either identical or touch disjoint       *)
@@ -50,9 +50,7 @@ Local Open Scope fset_scope.
 (*   RSinit  — 1-party: Init(d,k) steps to k, emitting d                     *)
 (*   RSret   — 1-party: Ret(d) steps to Finish, emitting d                   *)
 (*   RScomm  — 2-party: matched Send/Recv pair exchanges data                 *)
-(*   RSsample — 1-party: Sample(f) steps to f r on a nonempty seed stream     *)
-(* The remaining constructors (Finish, Fail, unmatched Send/Recv, a Sample    *)
-(* on an exhausted stream) are inert.                                         *)
+(* The remaining constructors (Finish, Fail, unmatched Send/Recv) are inert.  *)
 (*                                                                            *)
 (* reduction_spec packages the lens, inputs, outputs, and traces for each     *)
 (* kind. reduction_spec_at examines the process at index i and its partner    *)
@@ -71,18 +69,16 @@ Inductive reduction_spec n : Type :=
   | RSinit (i : 'I_n) (x : data) (p : proc data)
   | RSret (i : 'I_n) (x : data)
   | RScomm (i j : 'I_n) (x : data) (pi : proc data)
-           (pj : data -> proc data)
-  | RSsample (i : 'I_n) (f : data -> proc data) (x : data).
+           (pj : data -> proc data).
 
 Arguments RSinit {n}.
 Arguments RSret {n}.
 Arguments RScomm {n}.
-Arguments RSsample {n}.
 
 (* Size of a reduction's index set *)
 Definition reduction_spec_size {n} (r : reduction_spec n) : nat :=
   match r with
-  | RSinit _ _ _ | RSret _ _ | RSsample _ _ _ => 1
+  | RSinit _ _ _ | RSret _ _ => 1
   | RScomm _ _ _ _ _ => 2
   end.
 
@@ -93,7 +89,6 @@ Definition reduction_spec_lens {n} (r : reduction_spec n) :
   | RSinit i _ _ => [tuple i]
   | RSret i _ => [tuple i]
   | RScomm i j _ _ _ => [tuple i; j]
-  | RSsample i _ _ => [tuple i]
   end.
 
 (* Indices involved in a reduction — derived from lens via coercion *)
@@ -108,7 +103,6 @@ Definition reduction_spec_input {n} (r : reduction_spec n) :
   | RSret _ x => [tuple Ret x]
   | RScomm i j x pi pj =>
       [tuple Send (nat_of_ord j) x pi; Recv (nat_of_ord i) pj]
-  | RSsample _ f _ => [tuple Sample f]
   end.
 
 (* Output processes — what the reduction produces *)
@@ -118,7 +112,6 @@ Definition reduction_spec_output {n} (r : reduction_spec n) :
   | RSinit _ _ p => [tuple p]
   | RSret _ _ => [tuple Finish]
   | RScomm _ _ x pi pj => [tuple pi; pj x]
-  | RSsample _ f x => [tuple f x]
   end.
 
 (* Output traces — data emitted by the reduction *)
@@ -128,34 +121,22 @@ Definition reduction_spec_traces {n} (r : reduction_spec n) :
   | RSinit _ x _ => [tuple [:: x]]
   | RSret _ x => [tuple [:: x]]
   | RScomm _ _ x _ _ => [tuple nil; [:: x]]
-  | RSsample _ _ x => [tuple [:: x]]
   end.
 
-(* The seed condition of a sampling reduction: the drawing party's stream
-   stands at the value drawn. *)
-Definition reduction_spec_seed {n} (sds : n.-tuple (seq data))
-    (r : reduction_spec n) : Prop :=
-  if r is RSsample i _ x then exists sd, sds !_ i = x :: sd else True.
+(* Every reduction_spec is a valid rstep. Immediate by construction:
+   each variant directly corresponds to an rstep constructor. *)
+Lemma reduction_spec_valid n (r : reduction_spec n) :
+  rstep (reduction_spec_lens r) (reduction_spec_input r) (reduction_spec_output r)
+       (reduction_spec_traces r).
+Proof. by case: r => *; constructor. Qed.
 
-(* Every reduction_spec meeting its seed condition is a valid rstep at that
-   seed assignment.  Immediate by construction: each variant directly
-   corresponds to an rstep constructor. *)
-Lemma reduction_spec_valid n (sds : n.-tuple (seq data))
-    (r : reduction_spec n) :
-  reduction_spec_seed sds r ->
-  rstep sds (reduction_spec_lens r) (reduction_spec_input r)
-       (reduction_spec_output r) (reduction_spec_traces r).
-Proof.
-case: r => [i x p|i x|i j x pi pj|i f x] /=;
-  [by move=> _; constructor | by move=> _; constructor
-  | by move=> _; constructor | by move=> [sd Hsd]; exact: rsample Hsd].
-Qed.
-
-(* The applicable reduction at index i, canonically sender-first.  The Send
-   and Recv branches search for the matching partner, so step_sound needs no
-   partner search of its own. *)
-Definition reduction_spec_at {n} (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) : option (reduction_spec n) :=
+(* reduction_spec_at: find the applicable reduction at index i.
+   For Send j x p, looks up ps[j] for matching Recv — this is the
+   partner-search logic, done once here instead of inline in step_sound.
+   For Recv j f, looks up ps[j] for matching Send — same RScomm,
+   canonical sender-first, eliminating the Send/Recv symmetry. *)
+Definition reduction_spec_at {n} (ps : n.-tuple (proc data)) (i : 'I_n) :
+    option (reduction_spec n) :=
   match ps !_ i with
   | Init x p => Some (RSinit i x p)
   | Ret x => Some (RSret i x)
@@ -175,7 +156,6 @@ Definition reduction_spec_at {n} (ps : n.-tuple (proc data))
         | _ => None
         end
       else None
-  | Sample f => if sds !_ i is r :: _ then Some (RSsample i f r) else None
   | _ => None
   end.
 
@@ -186,22 +166,20 @@ Definition reduction_applies {n} (ps : n.-tuple (proc data)) (r : reduction_spec
 
 (* reduction_spec_at only returns reductions that actually apply to ps.
    Bridges reduction_spec_at → extract equality needed by rstep_disjoint. *)
-Lemma reduction_spec_at_applies n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) i r :
-  reduction_spec_at ps sds i = Some r -> reduction_applies ps r.
+Lemma reduction_spec_at_applies n (ps : n.-tuple (proc data)) i r :
+  reduction_spec_at ps i = Some r -> reduction_applies ps r.
 Proof.
 rewrite /reduction_applies /reduction_spec_at.
-case Hpi: (ps !_ i) => [x p|dst w next|frm f|g|x||] //=.
+case Hpi: (ps !_ i) => [x p|dst w next|frm f|x||] //=.
 - by move=> [<-] /=; rewrite Hpi.
 - case: eqP => //= dstn.
-  case Hdst: (ps !_ _) => [|dst' w' next'|frm' f'||||] //=.
+  case Hdst: (ps !_ _) => [|dst' w' next'|frm' f'|||] //=.
   case: ifP => // frm'i [<-] /=.
   by rewrite Hpi Hdst (eqP frm'i).
 - case: eqP => //= frmn.
-  case Hfrm: (ps !_ _) => [|dst' w' next'|||||] //=.
+  case Hfrm: (ps !_ _) => [|dst' w' next'||||] //=.
   case: ifP => // dsti [<-] /=.
   by rewrite Hfrm Hpi (eqP dsti).
-- by case: (sds !_ i) => [|r0 sd] // [<-] /=; rewrite Hpi.
 - by move=> [<-] /=; rewrite Hpi.
 Qed.
 
@@ -210,13 +188,13 @@ Qed.
 (*                                                                            *)
 (* From the interpreter's perspective, each index either fires (participates  *)
 (* in a reduction) or is inert (step returns the process unchanged).          *)
-(* The 7-way case split on proc constructors is absorbed into classify,       *)
+(* The 6-way case split on proc constructors is absorbed into classify,       *)
 (* which maps each index to one of two cases:                                 *)
 (*                                                                            *)
 (*   Inert     — Finish, Fail, unmatched Send, unmatched Recv                 *)
-(*               step at i returns the process, [::] and the stream unused  *)
+(*               step ps [::] i = (ps !_ i, [::], false)                     *)
 (*   Disjoint  — Init, Ret, matched Send/Recv                                *)
-(*               reduction_spec_at ps sds i = Some r for some r            *)
+(*               reduction_spec_at ps i = Some r for some r                         *)
 (*                                                                            *)
 (* The name "Disjoint" reflects the key property (from rstep_disjoint):       *)
 (* any two Disjoint reductions from the same state touch non-overlapping      *)
@@ -225,8 +203,6 @@ Qed.
 (* proc constructor mapping:                                                  *)
 (*   Init d k           →  Disjoint (RSinit i d k)                           *)
 (*   Ret d              →  Disjoint (RSret i d)                              *)
-(*   Sample f           →  Disjoint (RSsample i f r) if stream i is r :: _   *)
-(*                         Inert                     otherwise               *)
 (*   Send j x p         →  Disjoint (RScomm i j x p f) if Recv i f at j     *)
 (*                         Inert                       otherwise             *)
 (*   Recv j f           →  Disjoint (RScomm j i x p f) if Send i x p at j   *)
@@ -236,123 +212,112 @@ Qed.
 (******************************************************************************)
 
 (* Per-index verdict: either inert (step does nothing) or Disjoint with a
-   witnessing reduction. Lets step_sound dispatch on 2 cases, not 7. *)
-Inductive index_class n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) : Type :=
+   witnessing reduction. Lets step_sound dispatch on 2 cases, not 6. *)
+Inductive index_class n (ps : n.-tuple (proc data)) (i : 'I_n) : Type :=
   | Inert :
-      step ps [::] (sds !_ i) i = (ps !_ i, [::], sds !_ i, false) ->
-      index_class ps sds i
+      step ps [::] i = (ps !_ i, [::], false) -> index_class ps i
   | Disjoint (r : reduction_spec n) :
-      reduction_spec_at ps sds i = Some r -> index_class ps sds i.
+      reduction_spec_at ps i = Some r -> index_class ps i.
 
-(* The seven-way case split on proc constructors lives here, so that
-   step_sound sees only two cases. *)
-Lemma classify n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) :
-  index_class ps sds i.
+(* The 6-way case split on proc constructors lives here, once.
+   After this, step_sound only sees 2 cases.
+   Proof-mode construction (not computational): reduction_spec_at uses
+   opaque eqP pattern matching, so we prove reduction_spec_at ps i = Some r
+   by unfolding and stepping through the decidability checks. *)
+Lemma classify n (ps : n.-tuple (proc data)) (i : 'I_n) :
+  index_class ps i.
 Proof.
-have psE (k : 'I_n) : nth (default_proc data) ps k = ps !_ k by rewrite -tnth_nth.
-case Hpi: (ps !_ i) => [x p|dst w next|frm f|g|x||].
+case Hpi: (ps !_ i) => [x p|dst w next|frm f|x||].
 - by apply (Disjoint (r:=RSinit i x p)); rewrite /reduction_spec_at Hpi.
 - (* Send dst w next *)
   case: (ltnP dst n) => dstn; last first.
-    by apply Inert; rewrite /step psE Hpi nth_default // size_tuple.
+    apply Inert.
+    by rewrite /step -tnth_nth Hpi nth_default // size_tuple.
   set j := Ordinal dstn.
-  case Hpj: (ps !_ j) => [y q|dst2 w2 nxt2|frm2 f2|g2|y||];
-    try by apply Inert; rewrite /step psE Hpi (_: dst = j) // psE Hpj.
+  case Hpj: (ps !_ j) => [y q|dst2 w2 nxt2|frm2 f2|y||];
+    try by apply Inert; rewrite /step -tnth_nth Hpi (_: dst = j) // -tnth_nth Hpj.
   case: (eqVneq frm2 (nat_of_ord i)) => frm2i.
   + apply (Disjoint (r:=RScomm i j w next f2)).
     rewrite /reduction_spec_at Hpi /= /j.
     case: (eqP) => [pf|/negP]; last by rewrite dstn.
     by rewrite (bool_irrelevance pf dstn) Hpj frm2i eqxx.
-  + by apply Inert; rewrite /step psE Hpi (psE j) Hpj (negbTE frm2i).
+  + by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
+      -(tnth_nth (default_proc _) ps j) Hpj (negbTE frm2i).
 - (* Recv frm f *)
   have [frmn|frmn] := boolP (frm < n)%N; last first.
-    by apply Inert; rewrite /step psE Hpi nth_default ?size_tuple // leqNgt.
+    by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
+       nth_default ?size_tuple // leqNgt.
   set j := Ordinal frmn.
-  have Hj : nth (default_proc _) ps frm = ps !_ j by rewrite (psE j).
-  case Hpj: (ps !_ j) => [y q|dst2 w2 nxt2|frm2 f2|g2|y||];
-    try by apply Inert; rewrite /step psE Hpi Hj Hpj //=.
+  have Hj : nth (default_proc _) ps frm = ps !_ j.
+    by rewrite -(tnth_nth (default_proc _) ps j).
+  case Hpj: (ps !_ j) => [y q|dst2 w2 nxt2|frm2 f2|y||];
+    try by (apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
+         Hj Hpj //=).
   (* Send dst2 w2 nxt2 sub-case *)
   case: (eqVneq dst2 (nat_of_ord i)) => dst2i.
   + apply (Disjoint (r:=RScomm j i w2 nxt2 f)).
     rewrite /reduction_spec_at Hpi /= /j.
     case: (eqP) => [pf|/negP]; last by rewrite frmn.
-    by rewrite (bool_irrelevance pf frmn) Hpj dst2i eqxx.
-  + by apply Inert; rewrite /step psE Hpi Hj Hpj (negbTE dst2i).
-- (* Sample g *)
-  case Hsd: (sds !_ i) => [|r sd].
-  + by apply Inert; rewrite /step psE Hpi Hsd.
-  + by apply (Disjoint (r:=RSsample i g r)); rewrite /reduction_spec_at Hpi Hsd.
+    rewrite (bool_irrelevance pf frmn).
+    (* Now need: match ps !_ (Ordinal frmn) ... = Some (RScomm ...) *)
+    (* ps !_ (Ordinal frmn) = ps !_ j = Send dst2 w2 nxt2 *)
+    rewrite Hpj dst2i eqxx //.
+  + by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi
+      Hj Hpj (negbTE dst2i).
 - by apply (Disjoint (r:=RSret i x)); rewrite /reduction_spec_at Hpi.
-- by apply Inert; rewrite /step psE Hpi.
-- by apply Inert; rewrite /step psE Hpi.
-Qed.
-
-(* A reduction found at an index meets its seed condition.  The only Sample
-   reduction built reads the head of that party's stream. *)
-Lemma reduction_spec_at_seed n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) r :
-  reduction_spec_at ps sds i = Some r -> reduction_spec_seed sds r.
-Proof.
-rewrite /reduction_spec_at.
-case Hpi: (ps !_ i) => [x p|dst w next|frm f|g|x||] //=.
-- by move=> [<-].
-- case: eqP => //= dstn; case: (ps !_ _) => //= frm' f'.
-  by case: ifP => // _ [<-].
-- case: eqP => //= frmn; case: (ps !_ _) => //= dst' w' next'.
-  by case: ifP => // _ [<-].
-- by case Hsd: (sds !_ i) => [|r0 sd] // [<-] /=; exists sd.
-- by move=> [<-].
+- by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi.
+- by apply Inert; rewrite /step -(tnth_nth (default_proc _) ps i) Hpi.
 Qed.
 
 (* Lift reduction_spec_at to an rstep on the actual process state.
    Bridges reduction_spec (syntactic packaging) → rstep (semantic reduction).
    Proof: rewrite extract via reduction_spec_at_applies, apply reduction_spec_valid. *)
-Lemma reduction_spec_at_rstep n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) r :
-  reduction_spec_at ps sds i = Some r ->
-  rstep sds (reduction_spec_lens r) (extract (reduction_spec_lens r) ps)
+Lemma reduction_spec_at_rstep n (ps : n.-tuple (proc data)) (i : 'I_n) r :
+  reduction_spec_at ps i = Some r ->
+  rstep (reduction_spec_lens r) (extract (reduction_spec_lens r) ps)
         (reduction_spec_output r) (reduction_spec_traces r).
 Proof.
 move=> Hr.
 have Ha := reduction_spec_at_applies Hr.
 rewrite /reduction_applies in Ha.
-have Ha' : extract (reduction_spec_lens r) ps = reduction_spec_input r
-  by exact: val_inj.
-by rewrite Ha'; apply: reduction_spec_valid; exact: reduction_spec_at_seed Hr.
+have Ha' : extract (reduction_spec_lens r) ps = reduction_spec_input r by exact: val_inj.
+by rewrite Ha'; exact: reduction_spec_valid.
 Qed.
 
 (* Backward direction of step_complete: if reduction_spec_at finds a reduction,
    then step actually fires at each involved index. *)
-Lemma reduction_spec_at_fires n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) r :
-  reduction_spec_at ps sds i = Some r ->
+Lemma reduction_spec_at_fires n (ps : n.-tuple (proc data)) (i : 'I_n) r :
+  reduction_spec_at ps i = Some r ->
   forall j, j \in reduction_spec_indices r ->
-    (step ps [::] (sds !_ j) j).2 = true.
+    (step ps [::] j).2 = true.
 Proof.
 move=> Hr j Hj.
 have Ha := reduction_spec_at_applies Hr.
-have Hseed := reduction_spec_at_seed Hr.
-have psE (k : 'I_n) : nth (default_proc data) ps k = ps !_ k by rewrite -tnth_nth.
-rewrite /reduction_applies in Ha.
-case: r Hr Ha Hseed Hj => /=.
-- by move=> k y p _ [] Hk _; rewrite inE => /eqP ->; rewrite /step psE Hk.
-- by move=> k y _ [] Hk _; rewrite inE => /eqP ->; rewrite /step psE Hk.
-- move=> a b y pa pb _ [] Ha' Hb' _; rewrite !inE => /orP[]/eqP ->;
-    rewrite /step psE.
-  + by rewrite Ha' psE Hb' eqxx.
-  + by rewrite Hb' psE Ha' eqxx.
-- by move=> k g y _ [] Hk [sd Hsd]; rewrite inE => /eqP ->;
-     rewrite /step psE Hk Hsd.
+case: r Hr Ha Hj => /=.
+- (* RSinit *)
+  move=> k y p Hr Ha. rewrite inE => /eqP ->.
+  rewrite /reduction_applies /= in Ha. move: Ha => [] Hk.
+  by rewrite /step -(tnth_nth (default_proc _) ps k) Hk.
+- (* RSret *)
+  move=> k y Hr Ha. rewrite inE => /eqP ->.
+  rewrite /reduction_applies /= in Ha. move: Ha => [] Hk.
+  by rewrite /step -(tnth_nth (default_proc _) ps k) Hk.
+- (* RScomm *)
+  move=> a b y pa pb Hr Ha.
+  rewrite !inE => /orP[/eqP ->|/eqP ->].
+  + rewrite /reduction_applies /= in Ha. move: Ha => [] Ha Hb.
+    rewrite /step -(tnth_nth (default_proc _) ps a) Ha.
+    by rewrite -(tnth_nth (default_proc _) ps b) Hb eqxx.
+  + rewrite /reduction_applies /= in Ha. move: Ha => [] Ha Hb.
+    rewrite /step -(tnth_nth (default_proc _) ps b) Hb.
+    by rewrite -(tnth_nth (default_proc _) ps a) Ha eqxx.
 Qed.
 
 (* For RScomm, the sender and receiver are distinct.
    If i = j, then ps !_ i would be simultaneously Send and Recv,
    which is impossible since proc constructors are disjoint. *)
-Lemma reduction_spec_at_neq n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i j : 'I_n) x pi pj :
-  reduction_spec_at ps sds i = Some (RScomm i j x pi pj) -> i != j.
+Lemma reduction_spec_at_neq n (ps : n.-tuple (proc data)) (i j : 'I_n) x pi pj :
+  reduction_spec_at ps i = Some (RScomm i j x pi pj) -> i != j.
 Proof.
 move=> Hr; apply /eqP => ij; subst j.
 have := reduction_spec_at_applies Hr.
@@ -360,13 +325,12 @@ rewrite /reduction_applies /reduction_spec_lens /reduction_spec_input /extract /
 by move=> [] ->.
 Qed.
 
-(* reduction_spec_at ps sds i always returns a reduction involving i *)
-Lemma reduction_spec_at_mem n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) r :
-  reduction_spec_at ps sds i = Some r -> i \in reduction_spec_indices r.
+(* reduction_spec_at ps i always returns a reduction involving i *)
+Lemma reduction_spec_at_mem n (ps : n.-tuple (proc data)) (i : 'I_n) r :
+  reduction_spec_at ps i = Some r -> i \in reduction_spec_indices r.
 Proof.
 rewrite /reduction_spec_at.
-case: (ps !_ i) => [x p|dst w next|frm f|g|x||] //=.
+case: (ps !_ i) => [x p|dst w next|frm f|x||] //=.
 - by move=> [<-]; rewrite inE.
 - case: eqP => //= dstn.
   case: (ps !_ _) => //= frm2 f2.
@@ -376,7 +340,6 @@ case: (ps !_ i) => [x p|dst w next|frm f|g|x||] //=.
   case: (ps !_ _) => //= dst2 w2 nxt2.
   case: ifP => //= dst2i [<-].
   by rewrite !inE eqxx orbT.
-- by case: (sds !_ i) => [|r0 sd] // [<-]; rewrite inE.
 - by move=> [<-]; rewrite inE.
 Qed.
 
@@ -384,34 +347,32 @@ Qed.
 (* Soundness: step simulated by rsteps                                         *)
 (*                                                                            *)
 (* 2-way dispatch: Inert → step_result_inert, Disjoint → step_result_reduction_sender.   *)
-(* No 7-way case split, no partner search, no Send/Recv duplication.          *)
-(* The 7-way analysis is encapsulated in classify (proved once), and          *)
+(* No 6-way case split, no partner search, no Send/Recv duplication.          *)
+(* The 6-way analysis is encapsulated in classify (proved once), and          *)
 (* rstep_disjoint handles all invariant maintenance uniformly.                *)
 (******************************************************************************)
 
-(* One round of step restricted to the party set s, other parties left
-   unchanged.  Removing parties from s inductively bridges the functional
-   step to the relational rsteps. *)
-Definition step_result n (s : {fset 'I_n}) (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) :=
-  [tuple if i \in s then step ps [::] (sds !_ i) i
-         else (ps !_ i, nil, sds !_ i, false) | i < n].
+(* step_result computes the result of one round of step for all parties in set s.
+   For i in s, it runs step; for i not in s, it returns the unchanged process.
+   This intermediate definition bridges functional step and relational rsteps
+   by allowing inductive removal of parties from s. *)
+Definition step_result n (s : {fset 'I_n}) (ps : n.-tuple (proc data)) :=
+  [tuple if i \in s then step ps [::] i
+         else (ps !_ i, nil, false) | i < n].
 
 (* The interpreter result for party set S is a valid rsteps reduction *)
 Definition step_result_sound n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (S : {fset 'I_n}) : Prop :=
-  rsteps sds ps (result_procs (step_result S ps sds))
-         (result_traces (step_result S ps sds)).
+    (S : {fset 'I_n}) : Prop :=
+  rsteps ps (result_procs (step_result S ps)) (result_traces (step_result S ps)).
 
 (* When step leaves party i unchanged, removing i from the active set
    doesn't change step_result. For k != i, membership is unchanged;
-   for k = i, step returns the process, trace and stream it was given. *)
-Lemma step_result_inert n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n)
+   for k = i, step returning (ps !_ i, nil, false) matches the default. *)
+Lemma step_result_inert n (ps : n.-tuple (proc data)) (i : 'I_n)
     (pss : {fset 'I_n}) :
   i \in pss ->
-  step ps [::] (sds !_ i) i = (ps !_ i, [::], sds !_ i, false) ->
-  step_result pss ps sds = step_result (pss `\ i) ps sds.
+  step ps [::] i = (ps !_ i, [::], false) ->
+  step_result pss ps = step_result (pss `\ i) ps.
 Proof.
 move=> Hi Hstep.
 apply: eq_from_tnth => k; rewrite !tnth_mktuple !inE.
@@ -419,13 +380,12 @@ by have [-> |] //= := eqVneq k i; rewrite Hi Hstep.
 Qed.
 
 (* After a 1-party rstep, injecting the result equals the full step_result. *)
-Lemma step_result_inject1 n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n)
-    (pss : {fset 'I_n}) (q : proc data) (tr sd : seq data) :
+Lemma step_result_inject1 n (ps : n.-tuple (proc data)) (i : 'I_n)
+    (pss : {fset 'I_n}) (q : proc data) (tr : seq data) :
   i \in pss ->
-  step ps [::] (sds !_ i) i = (q, tr, sd, true) ->
-  inject [tuple i] (result_procs (step_result (pss `\ i) ps sds)) [tuple q] =
-  result_procs (step_result pss ps sds).
+  step ps [::] i = (q, tr, true) ->
+  inject [tuple i] (result_procs (step_result (pss `\ i) ps)) [tuple q] =
+  result_procs (step_result pss ps).
 Proof.
 move=> Hi Hstep.
 apply: eq_from_tnth => j; rewrite !(tnth_mktuple, tnth_map) /=.
@@ -435,14 +395,13 @@ by rewrite !inE eq_sym ij.
 Qed.
 
 (* After a 1-party rstep, trace projection matches rsteps concatenation. *)
-Lemma step_result_trace1 n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n)
-    (pss : {fset 'I_n}) (q : proc data) (tr sd : seq data) :
+Lemma step_result_trace1 n (ps : n.-tuple (proc data)) (i : 'I_n)
+    (pss : {fset 'I_n}) (q : proc data) (tr : seq data) :
   i \in pss ->
-  step ps [::] (sds !_ i) i = (q, tr, sd, true) ->
-  result_traces (step_result pss ps sds) =
+  step ps [::] i = (q, tr, true) ->
+  result_traces (step_result pss ps) =
   [tuple (inject [tuple i] [tuple [::] | _ < n] [tuple tr]) !_ k ++
-         (result_traces (step_result (pss `\ i) ps sds)) !_ k | k < n].
+         (result_traces (step_result (pss `\ i) ps)) !_ k | k < n].
 Proof.
 move=> Hi Hstep.
 apply: eq_from_tnth => k; rewrite !(tnth_mktuple, tnth_map) /=.
@@ -452,16 +411,15 @@ by have -> : (k \in pss `\ i) = (k \in pss) by rewrite !inE eq_sym ik.
 Qed.
 
 (* After a 2-party rstep, injecting both results equals the full step_result. *)
-Lemma step_result_inject2 n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (a b : 'I_n)
+Lemma step_result_inject2 n (ps : n.-tuple (proc data)) (a b : 'I_n)
     (pss : {fset 'I_n})
-    (qa qb : proc data) (tra trb sda sdb : seq data) :
+    (qa qb : proc data) (tra trb : seq data) :
   a \in pss -> b \in pss -> a != b ->
-  step ps [::] (sds !_ a) a = (qa, tra, sda, true) ->
-  step ps [::] (sds !_ b) b = (qb, trb, sdb, true) ->
-  inject [tuple a; b] (result_procs (step_result (pss `\ a `\ b) ps sds))
+  step ps [::] a = (qa, tra, true) ->
+  step ps [::] b = (qb, trb, true) ->
+  inject [tuple a; b] (result_procs (step_result (pss `\ a `\ b) ps))
     [tuple qa; qb] =
-  result_procs (step_result pss ps sds).
+  result_procs (step_result pss ps).
 Proof.
 move=> Ha Hb ab Hstepa Hstepb.
 apply: eq_from_tnth => k; rewrite !(tnth_mktuple, tnth_map) /=.
@@ -473,16 +431,15 @@ by rewrite !inE eq_sym bk eq_sym ak.
 Qed.
 
 (* After a 2-party rstep, trace projection matches rsteps concatenation. *)
-Lemma step_result_trace2 n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (a b : 'I_n)
+Lemma step_result_trace2 n (ps : n.-tuple (proc data)) (a b : 'I_n)
     (pss : {fset 'I_n})
-    (qa qb : proc data) (tra trb sda sdb : seq data) :
+    (qa qb : proc data) (tra trb : seq data) :
   a \in pss -> b \in pss -> a != b ->
-  step ps [::] (sds !_ a) a = (qa, tra, sda, true) ->
-  step ps [::] (sds !_ b) b = (qb, trb, sdb, true) ->
-  result_traces (step_result pss ps sds) =
+  step ps [::] a = (qa, tra, true) ->
+  step ps [::] b = (qb, trb, true) ->
+  result_traces (step_result pss ps) =
   [tuple (inject [tuple a; b] [tuple [::] | _ < n] [tuple tra; trb]) !_ k ++
-         (result_traces (step_result (pss `\ a `\ b) ps sds)) !_ k | k < n].
+         (result_traces (step_result (pss `\ a `\ b) ps)) !_ k | k < n].
 Proof.
 move=> Ha Hb ab Hstepa Hstepb.
 apply: eq_from_tnth => k; rewrite !(tnth_mktuple, tnth_map) /=.
@@ -504,88 +461,88 @@ Qed.
 
 (* If reduction_spec_at from a Send-side index gives RScomm, the queried index is
    the sender (first argument). *)
-Lemma reduction_spec_at_sender n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n)
+Lemma reduction_spec_at_sender n (ps : n.-tuple (proc data)) (i : 'I_n)
     a b x pa pb :
-  reduction_spec_at ps sds i = Some (RScomm a b x pa pb) ->
+  reduction_spec_at ps i = Some (RScomm a b x pa pb) ->
   is_true (match ps !_ i with Send _ _ _ => true | _ => false end) ->
   i = a.
 Proof.
 rewrite /reduction_spec_at.
-case Hpi: (ps !_ i) => [y p0|dst w next|frm f|g|y||] //=.
+case Hpi: (ps !_ i) => [y p0|dst w next|frm f|y||] //=.
 case: eqP => // jn.
-case Hpj: (ps !_ (Ordinal jn)) => [y' q|dst2 w2 nxt2|frm2 f2|g'|y'||] //=.
+case Hpj: (ps !_ (Ordinal jn)) => [y' q|dst2 w2 nxt2|frm2 f2|y'||] //=.
 by case: ifP => // _ [] -> _ _ _ _.
 Qed.
 
-(* Peel one reduction off the active set and reduce to soundness on the
-   smaller set. *)
-Lemma step_result_reduction_sender n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (pss : {fset 'I_n})
+(* Inductive step of the soundness argument: peel one reduction (1- or
+   2-party) off the active set and reduce to soundness on the smaller set. *)
+Lemma step_result_reduction_sender n (ps : n.-tuple (proc data)) (pss : {fset 'I_n})
     (i : 'I_n) (r : reduction_spec n) :
-  reduction_spec_at ps sds i = Some r ->
+  reduction_spec_at ps i = Some r ->
   i \in pss ->
   (forall a b x pa pb, r = RScomm a b x pa pb -> i = a /\ b \in pss) ->
-  step_result_sound ps sds
+  step_result_sound ps
     match r with
     | RSinit _ _ _ => pss `\ i
     | RSret _ _ => pss `\ i
     | RScomm a b _ _ _ => pss `\ a `\ b
-    | RSsample _ _ _ => pss `\ i
     end ->
-  step_result_sound ps sds pss.
+  step_result_sound ps pss.
 Proof.
 move=> Hr Hi Hsender IH.
-(* The three one-party reductions differ only in the process they consume and
-   in the trace and seed the step returns. *)
-have one (q q' : proc data) (tr sd : seq data) :
-    ps !_ i = q ->
-    step ps [::] (sds !_ i) i = (q', tr, sd, true) ->
-    rstep sds [tuple i] [tuple q] [tuple q'] [tuple tr] ->
-    step_result_sound ps sds (pss `\ i) ->
-    step_result_sound ps sds pss.
-  move=> Hpi Hstep Hrs IH'.
-  rewrite /step_result_sound; apply: (rtrans IH'); last first.
-    exact: (step_result_trace1 Hi Hstep).
-  move: Hrs; set ps'' := result_procs _.
-  have -> : [tuple q] = extract [tuple i] ps''.
-    apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
-    by rewrite !inE eqxx /= Hpi.
-  by move/rone; rewrite (step_result_inject1 Hi Hstep).
-case: r Hr IH Hsender => [k y p|k y|a b y pa pb|k g y] Hr IH Hsender.
+case: r Hr IH Hsender => [k y p|k y|a b y pa pb] Hr IH Hsender.
 - (* RSinit *)
   have Hi_mem := reduction_spec_at_mem Hr.
   rewrite /= inE in Hi_mem; move/eqP: Hi_mem => ?; subst k.
   have Ha := reduction_spec_at_applies Hr.
   rewrite /reduction_applies /= in Ha; move: Ha => [] Hpi.
-  apply: (one _ _ _ _ Hpi _ (rinit sds i y p) IH).
-  by rewrite /step -(tnth_nth (default_proc _)) Hpi.
+  have Hstep : step ps [::] i = (p, [:: y], true)
+    by rewrite /step -(tnth_nth (default_proc _)) Hpi.
+  rewrite /step_result_sound.
+  apply: (rtrans IH); last first.
+  + apply: (step_result_trace1 Hi Hstep).
+  + move: (rinit i y p).
+    set ps'' := result_procs _.
+    have -> : [tuple Init y p] = extract [tuple i] ps''.
+      apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
+      by rewrite !inE eqxx /= Hpi.
+    move/rone.
+    by rewrite (step_result_inject1 Hi Hstep).
 - (* RSret *)
   have Hi_mem := reduction_spec_at_mem Hr.
   rewrite /= inE in Hi_mem; move/eqP: Hi_mem => ?; subst k.
   have Ha := reduction_spec_at_applies Hr.
   rewrite /reduction_applies /= in Ha; move: Ha => [] Hpi.
-  apply: (one _ _ _ _ Hpi _ (rret sds i y) IH).
-  by rewrite /step -(tnth_nth (default_proc _)) Hpi.
+  have Hstep : step ps [::] i = (Finish, [:: y], true)
+    by rewrite /step -(tnth_nth (default_proc _)) Hpi.
+  rewrite /step_result_sound.
+  apply: (rtrans IH); last first.
+  + apply: (step_result_trace1 Hi Hstep).
+  + move: (rret i y).
+    set ps'' := result_procs _.
+    have -> : [tuple Ret y] = extract [tuple i] ps''.
+      apply/val_inj; rewrite /= /ps'' /result_procs tnth_map tnth_mktuple.
+      by rewrite !inE eqxx /= Hpi.
+    move/rone.
+    by rewrite (step_result_inject1 Hi Hstep).
 - (* RScomm - sender side only *)
   have [Hi_eq Hb_pss] := Hsender a b y pa pb erefl.
   subst i.
   have Hab := reduction_spec_at_neq Hr.
   have Happ := reduction_spec_at_applies Hr.
   rewrite /reduction_applies /= in Happ; move: Happ => [] Hpa Hpb.
-  have Hstepa : step ps [::] (sds !_ a) a = (pa, [::], sds !_ a, true).
+  have Hstepa : step ps [::] a = (pa, [::], true).
     rewrite /step -(tnth_nth (default_proc _)) Hpa.
     by rewrite -(tnth_nth (default_proc _) ps b) Hpb eqxx.
-  have Hstepb : step ps [::] (sds !_ b) b = (pb y, [:: y], sds !_ b, true).
+  have Hstepb : step ps [::] b = (pb y, [:: y], true).
     rewrite /step -(tnth_nth (default_proc _)) Hpb.
     by rewrite -(tnth_nth (default_proc _) ps a) Hpa eqxx.
   rewrite /step_result_sound.
   apply: (rtrans IH); last first.
   * apply: (step_result_trace2 Hi Hb_pss Hab Hstepa Hstepb).
-  * move: (rcomm sds a b y pa pb).
+  * move: (rcomm a b y pa pb).
     suff Hext : [tuple Send (nat_of_ord b) y pa; Recv (nat_of_ord a) pb] =
-              extract [tuple a; b]
-                (result_procs (step_result (pss `\ a `\ b) ps sds))
+              extract [tuple a; b] (result_procs (step_result (pss `\ a `\ b) ps))
       by rewrite Hext; move/rone;
          by rewrite (step_result_inject2 Hi Hb_pss Hab Hstepa Hstepb).
     apply/val_inj.
@@ -593,14 +550,6 @@ case: r Hr IH Hsender => [k y p|k y|a b y pa pb|k g y] Hr IH Hsender.
     have Ha_notin : a \notin pss `\ a `\ b by rewrite !inE eqxx /= andbF.
     have Hb_notin : b \notin pss `\ a `\ b by rewrite !inE eqxx.
     by rewrite (negbTE Ha_notin) (negbTE Hb_notin) Hpa Hpb.
-- (* RSsample *)
-  have Hi_mem := reduction_spec_at_mem Hr.
-  rewrite /= inE in Hi_mem; move/eqP: Hi_mem => ?; subst k.
-  have Ha := reduction_spec_at_applies Hr.
-  rewrite /reduction_applies /= in Ha; move: Ha => [] Hpi.
-  have [sd Hsd] := reduction_spec_at_seed Hr.
-  apply: (one _ _ _ _ Hpi _ (rsample g Hsd) IH).
-  by rewrite /step -(tnth_nth (default_proc _)) Hpi Hsd.
 Qed.
 
 (******************************************************************************)
@@ -611,61 +560,56 @@ Qed.
 (* instead of finSet_rect.                                                    *)
 (******************************************************************************)
 
-(* is_sender: true for Init/Ret/Send/Sample, false for Recv/Finish/Fail.
+(* is_sender: true for Init/Ret/Send, false for Recv/Finish/Fail.
    Used to filter out Recv so each RScomm appears once via sender indices. *)
 Definition is_sender {n} (ps : n.-tuple (proc data)) (i : 'I_n) : bool :=
   match ps !_ i with
-  | Init _ _ | Ret _ | Send _ _ _ | Sample _ => true
+  | Init _ _ | Ret _ | Send _ _ _ => true
   | _ => false
   end.
 
 (* has_reduction: i is a sender-side index with a fireable reduction *)
-Definition has_reduction {n} (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) : bool :=
+Definition has_reduction {n} (ps : n.-tuple (proc data)) (i : 'I_n) : bool :=
   is_sender ps i &&
-  match reduction_spec_at ps sds i with Some _ => true | None => false end.
+  match reduction_spec_at ps i with Some _ => true | None => false end.
 
 (* List of sender indices with fireable reductions.
    Each RScomm appears once (from the Send side, not the Recv side). *)
-Definition active_senders {n} (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) : seq 'I_n :=
-  [seq i <- enum 'I_n | has_reduction ps sds i].
+Definition active_senders {n} (ps : n.-tuple (proc data)) : seq 'I_n :=
+  [seq i <- enum 'I_n | has_reduction ps i].
 
 (* All indices involved in some reduction (senders + their partners) *)
-Definition active_indices {n} (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) : {fset 'I_n} :=
-  \big[fsetU/fset0]_(i <- active_senders ps sds)
-    match reduction_spec_at ps sds i with
+Definition active_indices {n} (ps : n.-tuple (proc data)) : {fset 'I_n} :=
+  \big[fsetU/fset0]_(i <- active_senders ps)
+    match reduction_spec_at ps i with
     | Some r => [fset j : 'I_n | j \in reduction_spec_indices r]
     | None => fset0
     end.
 
-(* For any active sender i with reduction_spec_at ps sds i = Some r,
+(* For any active sender i with reduction_spec_at ps i = Some r,
    all indices of r are in active_indices *)
-Lemma active_senders_indices n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) i r j :
-  i \in active_senders ps sds -> reduction_spec_at ps sds i = Some r ->
-  j \in reduction_spec_indices r -> j \in active_indices ps sds.
+Lemma active_senders_indices n (ps : n.-tuple (proc data)) i r j :
+  i \in active_senders ps -> reduction_spec_at ps i = Some r ->
+  j \in reduction_spec_indices r -> j \in active_indices ps.
 Proof.
 move=> Hi Hr Hj; rewrite /active_indices; apply/bigfcupP.
 by exists i; [rewrite Hi | rewrite Hr inE].
 Qed.
 
 (* Every Disjoint index has a corresponding active sender *)
-Lemma active_senders_complete n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) (i : 'I_n) r :
-  reduction_spec_at ps sds i = Some r ->
-  exists k, k \in active_senders ps sds /\ reduction_spec_at ps sds k = Some r.
+Lemma active_senders_complete n (ps : n.-tuple (proc data)) (i : 'I_n) r :
+  reduction_spec_at ps i = Some r ->
+  exists k, k \in active_senders ps /\ reduction_spec_at ps k = Some r.
 Proof.
 move=> Hr; case Hsender: (is_sender ps i).
 - exists i; split => //.
   by rewrite /active_senders mem_filter /has_reduction Hsender Hr mem_enum.
 - rewrite /is_sender in Hsender.
   rewrite /reduction_spec_at in Hr.
-  case Hpi: (ps !_ i) Hsender Hr => [y p0|dst w next|frm f|g|y||] //= _.
+  case Hpi: (ps !_ i) Hsender Hr => [y p0|dst w next|frm f|y||] //= _.
   case: eqP => // jn.
   set j := Ordinal jn.
-  case Hpj: (ps !_ j) => [y' q|dst2 w2 nxt2|frm2 f2|g'|y'||] //=.
+  case Hpj: (ps !_ j) => [y' q|dst2 w2 nxt2|frm2 f2|y'||] //=.
   case: ifP => // /eqP dst2i [] Hr_eq; subst r.
   have din : (dst2 < n)%N by rewrite dst2i; exact: ltn_ord.
   have ji_eq : Ordinal din = i by apply: val_inj; rewrite /= dst2i.
@@ -680,21 +624,18 @@ move=> Hr; case Hsender: (is_sender ps i).
 Qed.
 
 (* active_senders have uniq (inherited from enum) *)
-Lemma active_senders_uniq n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) :
-  uniq (active_senders ps sds).
+Lemma active_senders_uniq n (ps : n.-tuple (proc data)) :
+  uniq (active_senders ps).
 Proof. exact: filter_uniq (enum_uniq 'I_n). Qed.
 
 (* Stripping inert indices: step_result on the full set equals step_result on
    just the active indices, because inert indices don't change step_result. *)
-Lemma step_result_strip_inert n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) :
-  step_result [fset x : 'I_n | true] ps sds
-  = step_result (active_indices ps sds) ps sds.
+Lemma step_result_strip_inert n (ps : n.-tuple (proc data)) :
+  step_result [fset x : 'I_n | true] ps = step_result (active_indices ps) ps.
 Proof.
 apply: eq_from_tnth => k; rewrite !tnth_mktuple inE /=.
 case: ifP => // Hk_notin.
-case: (classify ps sds k) => [Hinert | r Hr]; first exact: Hinert.
+case: (classify ps k) => [Hinert | r Hr]; first exact: Hinert.
 exfalso; move/negP: Hk_notin; apply.
 have [k' [Hk'_as Hk'_r]] := active_senders_complete Hr.
 exact: (active_senders_indices Hk'_as Hk'_r (reduction_spec_at_mem Hr)).
@@ -702,54 +643,50 @@ Qed.
 
 (* Main list-based soundness: induction over active_senders *)
 Lemma step_sound_list n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data))
     (senders : seq 'I_n) (pss : {fset 'I_n}) :
   uniq senders ->
   (* all indices of all senders' reductions are in pss *)
-  (forall i, i \in senders -> forall r, reduction_spec_at ps sds i = Some r ->
+  (forall i, i \in senders -> forall r, reduction_spec_at ps i = Some r ->
     forall j, j \in reduction_spec_indices r -> j \in pss) ->
   (* all senders are active sender indices *)
-  (forall i, i \in senders -> has_reduction ps sds i) ->
+  (forall i, i \in senders -> has_reduction ps i) ->
   (* senders have disjoint reductions *)
   (forall i1 i2, i1 \in senders -> i2 \in senders -> i1 != i2 ->
-    forall r1 r2, reduction_spec_at ps sds i1 = Some r1 ->
-    reduction_spec_at ps sds i2 = Some r2 ->
+    forall r1 r2, reduction_spec_at ps i1 = Some r1 -> reduction_spec_at ps i2 = Some r2 ->
     {in reduction_spec_indices r1 & reduction_spec_indices r2, forall a b, a != b}) ->
   (* non-sender indices in pss are inert *)
   (forall i, i \in pss -> i \notin
     \big[fsetU/fset0]_(k <- senders)
-      match reduction_spec_at ps sds k with
+      match reduction_spec_at ps k with
       | Some r => [fset j : 'I_n | j \in reduction_spec_indices r]
       | None => fset0
       end ->
-    step ps [::] (sds !_ i) i = (ps !_ i, [::], sds !_ i, false)) ->
-  step_result_sound ps sds pss.
+    step ps [::] i = (ps !_ i, [::], false)) ->
+  step_result_sound ps pss.
 Proof.
 elim: senders pss => [|s senders' IHs] pss Huniq Hindices Hactive Hdisj Hinert.
 - (* Base case *)
   rewrite /step_result_sound.
-  have Heq : step_result pss ps sds
-             = [tuple (ps !_ k, [::], sds !_ k, false) | k < n].
+  have Heq : step_result pss ps = [tuple (ps !_ k, [::], false) | k < n].
     apply: eq_from_tnth => k; rewrite !tnth_mktuple.
     case/boolP: (k \in pss) => Hk //.
     apply: Hinert => //. rewrite big_nil inE //.
   rewrite Heq.
-  have -> : result_procs [tuple (ps !_ k, [::], sds !_ k, false) | k < n] = ps.
+  have -> : result_procs [tuple (ps !_ k, [::], false) | k < n] = ps.
     by apply: eq_from_tnth => k; rewrite /result_procs tnth_map !tnth_mktuple.
-  have -> : result_traces [tuple (ps !_ k, [::], sds !_ k, false) | k < n]
-            = [tuple [::] | _ < n].
+  have -> : result_traces [tuple (ps !_ k, [::], false) | k < n] = [tuple [::] | _ < n].
     by apply: eq_from_tnth => k; rewrite /result_traces tnth_map !tnth_mktuple.
   exact: rrefl.
 - (* Inductive case *)
   have /andP [Hs_notin Huniq'] := Huniq.
   have Hs_active := Hactive s (mem_head _ _).
   rewrite /has_reduction in Hs_active; case/andP: Hs_active => Hs_sender Hs_red.
-  case Hr_eq: (reduction_spec_at ps sds s) Hs_red => [r|] //= _.
+  case Hr_eq: (reduction_spec_at ps s) Hs_red => [r|] //= _.
   have Hs_mem := reduction_spec_at_mem Hr_eq.
   have Hs_pss : s \in pss := Hindices s (mem_head _ _) r Hr_eq s Hs_mem.
   apply: (step_result_reduction_sender Hr_eq Hs_pss); clear Hs_mem.
   + move=> a b x pa pb Hr_comm.
-    have Hr_eq' : reduction_spec_at ps sds s = Some (RScomm a b x pa pb)
+    have Hr_eq' : reduction_spec_at ps s = Some (RScomm a b x pa pb)
       by rewrite Hr_eq Hr_comm.
     have Happ := reduction_spec_at_applies Hr_eq'.
     rewrite /reduction_applies /= in Happ; case: Happ => Hpa Hpb.
@@ -769,7 +706,7 @@ elim: senders pss => [|s senders' IHs] pss Huniq Hindices Hactive Hdisj Hinert.
       have Hi_neq_s : i != s.
         by apply/eqP => is_eq; subst i; move: Hs_notin; rewrite Hi_in.
       have Hrdisj := Hdisj i s Hi_senders (mem_head _ _) Hi_neq_s r' r Hr' Hr_eq.
-      case: r Hr_eq Hrdisj => [k y p|k y|a b y pa pb|k g y] Hr_eq Hrdisj.
+      case: r Hr_eq Hrdisj => [k y p|k y|a b y pa pb] Hr_eq Hrdisj.
       -- rewrite !inE Hj_pss andbT.
          by have /= := Hrdisj j s Hj (reduction_spec_at_mem Hr_eq).
       -- rewrite !inE Hj_pss andbT.
@@ -781,21 +718,18 @@ elim: senders pss => [|s senders' IHs] pss Huniq Hindices Hactive Hdisj Hinert.
            by rewrite /= !inE eqxx orbT.
          have /= -> := Hrdisj j a Hj Ha_idx.
          by have /= -> := Hrdisj j b Hj Hb_idx.
-      -- rewrite !inE Hj_pss andbT.
-         by have /= := Hrdisj j s Hj (reduction_spec_at_mem Hr_eq).
     * move=> i0 Hi0_in; apply: Hactive; by rewrite inE Hi0_in orbT.
     * move=> i1 i2 Hi1 Hi2 Hneq r1 r2 Hr1 Hr2.
       by apply: (Hdisj i1 i2) => //; rewrite inE ?Hi1 ?Hi2 orbT.
     * move=> i Hi_pss' Hi_notin.
       apply: Hinert.
-      -- case: r Hr_eq Hi_pss' => [k y p|k y|a b y pa pb|k g y] Hr_eq.
+      -- case: r Hr_eq Hi_pss' => [k y p|k y|a b y pa pb] Hr_eq.
          ++ by rewrite inE; case/andP.
          ++ by rewrite inE; case/andP.
          ++ by rewrite !inE => /andP [? /andP [? ?]].
-         ++ by rewrite inE; case/andP.
       -- rewrite big_cons inE negb_or; apply/andP; split; last exact: Hi_notin.
          rewrite Hr_eq.
-         case: r Hr_eq Hi_pss' => [k y p|k y|a b y pa pb|k g y] Hr_eq Hi_pss'.
+         case: r Hr_eq Hi_pss' => [k y p|k y|a b y pa pb] Hr_eq Hi_pss'.
          ++ rewrite inE in Hi_pss'; case/andP: Hi_pss' => Hi_neq _.
             rewrite inE /= inE /=.
             by have := reduction_spec_at_mem Hr_eq; rewrite /= inE => /eqP <-;
@@ -811,21 +745,15 @@ elim: senders pss => [|s senders' IHs] pss Huniq Hindices Hactive Hdisj Hinert.
               /orP [/eqP Hsa | /eqP Hsb].
             ** by subst a; rewrite Hi_neq_a Hi_neq_b.
             ** by subst b; rewrite Hi_neq_a Hi_neq_b.
-         ++ rewrite inE in Hi_pss'; case/andP: Hi_pss' => Hi_neq _.
-            rewrite inE /= inE /=.
-            by have := reduction_spec_at_mem Hr_eq; rewrite /= inE => /eqP <-;
-               rewrite inE in Hi_neq.
 Qed.
 
 (* Distinct active senders have disjoint reduction indices.
    Uses rstep_disjoint + the fact that both senders have is_sender = true,
    so for RScomm the receiver (b) is excluded, forcing i1 = i2 = a. *)
 Lemma active_senders_disjoint n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data))
     (i1 i2 : 'I_n) r1 r2 :
-  i1 \in active_senders ps sds -> i2 \in active_senders ps sds -> i1 != i2 ->
-  reduction_spec_at ps sds i1 = Some r1 ->
-  reduction_spec_at ps sds i2 = Some r2 ->
+  i1 \in active_senders ps -> i2 \in active_senders ps -> i1 != i2 ->
+  reduction_spec_at ps i1 = Some r1 -> reduction_spec_at ps i2 = Some r2 ->
   {in reduction_spec_indices r1 & reduction_spec_indices r2, forall a b, a != b}.
 Proof.
 move=> Hi1 Hi2 Hneq Hr1 Hr2.
@@ -847,7 +775,7 @@ case: (rstep_disjoint erefl erefl Hrstep1 Hrstep2).
   have Hi2_in_r1 : i2 \in reduction_spec_indices r1 by rewrite indices_is_lens.
   clear Hi2_lens Hlens_eq.
   case: r1 Hr1 Hrstep1 Hi1_mem Hi2_in_r1 Hi1_sender
-    => [k y p|k y|a b y pa pb|k g y] Hr1 Hrstep1 Hi1_mem Hi2_in_r1 Hi1_sender.
+    => [k y p|k y|a b y pa pb] Hr1 Hrstep1 Hi1_mem Hi2_in_r1 Hi1_sender.
   + by rewrite /= !inE in Hi1_mem Hi2_in_r1; rewrite (eqP Hi1_mem) (eqP Hi2_in_r1).
   + by rewrite /= !inE in Hi1_mem Hi2_in_r1; rewrite (eqP Hi1_mem) (eqP Hi2_in_r1).
   + rewrite /= !inE in Hi1_mem Hi2_in_r1.
@@ -860,8 +788,6 @@ case: (rstep_disjoint erefl erefl Hrstep1 Hrstep2).
       case/orP: Hi2_in_r1 => /eqP // Hi2b.
       by exfalso; rewrite /is_sender Hi2b Hpb in Hi2_sender.
     by rewrite Hi1_eq Hi2_eq.
-  + by rewrite /= !inE in Hi1_mem Hi2_in_r1;
-      rewrite (eqP Hi1_mem) (eqP Hi2_in_r1).
 - move=> Hdisj a0 b0 Ha0 Hb0.
   rewrite indices_is_lens in Ha0.
   rewrite indices_is_lens in Hb0.
@@ -877,20 +803,19 @@ Qed.
 (* 3. Apply step_sound_list with active_senders                              *)
 (******************************************************************************)
 
-(* One interpreter round is a valid rsteps reduction: its processes and
-   traces come from step at every party. *)
-Lemma step_sound n (ps : n.-tuple (proc data))
-    (sds : n.-tuple (seq data)) :
-  let res := [tuple step ps nil (sds !_ i) i | i < n] in
+(* Soundness of one interpreter round: the processes and traces produced by
+   running step at every party form a valid rsteps reduction. *)
+Lemma step_sound n (ps : n.-tuple (proc data)) :
+  let res := [tuple step ps nil i | i < n] in
   let ps' := result_procs res in
   let tr := result_traces res in
-  rsteps sds ps ps' tr.
+  rsteps ps ps' tr.
 Proof.
 move=> res.
-have -> : res = step_result [fset x : 'I_n | true] ps sds.
+have -> : res = step_result [fset x : 'I_n | true] ps.
   by apply: eq_from_tnth => i; rewrite !tnth_mktuple ifT // !inE.
 rewrite step_result_strip_inert.
-apply: (step_sound_list (active_senders_uniq ps sds)).
+apply: (step_sound_list (active_senders_uniq ps)).
 - move=> i Hi r Hr j Hj.
   exact: (active_senders_indices Hi Hr Hj).
 - move=> i Hi.
@@ -898,7 +823,7 @@ apply: (step_sound_list (active_senders_uniq ps sds)).
 - move=> i1 i2 Hi1 Hi2 Hneq r1 r2 Hr1 Hr2.
   exact: (active_senders_disjoint Hi1 Hi2 Hneq Hr1 Hr2).
 - move=> i Hi Hnotin.
-  case: (classify ps sds i) => [Hinert | r Hr]; first exact: Hinert.
+  case: (classify ps i) => [Hinert | r Hr]; first exact: Hinert.
   exfalso; move/negP: Hnotin; apply.
   have [k [Hk_as Hk_r]] := active_senders_complete Hr.
   exact: (active_senders_indices Hk_as Hk_r (reduction_spec_at_mem Hr)).

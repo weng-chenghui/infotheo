@@ -6,8 +6,9 @@ Require Import smc_session_types.
 Declare Scope pismc_scope.
 Declare Custom Entry pismc.
 
-(* Program delimiter, written \pi{ e } because the brace-bar form clashes
-   with Rocq record syntax. *)
+(* Program delimiter.
+   Note that `{| e |}` is conflicting with the Rocq structure syntax.
+   So we use `\pi{ e }` instead. *)
 Notation "'\pi{' e '}'" := e (e custom pismc at level 99) : pismc_scope.
 
 (* Shared piSMC notations - protocol-independent constructors.
@@ -37,14 +38,13 @@ Notation "'Init' '(' x ',' .. ',' y ')' ; P" :=
    x constr at level 0, y constr at level 0,
    P custom pismc at level 85, right associativity).
 
-(* Sample - draw the head of the party's own seed stream.
-   No channel is used, so the session environment is unchanged. *)
-Notation "'Sample' x '=>' P" := (SSample (fun x => P))
-  (in custom pismc at level 85, x name,
-   P custom pismc at level 85, right associativity).
-
-(* Iterate a body over the elements of a finType, one sproc layer per
-   element.  Usage: ForEach 'I_n as f, i => body ; P. *)
+(* ForEach - iterate over finType elements using sproc_iter.
+   Usage: ForEach 'I_n as f, i => (fun n env cont => ...) ; P
+   - fT: the finType to enumerate
+   - f: bound variable for each element
+   - i: bound variable for the index
+   - body: function (n : nat) (env : senv dtype) (cont : sproc ...) -> sproc ...
+   - fuel_step = S (default); use the 'step' variant for other fuel steps *)
 Notation "'ForEach' fT 'as' f ',' i '=>' body ; P" :=
   (sproc_iter _ S _ (fun f i => body) (enum fT) 0 P)
   (in custom pismc at level 85, fT constr at level 0, f name, i name,
@@ -68,8 +68,10 @@ Notation "'ForEach' fT 'step' s 'enstep' es 'as' f ',' i '=>' body ; P" :=
    es constr at level 0, f name, i name, body constr at level 0,
    P custom pismc at level 85, right associativity).
 
-(* Like ForEach but iterating an explicit list, for cases where enum does
-   not reduce under vm_compute. *)
+(* ForList - iterate over an explicit list using sproc_iter.
+   Like ForEach but takes a concrete list instead of enum fT.
+   Useful when enum doesn't reduce under vm_compute.
+   The 'cont' variant binds the continuation variable for use in body. *)
 Notation "'ForList' ls 'step' s 'enstep' es 'as' f ',' i '=>' body ; P" :=
   (sproc_iter _ s es (fun f i => body) ls 0 P)
   (in custom pismc at level 85, ls constr at level 0, s constr at level 0,

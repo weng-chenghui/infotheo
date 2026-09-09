@@ -1,13 +1,18 @@
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import zmodp ring boolp reals.
+Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
+Require Import proba.
 Require Import extra_algebra.
-Require Import homomorphic_encryption residuosity_game paillier_fdist_instance.
-Require Import negligible.
+Require Import smc_interpreter smc_session_types.
+Require Import homomorphic_encryption residuosity_game.
+Require Import idealized_ahe paillier_fdist_instance.
+Require Import negligible epshop epshop_sequence.
 Require Import indcpa_game indcpa_scheme_sequence idealized_indcpa_scheme.
 Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance.
-Require Import dsdp_alice_trace_link dsdp_alice_main.
+Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
+Require Import dsdp_alice_main.
 
 (**md**************************************************************************)
 (* # Concrete readings of DSDP corrupted-Alice secrecy                       *)
@@ -27,6 +32,11 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 Local Open Scope ring_scope.
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope proc_scope.
+Local Open Scope sproc_scope.
 
 (* The vacuity question the abstract bounds leave open, answered on the
    idealized scheme sequence of idealized_indcpa_scheme.v.  Every hypothesis
@@ -35,19 +45,12 @@ Local Open Scope ring_scope.
 Section idealized.
 Variable R : realType.
 
-(* Alice's data on the idealized sequence: zero weights with a unit on
-   Charlie's input, and one seed per key space. *)
-Definition idealized_alice_data :
-    dsdp_alice_data (idealized_scheme_sequence R) :=
-  @Build_dsdp_alice_data R (idealized_scheme_sequence R)
-    (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
-    (fun _ => GRing.unitr1 _)
-    (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
-
-(* The idealized sequence: the schemes of idealized_indcpa_scheme.v with that
-   data. *)
+(* The idealized sequence: the schemes of idealized_indcpa_scheme.v, zero
+   weights with a unit on Charlie's input, and one seed per key space. *)
 Definition idealized_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (idealized_scheme_sequence R) idealized_alice_data.
+  mk_dsdp_instance_sequence (idealized_scheme_sequence R)
+    (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
+    (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
 
 (* The idealized instance at k, over a plaintext space of cardinality
    (k+2)^(k+2).  Its guessing probability is 1/#|plain| rather than 0, so the
@@ -60,29 +63,32 @@ Definition idealized_instance (k : nat) : dsdp_instance :=
    1/#|plain| term. *)
 Definition idealized_asymptotic :
     dsdp_asymptotic idealized_instance_sequence :=
-  mk_dsdp_asymptotic (idealized_scheme_sequence R) idealized_alice_data.
+  mk_dsdp_asymptotic (idealized_scheme_sequence R)
+    (fun _ => 0) (fun _ => 0) (fun _ => 0) (fun _ => 1)
+    (fun _ => GRing.unitr1 _) (fun _ => ord0) (fun _ => ord0) (fun _ => ord0).
 
 (* The constant predictor's distinguisher reads only the state slot.  Its
    Bob-key reduction ignores the challenge ciphertext, so the cipher-constant
    class admits it. *)
-Lemma idealized_bob_constant_admissible (k : nat) :
+Lemma idealized_bob_cipher_constant (k : nat) :
   indcpa_admissible
     (cipher_constant_assumption (R:=R) (idealized_instance k))
     (bob_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
-by apply/forallP => -[[[vv ms] ra] coins]; apply/forallP => ?; apply/forallP.
+apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
+by case: c => [[[vv ms] ra] rho3].
 Qed.
 
-(* The Charlie-key counterpart of idealized_bob_constant_admissible. *)
-Lemma idealized_charlie_constant_admissible (k : nat) :
+(* The Charlie-key counterpart of idealized_bob_cipher_constant. *)
+Lemma idealized_charlie_cipher_constant (k : nat) :
   indcpa_admissible
     (cipher_constant_assumption (R:=R) (idealized_instance k))
     (charlie_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[[vv ms] ra] rc2] c2zero].
+by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
 (* The hypotheses of alice_trace_guess_V2_negligible hold together at least
@@ -94,8 +100,8 @@ Corollary alice_trace_guess_V2_idealized_negligible :
 Proof.
 apply: (alice_trace_guess_V2_negligible (Q := idealized_instance_sequence)
           (predict := fun k => fun _ => 0) _ _ idealized_asymptotic).
-- exact: idealized_bob_constant_admissible.
-- exact: idealized_charlie_constant_admissible.
+- exact: idealized_bob_cipher_constant.
+- exact: idealized_charlie_cipher_constant.
 Qed.
 
 End idealized.
@@ -136,7 +142,7 @@ exact: (card_plain_paillier_pq (paillier_p_gt1 P k) (paillier_q_gt1 P k)).
 Qed.
 
 (* The inverse plaintext cardinality at the composite modulus. *)
-Let card_plain_pq_invE k :
+Let inv_pq_cardE k :
   ((paillier_p P k * paillier_q P k)%N%:R : R)^-1
   = (#|plain (AHE k)|%:R : R)^-1.
 Proof. by rewrite card_plain_pq. Qed.
@@ -144,13 +150,9 @@ Proof. by rewrite card_plain_pq. Qed.
 (* The Paillier instance sequence: the Paillier scheme sequence of
    paillier_indcpa_scheme.v with Alice's weights and the three key seeds.  It
    is the sequence alice_trace_guess_V2_negligible is applied at below. *)
-Definition paillier_alice_data :
-    dsdp_alice_data (paillier_scheme_sequence P) :=
-  @Build_dsdp_alice_data R (paillier_scheme_sequence P)
-    v1 u1 u2 u3 u3_unit sa sb sc.
-
 Definition paillier_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (paillier_scheme_sequence P) paillier_alice_data.
+  mk_dsdp_instance_sequence (paillier_scheme_sequence P)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
 (* The DSDP instance at k on the Paillier IND-CPA scheme.  Everything
    number-theoretic about the moduli beyond the fields of P stays assumed. *)
@@ -160,7 +162,7 @@ Definition paillier_instance (k : nat) : dsdp_instance :=
 (* The assumption at k is the one paillier_indcpa_scheme.v derives from the
    residuosity record P carries.  The equation holds by unfolding, so the
    identification is a conversion. *)
-Lemma paillier_assumption_dcrE k :
+Lemma paillier_assumption_at_dcrE k :
   sequence_assumption paillier_instance_sequence k
   = paillier_indcpa_assumption (paillier_p_gt1 P k) (paillier_q_gt1 P k)
       (paillier_dcr P k).
@@ -168,7 +170,7 @@ Proof. by []. Qed.
 
 (* The epsilon at k is twice the residuosity epsilon, one call per hop.  It
    restates a Paillier bound in decisional composite residuosity epsilons. *)
-Lemma paillier_epsilon_dcrE k :
+Lemma paillier_epsilon_at_dcrE k :
   indcpa_assumption_epsilon (sequence_assumption paillier_instance_sequence k)
   = 2 * dcr_epsilon (paillier_dcr P k).
 Proof. by []. Qed.
@@ -178,7 +180,8 @@ Proof. by []. Qed.
    from the asymptotic form of residuosity. *)
 Definition paillier_asymptotic :
     dsdp_asymptotic paillier_instance_sequence :=
-  mk_dsdp_asymptotic (paillier_scheme_sequence P) paillier_alice_data.
+  mk_dsdp_asymptotic (paillier_scheme_sequence P)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter, with the two class premises every trace bound below is
@@ -210,7 +213,7 @@ Corollary paillier_trace_guess_V2_admissible_le k :
 Proof.
 have := alice_trace_guess_V2_admissible_le (I:=paillier_instance k)
           (bob_admissible k) (charlie_admissible k).
-by rewrite paillier_epsilon_dcrE mulrA -(natrM R 2 2).
+by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
 Qed.
 
 (* The same bound with its unconditional summand written 1/(p k * q k), the
@@ -220,13 +223,13 @@ Corollary paillier_trace_guess_V2_admissible_pq_le k :
   <= ((paillier_p P k * paillier_q P k)%N%:R : R)^-1
      + 4 * dcr_epsilon (paillier_dcr P k).
 Proof.
-rewrite card_plain_pq_invE; exact: paillier_trace_guess_V2_admissible_le.
+rewrite inv_pq_cardE; exact: paillier_trace_guess_V2_admissible_le.
 Qed.
 
 (* The constant predictor's Bob-key reduction is in the class the residuosity
    record induces.  Its epsilon is zero, so the class premises of the bounds
    above are satisfiable. *)
-Lemma paillier_bob_constant_admissible k :
+Lemma paillier_bob_decide_constant_admissible k :
   paillier_dcr_admissible
     (decide_constant_assumption (R:=R)
        'Z_((paillier_p P k * paillier_q P k)
@@ -237,12 +240,13 @@ Lemma paillier_bob_constant_admissible k :
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
-by apply/forallP => -[[[vv ms] ra] coins]; apply/forallP => ?; apply/forallP.
+apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
+by case: c => [[[vv ms] ra] rho3].
 Qed.
 
-(* The Charlie-key counterpart of paillier_bob_constant_admissible, so
+(* The Charlie-key counterpart of paillier_bob_decide_constant_admissible, so
    that both class premises hold at the same record and the same predictor. *)
-Lemma paillier_charlie_constant_admissible k :
+Lemma paillier_charlie_decide_constant_admissible k :
   paillier_dcr_admissible
     (decide_constant_assumption (R:=R)
        'Z_((paillier_p P k * paillier_q P k)
@@ -254,7 +258,7 @@ Lemma paillier_charlie_constant_admissible k :
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[[vv ms] ra] rc2] c2zero].
+by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
 (* Past some security parameter the derived class admits the decrypting
@@ -325,20 +329,16 @@ Let card_plain_r k : #|plain (AHE k)| = benaloh_r B k.
 Proof. by rewrite card_ord (Zp_cast (benaloh_r_gt1 B k)). Qed.
 
 (* The inverse plaintext cardinality at the Benaloh block size. *)
-Let card_plain_r_invE k :
+Let inv_r_cardE k :
   ((benaloh_r B k)%:R : R)^-1 = (#|plain (AHE k)|%:R : R)^-1.
 Proof. by rewrite card_plain_r. Qed.
 
 (* The Benaloh instance sequence: the Benaloh scheme sequence of
    benaloh_indcpa_scheme.v with Alice's weights and the three key seeds.  It
    is the sequence alice_trace_guess_V2_negligible is applied at below. *)
-Definition benaloh_alice_data :
-    dsdp_alice_data (benaloh_scheme_sequence B) :=
-  @Build_dsdp_alice_data R (benaloh_scheme_sequence B)
-    v1 u1 u2 u3 u3_unit sa sb sc.
-
 Definition benaloh_instance_sequence : dsdp_instance_sequence R :=
-  mk_dsdp_instance_sequence (benaloh_scheme_sequence B) benaloh_alice_data.
+  mk_dsdp_instance_sequence (benaloh_scheme_sequence B)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
 (* The DSDP instance at k on the Benaloh IND-CPA scheme.  Everything
    number-theoretic about the modulus and the block size beyond the fields of
@@ -349,14 +349,14 @@ Definition benaloh_instance (k : nat) : dsdp_instance :=
 (* The assumption at k is the one benaloh_indcpa_scheme.v derives from the
    residuosity record B carries.  The equation holds by unfolding, so the
    identification is a conversion. *)
-Lemma benaloh_assumption_residuosityE k :
+Lemma benaloh_assumption_at_residuosityE k :
   sequence_assumption benaloh_instance_sequence k
   = benaloh_indcpa_assumption (benaloh_r_gt1 B k) (benaloh_residuosity B k).
 Proof. by []. Qed.
 
 (* The epsilon at k is twice the residuosity epsilon, one call per hop.  It
    restates a Benaloh bound in r-th residuosity epsilons. *)
-Lemma benaloh_epsilon_residuosityE k :
+Lemma benaloh_epsilon_at_residuosityE k :
   indcpa_assumption_epsilon (sequence_assumption benaloh_instance_sequence k)
   = 2 * benaloh_residuosity_epsilon (benaloh_residuosity B k).
 Proof. by []. Qed.
@@ -366,7 +366,8 @@ Proof. by []. Qed.
    from the asymptotic form of residuosity. *)
 Definition benaloh_asymptotic :
     dsdp_asymptotic benaloh_instance_sequence :=
-  mk_dsdp_asymptotic (benaloh_scheme_sequence B) benaloh_alice_data.
+  mk_dsdp_asymptotic (benaloh_scheme_sequence B)
+    v1 u1 u2 u3 u3_unit sa sb sc.
 
 (* A predictor of Bob's input reading Alice's executed trace, one at each
    security parameter, with the two class premises every trace bound below is
@@ -399,7 +400,7 @@ Corollary benaloh_trace_guess_V2_admissible_le k :
 Proof.
 have := alice_trace_guess_V2_admissible_le (I:=benaloh_instance k)
           (bob_admissible k) (charlie_admissible k).
-by rewrite benaloh_epsilon_residuosityE mulrA -(natrM R 2 2).
+by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
 Qed.
 
 (* The same bound at a block size written as a product p * q.  The hypothesis
@@ -410,13 +411,13 @@ Corollary benaloh_trace_guess_V2_admissible_pq_le k (p q : nat)
   <= ((p * q)%N%:R : R)^-1
      + 4 * benaloh_residuosity_epsilon (benaloh_residuosity B k).
 Proof.
-rewrite -r_pq card_plain_r_invE; exact: benaloh_trace_guess_V2_admissible_le.
+rewrite -r_pq inv_r_cardE; exact: benaloh_trace_guess_V2_admissible_le.
 Qed.
 
 (* The constant predictor's Bob-key reduction is in the class the residuosity
    record induces.  Its epsilon is zero, so the class premises of the bounds
    above are satisfiable. *)
-Lemma benaloh_bob_constant_admissible k :
+Lemma benaloh_bob_decide_constant_admissible k :
   benaloh_residuosity_admissible
     (decide_constant_assumption (R:=R) 'Z_(benaloh_n B k) (benaloh_r B k)
        (card_renc_benaloh (benaloh_n B k)))
@@ -424,12 +425,13 @@ Lemma benaloh_bob_constant_admissible k :
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
-by apply/forallP => -[[[vv ms] ra] coins]; apply/forallP => ?; apply/forallP.
+apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
+by case: c => [[[vv ms] ra] rho3].
 Qed.
 
-(* The Charlie-key counterpart of benaloh_bob_constant_admissible, so
+(* The Charlie-key counterpart of benaloh_bob_decide_constant_admissible, so
    that both class premises hold at the same record and the same predictor. *)
-Lemma benaloh_charlie_constant_admissible k :
+Lemma benaloh_charlie_decide_constant_admissible k :
   benaloh_residuosity_admissible
     (decide_constant_assumption (R:=R) 'Z_(benaloh_n B k) (benaloh_r B k)
        (card_renc_benaloh (benaloh_n B k)))
@@ -438,7 +440,7 @@ Lemma benaloh_charlie_constant_admissible k :
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
-by case: c => [[[[vv ms] ra] rc2] c2zero].
+by case: c => [[[vv ms] ra] c2zero].
 Qed.
 
 (* Past some security parameter the derived class admits the decrypting

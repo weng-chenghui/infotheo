@@ -98,7 +98,6 @@ Let data := di_data DI.
 Let d := di_data_of_plain DI.
 Let e := di_data_of_cipher DI.
 Let k := di_data_of_priv_key DI.
-Let rd := di_data_of_rand DI.
 
 (* Party definitions *)
 Definition alice : party_id := Alice.
@@ -135,9 +134,9 @@ Let ek (p : party_id) : pub_key AHE :=
 (* The three DSDP programs of dsdp_program.v at this instance.  Each is
    applied to the parties its own body names, which is what the section
    discharge left explicit. *)
-Let palice_inst := @palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3.
-Let pbob_inst := @pbob AHE alice bob charlie pn ek dk_b v2.
-Let pcharlie_inst := @pcharlie AHE alice bob charlie pn ek dk_c v3.
+Let palice_inst := @palice AHE bob charlie pn ek dk_a v1 u1 u2 u3 r2 r3 runit runit.
+Let pbob_inst := @pbob AHE alice bob charlie pn ek dk_b v2 runit runit.
+Let pcharlie_inst := @pcharlie AHE alice bob charlie pn ek dk_c v3 runit runit.
 
 (* Session-typed processes packed via [aprocs ...].
    See dsdp_program.v for detailed explanation of why this pattern is needed. *)
@@ -146,56 +145,44 @@ Let dsdp_saprocs : seq (aproc dsdp_dtype data) :=
 
 Let dsdp_procs : seq (proc data) := erase_aprocs dsdp_saprocs.
 
-(* The seed streams of one run, two coins per party in the order alice, bob,
-   charlie.  The idealized scheme ignores a coin's value. *)
-Let dsdp_run_seeds : seq (seq data) :=
-  [:: [:: rd runit; rd runit]; [:: rd runit; rd runit];
-      [:: rd runit; rd runit]].
-
 (* Protocol definition using interp directly with explicit traces *)
-Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]] dsdp_run_seeds.
+Definition dsdp h := interp h dsdp_procs [::[::];[::];[::]].
 
-(* The eighteen-round run at the idealized interface, with the drawn coin at
-   every slot a Sample writes.  The idealized scheme ignores a coin's value,
-   so every coin entry is the same [rd runit]. *)
+(* Protocol execution result: running dsdp for 15 steps produces the expected
+   final state with all parties finished and their respective traces.
+   In the idealized scheme, enc(pk, m, r) = m, so ciphertexts are just messages. *)
 Lemma dsdp_ok :
-  dsdp 18 =
+  dsdp 15 =
   ([:: Finish; Finish; Finish],
    [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
            e (v3 * u3 + r3 + (v2 * u2 + r2));
-           rd runit; rd runit;
            e v3;
            e v2;
            d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
-       [:: rd runit;
-           e (v3 * u3 + r3);
-           e (v2 * u2 + r2);
-           rd runit; d v2; k dk_b];
-       [:: rd runit;
-           e (v3 * u3 + r3 + (v2 * u2 + r2));
-           rd runit; d v3; k dk_c]
-   ],
-   [:: [::]; [::]; [::]]).
+       [:: e (v3 * u3 + r3);
+           e (v2 * u2 + r2); d v2; k dk_b];
+       [:: e (v3 * u3 + r3 + (v2 * u2 + r2)); d v3; k dk_c]
+  ]).
 Proof. reflexivity. Qed.
 
 (* Trace types for bounded sequences *)
-Notation dsdp_traceT := (18.-bseq data).
+Notation dsdp_traceT := (15.-bseq data).
 Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 
 Definition dsdp_traces : dsdp_tracesT :=
-  interp_traces 18 dsdp_procs dsdp_run_seeds.
+  interp_traces 15 dsdp_procs.
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
   let '(s, u3, u2, u1, v1) :=
-    if tnth trs 0 is Bseq [:: inl (inl (inl s)); _; _; _; _;
-                           _; _; _; inl (inl (inl u3)); inl (inl (inl u2));
+    if tnth trs 0 is Bseq [:: inl (inl (inl s)); _; _; _;
+                           _; _; inl (inl (inl u3)); inl (inl (inl u2));
                            inl (inl (inl u1)); inl (inl (inl v1)); _] _
     then (s, u3, u2, u1, v1) else (0, 0, 0, 0, 0) in
   let '(v2) :=
-    if tnth trs 1 is Bseq [:: _; _; _; _; inl (inl (inl v2)); _] _
+    if tnth trs 1 is Bseq [:: _; _; inl (inl (inl v2)); _] _
     then (v2) else (0) in
   let '(_v3) :=
-    if tnth trs 2 is Bseq [:: _; _; _; inl (inl (inl v3)); _] _
+    if tnth trs 2 is Bseq [:: _; inl (inl (inl v3)); _] _
     then (v3) else (0) in
   s = v3 * u3 + v2 * u2 + v1 * u1.
 
@@ -205,17 +192,12 @@ Lemma dsdp_traces_ok :
     [tuple
        [bseq d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
              e (v3 * u3 + r3 + (v2 * u2 + r2));
-             rd runit; rd runit;
              e v3;
              e v2;
              d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
-       [bseq rd runit;
-             e (v3 * u3 + r3);
-             e (v2 * u2 + r2);
-             rd runit; d v2; k dk_b];
-       [bseq rd runit;
-             e (v3 * u3 + r3 + (v2 * u2 + r2));
-             rd runit; d v3; k dk_c]].
+       [bseq e (v3 * u3 + r3);
+             e (v2 * u2 + r2); d v2; k dk_b];
+       [bseq e (v3 * u3 + r3 + (v2 * u2 + r2)); d v3; k dk_c]].
 Proof. by apply/val_inj/(inj_map val_inj); rewrite interp_traces_ok. Qed.
 
 (* Protocol correctness:

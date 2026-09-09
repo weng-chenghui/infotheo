@@ -1,9 +1,7 @@
 # Blueprint coverage baseline - declarations in the make_blueprint.sh MODULES
 # scope that do NOT have a \rocq{} node. Regenerated 2026-08-18, when the
 # SSProve modules left the codebase and the computational chapters were
-# retargeted at dsdp/hopping/, and revised 2026-09-08 for the scheme-sequence
-# and sampled-coin refactor and 2026-09-09 for the coin-carrying relay views
-# and the trace of the idealized run. Anti-drift ratchet: a NEW declaration must
+# retargeted at dsdp/hopping/. Anti-drift ratchet: a NEW declaration must
 # get a \rocq node or be added here; renames surface as dangling refs.
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
@@ -18,9 +16,6 @@
 benaloh_indcpa_scheme:Benaloh_AHEnc
 benaloh_indcpa_scheme:card_renc_benaloh
 benaloh_indcpa_scheme:rand_of_renc_benaloh
-# The coin map's left inverse at Benaloh, the identity on the coin space.
-benaloh_indcpa_scheme:renc_of_rand_benaloh
-benaloh_indcpa_scheme:rand_of_rencK_benaloh
 benaloh_indcpa_scheme:renc_benaloh
 benaloh_indcpa_scheme:enc_fdist_benalohE
 benaloh_indcpa_scheme:residuosity_of_adversary
@@ -30,6 +25,8 @@ benaloh_indcpa_scheme:zero_accept_residuosityE
 benaloh_indcpa_scheme:unit_accept_residuosityE
 benaloh_indcpa_scheme:benaloh_residuosity_admissible
 benaloh_indcpa_scheme:benaloh_residuosity_admissible_cipher_constant
+benaloh_indcpa_scheme:f_size_benaloh_negligible
+benaloh_indcpa_scheme:f_adv_benaloh_negligible
 benaloh_indcpa_scheme:f_r
 benaloh_indcpa_scheme:f_size_benaloh
 benaloh_indcpa_scheme:f_residuosity_benaloh
@@ -37,87 +34,79 @@ benaloh_indcpa_scheme:f_adv_benaloh
 # dsdp_alice_hop_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, and the constant-weight random variables.
 dsdp_alice_hop_secrecy:AliceSpectatorPre
+dsdp_alice_hop_secrecy:AliceSpectatorPre2
 dsdp_alice_hop_secrecy:U1c
 dsdp_alice_hop_secrecy:U2c
 dsdp_alice_hop_secrecy:U3c
 dsdp_alice_hop_secrecy:V1c
 dsdp_alice_hop_secrecy:alice_constraint_holds
+dsdp_alice_hop_secrecy:alice_hop_tuple_of_spectatorK
 dsdp_alice_hop_secrecy:alice_inputs_constE
+dsdp_alice_hop_secrecy:alice_spectator_of_hop_tuple
+dsdp_alice_hop_secrecy:alice_spectator_pre2T
 dsdp_alice_hop_secrecy:alice_spectator_preT
-# The eight-fold product the hopping-tuple record borrows its finite
-# structure from; the blueprint cites the record at def:alice_hop_ladder.
-dsdp_alice_hop_secrecy:alice_hop_prodT
-dsdp_alice_hop_secrecy:prod_of_alice_hop_tuple
-dsdp_alice_hop_secrecy:alice_hop_tuple_of_prod
-dsdp_alice_hop_secrecy:prod_of_alice_hop_tupleK
+dsdp_alice_hop_secrecy:alice_spectator_prod
+dsdp_alice_hop_secrecy:alice_spectator_prodE
+dsdp_alice_hop_secrecy:alice_spectator_regroup
 dsdp_alice_hop_secrecy:alice_var_uniform
-dsdp_alice_hop_secrecy:alice_pkey
-dsdp_alice_hop_secrecy:alice_tuple_all_zeroE
-dsdp_alice_hop_secrecy:rc1_uniformE
+dsdp_alice_hop_secrecy:fdistmap_prod
+dsdp_alice_hop_secrecy:fdistmap_prodr
 dsdp_alice_hop_secrecy:hop0_pair_uniformE
 dsdp_alice_hop_secrecy:hop1_state_of
 dsdp_alice_hop_secrecy:inde_RV_of_prod
+dsdp_alice_hop_secrecy:rho3_uniformE
+dsdp_alice_hop_secrecy:spectator_pre2_uniformE
 dsdp_alice_hop_secrecy:spectator_pre_indep
 dsdp_alice_hop_secrecy:spectator_pre_pair_uniformE
 dsdp_alice_hop_secrecy:spectator_pre_uniformE
-dsdp_alice_hop_secrecy:bob_pkey
-dsdp_alice_hop_secrecy:charlie_pkey
-dsdp_alice_hop_secrecy:enc_of_renc
-dsdp_alice_hop_secrecy:card_enc_img_gt0
-dsdp_alice_hop_secrecy:enc_fdist_uniform_img
-dsdp_alice_hop_secrecy:enc_fdist_uniform_imgE
-dsdp_alice_hop_secrecy:enc_fdist_uniform_img_fiber
-dsdp_alice_hop_secrecy:enc_fdist_uniform_img_inj
-dsdp_alice_hop_secrecy:Hop1StatePre
-dsdp_alice_hop_secrecy:hop0_state_prodE
-dsdp_alice_hop_secrecy:hop1_state_prodE
-dsdp_alice_hop_secrecy:hop1_state_pre_pair_uniformE
-# dsdp_alice_trace_link: the trace-entry readers of the hopping-tuple encoding
-# and the default entry they return off the end, and the fuel bound packaging
-# an interpreter trace as a bounded sequence.
+# dsdp_alice_trace_link: the operation-generic interpreter shim, the trace/tuple
+# encodings and their round-trips, the fuel bound packaging an interpreter
+# trace as a bounded sequence, and the sample-splitting uniformity lemmas
+# under the two conditional-entropy transfers.
+dsdp_alice_trace_link:AliceCombineRand
+dsdp_alice_trace_link:AliceSampleRest
+dsdp_alice_trace_link:alice_hop_tuple_rand_traceE
+dsdp_alice_trace_link:alice_sample_restT
+dsdp_alice_trace_link:combine_rand_rest_indep
+dsdp_alice_trace_link:combine_rand_rest_uniformE
+dsdp_alice_trace_link:combine_rand_trace_indep
+dsdp_alice_trace_link:combine_rand_uniformE
+dsdp_alice_trace_link:hop_tuple_of_rand_trace
+dsdp_alice_trace_link:hop_tuple_of_rand_traceK
+dsdp_alice_trace_link:rand_trace_of_hop_tuple
+dsdp_alice_trace_link:sample_rest_uniformE
 dsdp_alice_trace_link:trace_data_cipher
 dsdp_alice_trace_link:trace_data_plain
-dsdp_alice_trace_link:trace_data_coin
-dsdp_alice_trace_link:trace_default
 dsdp_alice_trace_link:trace_of_run_size
+dsdp_alice_trace_link:trace_of_trace_tuple
+dsdp_alice_trace_link:trace_of_trace_tupleK
+dsdp_alice_trace_link:trace_tuple_of_trace
+dsdp_alice_trace_link:v2_trace_tuple_of_sample_rest
 # The two deterministic-image equalities the trace-level steps of a program
 # rest on; the blueprint cites those steps, not the images.
 dsdp_alice_trace_link:alice_trace_realE
 dsdp_alice_trace_link:alice_trace_idealE
 # dsdp_alice_main: the per-bit challenge equalities the two hop_advantageE
-# nodes fold together, and the two reduction adversaries a trace test induces
-# with their advantages; the blueprint cites the bounds those advantages are
-# summed in, not the adversaries.
+# nodes fold together.
 dsdp_alice_main:hop0_real_challengeE
 dsdp_alice_main:hop0_zero_challengeE
 dsdp_alice_main:hop1_real_challengeE
 dsdp_alice_main:hop1_zero_challengeE
-dsdp_alice_main:bob_trace_adversary
-dsdp_alice_main:charlie_trace_adversary
-dsdp_alice_main:bob_trace_predictor_epsilon
-dsdp_alice_main:charlie_trace_predictor_epsilon
 # idealized_indcpa_scheme and dsdp_alice_instances: the idealized coin-space
 # cardinality, the asymptotic values the sequence nodes read through, the two
 # satisfiability lemmas at each scheme, and the per-scheme instances of the
 # generic eventually-false corollary.
 idealized_indcpa_scheme:card_renc_ord1
-# The coin map's left inverse at the idealized scheme, whose coin space is
-# a single point.
-idealized_indcpa_scheme:renc_of_rand_idealized
-idealized_indcpa_scheme:rand_of_rencK_idealized
 dsdp_alice_instances:idealized_asymptotic
-dsdp_alice_instances:idealized_alice_data
-dsdp_alice_instances:paillier_alice_data
-dsdp_alice_instances:benaloh_alice_data
-dsdp_alice_instances:idealized_bob_constant_admissible
-dsdp_alice_instances:idealized_charlie_constant_admissible
+dsdp_alice_instances:idealized_bob_cipher_constant
+dsdp_alice_instances:idealized_charlie_cipher_constant
 dsdp_alice_instances:paillier_asymptotic
-dsdp_alice_instances:paillier_bob_constant_admissible
-dsdp_alice_instances:paillier_charlie_constant_admissible
+dsdp_alice_instances:paillier_bob_decide_constant_admissible
+dsdp_alice_instances:paillier_charlie_decide_constant_admissible
 dsdp_alice_instances:paillier_decrypt_reduction_admissible_eventuallyF
 dsdp_alice_instances:benaloh_asymptotic
-dsdp_alice_instances:benaloh_bob_constant_admissible
-dsdp_alice_instances:benaloh_charlie_constant_admissible
+dsdp_alice_instances:benaloh_bob_decide_constant_admissible
+dsdp_alice_instances:benaloh_charlie_decide_constant_admissible
 dsdp_alice_instances:benaloh_decrypt_reduction_admissible_eventuallyF
 # dsdp_entropy: the abstract-variable and non-ring forms of the fiber counting
 # facts; the blueprint cites the two ring forms.
@@ -128,10 +117,6 @@ dsdp_entropy:dsdp_centropy1_uniform
 dsdp_entropy:dsdp_centropy1_uniform_n
 dsdp_entropy:dsdp_constraint
 dsdp_entropy:dsdp_constraint_ring
-dsdp_entropy:dsdp_constraintE
-dsdp_entropy:dsdp_constraint_ringE
-dsdp_entropy:last_relay_weight
-dsdp_entropy:linear_fiber_2d_card_pq
 dsdp_entropy:dsdp_fiber
 dsdp_entropy:dsdp_fiber_card
 dsdp_entropy:dsdp_fiber_card_n
@@ -189,56 +174,28 @@ dsdp_random_inputs:uniform_sample_fdist
 dsdp_random_inputs:uniform_split
 dsdp_random_inputs:uniform_view_input
 dsdp_random_inputs:uniform_view_mask
-# dsdp_random_inputs: the coin space the uniform witness works over and the six
-# constants it holds the coins at; the blueprint cites uniform_coins_indep, the
-# law those constants satisfy, at def:idealized_setting.
-dsdp_random_inputs:uniform_coinT
-dsdp_random_inputs:uniform_coin_ra1
-dsdp_random_inputs:uniform_coin_ra2
-dsdp_random_inputs:uniform_coin_rb1
-dsdp_random_inputs:uniform_coin_rb2
-dsdp_random_inputs:uniform_coin_rc1
-dsdp_random_inputs:uniform_coin_rc2
-# dsdp_relay_trace: the program list and the seed streams the idealized run is
-# taken at, the party-indexed size bound that packages a trace as a bounded
-# sequence, the two named relay traces, which are ideal_trace_of_run at Bob
-# and at Charlie, and the four encoders and readers of the trace-view recoding;
-# the blueprint cites the run at def:ideal_run and the recoding at
-# lem:relay_trace_of_view, not the maps either is built from.
-# The idealized scheme packaged as an AHEncType, the three-line hierarchy
-# build dsdp_correctness.v also performs; the blueprint cites the scheme at
-# def:idealized_setting.
-dsdp_relay_trace:Idealized_EncDec_instance
-dsdp_relay_trace:Idealized_AHEnc_instance
-dsdp_relay_trace:Idealized_AHEnc_local
-dsdp_relay_trace:dsdp_procs_ideal
-dsdp_relay_trace:dsdp_seeds_ideal
-dsdp_relay_trace:ideal_trace_size
-dsdp_relay_trace:BobTrace
-dsdp_relay_trace:CharlieTrace
-dsdp_relay_trace:bob_trace_of_view
-dsdp_relay_trace:bob_view_of_trace
-dsdp_relay_trace:charlie_trace_of_view
-dsdp_relay_trace:charlie_view_of_trace
-# dsdp_instance: the key table read off three private keys, the six-fold
-# product the coin record borrows its finite structure from, and the two
-# summand sequences a bound along an instance sequence is written from; the
-# blueprint cites the records at def:dsdp_enc_coins, def:dsdp_instance,
-# def:dsdp_instance_sequence, def:dsdp_asymptotic and
-# def:mk_dsdp_instance_sequence.
+# dsdp_instance: the key table read off three private keys, the coin-replacing
+# instance the averaging statements are read at, the two summand sequences a
+# bound along an instance sequence is written from, and the
+# superpolynomial-growth helpers the witness sequence discharges its
+# negligibility field with; the blueprint cites the three records.
+dsdp_instance:expnn_gt_monomial
 dsdp_instance:f_adv
-dsdp_instance:enc_coins_tupleT
-dsdp_instance:tuple_of_enc_coins
-dsdp_instance:enc_coins_of_tuple
-dsdp_instance:tuple_of_enc_coinsK
 dsdp_instance:f_size
 dsdp_instance:inst_pkey_of_party
+dsdp_instance:inst_with_rc2
+dsdp_instance:negligible_fun_inv_expnn
+dsdp_instance:negligible_fun_inv_ge_expnn
 dsdp_instance:pkey_of_dk
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.
+entropy_fiber_zpq:Pr_cond_fiber_marginE
+entropy_fiber_zpq:cPr_uniform_fiber
 entropy_fiber_zpq:gen_Pr_cond_fiber_marginE
 entropy_fiber_zpq:gen_joint_factors_by_indeE
 entropy_fiber_zpq:gen_uniform_VarRV_probE
+entropy_fiber_zpq:joint_factors_by_indeE
+entropy_fiber_zpq:uniform_VarRV_probE
 # extra_proba: the general-purpose probability lemmas of the local library; the
 # blueprint cites cinde_diagonal_bound.
 extra_proba:PrX_fstRV
@@ -267,17 +224,6 @@ extra_proba:pfwd1_pair4_swap34
 extra_proba:pr_eq_comp_constraint
 extra_proba:pr_eq_comp_constraint_tail
 extra_proba:sum_cPr_eq
-extra_proba:Pr_fdistbind
-extra_proba:fdist_mixture_advantage_le
-extra_proba:fdist_rV_uniform
-extra_proba:inde_RV_contraction
-extra_proba:rV_drop
-extra_proba:rV_join
-extra_proba:rV_joinK
-extra_proba:rV_split
-extra_proba:rV_splitK
-extra_proba:rV_split_bij
-extra_proba:uniform_bij_indep
 # epshop: the soundness obligation each statement supplies for its own
 # invariant field, and the fold lemma loss_evalE is proved from. The blueprint
 # states the invariant once at def:chain and def:chain_result, where the
@@ -291,28 +237,21 @@ epshop:same_sound
 epshop:start_sound
 epshop:then_sound
 # indcpa_game: the role-type abbreviation, the two arm-selection equations of
-# the challenger, the slot-resampling and protocol-law plumbing the two
-# hop_advantageE nodes fold together, and the nonemptiness of a coin space with
-# the coin it names.
+# the challenger, and the slot-resampling and challenge-joint plumbing the
+# two hop_advantageE nodes fold together.
+indcpa_game:challenge_joint_acceptE
+indcpa_game:challenge_joint_accept_bindE
+indcpa_game:challenge_joint_fdist
+indcpa_game:challenge_joint_fdistE
 indcpa_game:distinguisher
 indcpa_game:enc_slot_resampleE
 indcpa_game:fdistbind_cst
-indcpa_game:protocol_RV
-indcpa_game:indcpa_fdist
-indcpa_game:protocol_indcpa_fdistE
-indcpa_game:indcpa_fdist_acceptE
-indcpa_game:card_renc_gt0
-indcpa_game:renc_default
 # negligible: the closure lemmas the blueprint folds into the def:negligible
-# node and into lem:negligible_fun_sum, and the three growth-rate comparisons
-# lem:negligible_fun_inv_exp2 is proved from.
+# node and into lem:negligible_fun_sum.
 negligible:negligible_fun_add
 negligible:negligible_fun_cst0
 negligible:negligible_fun_double
 negligible:negligible_fun_le
-negligible:exp2_gt_linear
-negligible:exp2_gt_monomial
-negligible:expnn_gt_monomial
 # paillier_indcpa_scheme: the scheme side of the Paillier IND-CPA scheme, the
 # coin plumbing and the modulus bound the packaging is taken at, the challenger
 # identity, the two composite-residuosity reductions with their three
@@ -322,10 +261,8 @@ negligible:expnn_gt_monomial
 # thm:paillier_dcr_epsilon_le, and the DSDP bound read off at that scheme in
 # the Paillier section of dsdp_alice_instances.
 paillier_indcpa_scheme:card_renc_paillier
+paillier_indcpa_scheme:pq_gt1
 paillier_indcpa_scheme:rand_of_renc_paillier
-# The coin map's left inverse at Paillier, the identity on the coin space.
-paillier_indcpa_scheme:renc_of_rand_paillier
-paillier_indcpa_scheme:rand_of_rencK_paillier
 paillier_indcpa_scheme:renc_paillier
 paillier_indcpa_scheme:enc_fdist_paillierE
 paillier_indcpa_scheme:dcr_of_adversary
@@ -335,6 +272,8 @@ paillier_indcpa_scheme:zero_accept_dcrE
 paillier_indcpa_scheme:unit_accept_dcrE
 paillier_indcpa_scheme:paillier_dcr_admissible
 paillier_indcpa_scheme:paillier_dcr_admissible_cipher_constant
+paillier_indcpa_scheme:f_size_paillier_negligible
+paillier_indcpa_scheme:f_adv_paillier_negligible
 paillier_indcpa_scheme:f_pq
 paillier_indcpa_scheme:f_size_paillier
 paillier_indcpa_scheme:f_dcr_paillier
@@ -346,3 +285,62 @@ paillier_indcpa_scheme:f_adv_paillier
 indcpa_game:indcpa_scheme
 paillier_indcpa_scheme:paillier_indcpa_scheme
 benaloh_indcpa_scheme:benaloh_indcpa_scheme
+
+# Probability and game plumbing the chapters use without citing: the vector
+# split/join bijections and the mixture and contraction laws behind the hop
+# bounds, the experiment distribution the acceptance identities are stated
+# over, and the two growth facts Lemma lem:negligible_fun_inv_exp2 is proved
+# from.
+extra_proba:Pr_fdistbind
+extra_proba:fdist_mixture_advantage_le
+extra_proba:fdist_rV_uniform
+extra_proba:inde_RV_contraction
+extra_proba:rV_drop
+extra_proba:rV_join
+extra_proba:rV_joinK
+extra_proba:rV_split
+extra_proba:rV_split_bij
+extra_proba:rV_splitK
+extra_proba:uniform_bij_indep
+indcpa_game:card_renc_gt0
+indcpa_game:indcpa_fdist
+indcpa_game:indcpa_fdist_acceptE
+indcpa_game:protocol_RV
+indcpa_game:protocol_indcpa_fdistE
+indcpa_game:renc_default
+negligible:exp2_gt_linear
+negligible:exp2_gt_monomial
+negligible:expnn_gt_monomial
+
+# The uniform-image machinery behind the hop-state laws, the two party key
+# readers, and the constraint and fiber-counting steps the entropy bound is
+# assembled from: intermediate steps of nodes the chapters already state.
+dsdp_alice_hop_secrecy:Hop1StatePre
+dsdp_alice_hop_secrecy:bob_pkey
+dsdp_alice_hop_secrecy:card_enc_img_gt0
+dsdp_alice_hop_secrecy:charlie_pkey
+dsdp_alice_hop_secrecy:enc_fdist_uniform_img
+dsdp_alice_hop_secrecy:enc_fdist_uniform_imgE
+dsdp_alice_hop_secrecy:enc_fdist_uniform_img_fiber
+dsdp_alice_hop_secrecy:enc_fdist_uniform_img_inj
+dsdp_alice_hop_secrecy:enc_of_renc
+dsdp_alice_hop_secrecy:hop0_state_prodE
+dsdp_alice_hop_secrecy:hop1_state_pre_pair_uniformE
+dsdp_alice_hop_secrecy:hop1_state_prodE
+dsdp_entropy:dsdp_constraintE
+dsdp_entropy:dsdp_constraint_ringE
+dsdp_entropy:last_relay_weight
+dsdp_entropy:linear_fiber_2d_card_pq
+
+# The per-coin forms of the raw-trace experiments and of the simulation bound,
+# together with the two relay adversaries and their epsilons. The blueprint
+# states the averaged forms at thm:raw_trace_simulation, the per-coin ones
+# being the steps it averages.
+dsdp_alice_main:alice_raw_trace_ideal_experiment_avg
+dsdp_alice_main:alice_raw_trace_real_experiment_avg
+dsdp_alice_main:alice_raw_trace_sim_advantage_le
+dsdp_alice_main:bob_trace_adversary
+dsdp_alice_main:bob_trace_predictor_epsilon
+dsdp_alice_main:charlie_trace_adversary
+dsdp_alice_main:charlie_trace_predictor_epsilon
+dsdp_alice_trace_link:alice_trace_ideal_avg

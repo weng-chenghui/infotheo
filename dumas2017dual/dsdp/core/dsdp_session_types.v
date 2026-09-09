@@ -13,10 +13,12 @@ Import Prenex Implicits.
 (* ========================================================================== *)
 
 (* Session-typed versions using sproc from smc_session_types.
-   These wrappers are parameterized over a standalone DSDP_Interface [DI].
-   Only the handler under each lambda depends on [DI]; the
-   [SRecv .. DT_Enc]/[SSend .. DT_Enc] skeleton is independent of [DI], so the
-   session environments — and hence the duality proofs — are unchanged. *)
+   These wrappers are parameterized over a standalone DSDP_Interface [DI],
+   so the very same skeletons drive the cryptographic (Standard) instance and
+   a parameter-free symbolic instance.  Only the handler under each lambda
+   depends on [DI]; the [SRecv .. DT_Enc]/[SSend .. DT_Enc] skeleton is
+   independent of [DI], so the session environments — and hence the duality
+   proofs — are unchanged. *)
 
 Section smc_dsdp_session_types.
 
@@ -28,10 +30,10 @@ Let msgT := di_msgT DI.
 Let priv_keyT := di_priv_keyT DI.
 Let e := di_data_of_cipher DI.
 
-(* Per-instance decoder: turn a received ciphertext into a plaintext, which
-   the Standard instance supplies as [dec dk].  Threaded as a parameter
-   because the carrier-free [DSDP_Interface] record does not bundle a bare
-   decryption primitive. *)
+(* Per-instance decoder: turn a received ciphertext into a plaintext.
+   Standard supplies [dec dk]; the symbolic instance supplies [HE_dec].
+   Threaded as a parameter because the carrier-free [DSDP_Interface] record
+   does not bundle a bare decryption primitive. *)
 Variable decode : priv_keyT -> cipherT -> option msgT.
 
 (* Receive encrypted - pattern match data, use SFail on mismatch *)
@@ -69,18 +71,6 @@ Definition DInit {party n env} (x : data) (p : @sproc dsdp_dtype data party n en
     : @sproc dsdp_dtype data party n.+1 env :=
   SInit x p.
 
-(* DSample: draw one encryption coin from this party's own seed stream, a
-   datum of any other sort failing the party.  No channel is used, so the
-   session environment is unchanged and the fuel grows by one. *)
-Definition DSample {party n env}
-    (f : di_randT DI -> @sproc dsdp_dtype data party n env)
-    : @sproc dsdp_dtype data party n.+1 env :=
-  SSample (fun x =>
-    match di_get_rand DI x with
-    | Some r => f r
-    | None => SFail
-    end).
-
 (* DRet: terminal return wrapper (fuel 2, empty session environment). *)
 Definition DRet {party : nat} (x : data) : @sproc dsdp_dtype data party 2 senv_end :=
   SRet x.
@@ -89,8 +79,9 @@ Definition DRet {party : nat} (x : data) : @sproc dsdp_dtype data party 2 senv_e
 Definition DFinish {party : nat} : @sproc dsdp_dtype data party 1 senv_end :=
   SFinish.
 
-(* Send encrypted data to each party of a list, one SSend per element.
-   The destination comes from dst and the datum from payload. *)
+(* Iteration wrapper: send encrypted data to each party in a list.
+   dst maps each element to a destination party index.
+   payload maps each element to the data to send. *)
 Definition DSend_iter {T} (party : nat) (dst : T -> nat) (payload : T -> data)
     (elems : seq T) {n} {env : senv dsdp_dtype}
     (cont : @sproc dsdp_dtype data party n env)
@@ -127,7 +118,6 @@ Arguments DRecv_enc {DI party n env}.
 Arguments DRecv_dec {DI} decode {party n env}.
 Arguments DSend {DI party n env}.
 Arguments DInit {DI party n env}.
-Arguments DSample {DI party n env}.
 Arguments DRet {DI party}.
 Arguments DFinish {DI party}.
 Arguments DSend_iter {DI T} party dst payload elems {n env} cont.

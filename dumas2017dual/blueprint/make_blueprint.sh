@@ -16,8 +16,6 @@ MODULES=(
   # The counting facade: the run's random inputs, the laws relay secrecy
   # reads off them, and the uniform witness that inhabits them.
   dumas2017dual/dsdp/counting/dsdp_random_inputs.v
-  # The relay views read at the trace the piSMC interpreter produces for them.
-  dumas2017dual/dsdp/counting/dsdp_relay_trace.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
   dumas2017dual/lib/extra_proba.v
   # The asymptotic reading of every concrete epsilon below: negligibility of

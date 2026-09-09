@@ -11,11 +11,8 @@ Require Import negligible indcpa_game indcpa_scheme_sequence.
 (*                                                                            *)
 (* One DSDP instance is an IND-CPA scheme together with the data the          *)
 (* corrupted-Alice development runs on: Alice's four weights with Charlie's   *)
-(* weight invertible, and the three private keys.  The six encryption coins   *)
-(* of a run are not instance data: the programs draw them, and                *)
-(* dsdp_enc_coins is the sample space they are drawn from.                    *)
-(*                                                                            *)
-(* The scheme enters as one field rather than as its four                     *)
+(* weight invertible, the three private keys, and Bob's and Charlie's         *)
+(* second-hop coins.  The scheme enters as one field rather than as its four  *)
 (* data, so that an instance and the IND-CPA assumption made about it name    *)
 (* the same scheme value, and in particular the same pinned coin-space        *)
 (* cardinality.  The coercion inst_scheme is what lets a game-layer constant  *)
@@ -48,10 +45,6 @@ Require Import negligible indcpa_game indcpa_scheme_sequence.
 (* ```                                                                        *)
 (*                 pkey_of_dk == the public key of each party, read off its   *)
 (*                               private key                                  *)
-(*            dsdp_enc_coins == the six encryption coins one run consumes,    *)
-(*                               packed as one record                         *)
-(*       card_dsdp_enc_coins == that record type is nonempty                  *)
-(*       dsdp_enc_coins_fdist == the uniform law on the coin record           *)
 (*              dsdp_instance == one instance of the sequence, the section    *)
 (*                               variables of the corrupted-Alice trace       *)
 (*                               development packed as one record             *)
@@ -59,6 +52,9 @@ Require Import negligible indcpa_game indcpa_scheme_sequence.
 (*                               coercion                                     *)
 (*         inst_pkey_of_party == the public-key table of its three private    *)
 (*                               keys                                         *)
+(*              inst_with_rc2 == the instance with Charlie's second-hop coin  *)
+(*                               replaced, the one field a statement that     *)
+(*                               samples that coin leaves free                *)
 (*     dsdp_instance_sequence == a sequence of instances indexed by the       *)
 (*                               security parameter, with the assumption      *)
 (*                               made at each k                               *)
@@ -74,10 +70,8 @@ Require Import negligible indcpa_game indcpa_scheme_sequence.
 (*             adv_negligible == f_adv is a negligible sequence, the          *)
 (*                               assumption-conditional term of every         *)
 (*                               bound along the sequence                     *)
-(*            dsdp_alice_data == the four weight sequences, the invertibility *)
-(*                               of the third, and the three key seeds        *)
 (*           mk_dsdp_instance == the instance at k built from a scheme        *)
-(*                               sequence and one dsdp_alice_data             *)
+(*                               sequence, four weights and three key seeds   *)
 (*  mk_dsdp_instance_sequence == the sequence of those instances, its         *)
 (*                               assumption at k the one the scheme           *)
 (*                               sequence makes                               *)
@@ -94,7 +88,6 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 Local Open Scope ring_scope.
-Local Open Scope fdist_scope.
 
 (* The public key of each party, read off that party's private key.
    Decryption under it then holds by conversion, so no key hypothesis is
@@ -108,73 +101,9 @@ Definition pkey_of_dk (AHE : AHEncType) (dk_a dk_b dk_c : priv_key AHE)
   | NoParty => pub_of_priv dk_a
   end.
 
-(* The six encryption coins one DSDP execution consumes.  Two are the coins of
-   the ciphertexts Alice receives, two are her combine coins, and two are the
-   second-hop coins. *)
-Record dsdp_enc_coins (S : indcpa_scheme) := {
-  (* the coin of Bob's encryption of his input to Alice *)
-  coin_rb1 : scheme_renc S ;
-  (* the coin of Charlie's encryption of his input to Alice *)
-  coin_rc1 : scheme_renc S ;
-  (* the coin of Alice's first combine *)
-  coin_ra1 : scheme_renc S ;
-  (* the coin of Alice's second combine *)
-  coin_ra2 : scheme_renc S ;
-  (* the coin of Bob's encryption to Charlie *)
-  coin_rb2 : scheme_renc S ;
-  (* the coin of Charlie's re-encryption to Alice *)
-  coin_rc2 : scheme_renc S }.
-
-Section dsdp_enc_coins_finite.
-Variable S : indcpa_scheme.
-Local Notation Renc := (scheme_renc S).
-
-(* The six-fold product the coin record is in bijection with.  The finite
-   structure lives on the product and the record borrows it. *)
-Definition enc_coins_tupleT := (Renc * Renc * Renc * Renc * Renc * Renc)%type.
-
-Definition tuple_of_enc_coins (c : dsdp_enc_coins S) : enc_coins_tupleT :=
-  (coin_rb1 c, coin_rc1 c, coin_ra1 c, coin_ra2 c, coin_rb2 c, coin_rc2 c).
-
-Definition enc_coins_of_tuple (t : enc_coins_tupleT) : dsdp_enc_coins S :=
-  {| coin_rb1 := t.1.1.1.1.1 ; coin_rc1 := t.1.1.1.1.2 ;
-     coin_ra1 := t.1.1.1.2 ; coin_ra2 := t.1.1.2 ;
-     coin_rb2 := t.1.2 ; coin_rc2 := t.2 |}.
-
-(* Reading the six coins off the record and rebuilding it loses nothing. *)
-Lemma tuple_of_enc_coinsK : cancel tuple_of_enc_coins enc_coins_of_tuple.
-Proof. by case. Qed.
-
-HB.instance Definition _ :=
-  Equality.copy (dsdp_enc_coins S) (can_type tuple_of_enc_coinsK).
-HB.instance Definition _ :=
-  Choice.copy (dsdp_enc_coins S) (can_type tuple_of_enc_coinsK).
-HB.instance Definition _ :=
-  Countable.copy (dsdp_enc_coins S) (can_type tuple_of_enc_coinsK).
-HB.instance Definition _ : isFinite (dsdp_enc_coins S) :=
-  CanIsFinite tuple_of_enc_coinsK.
-
-(* The coin record is nonempty, in the successor form fdist_uniform takes. *)
-Lemma card_dsdp_enc_coins :
-  #|{: dsdp_enc_coins S}| = #|{: dsdp_enc_coins S}|.-1.+1.
-Proof.
-have /card_gt0P[x _] : (0 < #|Renc|)%N by rewrite scheme_card_renc.
-rewrite prednK //; apply/card_gt0P.
-by exists (Build_dsdp_enc_coins x x x x x x).
-Qed.
-
-(* The law of one execution's encryption randomness: the uniform product on
-   the six coordinates.  Every coin is uniform, independent of the others, and
-   fresh, which is what the IND-CPA reductions read off. *)
-Definition dsdp_enc_coins_fdist (R : realType) : R.-fdist (dsdp_enc_coins S) :=
-  fdist_uniform card_dsdp_enc_coins.
-
-End dsdp_enc_coins_finite.
-
-
 (* One DSDP execution as a record: the IND-CPA scheme, Alice's input and three
-   weights, and three private keys.  The weight on Charlie's input is a
-   unit. *)
+   weights, three private keys, and two coins.  The weight on Charlie's input
+   is a unit. *)
 Record dsdp_instance := {
   (* the IND-CPA scheme the execution runs on *)
   inst_scheme  :> indcpa_scheme ;
@@ -193,13 +122,34 @@ Record dsdp_instance := {
   (* Bob's private key *)
   inst_dk_b    : priv_key (scheme_AHE inst_scheme) ;
   (* Charlie's private key *)
-  inst_dk_c    : priv_key (scheme_AHE inst_scheme) }.
+  inst_dk_c    : priv_key (scheme_AHE inst_scheme) ;
+  (* the coin of Bob's encryption to Charlie *)
+  inst_rb2     : scheme_renc inst_scheme ;
+  (* the coin of Charlie's encryption to Alice *)
+  inst_rc2     : scheme_renc inst_scheme }.
 
 (* The public-key table of an instance's three private keys.  It stays
    transparent, so the table read off a record and pkey_of_dk of its three
    keys are the same term. *)
 Definition inst_pkey_of_party (I : dsdp_instance) :=
   pkey_of_dk (inst_dk_a I) (inst_dk_b I) (inst_dk_c I).
+
+(* The instance with the coin of Charlie's encryption replaced.  Sampling that
+   coin makes a statement speak about the protocol rather than one
+   execution. *)
+Definition inst_with_rc2 (I : dsdp_instance) (w : scheme_renc I)
+    : dsdp_instance :=
+  {| inst_scheme := inst_scheme I ;
+     inst_v1 := inst_v1 I ; inst_u1 := inst_u1 I ;
+     inst_u2 := inst_u2 I ; inst_u3 := inst_u3 I ;
+     inst_u3_unit := inst_u3_unit I ;
+     inst_dk_a := inst_dk_a I ; inst_dk_b := inst_dk_b I ;
+     inst_dk_c := inst_dk_c I ;
+     inst_rb2 := inst_rb2 I ; inst_rc2 := w |}.
+
+(* The instance stays an explicit argument: a call site names the instance it
+   replaces the coin of, and the coin alone would leave it implicit. *)
+Arguments inst_with_rc2 : clear implicits.
 
 (* A sequence of DSDP instances indexed by the security parameter, with the
    IND-CPA assumption made at each k.  Consecutive instances are unrelated:
@@ -230,42 +180,29 @@ Record dsdp_asymptotic (R : realType) (Q : dsdp_instance_sequence R) := {
   (* the assumption-conditional term: the assumed advantage vanishes *)
   adv_negligible : negligible_fun (f_adv Q) }.
 
-(* The corrupted-Alice data along a scheme sequence: Alice's input, her three
-   weights with Charlie's invertible, and the three key seeds.  It is what the
-   DSDP side supplies beside the scheme sequence, at every k at once. *)
-Record dsdp_alice_data (R : realType) (Q : indcpa_scheme_sequence R) := {
-  (* Alice's own input at k *)
-  data_v1 : forall k, plain (scheme_AHE (scheme_at Q k)) ;
-  (* Alice's weight on her own input at k *)
-  data_u1 : forall k, plain (scheme_AHE (scheme_at Q k)) ;
-  (* Alice's weight on Bob's input at k *)
-  data_u2 : forall k, plain (scheme_AHE (scheme_at Q k)) ;
-  (* Alice's weight on Charlie's input at k *)
-  data_u3 : forall k, plain (scheme_AHE (scheme_at Q k)) ;
-  (* that weight is invertible at every k *)
-  data_u3_unit : forall k, data_u3 k \is a GRing.unit ;
-  (* the seed Alice's key is generated from at k *)
-  data_seed_a : forall k, keygen_seedT (scheme_keygen Q) k ;
-  (* the seed Bob's key is generated from at k *)
-  data_seed_b : forall k, keygen_seedT (scheme_keygen Q) k ;
-  (* the seed Charlie's key is generated from at k *)
-  data_seed_c : forall k, keygen_seedT (scheme_keygen Q) k }.
-
+(* The corrupted-Alice data read off one scheme sequence.  The schemes, the
+   assumptions and the private keys come from that record, and the weights and
+   the key seeds are the only data supplied alongside it. *)
 Section dsdp_of_scheme_sequence.
 Context {R : realType}.
 Variable Q : indcpa_scheme_sequence R.
-Variable D : dsdp_alice_data Q.
+Variables (v1 u1 u2 u3 : forall k, plain (scheme_AHE (scheme_at Q k))).
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (sa sb sc : forall k, keygen_seedT (scheme_keygen Q) k).
 
 (* The instance at k: the scheme the sequence carries there, the four weights,
-   and the keys the three seeds generate. *)
+   and the keys the three seeds generate.  The two hop coins are filled from
+   the scheme's pinned nonemptiness, no protocol run having produced one at
+   this point. *)
 Definition mk_dsdp_instance (k : nat) : dsdp_instance := {|
   inst_scheme  := scheme_at Q k ;
-  inst_v1 := data_v1 D k ; inst_u1 := data_u1 D k ;
-  inst_u2 := data_u2 D k ; inst_u3 := data_u3 D k ;
-  inst_u3_unit := data_u3_unit D k ;
-  inst_dk_a    := keygen_priv_key (scheme_keygen Q) k (data_seed_a D k) ;
-  inst_dk_b    := keygen_priv_key (scheme_keygen Q) k (data_seed_b D k) ;
-  inst_dk_c    := keygen_priv_key (scheme_keygen Q) k (data_seed_c D k) |}.
+  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ; inst_u3 := u3 k ;
+  inst_u3_unit := u3_unit k ;
+  inst_dk_a    := keygen_priv_key (scheme_keygen Q) k (sa k) ;
+  inst_dk_b    := keygen_priv_key (scheme_keygen Q) k (sb k) ;
+  inst_dk_c    := keygen_priv_key (scheme_keygen Q) k (sc k) ;
+  inst_rb2     := renc_default (scheme_at Q k) ;
+  inst_rc2     := renc_default (scheme_at Q k) |}.
 
 (* The sequence of those instances.  Its assumption at k is the one the scheme
    sequence makes, so instance and assumption name the same scheme value. *)
@@ -276,16 +213,15 @@ Definition mk_dsdp_instance_sequence : dsdp_instance_sequence R := {|
 (* The asymptotic content of that sequence, both facts read off Q.  What a
    protocol file used to carry as two negligibility hypotheses beside its
    scheme variables is discharged here. *)
-(* The record literal cannot solve the ascribed sequence index, so the
-   constructor is applied to it. *)
 Definition mk_dsdp_asymptotic : dsdp_asymptotic mk_dsdp_instance_sequence :=
   @Build_dsdp_asymptotic R mk_dsdp_instance_sequence
     (scheme_size_negligible Q) (scheme_adv_negligible Q).
 
 End dsdp_of_scheme_sequence.
 
-(* The scheme sequence stays an explicit argument: a call site names the
-   sequence it reads its schemes off. *)
-Arguments mk_dsdp_instance {R} Q D k.
-Arguments mk_dsdp_instance_sequence {R} Q D.
-Arguments mk_dsdp_asymptotic {R} Q D.
+(* The scheme sequence and Charlie's weight stay explicit arguments: a call
+   site names the sequence it reads its schemes off, and both would otherwise
+   be left to unification against the weights. *)
+Arguments mk_dsdp_instance {R} Q v1 u1 u2 u3 u3_unit sa sb sc k.
+Arguments mk_dsdp_instance_sequence {R} Q v1 u1 u2 u3 u3_unit sa sb sc.
+Arguments mk_dsdp_asymptotic {R} Q v1 u1 u2 u3 u3_unit sa sb sc.

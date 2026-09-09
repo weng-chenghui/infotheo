@@ -107,11 +107,7 @@ Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 (*       rand_of_renc_benaloh == the coin map, the identity                   *)
 (*          card_renc_benaloh == the successor form of that cardinality, in   *)
 (*                               one pinned proof term                        *)
-(*       renc_of_rand_benaloh == the coin index a randomness stands for, the  *)
-(*                               identity                                     *)
-(*      rand_of_rencK_benaloh == the coin map of this instantiation is a      *)
-(*                               section of that index map                    *)
-(*      benaloh_indcpa_scheme == the six data above as one indcpa_scheme      *)
+(*      benaloh_indcpa_scheme == the four data above as one indcpa_scheme     *)
 (*                               value, at modulus n and block size r         *)
 (*         enc_fdist_benalohE == the IND-CPA challenger at this packaging     *)
 (*                               encrypts with benaloh_enc under uniform      *)
@@ -238,24 +234,13 @@ Definition rand_of_renc_benaloh : renc_benaloh -> rand AHE := idfun.
 Lemma card_renc_benaloh : #|renc_benaloh| = #|renc_benaloh|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
-(* Benaloh coins are the randomness itself, so reading an index back is the
-   identity. *)
-Definition renc_of_rand_benaloh : rand AHE -> renc_benaloh := idfun.
-
-(* Reading a Benaloh coin's randomness back names the coin again. *)
-Lemma rand_of_rencK_benaloh :
-  cancel rand_of_renc_benaloh renc_of_rand_benaloh.
-Proof. by []. Qed.
-
 (* The Benaloh scheme as one indcpa_scheme: the packaging at modulus n and
    block size r, plus its coin data.  The DSDP files instantiate the game
    here, so every Benaloh bound is read at this record. *)
 Definition benaloh_indcpa_scheme : indcpa_scheme :=
   {| scheme_AHE := AHE ; scheme_renc := renc_benaloh ;
      scheme_card_renc := card_renc_benaloh ;
-     scheme_rand_of_renc := rand_of_renc_benaloh ;
-     scheme_renc_of_rand := renc_of_rand_benaloh ;
-     scheme_rand_of_rencK := rand_of_rencK_benaloh |}.
+     scheme_rand_of_renc := rand_of_renc_benaloh |}.
 
 (* The IND-CPA challenger at this packaging is the Benaloh encryption of
    benaloh_enc.v under uniform unit-group randomness.  Every advantage below
