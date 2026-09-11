@@ -1331,7 +1331,7 @@ apply: leq_sum => i _; exact: senv_depth_fuel.
 Qed.
 
 Hypothesis has_aps1 :
-    has snd [seq stype_step (map aproc_env aps1) i | i <- iota 0 (size aps1)].
+    has snd [tuple stype_step (map aproc_env aps1) i | i < size aps1].
 
 Lemma aproc_step_progress (i : 'I_(size aps1)) :
   (stype_step (map aproc_env aps1) i).2 ->
@@ -1391,12 +1391,11 @@ Proof.
 rewrite /stypes_interp_fuel !sumnE 4!big_map.
 rewrite [X in _ < X + 1]big_map.
 rewrite [in X in _ < X + 1]Haps1 /= big_map.
-move: has_aps1; rewrite has_map => /hasP[i].
-rewrite mem_iota0 !big_enum /= => Hi Hstep.
-rewrite (bigD1 (Ordinal Hi)) // [in X in _ < X + 1](bigD1 (Ordinal Hi)) //=.
+move: has_aps1; rewrite has_map => /hasP[i _] /= Hstep.
+rewrite !big_enum (bigD1 i) // [in X in _ < X + 1](bigD1 i) //=.
 rewrite !addn1 -!addSn leq_add //; last first.
   apply: leq_sum => j _; exact: senv_depth_fuel.
-by rewrite ltnS (@aproc_step_progress (Ordinal Hi)).
+by rewrite ltnS (@aproc_step_progress i).
 Qed.
 
 Let pss1 := unzip1 [tuple stype_step (map aproc_env aps1) i| i < size aps1].
@@ -1521,7 +1520,7 @@ case: ifPn => [Hhas | _] Hall1; last exact: aprocs_skip_final.
 rewrite stypes_interp_fuel_ok //.
 rewrite -(stypes_interp_fuel_ok (h:=h1)); last first.
   rewrite -ltnS -Hh /h.
-  rewrite size_map in Hhas.
+  rewrite size_map map_iota_tuple in Hhas.
   apply: aprocs_step_fuel_progress => //.
   by rewrite Haps'.
 rewrite /is_true -[RHS]Hall1.
