@@ -115,8 +115,7 @@ Theorem dsdp_ideal_senv_zero traces :
     aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
-  @senv_bounded _ _ [:: 0; 1; 2] [> dsdp_ideal_saprocs]
-    dsdp_ideal_saprocs traces (leqnn _).
+  @senv_bounded _ _ [> dsdp_ideal_saprocs] dsdp_ideal_saprocs traces (leqnn _).
 exists aps'.
 split; first exact: Herase.
 apply: terminated_nonfail_senv_zero.
@@ -255,8 +254,7 @@ Theorem dsdp_n4_senv_zero traces :
     aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
-  @senv_bounded _ _ [:: 0; 1; 2; 3] [> dsdp_n4_saprocs]
-    dsdp_n4_saprocs traces (leqnn _).
+  @senv_bounded _ _ [> dsdp_n4_saprocs] dsdp_n4_saprocs traces (leqnn _).
 exists aps'.
 split; first exact: Herase.
 apply: terminated_nonfail_senv_zero.

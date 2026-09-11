@@ -187,7 +187,7 @@ Theorem spp_senv_zero traces :
 Proof.
 (* Use senv_bounded to get annotated processes for the final state *)
 have [aps' [Hsz [Herase Hsenv]]] :=
-  @senv_bounded _ _ [:: 0; 1; 2] [> spp_saprocs] spp_saprocs traces (leqnn _).
+  @senv_bounded _ _ [> spp_saprocs] spp_saprocs traces (leqnn _).
 exists aps'.
 split; first exact: Herase.
 (* Apply terminated_nonfail_senv_zero: need all_terminated and all_nonfail *)
