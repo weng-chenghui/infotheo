@@ -940,11 +940,11 @@ Qed.
    outside the public-key attack model an epsilon is measured in. *)
 Lemma decrypt_reduction_admissibleF (A : indcpa_epsilon_assumption) :
   indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
-  indcpa_admissible A
+  ~ indcpa_admissible A
     (bob_trace_adversary
-       (distinguisher_of_predictor bob_decrypt_predictor)) = false.
+       (distinguisher_of_predictor bob_decrypt_predictor)).
 Proof.
-move=> Heps; apply/negbTE/negP => Hadm.
+move=> Heps Hadm.
 have Hle := le_trans decrypt_bob_epsilon_ge
               (indcpa_admissible_epsilon_le dk_b Hadm).
 by move: (lt_le_trans Heps Hle); rewrite ltxx.
@@ -1332,9 +1332,9 @@ Qed.
    the predictor whose guessing probability is 1. *)
 Corollary decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
-    indcpa_admissible (assumption k)
+    ~ indcpa_admissible (assumption k)
       (bob_trace_adversary (distinguisher_of_predictor
-         (bob_decrypt_predictor (I:=I k)))) = false.
+         (bob_decrypt_predictor (I:=I k)))).
 Proof.
 have [N1 HN1] := size_negligible N 1%N; have [N2 HN2] := adv_negligible N 1%N.
 exists (maxn (maxn N1 N2) 1) => k.

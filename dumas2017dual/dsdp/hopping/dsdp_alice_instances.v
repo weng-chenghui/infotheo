@@ -266,11 +266,10 @@ Qed.
    facts of P exclude the predictor whose guessing probability is 1. *)
 Corollary paillier_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
-    indcpa_admissible (sequence_assumption paillier_instance_sequence k)
+    ~ indcpa_admissible (sequence_assumption paillier_instance_sequence k)
       (bob_trace_adversary (I:=paillier_instance k)
          (distinguisher_of_predictor
-            (bob_decrypt_predictor (I:=paillier_instance k))))
-    = false.
+            (bob_decrypt_predictor (I:=paillier_instance k)))).
 Proof.
 exact: (decrypt_reduction_admissible_eventuallyF paillier_asymptotic).
 Qed.
@@ -448,11 +447,10 @@ Qed.
    facts of B exclude the predictor whose guessing probability is 1. *)
 Corollary benaloh_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
-    indcpa_admissible (sequence_assumption benaloh_instance_sequence k)
+    ~ indcpa_admissible (sequence_assumption benaloh_instance_sequence k)
       (bob_trace_adversary (I:=benaloh_instance k)
          (distinguisher_of_predictor
-            (bob_decrypt_predictor (I:=benaloh_instance k))))
-    = false.
+            (bob_decrypt_predictor (I:=benaloh_instance k)))).
 Proof.
 exact: (decrypt_reduction_admissible_eventuallyF benaloh_asymptotic).
 Qed.

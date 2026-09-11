@@ -351,7 +351,7 @@ Definition indcpa_epsilon (pk : pub_key AHE)
    see. *)
 Record indcpa_epsilon_assumption := {
   (* the class of adversaries the assumption speaks about *)
-  indcpa_admissible : indcpa_adversary -> bool ;
+  indcpa_admissible : indcpa_adversary -> Prop ;
   (* the advantage assumed of every adversary of that class *)
   indcpa_assumption_epsilon : R ;
   (* at every key of a private key, a classified adversary stays below it *)
