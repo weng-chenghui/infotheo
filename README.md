@@ -73,8 +73,7 @@ Infotheo's.
 ### Files cited in the paper
 
 The paper cites Rocq identifiers by file. The table maps each file name used
-in the paper to the file in this directory. Five names in the paper predate a
-reorganization of the sources; their successor files are given.
+in the paper to the file in this directory.
 
 | Name in the paper | File in this directory |
 |---|---|
@@ -93,11 +92,6 @@ reorganization of the sources; their successor files are given.
 | `dsdp_alice_hop_secrecy.v` | `dsdp_alice_hop_secrecy.v` |
 | `dsdp_alice_trace_link.v` | `dsdp_alice_trace_link.v` |
 | `dsdp_alice_main.v` | `dsdp_alice_main.v` |
-| `dsdp_main.v` | `dsdp_alice_main.v` and `dsdp_alice_instances.v` (the results are now stated at their source files) |
-| `dsdp_alice_fdist_secrecy.v` | `dsdp_alice_hop_secrecy.v` |
-| `dsdp_instance_family.v` | `indcpa_scheme_sequence.v` and `dsdp_instance.v` |
-| `paillier_indcpa_instance.v` | `paillier_indcpa_scheme.v` |
-| `benaloh_indcpa_instance.v` | `benaloh_indcpa_scheme.v` |
 
 Identifiers the paper cites without naming a file are found with
 `grep -n "Lemma <name>\|Definition <name>" *.v` in this directory.
