@@ -27,7 +27,6 @@ Makefile.coq.conf
 **/*-implementation-plan.md
 **/*-implementation-spec.md
 pgg-smc
-weng2026/rssdp
 **/.DS_Store
 Screenshot*.png
 coqdoc.css

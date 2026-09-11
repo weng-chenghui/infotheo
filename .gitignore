@@ -37,7 +37,6 @@ docs/superpowers/
 
 # Unrelated local developments excluded from this distribution branch
 /pgg-smc/
-/weng2026/rssdp/
 
 # Nix overlays
 .nix/coq-overlays/

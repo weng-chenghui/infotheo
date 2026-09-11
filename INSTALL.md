@@ -18,6 +18,6 @@ do not already have it, then run:
 opam switch create infotheo ocaml-base-compiler.4.14.2
 eval $(opam env --switch=infotheo)
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install --deps-only -y ./coq-infotheo.opam
+opam install --deps-only -y ./rocq-infotheo.opam
 make
 ```

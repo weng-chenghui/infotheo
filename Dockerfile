@@ -9,8 +9,8 @@ RUN opam repo add coq-released https://coq.inria.fr/opam/released && \
     opam update
 
 WORKDIR /home/opam/infotheo
-COPY --chown=opam:opam coq-infotheo.opam .
-RUN opam install --deps-only -y -j"$(nproc)" ./coq-infotheo.opam && \
+COPY --chown=opam:opam rocq-infotheo.opam .
+RUN opam install --deps-only -y -j"$(nproc)" ./rocq-infotheo.opam && \
     opam clean -a -c -s --logs
 
 # ============================================================
