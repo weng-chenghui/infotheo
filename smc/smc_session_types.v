@@ -1302,17 +1302,16 @@ Qed.
 End aprocs_step_final.
 
 Section aprocs_step_progress.
-Variable aps1 : seq (aproc dtype data).
-Let aps' := [tuple sval (fuel_senv_decreases [::] (ltn_ord i)) | i < size aps1].
-Let Haps1 : aps1 = map (tnth (in_tuple aps1)) (ord_tuple (size aps1)).
-Proof. by rewrite -[LHS]in_tupleE {1}(tuple_map_ord (in_tuple aps1)). Qed.
+Variables (m : nat) (aps1 : m.-tuple (aproc dtype data)).
+Let ltn_aps1 (i : 'I_m) : i < size aps1. by rewrite size_tuple. Qed.
+Let aps' := [tuple sval (fuel_senv_decreases [::] (ltn_aps1 i)) | i < m].
 
 Hypothesis Hnocomm : all inert_nocomm (erase_aprocs aps1).
 Hypothesis Hnf : all_nonfail (erase_aprocs aps').
 
-Lemma senv_depth_fuel (i : 'I_(size aps1)) :
-  senv_depth (aproc_env (sval (fuel_senv_decreases [::] (ltn_ord i)))) <=
-  senv_depth (aproc_env (tnth (in_tuple aps1) i)).
+Lemma senv_depth_fuel (i : 'I_m) :
+  senv_depth (aproc_env (sval (fuel_senv_decreases [::] (ltn_aps1 i)))) <=
+  senv_depth (aproc_env (tnth aps1 i)).
 Proof.
 case: fuel_senv_decreases => pa [ha] [sa] /= ->.
 rewrite (tnth_nth (aproc_default _ _)) /=.
@@ -1325,59 +1324,57 @@ Lemma aprocs_step_fuel :
   stypes_interp_fuel (map aproc_env aps') <=
   stypes_interp_fuel (map aproc_env aps1).
 Proof.
-rewrite {2}Haps1 /stypes_interp_fuel leq_add // !sumnE.
-rewrite 4!big_map 2![X in _ <= X]big_map !big_enum /=.
+rewrite /stypes_interp_fuel leq_add // !sumnE.
+rewrite (tuple_map_ord aps1) 4!big_map 2![X in _ <= X]big_map !big_enum /=.
 apply: leq_sum => i _; exact: senv_depth_fuel.
 Qed.
 
 Hypothesis has_aps1 :
     has snd [tuple stype_step (map aproc_env aps1) i | i < size aps1].
 
-Lemma aproc_step_progress (i : 'I_(size aps1)) :
+Lemma aproc_step_progress (i : 'I_m) :
   (stype_step (map aproc_env aps1) i).2 ->
-  senv_depth (aproc_env (sval (fuel_senv_decreases [::] (ltn_ord i)))) <
-  senv_depth (aproc_env (tnth (in_tuple aps1) i)).
+  senv_depth (aproc_env (sval (fuel_senv_decreases [::] (ltn_aps1 i)))) <
+  senv_depth (aproc_env (tnth aps1 i)).
 Proof.
 move=> Hstep.
 move: (Hnf); rewrite /all_nonfail /aps'/mktuple 2!all_map.
 move/allP/(_ i); rewrite mem_enum /= => /(_ isT).
 case: fuel_senv_decreases => pa [ha] [sa] /= ->.
-case: ifPn; rewrite (nth_map (aproc_default _ _)) //.
+case: ifPn; rewrite -!tnth_nth //.
+  rewrite tnth_map.
   case/andP => _.
-  rewrite (tnth_nth (aproc_default _ _)) /=.
-  by case: nth => pa1 [ha1] [sa1] [].
+  by case: (tnth _ _) => pa1 [ha1] [sa1] [].
 move: Hstep.
-rewrite ha /stype_step (nth_map (aproc_default _ _)) //.
-move/(all_nthP (default_proc data))/(_ i): (Hnocomm).
-rewrite size_map ltn_ord => /(_ isT).
+rewrite ha /stype_step tnth_map.
+move/all_tnthP/(_ i): (Hnocomm).
 rewrite /aproc_env /erase_aproc /step.
-rewrite (nth_map (aproc_default _ _)) //.
-case: nth => /= pa1 [ha1] [sa1] p /=.
+rewrite -!tnth_nth !tnth_map.
+case: (tnth aps1 i) => /= pa1 [ha1] [sa1] p /=.
 case: ha1 sa1 / p => //= ha1 sa1 src dt d k.
-- case/boolP: (src < size aps1) => Hsrc; last first.
-    by rewrite (nth_default STEnd) // size_map; rewrite -leqNgt in Hsrc.
+- case/boolP: (src < m) => Hsrc; last first.
+    rewrite (nth_default STEnd) // size_map size_tuple.
+    by rewrite -leqNgt in Hsrc.
   move: (Hnf); rewrite /all_nonfail /aps'/mktuple 2!all_map.
   move/allP/(_ (Ordinal Hsrc)); rewrite mem_enum /= => /(_ isT).
   case: fuel_senv_decreases => pb [->] _.
-  move/(all_nthP (default_proc data))/(_ src): Hnocomm.
-  rewrite size_map => /(_ Hsrc).
+  move/all_tnthP/(_ (Ordinal Hsrc)): Hnocomm.
   rewrite /aproc_env /erase_aproc /step /aproc_proc.
-  rewrite !(nth_map (aproc_default _ _)) //.
-  case: nth => pa2 [ha2] [sa2] p2 /=.
+  rewrite -!(tnth_nth _ _ (Ordinal Hsrc)) !tnth_map.
+  case: (tnth _ _) => pa2 [ha2] [sa2] p2 /=.
   case: ha2 sa2 / p2 => //=.
   move=> ha3 sa3 src' dt' k'.
   case: ifP => // /andP[].
   by rewrite eq_sym => ->.
-- case/boolP: (src < size aps1) => Hsrc; last first.
-    by rewrite (nth_default STEnd) // size_map; rewrite -leqNgt in Hsrc.
+- case/boolP: (src < m) => Hsrc; last first.
+    by rewrite (nth_default STEnd) // size_tuple; rewrite -leqNgt in Hsrc.
   move: (Hnf); rewrite /all_nonfail /aps'/mktuple 2!all_map.
   move/allP/(_ (Ordinal Hsrc)); rewrite mem_enum /= => /(_ isT).
   case: fuel_senv_decreases => pb [->] _.
-  move/(all_nthP (default_proc data))/(_ src): Hnocomm.
-  rewrite size_map => /(_ Hsrc).
+  move/all_tnthP/(_ (Ordinal Hsrc)): Hnocomm.
   rewrite /aproc_env /erase_aproc /step /aproc_proc.
-  rewrite !(nth_map (aproc_default _ _)) //.
-  case: nth => pa2 [ha2] [sa2] p2 /=.
+  rewrite -!(tnth_nth _ _ (Ordinal Hsrc)) !tnth_map.
+  case: (tnth _ _) => pa2 [ha2] [sa2] p2 /=.
   case: ha2 sa2 / p2 => //=.
   move=> ha3 sa3 src' dt' d' k'.
   case: ifP => //=.
