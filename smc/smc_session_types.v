@@ -1287,14 +1287,10 @@ rewrite 2!size_map size_enum_ord -val_enum_ord -val_ord_tuple.
 apply: negbTE.
 rewrite -all_predC.
 apply/all_tnthP => i /=.
-rewrite !tnth_map tnth_ord_tuple.
-rewrite /stype_step.
-set ape := nth _ _ _.
-have -> // : ape = STEnd.
-move: all_aps1; rewrite -aprocs_env_final => /allP/(_ ape).
-suff -> : ape \in map_tuple aproc_env aps'.
-  by move/(_ isT); case: ape.
-by rewrite /ape -val_ord_tuple -tnth_nth mem_tnth.
+rewrite !tnth_map tnth_ord_tuple /stype_step.
+rewrite -[map _ (enum _)]/(val aps') -tnth_nth.
+move: all_aps1; rewrite -aprocs_env_final => /all_tnthP/(_ i).
+by case: (tnth _ _).
 Qed.
 End aprocs_step_final.
 
