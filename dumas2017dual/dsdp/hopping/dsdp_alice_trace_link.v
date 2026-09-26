@@ -8,7 +8,6 @@ Require Import spp_proba.
 Require Import extra_proba extra_entropy.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
-Require Import epshop.
 Require Import dsdp_instance.
 Require Import dsdp_alice_hop_secrecy.
 

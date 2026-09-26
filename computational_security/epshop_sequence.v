@@ -5,44 +5,43 @@ Require Import negligible epshop.
 (**md**************************************************************************)
 (* # epsHop over the security parameter                                       *)
 (*                                                                            *)
-(* The sequence layer of epsHop, the second of the two monads the language    *)
-(* is stacked from.  epsHop states a bound at one security parameter: a       *)
-(* program is a chain of hops and its result publishes one real, and nothing  *)
-(* in that file mentions the parameter.  A sequence program, of type          *)
-(* forall k, chain_result (C k), is a value of the Reader monad over the      *)
-(* security parameter, and the binder fun k => is that monad's bind.          *)
-(* Negligibility is the monad's terminal, a statement about the whole         *)
-(* sequence that no single member of it can carry.                            *)
+(* The sequence layer of epsHop, the second of the two monads the language is *)
+(* stacked from.  epsHop states a bound at one security parameter: a script   *)
+(* of hops publishes one real, and nothing in that file mentions the          *)
+(* parameter.  A sequence script, of type forall k, script_result (C k), is a *)
+(* value of the Reader monad over the security parameter, and the binder      *)
+(* fun k => is that monad's bind.  Negligibility is the monad's terminal, a   *)
+(* statement about the whole sequence that no single member of it can carry.  *)
 (*                                                                            *)
-(* A sequence program whose label list is the same at every k has a           *)
-(* negligible advantage as soon as every label's loss is a negligible         *)
-(* function.  The negligible functions form a submonoid of the additive       *)
-(* functions, closed under addition and containing the zero function          *)
-(* (negligible_fun_add, negligible_fun_cst0, negligible_fun_sum) and downward *)
-(* closed (negligible_fun_le); loss_eval is a monoid morphism out of the free *)
-(* monoid on labels, and result_total says the bound a program publishes is   *)
-(* the total that morphism returns.  A total therefore lands in the           *)
-(* submonoid exactly when each of its generators does, which is the one       *)
-(* mathematical content of this file.                                         *)
+(* A sequence script whose label list is the same at every k has a negligible *)
+(* advantage as soon as every label's loss is a negligible function.  The     *)
+(* negligible functions form a submonoid of the additive functions, closed    *)
+(* under addition and containing the zero function (negligible_fun_add,       *)
+(* negligible_fun_cst0, negligible_fun_sum) and downward closed               *)
+(* (negligible_fun_le); loss_eval is a monoid morphism out of the free monoid *)
+(* on labels, and result_total says the bound a script publishes is the total *)
+(* that morphism returns.  A total therefore lands in the submonoid exactly   *)
+(* when each of its generators does, which is the one mathematical content of *)
+(* this file.                                                                 *)
 (*                                                                            *)
 (* The labels of a dictionary are made negligible once, by registering that   *)
 (* dictionary sequence as a negligibleClaims.  The field is quantified over   *)
-(* the label type, so whatever a chain over the dictionary spends is covered. *)
-(* A theorem about a program written at that dictionary then names no label   *)
-(* at all: canonical inference supplies the negligibility of every label the  *)
-(* program can spend, and the asymptotic reading of a bound asks the client   *)
-(* one hypothesis per quantity rather than one per hop.  The terminal's own   *)
-(* check that the loss does not vary with k is discharged by fun _ => erefl   *)
-(* at a literal program, and what the program contributes is result_sound     *)
-(* and result_total, so only the label list is left to read.                  *)
+(* the label type, so whatever a script over the dictionary spends is         *)
+(* covered.  A theorem about a script written at that dictionary then names   *)
+(* no label at all: canonical inference supplies the negligibility of every   *)
+(* label the script can spend, and the asymptotic reading of a bound asks the *)
+(* client one hypothesis per quantity rather than one per hop.  The           *)
+(* terminal's own check that the loss does not vary with k is discharged by   *)
+(* fun _ => erefl at a script whose label list is literal, and what the       *)
+(* script contributes is result_sound and result_total, so only the label     *)
+(* list is left to read.                                                      *)
 (*                                                                            *)
 (* ## What the syntax spends                                                  *)
 (*                                                                            *)
-(* \negligible[ and ]{ are new symbol tokens, and fun, => and by are          *)
-(* keywords already.  The second surface, the one taking a named sequence     *)
-(* program, closes on the token ] alone and adds nothing further.  This file  *)
-(* declares no custom entry, so no identifier stops being readable as a term  *)
-(* below it.                                                                  *)
+(* \negligible[ is a new symbol token and by is a keyword already, and the    *)
+(* form closes on the token ] alone, which adds nothing further.  This file   *)
+(* declares no tactic notation, so no identifier stops being readable as a    *)
+(* term below it.                                                             *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*      negligibleClaims L R == a sequence of dictionaries indexed by the     *)
@@ -55,7 +54,7 @@ Require Import negligible epshop.
 (*                              sequence                                      *)
 (*    loss_eval_negligible s == the total of a fixed label list, read along   *)
 (*                              the security parameter, is negligible         *)
-(*      advantage_negligible == a sequence program with a k-independent loss  *)
+(*      advantage_negligible == a sequence script with a k-independent loss   *)
 (*                              has a negligible advantage                    *)
 (* ```                                                                        *)
 (*                                                                            *)
@@ -98,11 +97,11 @@ rewrite /loss_eval; apply: negligible_fun_sum => l.
 exact: claims_negligible.
 Qed.
 
-(* The terminal of the sequence monad: a sequence program spending the same
+(* The terminal of the sequence monad: a sequence script spending the same
    labels at every k has a negligible advantage.  Hs states that independence
    against the loss at 0, and Hf identifies the client's quantity with the
-   program's advantage. *)
-Lemma advantage_negligible (f : nat -> R) (P : forall k, chain_result (C k))
+   script's advantage. *)
+Lemma advantage_negligible (f : nat -> R) (P : forall k, script_result (C k))
     (Hs : forall k, result_loss (P k) = result_loss (P 0))
     (Hf : forall k, f k = result_advantage (P k)) : negligible_fun f.
 Proof.
@@ -117,18 +116,9 @@ End advantage_negligible_theory.
 
 Arguments advantage_negligible {L R} C f P Hs Hf.
 
-(* Read: f is negligible, by Hf identifying it with the advantage of the
-   program e under the binder.  The dictionary is resolved to a registered
-   negligibleClaims by canonical inference, and the erefl checks the loss is
-   k-independent. *)
-Notation "'\negligible[' f 'by' Hf ']{' 'fun' k '=>' e '}'" :=
-  (advantage_negligible _ f (fun k => e) (fun _ => erefl) Hf)
-  (f constr at level 10, Hf constr at level 10, k ident,
-   e constr at level 200) : epshop_scope.
-
-(* The same terminal over a sequence program that already has a name.  The
-   dictionary is read off the program's type, so the client names no label. *)
+(* The terminal over a sequence script that already has a name.  The
+   dictionary is read off the script's type, so the client names no label. *)
 Notation "'\negligible[' f 'by' Hf ']' P" :=
   (advantage_negligible _ f P (fun _ => erefl) Hf)
-  (f constr at level 10, Hf constr at level 10, P constr at level 10)
-  : epshop_scope.
+  (at level 0, f constr at level 10, Hf constr at level 10,
+   P constr at level 10) : epshop_scope.

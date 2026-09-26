@@ -9,7 +9,6 @@ Require Import extra_algebra extra_proba extra_entropy.
 Require Import dsdp_program dsdp_entropy.
 Require Export indcpa_game.
 Require Import dsdp_instance.
-Require Import epshop.
 
 (**md**************************************************************************)
 (* # DSDP corrupted-Alice secrecy, hopping axis                               *)

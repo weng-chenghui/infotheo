@@ -287,7 +287,7 @@ Proof.
    with eps k the advantage the residuosity record assumes.  The two fields of
    paillier_asymptotic make f_size and f_adv negligible, f_size through the
    k-bit modulus of P read as a k-bit plaintext space.  Those two are the loss
-   terms the three labels of the program carry, so the terminal over the
+   terms the three labels of the script carry, so the terminal over the
    security parameter reads the bound off the label list and transfers
    negligibility to f_guess_V2. *)
 exact: (alice_trace_guess_V2_negligible (Q := paillier_instance_sequence)
@@ -468,7 +468,7 @@ Proof.
    eps k the advantage the residuosity record assumes.  The two fields of
    benaloh_asymptotic make f_size and f_adv negligible, f_size through the
    k-bit block size of B read as a k-bit plaintext space.  Those two are the
-   loss terms the three labels of the program carry, so the terminal over the
+   loss terms the three labels of the script carry, so the terminal over the
    security parameter reads the bound off the label list and transfers
    negligibility to f_guess_V2. *)
 exact: (alice_trace_guess_V2_negligible (Q := benaloh_instance_sequence)
