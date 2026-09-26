@@ -422,8 +422,7 @@ Lemma paillier_dcr_epsilon_le :
   <= 2 * dcr_epsilon dcr.
 Proof.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
-rewrite !enc_fdist_paillierE /= real_accept_dcrE zero_accept_dcrE.
-rewrite -(dcr_totalE dcr).
+rewrite real_accept_dcrE zero_accept_dcrE -dcr_totalE.
 exact: hop_script_total paillier_script.
 Qed.
 

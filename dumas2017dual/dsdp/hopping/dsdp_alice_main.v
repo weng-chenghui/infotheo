@@ -71,9 +71,9 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* The last region reads the same two trace arguments along a sequence of     *)
 (* instances, with both ciphertext replacements charged at the epsilon an     *)
 (* adversary-class assumption promises rather than at the advantage each      *)
-(* reduction shows.  Those two class-conditional arguments are scripts,       *)
+(* reduction shows.  Those two class-conditional arguments are the scripts    *)
 (* alice_script and alice_sim_script, one tactic line per hop, whose types    *)
-(* name the labels they spend; the terminals read them through                *)
+(* name the labels they spend; the sequence theorems read them through        *)
 (* result_of_script:                                                          *)
 (* alice_trace_guess_V2_admissible_le is the guessing bound at one            *)
 (* instance, read off the sequence that repeats it, and                       *)
@@ -700,13 +700,13 @@ Proof. by rewrite mulr_natl mulr2n addrC. Qed.
    interpreter hands Alice when it runs the DSDP protocol at the sampled
    inputs, so the object the argument starts from is the executed protocol
    itself rather than a tuple of values standing for it.
-   alice_trace_guess_V2_le reads its bound through alice_totalE.  The trace
-   is a deterministic image of the hopping tuple, so the step to the tuple
-   loses nothing.  Each of the two ciphertext replacements carries
-   the key its advantage is charged to, which is what the class-conditional
-   reading and the sequence reading below read off a label.  The last line,
-   the term labelled uniform_fiber, is what that theorem adds to the simulation
-   bound: the mass the leaked output leaves along the DSDP solution fiber,
+   alice_trace_guess_V2_le reads its bound through alice_totalE.  The trace is
+   a deterministic image of the hopping tuple, so the step to the tuple loses
+   nothing.  Each of the two ciphertext replacements carries the key its
+   advantage is charged to, which is what the class-conditional reading and
+   the sequence reading below read off a label.  The last line, the term
+   labelled uniform_fiber, is what that theorem adds to the simulation bound:
+   the mass the leaked output leaves along the DSDP solution fiber,
    unconditional where the two hop terms are conditional on the IND-CPA
    assumption at one key each. *)
 Section alice_trace_script.
@@ -794,8 +794,7 @@ Theorem alice_trace_sim_advantage_le :
   <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
      + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
-rewrite -!acceptE.
-exact: hop_script_total alice_trace_sim_script.
+rewrite -!acceptE; exact: hop_script_total alice_trace_sim_script.
 Qed.
 
 (* The distance a trace test sees between Alice's executed trace and the
@@ -866,9 +865,7 @@ Theorem alice_trace_guess_V2_le :
        + indcpa_epsilon (pkey_of_dk Charlie)
            (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
-rewrite -(alice_totalE
-  (hop_tuple_distinguisher (distinguisher_of_predictor predict))).
+rewrite guess_V2_acceptE -(advantage0 (accept_ge0 _ _)) -alice_totalE.
 exact: hop_script_total (alice_trace_script predict).
 Qed.
 

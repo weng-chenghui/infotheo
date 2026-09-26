@@ -437,8 +437,7 @@ Lemma benaloh_residuosity_epsilon_le :
   <= 2 * benaloh_residuosity_epsilon residuosity.
 Proof.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
-rewrite !enc_fdist_benalohE /= real_accept_residuosityE.
-rewrite zero_accept_residuosityE -(residuosity_totalE residuosity).
+rewrite real_accept_residuosityE zero_accept_residuosityE -residuosity_totalE.
 exact: hop_script_total benaloh_script.
 Qed.
 
