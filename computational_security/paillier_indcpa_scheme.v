@@ -69,17 +69,16 @@ Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 (* back.  Between them the multiplier erases the plaintext, so the middle     *)
 (* step is an identity and loses nothing.                                     *)
 (*                                                                            *)
-(* The two hops and the identity between them are written in the epsHop       *)
-(* language of computational_security/epshop.v: paillier_chain starts at the  *)
-(* real experiment, hops to the unit challenge, crosses the middle identity   *)
-(* at no loss, and hops back to the zero experiment.  Its loss is the list    *)
-(* of the two labels the bound rests on, one per residuosity call, and        *)
-(* paillier_claim, the dictionary written on the program's delimiter, fixes   *)
-(* for each label the two experiments its call moves between and the epsilon  *)
-(* it assumes.  The chain returns twice the residuosity epsilon as its        *)
-(* bound, which is the number in paillier_dcr_epsilon_le.  The two class      *)
-(* memberships are variables of the section the chain sits in, so             *)
-(* paillier_dcr_epsilon_le assumes exactly what building the chain spends.    *)
+(* The two hops and the identity between them are written on the tactic       *)
+(* surface of computational_security/epshop.v: paillier_script goes from the  *)
+(* real experiment to the zero experiment, one tactic line per step, and its  *)
+(* type names the two labels the bound rests on, one per residuosity call.    *)
+(* paillier_claim, the dictionary in the type, fixes for each label the two   *)
+(* experiments its call moves between and the epsilon it assumes.  The bound  *)
+(* of paillier_dcr_epsilon_le, twice the residuosity epsilon, is read off the *)
+(* script through hop_script_total and dcr_totalE.  The two class memberships *)
+(* are variables of the section the script sits in, so                        *)
+(* paillier_dcr_epsilon_le assumes exactly what proving the script spends.    *)
 (*                                                                            *)
 (* The one number-theoretic input is g ^+ (p q) = 1, the order condition the  *)
 (* private key record already carries.  The statement proved here is          *)
@@ -132,12 +131,11 @@ Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 (*                              between, and the epsilon it assumes           *)
 (*            dcr_totalE dcr == the closed form of the two-call loss, twice   *)
 (*                              the residuosity epsilon                       *)
-(* paillier_chain admissible_g admissible_0 ==                                *)
+(* paillier_script admissible_g admissible_0 ==                               *)
 (*                              the two hops and the identity between them    *)
-(*                              as one chain over acceptance probabilities,   *)
-(*                              at the two class memberships it spends,       *)
-(*                              returning twice the residuosity epsilon as    *)
-(*                              its bound                                     *)
+(*                              as one script from the real experiment to     *)
+(*                              the zero experiment, spending dcr_g and dcr_0 *)
+(*                              at the two class memberships                  *)
 (*   paillier_dcr_epsilon_le == the IND-CPA advantage of an adversary whose   *)
 (*                              two reductions are classified is at most      *)
 (*                              twice the residuosity epsilon                 *)
@@ -186,6 +184,7 @@ Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
+Import EpsHopTac.
 
 Local Open Scope ring_scope.
 Local Open Scope reals_ext_scope.
@@ -276,7 +275,7 @@ Definition dcr_of_adversary_zero
 
 (* An encryption of m under g is g^m times a (p q)-th power of a uniform
    unit.  The real experiment is therefore the multiplying reduction at the
-   residue challenge, where the chain opens. *)
+   residue challenge, where the script opens. *)
 Lemma real_accept_dcrE (g : 'Z_((p * q) * (p * q)))
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
@@ -332,7 +331,7 @@ exact: unit_fdistmap_translateE 'Z_((p * q) * (p * q)) card_renc_paillier
 Qed.
 
 (* The acceptance probability of a residuosity distinguisher, under the short
-   name the chain below reads at. *)
+   name the script below reads at. *)
 Local Notation accept := (residuosity_accept (R:=R)).
 
 (* The two labels, one per residuosity call: dcr_g for dcr_of_adversary at
@@ -361,26 +360,24 @@ Definition paillier_claim (dcr : dcr_assumption) (dk : priv_key AHE)
 
 Local Open Scope epshop_scope.
 
-(* The closed form of the loss the chain below accumulates: one residuosity
-   epsilon per hop, twice the assumed epsilon.  The chain returns its bound by
-   this identity, and every factor two in this file comes from here. *)
+(* The closed form of the loss the script below spends: one residuosity
+   epsilon per hop, twice the assumed epsilon.  The bound is read through this
+   identity, and every factor two in this file comes from here. *)
 Lemma dcr_totalE (dcr : dcr_assumption) :
   dcr_epsilon dcr + dcr_epsilon dcr = 2 * dcr_epsilon dcr.
 Proof. by rewrite mulr_natl mulr2n. Qed.
 
-(* The two-step hybrid as one chain over acceptance probabilities.  It starts
-   at the real experiment, which is the multiplying reduction at the residue
+(* The two-step hybrid as one script over acceptance probabilities.  It
+   starts at the real experiment, the multiplying reduction at the residue
    challenge; hops to that reduction at the unit challenge, where the
    residuosity assumption bounds the move; crosses to the plain reduction at
    the unit challenge, where the multiplier erases the plaintext and the move
    is an identity; and hops to the plain reduction at the residue challenge,
-   which is the zero experiment.  Its two endpoints are the acceptance
-   probabilities the IND-CPA advantage compares, and its loss names the two
-   residuosity calls that comparison spends.  The two class memberships are
-   variables of the section, spent in the justification of the hop each one
-   licenses, so a chain that exists has already spent them and leaves nothing
-   to discharge. *)
-Section paillier_chain.
+   the zero experiment.  Its two endpoints are the acceptance probabilities
+   the IND-CPA advantage compares, and its type names the two residuosity
+   calls that comparison spends.  The two class memberships are variables of
+   the section, spent in the justification of the hop each one licenses. *)
+Section paillier_script.
 Variable dcr : dcr_assumption.
 Variable dk : priv_key AHE.
 Variable adv : indcpa_adversary (R:=R) paillier_indcpa_scheme.
@@ -389,31 +386,33 @@ Hypothesis admissible_g :
 Hypothesis admissible_0 :
   residuosity_admissible dcr (dcr_of_adversary_zero adv).
 
-(* The two reductions the chain moves between, under the short names its
+(* The two reductions the script moves between, under the short names its
    steps read at.  D_g multiplies at the key's generator, D_0 hands the
    challenge over unchanged. *)
 Local Notation D_g := (dcr_of_adversary (priv_gen dk) adv).
 Local Notation D_0 := (dcr_of_adversary_zero adv).
 Local Notation eps := (dcr_epsilon dcr).
 
-Definition paillier_chain :=
-  \epsilon[ paillier_claim dcr dk adv ]{
-            (* the real experiment *)
-            start (accept D_g residue_fdist) ;
-            (* the first residuosity call, through D_g *)
-            hop dcr_g eps to (accept D_g unit_fdist)
-              by residuosity_admissible_epsilon_le _ _ admissible_g ;
-            (* the free step: at the unit challenge the multiplier erases the
-               plaintext, Katz and Lindell 2015 Lemma 11.15 *)
-            same to (accept D_0 unit_fdist)
-              by unit_accept_dcrE (priv_gen_order dk) adv ;
-            (* the second residuosity call, through D_0 run backwards, and
-               the zero experiment *)
-            hop dcr_0 eps to (accept D_0 residue_fdist)
-              by residuosity_admissible_epsilon_leC _ _ admissible_0 ;;
-            (* the gap between the two experiments, at the two calls it
-               spent *)
-            bound (2 * eps) by dcr_totalE dcr }.
+(* The two-call hybrid as a script from the real experiment to the zero
+   experiment, spending one residuosity call per hop.  Its type names the two
+   calls the IND-CPA bound rests on. *)
+Lemma paillier_script :
+  \hops[ paillier_claim dcr dk adv ]
+    `| accept D_g residue_fdist - accept D_0 residue_fdist |
+    <= [:: dcr_g; dcr_0].
+Proof.
+(* the first residuosity call, through D_g *)
+hop dcr_g to (accept D_g unit_fdist)
+  by (residuosity_admissible_epsilon_le _ _ admissible_g).
+(* the free step: at the unit challenge the multiplier erases the plaintext,
+   Katz and Lindell 2015 Lemma 11.15 *)
+same to (accept D_0 unit_fdist) by (unit_accept_dcrE (priv_gen_order dk) adv).
+(* the second residuosity call, through D_0 run backwards, and the zero
+   experiment *)
+hop dcr_0 to (accept D_0 residue_fdist)
+  by (residuosity_admissible_epsilon_leC _ _ admissible_0).
+stop.
+Qed.
 
 (* An adversary whose two reductions the class admits has IND-CPA advantage
    at most 2 eps_DCR.  This is Katz and Lindell 2015 Theorem 13.13, one
@@ -425,10 +424,11 @@ Lemma paillier_dcr_epsilon_le :
 Proof.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_paillierE /= real_accept_dcrE zero_accept_dcrE.
-exact: result_sound paillier_chain.
+rewrite -(dcr_totalE dcr).
+exact: hop_script_total paillier_script.
 Qed.
 
-End paillier_chain.
+End paillier_script.
 
 (* The IND-CPA class a residuosity assumption induces: both reductions of the
    adversary are classified, the multiplying one at every generator.  The
