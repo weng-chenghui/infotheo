@@ -550,8 +550,7 @@ Lemma script_hop_sound (l : L) (g' z : R) (s : loss L) :
   `| claim_from (claim_of l) - z | <= loss_eval claim_of (l :: s).
 Proof.
 move=> ob gE gz.
-exact: (then_sound (m := chain_hop l _ g' ob erefl gE) (frag := Chain gz)
-  erefl).
+exact: then_sound (chain_hop l _ g' ob erefl gE) (Chain gz) erefl.
 Qed.
 
 (* A derivation that a goes to b spending the labels of s, one constructor
@@ -569,17 +568,15 @@ Inductive hop_script : R -> R -> loss L -> Type :=
 Lemma hop_script_sound a b s :
   hop_script a b s -> `| a - b | <= loss_eval claim_of s.
 Proof.
-elim=> [g | l g' z s' ob gE _ IH | x g' z s' xE _ IH].
-- exact: start_sound.
-- exact: script_hop_sound ob gE IH.
-- by rewrite xE.
+elim=> [|l g' z s' ob gE _ /(script_hop_sound ob gE) //|x g' z s' -> //].
+exact: start_sound.
 Qed.
 
 (* A script from a to b over s bounds | a - b | by the fold of s.  On
    literal labels this total converts to the sum a theorem states. *)
 Lemma hop_script_total a b s :
   hop_script a b s -> `| a - b | <= loss_total claim_of s.
-Proof. by rewrite -loss_evalE; exact: hop_script_sound. Qed.
+Proof. rewrite -loss_evalE; exact: hop_script_sound. Qed.
 
 (* The conjunction of the claims of a label list.  It is what a script
    certifies about the assumptions it names. *)
@@ -590,12 +587,12 @@ Fixpoint loss_obligations (s : loss L) : Prop :=
 (* Every label of a script has its claim proved.  The label list of a script
    is therefore an assumption trail checked by the kernel. *)
 Lemma hop_script_obligations a b s : hop_script a b s -> loss_obligations s.
-Proof. by elim=> // l g' z s' ob _ _ IH; split. Qed.
+Proof. by elim. Qed.
 
 (* A script over the empty loss joins equal games.  A bound that spends no
    assumption is an identity of games. *)
 Lemma hop_script_nil a b s : hop_script a b s -> s = [::] -> a = b.
-Proof. by elim=> // x g' z s' -> _ IH /IH. Qed.
+Proof. by elim=> // x g' z s' -> _. Qed.
 
 (* The result a script returns: its games' distance, its label list, their
    total.  The sequence terminal reads the labels off the index s. *)
@@ -622,8 +619,8 @@ Arguments result_of_script {L R claim_of a b s}.
 Lemma hop_script_not_total (R : realType) :
   (forall (C : unit -> claim R) a b s, hop_script C a b s) -> False.
 Proof.
-move=> /(_ (fun=> Claim 0 0 0) 0 1 [::]) /hop_script_nil /(_ erefl) /eqP.
-by rewrite eq_sym oner_eq0.
+move=> /(_ (fun=> Claim 0 0 0) 0 1 [::]) /hop_script_nil /(_ erefl) /esym.
+exact/eqP/oner_neq0.
 Qed.
 
 (* A script type displayed as the inequality it witnesses.  A compound game

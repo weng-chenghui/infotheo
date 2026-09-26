@@ -1276,14 +1276,12 @@ same to (accept (tuple_distinguisher k) (G0 k)) by (accept_trace_tupleE _).
    which the class membership of the Bob-key reduction licenses *)
 hop cpa_bob to (accept (tuple_distinguisher k) (G1 k))
   by (le_trans (le_of_eq (hop0_advantageE _))
-               (indcpa_admissible_epsilon_le (inst_dk_b (I k))
-                  (bob_admissible k))).
+               (indcpa_admissible_epsilon_le _ (bob_admissible k))).
 (* Charlie's slot zeroed, at the same epsilon, licensed by the class
    membership of the Charlie-key reduction *)
 hop cpa_charlie to (accept (tuple_distinguisher k) (G2 k))
   by (le_trans (le_of_eq (hop1_advantageE _))
-               (indcpa_admissible_epsilon_le (inst_dk_c (I k))
-                  (charlie_admissible k))).
+               (indcpa_admissible_epsilon_le _ (charlie_admissible k))).
 (* the guessing residue of the all-zero view, a term outside the hopping *)
 plus uniform_fiber
   by (plus_le (accept_ge0 _ _)
@@ -1297,7 +1295,7 @@ Qed.
 Lemma f_guess_V2_le k :
   f_guess_V2 k <= (#|plain (scheme_AHE (I k))|%:R : R)^-1 + 2 * eps k.
 Proof.
-rewrite f_guess_V2_advantageE -(alice_admissible_totalE (assumption k)).
+rewrite f_guess_V2_advantageE -alice_admissible_totalE.
 exact: hop_script_total (alice_script k).
 Qed.
 
@@ -1396,9 +1394,9 @@ Lemma f_sim_advantageE k :
        - accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)) |.
 Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
 
-(* The real trace game and the simulated one lie within two class epsilons of
-   each other.  Both hops zero a ciphertext slot; the simulated trace is the
-   image of the all-zero tuple. *)
+(* The real trace game and the simulated one lie within two class epsilons
+   of each other.  It is the class-conditional bound the simulation theorem
+   reads at every k. *)
 Lemma alice_sim_script k :
   \hops[ alice_sim_claims_at k ]
     `| accept (trace_distinguishers k)
@@ -1415,14 +1413,14 @@ same to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G0 k))
 hop cpa_bob
   to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G1 k))
   by (le_trans (le_of_eq (hop0_advantageE _))
-               (indcpa_admissible_epsilon_le (inst_dk_b (I k))
+               (indcpa_admissible_epsilon_le _
                   (bob_admissible_distinguisher k))).
 (* Charlie's slot zeroed, at the same epsilon, licensed by the class
    membership of the Charlie-key reduction *)
 hop cpa_charlie
   to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G2 k))
   by (le_trans (le_of_eq (hop1_advantageE _))
-               (indcpa_admissible_epsilon_le (inst_dk_c (I k))
+               (indcpa_admissible_epsilon_le _
                   (charlie_admissible_distinguisher k))).
 (* the simulated trace is that same image of the all-zero tuple *)
 same to (accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)))
