@@ -555,18 +555,18 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantage_le}
   \rocqok
-  \uses{lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_simulation_secure}
+  \uses{lem:trace_of_hop_tuple,def:alice_trace_script,def:alice_trace_sim_script,thm:alice_guess_real,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
   executed trace obeys the guessing bound at $g \circ \tau$. For all weights,
   every distinguisher separates the real trace law from the trace-level ideal
   law by at most the two hop advantages.
   \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
        \le \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
-  The simulation bound is the gap result of
-  Definition~\ref{def:alice_trace_sim_chain}, and the guessing bound is that
+  The simulation bound is read off the script of
+  Definition~\ref{def:alice_trace_sim_script}, and the guessing bound is that
   simulation bound at the predictor's distinguisher plus the fiber term of the
-  ideal trace, as at the tuple; the program of
-  Definition~\ref{def:alice_trace_chain} returns the same bound.
+  ideal trace, as at the tuple, read off the script of
+  Definition~\ref{def:alice_trace_script}.
   Proved in \texttt{dsdp\_alice\_main.v}. Both bounds at the raw
   trace, Theorems~\ref{thm:raw_trace_guess}
   and~\ref{thm:raw_trace_simulation}, are read through the decoding of
@@ -681,7 +681,7 @@ $e$-th residuosity assumption.
      \mathrm{negl}\Big(k \mapsto \sum_{i \in s} F_i(k)\Big) \]
   The negligible sequences are an additive submonoid of the sequences of
   reals, and a sum over a list lands in it as soon as each entry does. A
-  chain totals one loss term per label of its loss, so a bound read off such
+  script totals one loss term per label of its loss, so a bound read off such
   a total is negligible as soon as each label's loss sequence is.
 \end{lemma}
 
@@ -753,7 +753,7 @@ $e$-th residuosity assumption.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
-  \uses{thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_admissible}
+  \uses{thm:alice_trace_bounds,def:indcpa_assumption,def:alice_script}
   When both reduction adversaries of a trace predictor $g$ are admissible for
   $\mathcal{A}$, and $u_3$ is a unit of the plaintext ring, $g$ matches Bob's
   input with probability at most $1/m$ plus twice the assumed advantage; the
@@ -767,9 +767,10 @@ $e$-th residuosity assumption.
   measures the two ciphertext replacements at the advantage $\mathcal{A}$
   assumes rather than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
-  The bound is the soundness field of the program of
-  Definition~\ref{def:alice_trace_chain_admissible}, which spends the two
-  premises at its two hops, so no triangle inequality is taken here.
+  The bound is the script of Definition~\ref{def:alice_script} read through
+  soundness, and that script spends the two premises at its two hops, so the
+  one triangle inequality here is the soundness statement of
+  Definition~\ref{def:hop_script}.
   Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{alice\_trace\_guess\_V2\_admissible\_le} and
   \texttt{alice\_trace\_guess\_V2\_admissible\_pq\_le}, and read at each
@@ -1026,47 +1027,49 @@ $e$-th residuosity assumption.
   \texttt{benaloh\_epsilon\_at\_residuosityE}.
 \end{corollary}
 
-\section{epsHop, the language a multi-hop bound is written in}
+\section{epsHop, the scripts a multi-hop bound is written in}
 
 Each of the three reductions above is a hybrid: a sequence of games joined by
 steps, some of which spend an assumption and some of which are identities. This
-section states the language they are written in, epsHop. A chain is a morphism
-between acceptance probabilities graded by an accumulated loss, and that loss is
-a list of labels rather than a single real, so a finished derivation carries the
-assumptions its bound rests on alongside their numeric total. epsHop
-is the dual of the piSMC language of \texttt{smc/pismc.v}: piSMC writes what the
-parties of a protocol do, epsHop writes what a security argument about them
-loses. The three programs of the section are the Paillier hybrid, the Benaloh
-hybrid, and Alice's two-hop ladder, each written in it, and the section closes
-with the reading of such a program along a sequence of security parameters.
+section states the form they are written in, epsHop. A hopping argument is a
+script, a value of the type $\mathrm{Script}_C(a, b, s)$ indexed by the game
+$a$ it opens at, the game $b$ it stops at, and the list $s$ of labels it spends.
+The Rocq source displays that type as the inequality its values witness,
+\texttt{\textbackslash{}hops[ C ] `| a - b | <= s}. The values of the type are
+exactly what the three steps of Definition~\ref{def:hop_script} build, so the
+label list of a finished script is the list of assumptions its bound rests on,
+carried beside their numeric total. epsHop is the dual of the piSMC language of
+\texttt{smc/pismc.v}: piSMC writes what the parties of a protocol do, epsHop
+writes what a security argument about them loses. The scripts of the section
+are the Paillier hybrid, the Benaloh hybrid, and Alice's guessing and
+simulation arguments at her executed trace, each at the advantage its
+reductions show and at the epsilon an adversary class assumes, and the section
+closes with the reading of a script along a sequence of security parameters.
 
-A program is one delimited block, $\varepsilon\{\;\cdots\;\}$, whose statements
-are separated by a semicolon and read as follows.
+A script is written one tactic line per step, on a goal of script type from the
+current game $x$ to the final game $z$, and each line leaves the script type of
+the rest as the residual goal.
 \begin{itemize}
-  \item \texttt{start g} opens the chain at the game $g$, with no loss yet.
-  \item \texttt{hop l e to g' by H} invokes the assumption named $l$, loses
-    $e$, and reaches the game $g'$, guaranteed by
-    $H : \lvert \mathrm{current} - g' \rvert \le e$. The label $l$ fixes the
-    source game, the target and the loss through its claim, and $e$, $g'$ and
-    $H$ are each checked against it.
-  \item \texttt{same to g' by H} rewrites the game to $g'$ at no loss,
-    guaranteed by $H : \mathrm{current} = g'$.
-  \item \texttt{plus l c by H} is \texttt{hop l c to 0 by H}, under a label
-    whose target is the zero game: the last game lies within $c$ of zero,
-    guaranteed by $H : \lvert \mathrm{current} - 0 \rvert \le c$, so it is at
-    most $c$ and $c$ enters the loss. It is spelled \texttt{plus} so that a
-    reader sees a term added rather than a hop taken.
-  \item \texttt{s ;; bound c by H} returns the bound: the total of the loss is
-    $c$, guaranteed by $H : \mathrm{total} = c$, so the advantage of the
-    chain, the distance between the game it opened at and the game it stopped
-    at, is at most $c$.
+  \item \texttt{hop l to g' by (H)} spends the label $l$ on a goal
+    $\mathrm{Script}_C(x, z, l :: s)$ with $x = \mathrm{src}(C(l))$. It checks
+    $g'$ against $\mathrm{tgt}(C(l))$ by reduction, takes
+    $H : \mathrm{obl}(C(l))$, and leaves $\mathrm{Script}_C(g', z, s)$.
+  \item \texttt{same to g' by (H)} rewrites the game to $g'$ at no loss, for
+    $H : x = g'$, and leaves $\mathrm{Script}_C(g', z, s)$ over the same list
+    $s$.
+  \item \texttt{plus l by (H)} is a hop under $l$ to the zero game followed by
+    \texttt{stop}. It closes $\mathrm{Script}_C(x, 0, [l])$ for a label whose
+    target is the zero game, with $H : \lvert x - 0 \rvert \le
+    \mathrm{loss}(C(l))$, and is spelled \texttt{plus} so that a reader sees a
+    term added to the bound.
+  \item \texttt{stop} closes $\mathrm{Script}_C(g, g, [\,])$, the script that
+    spends nothing.
 \end{itemize}
-The label slot names the assumption invoked and where, the loss slot is that
-assumption's advantage, and the proof slot says whether the term is assumed or
-exact. All three are compared with what the label claims. Each proof slot is
-mandatory: a statement is ill-formed without it, and a proof about the wrong
-pair of games neither convinces nor names a step. So a chain that exists has no
-pending obligation, and a bound is read off it by projection.
+The label slot names the assumption invoked, and the proof slot is the
+justification that assumption's claim asks for, checked against the claim.
+Every step carries its proof slot, so a finished script holds every obligation
+its labels name, and a bound is read off it by the soundness statement of
+Definition~\ref{def:hop_script}.
 
 \begin{definition}[A label and the claim it stands for]
   \label{def:claim}
@@ -1122,200 +1125,193 @@ pending obligation, and a bound is read off it by projection.
   total of a composite the sum of the totals of its parts.
 \end{definition}
 
-\begin{definition}[A chain and the four statements that build one]
-  \label{def:chain}
-  \rocq{infotheo.computational_security.epshop.chain,
-       infotheo.computational_security.epshop.chain_start,
-       infotheo.computational_security.epshop.chain_hop,
-       infotheo.computational_security.epshop.chain_same,
-       infotheo.computational_security.epshop.chain_then,
+\begin{definition}[A script and its three steps]
+  \label{def:hop_script}
+  \rocq{infotheo.computational_security.epshop.hop_script,
+       infotheo.computational_security.epshop.script_stop,
+       infotheo.computational_security.epshop.script_hop,
+       infotheo.computational_security.epshop.script_same,
+       infotheo.computational_security.epshop.hop_script_sound,
+       infotheo.computational_security.epshop.hop_script_total,
        infotheo.computational_security.epshop.le_of_eq,
        infotheo.computational_security.epshop.plus_le,
        infotheo.computational_security.epshop.advantage0}
   \rocqok
-  \uses{def:loss}
-  A chain is a head endpoint $a$, a last endpoint $b$, a loss $s$, and a
-  proof that the total of the loss bounds the distance between the endpoints.
-  The endpoints are acceptance probabilities.
-  \[ \lvert a - b \rvert \le \mathrm{ev}(s) \]
-  Four statements build one, each re-establishing that invariant and each
-  taking its own justification as an argument, and are written below as the
-  three data $(a, b, s)$ they carry.
-  \[ \mathrm{start}(g) = \big(g,\; g,\; [\,]\big), \qquad
-     \mathrm{hop}(l, e, g', H) = \big(\mathrm{src}(C(l)),\; g',\; [l]\big)
-       \quad\text{for } H : \mathrm{obl}(C(l)) \]
-  \[ \mathrm{same}(g', H) = \big(x,\; g',\; [\,]\big)
-       \quad\text{for } H : x = g', \qquad
-     \mathrm{then}(m, f, H_b) = \big(a_m,\; b_f,\;
-       s_m \mathbin{+\!\!+} s_f\big) \]
-  An assumption enters a derivation at $\mathrm{hop}$ and nowhere else, which
-  is why the loss of a finished chain is the complete list of what its bound
-  rests on. A $\mathrm{hop}$ takes two further arguments, the equations
-  $e = \mathrm{loss}(C(l))$ and $g' = \mathrm{tgt}(C(l))$, each discharged by
-  reflexivity, so the loss and the target written at a step are the loss and
-  the target the label claims. $\mathrm{same}$ is the step an
+  \uses{def:claim,def:loss}
+  A script from $a$ to $b$ over $s$ is a derivation, one step per constructor,
+  that the acceptance probabilities $a$ and $b$ lie within the total of $s$.
+  Its type $\mathrm{Script}_C(a, b, s)$ is inductive, with three constructors.
+  \[ \mathrm{stop}(g) : \mathrm{Script}_C(g,\, g,\, [\,]) \]
+  \[ \mathrm{hop}(l, g', H, p) :
+       \mathrm{Script}_C\big(\mathrm{src}(C(l)),\, z,\, l :: s\big)
+     \quad\text{for } H : \mathrm{obl}(C(l)),\
+       g' = \mathrm{tgt}(C(l)),\ p : \mathrm{Script}_C(g', z, s) \]
+  \[ \mathrm{same}(g', H, p) : \mathrm{Script}_C(x,\, z,\, s)
+     \quad\text{for } H : x = g',\ p : \mathrm{Script}_C(g', z, s) \]
+  Every script bounds the distance between its two games by the total of its
+  loss, in both readings of the total.
+  \[ \mathrm{Script}_C(a, b, s) \implies
+       \lvert a - b \rvert \le \mathrm{ev}(s), \qquad
+     \mathrm{Script}_C(a, b, s) \implies
+       \lvert a - b \rvert \le \mathrm{tot}(s) \]
+  An assumption enters a script at $\mathrm{hop}$ and nowhere else, which is
+  why the loss of a finished script is the complete list of what its bound
+  rests on. The equation $g' = \mathrm{tgt}(C(l))$ is discharged by
+  reduction, so the game a hop reaches is the game its label claims, and the
+  game a hop leaves is the source of that claim. $\mathrm{same}$ is the step an
   information-theoretic identity between two games takes, and it leaves the
-  loss as it stands; \texttt{le\_of\_eq} turns such an identity into the
-  inequality a $\mathrm{hop}$ asks for, which is what a hop whose gap is an
-  equality of advantages rather than an assumed bound is justified by, and
-  \texttt{plus\_le} does the same for a hop whose target is the zero game,
-  \texttt{advantage0} reading the distance from zero back as the game. In
-  $\mathrm{hop}$ the source endpoint is the source of the label's claim and in
-  $\mathrm{same}$ it is read off the type of the justification, so neither
-  writes it. Composition $\mathrm{then}$ is partial, sound
-  only under the side condition $H_b : a_f = b_m$, that the second fragment
-  starts where the first stopped, and it is where the one triangle inequality
-  of the development is discharged, once, so that a chain of any length needs
-  none. Without that side condition the concatenated loss would bound nothing
-  about the two outer endpoints. The semicolon of a program discharges it by
-  conversion, so two consecutive statements type-check exactly when the second
-  opens at the game the first reached.
+  loss as it stands. The one triangle inequality of the development is the
+  soundness statement above, so a script of any length is read through it
+  alone. \texttt{le\_of\_eq} turns an equality of advantages into the
+  inequality a hop asks for, \texttt{plus\_le} turns $0 \le x \le c$ into the
+  form $\lvert x - 0 \rvert \le c$ that a hop to the zero game asks for, and
+  \texttt{advantage0} reads $\lvert x - 0 \rvert$ back as $x$, so a script
+  stopping at the zero game bounds the game it opens at.
 \end{definition}
 
-\begin{definition}[What a program returns]
-  \label{def:chain_result}
-  \rocq{infotheo.computational_security.epshop.chain_result,
-       infotheo.computational_security.epshop.chain_result_of_chain,
-       infotheo.computational_security.epshop.chain_bound}
+\begin{lemma}[What a script type guarantees]
+  \label{lem:hop_script_guard}
+  \rocq{infotheo.computational_security.epshop.loss_obligations,
+       infotheo.computational_security.epshop.hop_script_obligations,
+       infotheo.computational_security.epshop.hop_script_nil,
+       infotheo.computational_security.epshop.hop_script_not_total}
   \rocqok
-  \uses{def:chain}
+  \uses{def:hop_script}
+  Every label a script spends has its claim proved, a script over the empty
+  loss joins equal games, and some script type is empty.
+  \[ \mathrm{Script}_C(a, b, s) \implies
+       \bigwedge_{l \in s} \mathrm{obl}(C(l)), \qquad
+     \mathrm{Script}_C(a, b, [\,]) \implies a = b \]
+  \[ \neg\big(\forall C\, a\, b\, s,\ \mathrm{Script}_C(a, b, s)\big) \]
+  The last statement is witnessed at the games $0$ and $1$ over the empty
+  loss. Together the three make the label list of a script an assumption trail
+  that the kernel checks, whatever tactics built the script: the obligations of
+  its labels are recoverable from the script itself, a bound spending the empty
+  list is an identity of games, and a script is a witness whose label list is
+  data a result carries.
+\end{lemma}
+
+\begin{definition}[What a script returns]
+  \label{def:script_result}
+  \rocq{infotheo.computational_security.epshop.script_result,
+       infotheo.computational_security.epshop.result_of_script}
+  \rocqok
+  \uses{def:hop_script,def:loss}
   A result is an advantage $a$, a loss $s$, a bound $c$, a proof that $c$
   bounds $a$, and a proof that $c$ is the total of $s$.
   \[ a \le c, \qquad \mathrm{tot}(s) = c \]
-  A chain returns one on its own, on the distance between its endpoints, at
-  the total of its loss; $\mathrm{bound}$ republishes a result at an explicit
-  $c$ for $H : \mathrm{tot}(s) = c$.
-  \[ m = \big(\lvert a_m - b_m \rvert,\; s_m,\; \mathrm{tot}(s_m)\big),
-     \qquad
-     \mathrm{bound}(b, c, H) = \big(a_b,\; s_b,\; c\big) \]
-  A chain whose last game is the zero game therefore returns a bound on the
+  A script returns the result on the distance between its two games at the
+  total of its loss, the loss being the index $s$ of its type.
+  \[ p : \mathrm{Script}_C(a, b, s) \ \longmapsto\
+       \big(\lvert a - b \rvert,\; s,\; \mathrm{tot}(s)\big) \]
+  A script stopping at the zero game therefore returns a bound on the
   probability of the game it opened at, which is the shape a secrecy theorem
-  has, and the label of that last step is the one summand of such a bound that
-  comes from the endpoint rather than from a ciphertext replacement.
-  $\mathrm{bound}$ is where the published number is written
-  down: since $\mathrm{tot}$ converts to a plain sum on a list of literal
-  labels, $H$ is an algebraic identity between that sum and the number the
-  client's theorem states, and no vocabulary of the language appears in it.
-  It is written after the double semicolon because it returns a result
-  where every other statement returns a chain. The last field is what keeps
-  the label list, rather than the number written at $\mathrm{bound}$, the
-  source of a published bound: republishing composes $H$ with the identity
-  the result already carried, so the bound of a program is the total of its
-  labels however often it has been rewritten. A reading of a bound along a
-  sequence of security parameters is a reading of that list, and it is sound
-  only because of this field.
+  has. The last field keeps the label list the source of a published bound. A
+  reading of a bound along a sequence of security parameters is a reading of
+  that list, and it is sound because of this field. At one parameter a theorem
+  reads its number off a script through soundness and one identity between
+  $\mathrm{tot}(s)$ and that number, and since $\mathrm{tot}$ converts to a
+  plain sum on a list of literal labels, that identity is ring arithmetic.
 \end{definition}
 
-\begin{lemma}[The category laws, as equalities of records]
-  \label{lem:chain_laws}
-  \rocq{infotheo.computational_security.epshop.chain_observable_eq,
-       infotheo.computational_security.epshop.chain_left_unit,
-       infotheo.computational_security.epshop.chain_right_unit,
-       infotheo.computational_security.epshop.chain_assoc}
-  \rocqok
-  \uses{def:chain}
-  Two chains that agree on their three observable fields are equal, and the
-  unit and associativity laws hold as equalities of records.
-  \[ \mathrm{then}(\mathrm{start}(g), \mathrm{frag}) = \mathrm{frag}, \qquad
-     \mathrm{then}(m, \mathrm{start}(b_m)) = m \]
-  \[ \mathrm{then}(\mathrm{then}(m_1, m_2), m_3)
-       = \mathrm{then}(m_1, \mathrm{then}(m_2, m_3)) \]
-  The fourth field of a chain is a proof of a Boolean, whose uniqueness is a
-  lemma of the library and not an axiom, so \texttt{chain\_observable\_eq}
-  uses nothing classical and the three laws are equalities rather than
-  statements up to an equivalence. Their content for a program is that the
-  regrouping and unit rearrangements the semicolon performs leave the loss, and
-  therefore every bound of the three programs below, as it stands.
-\end{lemma}
-
-\begin{definition}[The Paillier hybrid as a chain]
-  \label{def:paillier_chain}
+\begin{definition}[The Paillier hybrid as a script]
+  \label{def:paillier_script}
   \rocq{infotheo.computational_security.paillier_indcpa_scheme.paillier_label,
        infotheo.computational_security.paillier_indcpa_scheme.paillier_claim,
-       infotheo.computational_security.paillier_indcpa_scheme.paillier_chain,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_script,
        infotheo.computational_security.paillier_indcpa_scheme.dcr_totalE}
   \rocqok
-  \uses{def:chain,def:chain_result,def:claim,def:loss,def:dcr_assumption,thm:paillier_dcr_epsilon_le,lem:unit_fdist_translateE}
-  The three-step hybrid of Theorem~\ref{thm:paillier_dcr_epsilon_le} as a chain
-  over the four acceptance probabilities it passes through. It starts at the
+  \uses{def:hop_script,def:script_result,def:claim,def:loss,def:dcr_assumption,thm:paillier_dcr_epsilon_le,lem:unit_fdist_translateE}
+  The three-step hybrid of Theorem~\ref{thm:paillier_dcr_epsilon_le} as a script
+  over the four acceptance probabilities it passes through. It opens at the
   multiplying reduction under $\mathsf{res}_{pq}$, which is the real arm of the
   IND-CPA experiment; hops to that reduction under $\mathsf{unit}$; crosses to
   the plain reduction under $\mathsf{unit}$ by
-  Lemma~\ref{lem:unit_fdist_translateE}, which is an identity and logs nothing;
-  and hops to the plain reduction under $\mathsf{res}_{pq}$, which is the zero
-  arm. Its loss is the two labels $\mathsf{dcr\_g}$ and $\mathsf{dcr\_0}$,
-  named after the reduction each hop invokes the assumption through, and
-  \texttt{paillier\_claim} fixes for each of them the two experiments its call
-  moves between and the epsilon it assumes.
-  It returns the bound $\mathrm{tot}(s)$ in closed form, the identity
-  \texttt{dcr\_totalE} proving the return statement.
-  \[ \mathrm{tot}(s) = \varepsilon_{\mathrm{dcr}} + \varepsilon_{\mathrm{dcr}}
+  Lemma~\ref{lem:unit_fdist_translateE}, an identity that adds nothing to the
+  loss; hops to the plain reduction under $\mathsf{res}_{pq}$, which is the
+  zero arm; and stops. Its loss, the last index of its type, is the two labels
+  $\mathsf{dcr\_g}$ and $\mathsf{dcr\_0}$, named after the reduction each hop
+  invokes the assumption through, and \texttt{paillier\_claim} fixes for each
+  of them the two experiments its call moves between and the epsilon it
+  assumes.
+  \[ \mathrm{tot}[\mathsf{dcr\_g}, \mathsf{dcr\_0}]
+       = \varepsilon_{\mathrm{dcr}} + \varepsilon_{\mathrm{dcr}}
        = 2\,\varepsilon_{\mathrm{dcr}} \]
-  The two class memberships $\mathrm{adm}(\mathcal{B}_{\mathrm{mul}})$ and
-  $\mathrm{adm}(\mathcal{B}_{\mathrm{pl}})$ are parameters of the chain, spent
-  at the two hops as they are built. Both terms are conditional on
-  $\mathcal{B}$, so this loss has one kind of term. The number in
-  Theorem~\ref{thm:paillier_dcr_epsilon_le} is the bound this program returns
-  and its two hypotheses are those two memberships, so that theorem is the
-  soundness field of this result rather than a triangle inequality of its own.
+  The bound $2\,\varepsilon_{\mathrm{dcr}}$ is read off the script through
+  \texttt{hop\_script\_total} and the identity \texttt{dcr\_totalE}. The two
+  class memberships $\mathrm{adm}(\mathcal{B}_{\mathrm{mul}})$ and
+  $\mathrm{adm}(\mathcal{B}_{\mathrm{pl}})$ are hypotheses of the script, spent
+  in the justification of the hop each one licenses. Both terms are
+  conditional on $\mathcal{B}$, so this loss has one kind of term. The number
+  in Theorem~\ref{thm:paillier_dcr_epsilon_le} is the bound this script
+  carries and its two hypotheses are those two memberships, so that theorem is
+  this script read through soundness.
 \end{definition}
 
-\begin{definition}[The Benaloh hybrid as a chain]
-  \label{def:benaloh_chain}
+\begin{definition}[The Benaloh hybrid as a script]
+  \label{def:benaloh_script}
   \rocq{infotheo.computational_security.benaloh_indcpa_scheme.benaloh_label,
        infotheo.computational_security.benaloh_indcpa_scheme.benaloh_claim,
-       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_chain,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_script,
        infotheo.computational_security.benaloh_indcpa_scheme.residuosity_totalE}
   \rocqok
-  \uses{def:chain,def:chain_result,def:claim,def:loss,def:benaloh_residuosity_assumption,thm:benaloh_residuosity_epsilon_le,lem:unit_fdist_translateE}
+  \uses{def:hop_script,def:script_result,def:claim,def:loss,def:benaloh_residuosity_assumption,thm:benaloh_residuosity_epsilon_le,lem:unit_fdist_translateE}
   The same three steps at $T = \mathbb{Z}_n$ and the exponent $r$, with the
   labels $\mathsf{residuosity\_y}$ and $\mathsf{residuosity\_0}$, their claims
   fixed by \texttt{benaloh\_claim}, and the same two-label loss.
-  \[ \mathrm{tot}(s) = \varepsilon_{\mathrm{res}} + \varepsilon_{\mathrm{res}}
+  \[ \mathrm{tot}[\mathsf{residuosity\_y}, \mathsf{residuosity\_0}]
+       = \varepsilon_{\mathrm{res}} + \varepsilon_{\mathrm{res}}
        = 2\,\varepsilon_{\mathrm{res}} \]
-  One place separates it from the Paillier chain. Its middle identity takes no
+  One place separates it from the Paillier script. Its middle identity takes no
   order premise on the generator, the multiplier $y^{p_A}$ being a unit of
   $\mathbb{Z}_n$ by its type, so the $\mathrm{same}$ step there is discharged
-  without reading the key's order condition. Both terms are conditional on
-  $\mathcal{B}$, and Theorem~\ref{thm:benaloh_residuosity_epsilon_le} is again
-  the soundness field of this result at its two class memberships.
+  without reading the key's order condition. The bound
+  $2\,\varepsilon_{\mathrm{res}}$ is read off the script through
+  \texttt{hop\_script\_total} and \texttt{residuosity\_totalE}. Both terms are
+  conditional on $\mathcal{B}$, and
+  Theorem~\ref{thm:benaloh_residuosity_epsilon_le} is again this script read
+  through soundness at its two class memberships.
 \end{definition}
 
-\begin{definition}[Alice's trace argument as a chain opening at the protocol]
-  \label{def:alice_trace_chain}
+\begin{definition}[Alice's trace argument as a script opening at the protocol]
+  \label{def:alice_trace_script}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_label,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop_tuple_distinguisher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_script}
   \rocqok
-  \uses{def:chain,def:chain_result,def:claim,def:loss,def:alice_trace,lem:trace_of_hop_tuple,lem:alice_view_advantage,lem:guess_all_zero}
-  Alice's guessing argument as one chain, opening at the executed protocol.
+  \uses{def:hop_script,def:script_result,def:claim,def:loss,def:alice_trace,lem:trace_of_hop_tuple,lem:alice_view_advantage,lem:guess_all_zero}
+  Alice's guessing argument as one script, opening at the executed protocol.
   $G_\tau$ is the law of the honest input pair beside the trace the interpreter
   returns for Alice when it runs $\mathrm{dsdp\_protocol}$ at a sample, and
   $\gamma_\tau(D_g)$ the probability that a predictor's distinguisher accepts a
   value sampled from it, so the object the argument starts from is the executed
-  protocol and not the tuple $\hoptuple{0}$.
-  \[ \mathrm{start}\ \gamma_\tau(D_g) \]
+  protocol itself rather than the tuple $\hoptuple{0}$. The script's first line
+  steps to the tuple.
   \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
        \texttt{accept\_trace\_tupleE} \]
-  The step to $\gamma_0$ carries no label and adds nothing to the loss: by
+  That step carries no label and adds nothing to the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift
   $D_{g \circ \tau}$ on the tuple, which is
   \texttt{hop\_tuple\_distinguisher} applied once under a local name. Two hops
   then run the ciphertext replacements over $\gamma_0$, $\gamma_1$ and
-  $\gamma_2$ at that lift, each logging the advantage of the reduction its
-  label names, at Bob's key and then at Charlie's, and a third step hops from
-  the all-zero endpoint to the zero game, so the program is a chain bound on
-  $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what each of the three labels
-  claims: the games a hop label joins and the advantage it loses, and the
-  all-zero game against the zero game.
-  \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
-  The chain accumulates the two hop terms before the endpoint term, so the
-  return statement reorders, which is what \texttt{alice\_totalE} proves.
+  $\gamma_2$ at that lift, each spending the advantage of the reduction its
+  label names, at Bob's key and then at Charlie's, and a $\mathrm{plus}$ step
+  adds the term of the all-zero game against the zero game. The script's type
+  is therefore a bound on $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what
+  each of the three labels claims: the games a hop label joins and the
+  advantage it loses, and the all-zero game against the zero game.
+  \[ \mathrm{Script}_C\big(\gamma_\tau(D_g),\ 0,\
+       [\mathsf{cpa\_bob}, \mathsf{cpa\_charlie},
+        \mathsf{uniform\_fiber}]\big),
+     \qquad
+     \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
+  The script spends the two hop labels before the endpoint label, so the bound
+  reorders, which is what \texttt{alice\_totalE} proves.
   This loss has two kinds of term and the labels separate them. The two hop
   terms are the advantages of the reductions $\hopred{0}{D_{g \circ \tau}}$ and
   $\hopred{1}{D_{g \circ \tau}}$, each of which becomes conditional on a
@@ -1323,24 +1319,25 @@ pending obligation, and a bound is read off it by projection.
   small. The term $\mathsf{uniform\_fiber}$ is information-theoretic and
   unconditional, the residue the leaked output leaves along the solution fiber.
   Each hop is justified by Lemma~\ref{lem:alice_view_advantage}, which makes
-  its gap exactly the term it logs, read as an inequality through
-  \texttt{le\_of\_eq}; the step to the zero game is justified by
+  its gap exactly the term it spends, read as an inequality through
+  \texttt{le\_of\_eq}. The $\mathrm{plus}$ step is justified by
   \texttt{all\_zero\_game\_V2\_le\_invm}, which is
   Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
-  the fiber enters. The trace bound of Theorem~\ref{thm:alice_trace_bounds} is
-  the soundness field of this result.
+  the fiber enters. The trace guessing bound of
+  Theorem~\ref{thm:alice_trace_bounds} is this script read through soundness
+  and \texttt{alice\_totalE}.
 \end{definition}
 
-\begin{definition}[Alice's trace against the simulation as one chain]
-  \label{def:alice_trace_sim_chain}
+\begin{definition}[Alice's trace against the simulation as one script]
+  \label{def:alice_trace_sim_script}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_ideal_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_chain}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_script}
   \rocqok
-  \uses{def:alice_trace_chain,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
-  The two hops of Definition~\ref{def:alice_trace_chain} with one step at each
-  end that adds nothing to the loss. The chain opens at $\gamma_\tau(D)$, runs the
-  two ciphertext replacements at the lifted test $D \circ \tau$, and closes at
-  $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
+  \uses{def:alice_trace_script,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
+  The two hops of Definition~\ref{def:alice_trace_script} with one
+  $\mathrm{same}$ step at each end. The script opens at $\gamma_\tau(D)$, runs
+  the two ciphertext replacements at the lifted test $D \circ \tau$, and stops
+  at $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
   trace-level ideal law.
   \[ \mathrm{same\ to}\ \gamma_0(D \circ \tau)\ \mathrm{by}\
        \texttt{accept\_trace\_tupleE},
@@ -1351,74 +1348,86 @@ pending obligation, and a bound is read off it by projection.
   probabilities. The second holds because $\Ideal^\tau$ is the image under
   $\tau$ of $\Ideal$, which Lemma~\ref{lem:simulator_factorization} identifies
   with the law of the honest inputs beside $\hoptuple{2}$.
-  \[ \mathrm{loss}(s) = [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}],
+  \[ \mathrm{Script}_C\big(\gamma_\tau(D),\ \Pr_{\Ideal^\tau}[D],\
+       [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}]\big),
      \qquad \mathrm{tot}(s) = \epshopsum{D \circ \tau} \]
-  The chain carries no terminal statement, so the gap result it returns is the
-  trace-level simulation bound of Theorem~\ref{thm:alice_trace_bounds}.
+  The script stops at the simulated trace itself, so the bound read off it
+  through soundness is the trace-level simulation bound of
+  Theorem~\ref{thm:alice_trace_bounds}.
   \[ \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
        \le \epshopsum{D \circ \tau} \]
 \end{definition}
 
 \begin{definition}[Alice's trace argument at the class epsilon]
-  \label{def:alice_trace_chain_admissible}
+  \label{def:alice_script}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim_admissible,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_admissible_totalE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_script,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_guess_V2_le}
   \rocqok
-  \uses{def:alice_trace_chain,def:indcpa_assumption,def:claim,def:loss}
-  The program of Definition~\ref{def:alice_trace_chain} over the dictionary
-  $C^{\mathcal{A}}$ that charges each hop the advantage $\mathcal{A}$ assumes
-  in place of the advantage its own reduction shows. The three games and the
-  three labels are those of \texttt{alice\_claim}.
+  \uses{def:alice_trace_script,def:indcpa_assumption,def:claim,def:loss}
+  The script of Definition~\ref{def:alice_trace_script} at the $k$-th instance
+  of a sequence, over the dictionary $C^{\mathcal{A}}$ that charges each hop
+  the advantage $\mathcal{A}$ assumes in place of the advantage its own
+  reduction shows. The three games and the three labels are those of
+  \texttt{alice\_claim}.
   \[ C^{\mathcal{A}}(\mathsf{cpa\_bob})
        = \big(\gamma_0(D),\ \gamma_1(D),\ \varepsilon_{\mathrm{cpa}}\big),
      \qquad
      C^{\mathcal{A}}(\mathsf{cpa\_charlie})
        = \big(\gamma_1(D),\ \gamma_2(D),\ \varepsilon_{\mathrm{cpa}}\big) \]
-  The two class memberships are premises of the statements the program is
-  written under, and are spent in the justification of the hop each one
-  licenses, which is the shape Definition~\ref{def:paillier_chain} has. The zero-game label loses the same
-  unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
+  The two class memberships are hypotheses of the script, spent in the
+  justification of the hop each one licenses, which is the shape
+  Definition~\ref{def:paillier_script} has. The zero-game label loses the same
+  unconditional residue as in Definition~\ref{def:alice_trace_script}, so the
   total adds one unconditional term to two class-conditional ones, and
   \texttt{alice\_admissible\_totalE} is the reordering that states it.
-  \[ \mathrm{tot}(s) = \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
-  The program is written along a sequence of instances, under
-  Theorem~\ref{thm:alice_guess_negligible} and again under the bound it
-  returns at each parameter, and Theorem~\ref{thm:alice_guess_admissible} is
-  that bound read at the sequence which repeats one instance.
+  \[ \mathrm{tot}[\mathsf{cpa\_bob}, \mathsf{cpa\_charlie},
+       \mathsf{uniform\_fiber}]
+       = \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
+  The script is read twice along the sequence of instances: at each parameter
+  through soundness and \texttt{alice\_admissible\_totalE}, which is
+  \texttt{f\_guess\_V2\_le}, and as a sequence of results under
+  Theorem~\ref{thm:alice_guess_negligible}.
+  Theorem~\ref{thm:alice_guess_admissible} is the first reading at the
+  sequence which repeats one instance.
 \end{definition}
 
 \begin{definition}[Alice's trace against the simulation at the class epsilon]
-  \label{def:alice_trace_sim_chain_admissible}
+  \label{def:alice_sim_script}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantage,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_sim_advantage,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_sim_advantageE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_sim_advantageE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_sim_script}
   \rocqok
-  \uses{def:alice_trace_sim_chain,def:alice_trace_chain_admissible}
-  The chain of Definition~\ref{def:alice_trace_sim_chain} over the dictionary
-  $C^{\mathcal{A}}$ of Definition~\ref{def:alice_trace_chain_admissible}, which
-  charges each of the two hops the advantage $\mathcal{A}$ assumes in place of
-  the advantage its own reduction shows. The two class memberships are
-  premises of the statement the program is written under, and are spent in the
-  justification of the hop each one licenses.
-  \[ \mathrm{loss}(s) = [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}],
+  \uses{def:alice_trace_sim_script,def:alice_script}
+  The script of Definition~\ref{def:alice_trace_sim_script} at the $k$-th
+  instance, over the dictionary $C^{\mathcal{A}}$ of
+  Definition~\ref{def:alice_script} at the $k$-th test, which charges each of
+  the two hops the advantage $\mathcal{A}$ assumes in place of the advantage
+  its own reduction shows. The two class memberships are hypotheses of the
+  script, spent in the justification of the hop each one licenses.
+  \[ \mathrm{Script}_{C^{\mathcal{A}}}\big(\gamma_\tau(D),\
+       \Pr_{\Ideal^\tau}[D],\
+       [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}]\big),
      \qquad \mathrm{tot}(s) = 2\,\varepsilon_{\mathrm{cpa}} \]
-  The two steps at the ends carry the test between the executed trace and the
-  hopping tuple at no loss, and the chain carries no terminal statement, so
-  the quantity it opens at is the distance a trace test sees between the
-  executed trace and the simulation, and the gap result it returns bounds that
-  distance by two class-conditional terms and nothing else.
+  The two $\mathrm{same}$ steps at the ends carry the test between the
+  executed trace and the hopping tuple at no loss, and the script stops at the
+  simulated trace itself, so the distance between its two games is the
+  distance a trace test sees between the executed trace and the simulation,
+  and the script bounds that distance by two class-conditional terms and
+  nothing else. \texttt{f\_sim\_advantageE} identifies the $k$-th member of the
+  distance sequence with that gap.
   \[ \mathrm{adv}^\tau(D)
-       = \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
-       = a_s, \qquad
+       = \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert, \qquad
      \mathrm{adv}^\tau(D) \le 2\,\varepsilon_{\mathrm{cpa}} \]
 \end{definition}
 
-Each of the three programs states a bound at one security parameter, where an
-asymptotic notion has nothing to measure. The three statements that close this
-section read a program along a sequence of parameters instead, which is the
-form a computational claim finally takes. A program indexed by the parameter is
-a sequence of results, and negligibility is a property of that sequence that no
+Each script states a bound at one security parameter, where an asymptotic
+notion has nothing to measure. The three statements that close this section
+read a script along a sequence of parameters instead, which is the form a
+computational claim finally takes. A script indexed by the parameter returns a
+sequence of results, and negligibility is a property of that sequence that no
 single member of it can carry.
 
 \begin{definition}[A dictionary all of whose labels lose a negligible sequence]
@@ -1430,12 +1439,12 @@ single member of it can carry.
   with the negligibility of the loss term of every label of the label type, read
   along that parameter.
   \[ \forall l,\ \mathrm{negl}\big(k \mapsto \mathrm{loss}(C_k(l))\big) \]
-  The condition quantifies over the label type and not over the labels one
-  program spends, so whatever a chain over $C$ names is covered by it. It is
-  attached to the dictionary once, and a theorem about any program written at
-  that dictionary then names no label: the dictionary carries the per-label
-  statements the theorem would otherwise have to list. Recovering the
-  statements from a program is by the name of its dictionary, so a dictionary
+  The condition quantifies over the whole label type, so whatever a script
+  over $C$ spends is covered by it. It is attached to the dictionary once, and
+  a theorem about any script written at that dictionary then names no label:
+  the dictionary carries the per-label statements the theorem would otherwise
+  have to list. Recovering the statements from a script is by the name of its
+  dictionary, so a dictionary
   written as an anonymous function can be given this data and never found
   again.
 \end{definition}
@@ -1455,17 +1464,18 @@ single member of it can carry.
   type.
 \end{lemma}
 
-\begin{theorem}[A sequence of programs has a negligible advantage]
+\begin{theorem}[A sequence script has a negligible advantage]
   \label{thm:advantage_negligible}
   \rocq{infotheo.computational_security.epshop_sequence.advantage_negligible}
   \rocqok
-  \uses{def:negligible_claims,def:chain_result,def:negligible_fun,lem:loss_eval_negligible}
-  Let $P$ be a program at every security parameter, over a dictionary all of
-  whose labels are negligible, and let its loss be the same at every parameter.
+  \uses{def:negligible_claims,def:script_result,def:negligible_fun,lem:loss_eval_negligible}
+  Let $P$ be a sequence script, a result $P_k$ at every security parameter
+  over a dictionary all of whose labels are negligible, and let its loss be the
+  same at every parameter.
   Then any $f$ identified with the advantage $P$ bounds is negligible.
   \[ \big(\forall k,\ s_{P_k} = s_{P_0}\big) \implies
      \big(\forall k,\ f(k) = a_{P_k}\big) \implies \mathrm{negl}(f) \]
-  The program supplies the two facts the argument runs on: its advantage is
+  The script supplies the two facts the argument runs on: its advantage is
   below its published bound, and that bound is the total of its labels. So the
   asymptotic reading of a multi-hop bound is a reading of the label list, and
   the hypothesis that the loss does not vary with the parameter is what makes
@@ -1661,7 +1671,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claims_admissible_at,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_label_negligible_at}
   \rocqok
-  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,def:dsdp_asymptotic,thm:alice_guess_admissible,def:alice_trace_chain_admissible,def:negligible_claims,thm:advantage_negligible}
+  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,def:dsdp_asymptotic,thm:alice_guess_admissible,def:alice_script,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances, an asymptotic value
   $\mathcal{N}$ for $\mathcal{Q}$, and a sequence of predictors
   $g_k$, if both reduction adversaries of $g_k$ are admissible for
@@ -1671,9 +1681,9 @@ single member of it can carry.
      \big(\forall k,\ \mathrm{adm}_{\mathcal{A}_k}(\hopred{1}{D_{g_k}})\big)
      \implies \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
-  It is Theorem~\ref{thm:advantage_negligible} read over the program of
-  Definition~\ref{def:alice_trace_chain_admissible} at the $k$-th instance. That
-  program spends the same three labels at every $k$, and the loss of each of
+  It is Theorem~\ref{thm:advantage_negligible} read over the scripts of
+  Definition~\ref{def:alice_script}, one at each $k$. That script spends the
+  same three labels at every $k$, and the loss of each of
   them along the sequence is one of the two fields of
   $\mathcal{N}$: both hop labels lose $\mathrm{negl}(k \mapsto
   \varepsilon_{\mathrm{cpa},k})$ and the zero-game label loses
@@ -1716,7 +1726,7 @@ single member of it can carry.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_sim_claims_at,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_sim_label_negligible_at}
   \rocqok
-  \uses{def:alice_trace_sim_chain_admissible,def:dsdp_asymptotic,def:negligible_claims,thm:advantage_negligible}
+  \uses{def:alice_sim_script,def:dsdp_asymptotic,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances with an asymptotic value
   $\mathcal{N}$, and a sequence $D_k$ of tests
   of Alice's executed trace, if both reduction adversaries of $D_k$ are
@@ -1729,9 +1739,8 @@ single member of it can carry.
   This is computational indistinguishability of Alice's view from the
   simulation, the form a simulation-based secrecy claim takes once the
   parameter is free to grow. It is Theorem~\ref{thm:advantage_negligible} read
-  over the program of Definition~\ref{def:alice_trace_sim_chain_admissible} at
-  the $k$-th instance, the second statement that program carries. That program
-  spends the two hop labels alone, so the whole distance is
+  over the scripts of Definition~\ref{def:alice_sim_script}, one at each $k$.
+  That script spends the two hop labels alone, so the whole distance is
   $\mathrm{negl}(k \mapsto \varepsilon_{\mathrm{cpa},k})$ and no
   plaintext-size term enters, which is what separates it from
   Theorem~\ref{thm:alice_guess_negligible}. The dictionary is registered a
