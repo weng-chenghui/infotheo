@@ -1036,9 +1036,9 @@ script, a value of the type $\mathrm{Script}_C(a, b, s)$ indexed by the game
 $a$ it opens at, the game $b$ it stops at, and the list $s$ of labels it spends.
 The Rocq source displays that type as the inequality its values witness,
 \texttt{\textbackslash{}hops[ C ] `| a - b | <= s}. The values of the type are
-exactly what the three steps of Definition~\ref{def:hop_script} build, so the
-label list of a finished script is the list of assumptions its bound rests on,
-carried beside their numeric total. epsHop is the dual of the piSMC language of
+exactly what the three steps of Definition~\ref{def:hop_script} build. A label
+enters a script at hop and nowhere else, so the loss of a finished script lists
+every term its bound is charged to, carried beside their numeric total. epsHop is the dual of the piSMC language of
 \texttt{smc/pismc.v}: piSMC writes what the parties of a protocol do, epsHop
 writes what a security argument about them loses. The scripts of the section
 are the Paillier hybrid, the Benaloh hybrid, and Alice's guessing and
@@ -1067,7 +1067,7 @@ the rest as the residual goal.
 \end{itemize}
 The label slot names the assumption invoked, and the proof slot is the
 justification that assumption's claim asks for, checked against the claim.
-Every step carries its proof slot, so a finished script holds every obligation
+Every hop and same step carries its proof slot, so a finished script holds every obligation
 its labels name, and a bound is read off it by the soundness statement of
 Definition~\ref{def:hop_script}.
 
@@ -1154,15 +1154,13 @@ Definition~\ref{def:hop_script}.
        \lvert a - b \rvert \le \mathrm{ev}(s), \qquad
      \mathrm{Script}_C(a, b, s) \implies
        \lvert a - b \rvert \le \mathrm{tot}(s) \]
-  An assumption enters a script at $\mathrm{hop}$ and nowhere else, which is
-  why the loss of a finished script is the complete list of what its bound
-  rests on. The equation $g' = \mathrm{tgt}(C(l))$ is discharged by
-  reduction, so the game a hop reaches is the game its label claims, and the
-  game a hop leaves is the source of that claim. $\mathrm{same}$ is the step an
-  information-theoretic identity between two games takes, and it leaves the
-  loss as it stands. The one triangle inequality of the development is the
-  soundness statement above, so a script of any length is read through it
-  alone. \texttt{le\_of\_eq} turns an equality of advantages into the
+  A label enters a script at $\mathrm{hop}$ and nowhere else, so the loss of a
+  finished script lists every term its bound is charged to. The game a hop
+  reaches is the target its label claims; the hop tactic discharges the
+  equation by reduction. The game a hop leaves is the source of that claim.
+  $\mathrm{same}$ is the step an information-theoretic identity between two
+  games takes, and it leaves the loss as it stands. Every script, of any
+  length, is read through this one soundness statement. \texttt{le\_of\_eq} turns an equality of advantages into the
   inequality a hop asks for, \texttt{plus\_le} turns $0 \le x \le c$ into the
   form $\lvert x - 0 \rvert \le c$ that a hop to the zero game asks for, and
   \texttt{advantage0} reads $\lvert x - 0 \rvert$ back as $x$, so a script
@@ -1205,7 +1203,8 @@ Definition~\ref{def:hop_script}.
   \[ p : \mathrm{Script}_C(a, b, s) \ \longmapsto\
        \big(\lvert a - b \rvert,\; s,\; \mathrm{tot}(s)\big) \]
   A script stopping at the zero game therefore returns a bound on the
-  probability of the game it opened at, which is the shape a secrecy theorem
+  probability of the game it opened at, through \texttt{advantage0}, the game
+  being nonnegative, which is the shape a secrecy theorem
   has. The last field keeps the label list the source of a published bound. A
   reading of a bound along a sequence of security parameters is a reading of
   that list, and it is sound because of this field. At one parameter a theorem
@@ -1222,7 +1221,7 @@ Definition~\ref{def:hop_script}.
        infotheo.computational_security.paillier_indcpa_scheme.dcr_totalE}
   \rocqok
   \uses{def:hop_script,def:script_result,def:claim,def:loss,def:dcr_assumption,thm:paillier_dcr_epsilon_le,lem:unit_fdist_translateE}
-  The three-step hybrid of Theorem~\ref{thm:paillier_dcr_epsilon_le} as a script
+  The two-call hybrid of Theorem~\ref{thm:paillier_dcr_epsilon_le} as a script
   over the four acceptance probabilities it passes through. It opens at the
   multiplying reduction under $\mathsf{res}_{pq}$, which is the real arm of the
   IND-CPA experiment; hops to that reduction under $\mathsf{unit}$; crosses to
@@ -1293,7 +1292,7 @@ Definition~\ref{def:hop_script}.
   steps to the tuple.
   \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
        \texttt{accept\_trace\_tupleE} \]
-  That step carries no label and adds nothing to the loss: by
+  That step is an identity, free in the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift
   $D_{g \circ \tau}$ on the tuple, which is
@@ -1302,7 +1301,8 @@ Definition~\ref{def:hop_script}.
   $\gamma_2$ at that lift, each spending the advantage of the reduction its
   label names, at Bob's key and then at Charlie's, and a $\mathrm{plus}$ step
   adds the term of the all-zero game against the zero game. The script's type
-  is therefore a bound on $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what
+  is therefore a bound on $\lvert \gamma_\tau(D_g) - 0 \rvert$, which
+  \texttt{advantage0} reads as $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what
   each of the three labels claims: the games a hop label joins and the
   advantage it loses, and the all-zero game against the zero game.
   \[ \mathrm{Script}_C\big(\gamma_\tau(D_g),\ 0,\
@@ -1310,7 +1310,7 @@ Definition~\ref{def:hop_script}.
         \mathsf{uniform\_fiber}]\big),
      \qquad
      \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
-  The script spends the two hop labels before the endpoint label, so the bound
+  The script spends the two hop labels before the zero-game label, so the bound
   reorders, which is what \texttt{alice\_totalE} proves.
   This loss has two kinds of term and the labels separate them. The two hop
   terms are the advantages of the reductions $\hopred{0}{D_{g \circ \tau}}$ and
@@ -1324,8 +1324,9 @@ Definition~\ref{def:hop_script}.
   \texttt{all\_zero\_game\_V2\_le\_invm}, which is
   Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
   the fiber enters. The trace guessing bound of
-  Theorem~\ref{thm:alice_trace_bounds} is this script read through soundness
-  and \texttt{alice\_totalE}.
+  Theorem~\ref{thm:alice_trace_bounds} is this script read through soundness,
+  \texttt{guess\_V2\_acceptE}, \texttt{advantage0} and
+  \texttt{alice\_totalE}.
 \end{definition}
 
 \begin{definition}[Alice's trace against the simulation as one script]
@@ -1419,8 +1420,9 @@ Definition~\ref{def:hop_script}.
   nothing else. \texttt{f\_sim\_advantageE} identifies the $k$-th member of the
   distance sequence with that gap.
   \[ \mathrm{adv}^\tau(D)
-       = \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert, \qquad
-     \mathrm{adv}^\tau(D) \le 2\,\varepsilon_{\mathrm{cpa}} \]
+       = \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert \]
+  So \texttt{f\_sim\_advantageE} with \texttt{hop\_script\_total} gives
+  $\mathrm{adv}^\tau(D) \le 2\,\varepsilon_{\mathrm{cpa}}$ at each $k$.
 \end{definition}
 
 Each script states a bound at one security parameter, where an asymptotic
@@ -1682,9 +1684,9 @@ single member of it can carry.
      \implies \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
   It is Theorem~\ref{thm:advantage_negligible} read over the scripts of
-  Definition~\ref{def:alice_script}, one at each $k$. That script spends the
-  same three labels at every $k$, and the loss of each of
-  them along the sequence is one of the two fields of
+  Definition~\ref{def:alice_script}, one at each $k$. Each script spends the
+  same three labels, so the loss is the same at every $k$, and the loss of each
+  label along the sequence is one of the two fields of
   $\mathcal{N}$: both hop labels lose $\mathrm{negl}(k \mapsto
   \varepsilon_{\mathrm{cpa},k})$ and the zero-game label loses
   $\mathrm{negl}(k \mapsto 1/m_k)$. Those two facts are attached to the
