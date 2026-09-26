@@ -125,13 +125,13 @@ From mathcomp Require Import boolp reals.
 (* Module EpsHopTac, activated by Import, writes a script one tactic line per *)
 (* step on a goal of type hop_script: hop l to g' by (H), same to g' by (H),  *)
 (* plus l by (H), stop. The residual goal after each line is the script type  *)
-(* of the rest, printed as \hops[ C ] `| g' - z | <= s. Tactic-notation tokens*)
-(* do not enter the term lexer, so stop, the one token not already a keyword  *)
-(* of the custom entry, stays readable as a term below. The proof slots are   *)
-(* elaborated against the goal, so the proof terms of the \epsilon programs   *)
-(* are written unchanged in parentheses. The normaliser of the target equation*)
-(* is cbn; lazy did not finish within 600 s and vm_compute within 125 s on a  *)
-(* client dictionary.                                                         *)
+(* of the rest, printed as \hops[ C ] `| g' - z | <= s. Tactic-notation       *)
+(* tokens do not enter the term lexer, so stop, the one token not already a   *)
+(* keyword of the custom entry, stays readable as a term below. The proof     *)
+(* slots are elaborated against the goal, so the proof terms of the \epsilon  *)
+(* programs are written unchanged in parentheses. The normaliser of the       *)
+(* target equation is cbn, which reduces a client dictionary in a millisecond *)
+(* where lazy and vm_compute run past 600 s and 125 s.                        *)
 (*                                                                            *)
 (* The claim function indexes a chain_result although no field of the result  *)
 (* reads it: it says which program the result came from, and it is what the   *)
@@ -212,10 +212,10 @@ From mathcomp Require Import boolp reals.
 (*          hop_script_sound == a script from a to b over s bounds | a - b |  *)
 (*                              by loss_eval s                                *)
 (*          hop_script_total == the same bound at loss_total s                *)
-(*        loss_obligations s == the conjunction of the claims of the labels of*)
-(*                              s                                             *)
+(*        loss_obligations s == the conjunction of the claims of the          *)
+(*                              labels of s                                   *)
 (*    hop_script_obligations == every label of a script has its claim proved  *)
-(*            hop_script_nil == a script over the empty loss joins equal games*)
+(*            hop_script_nil == a script over [::] joins equal games          *)
 (*      hop_script_not_total == some script type is uninhabited               *)
 (*        result_of_script p == the result a script returns, its label list   *)
 (*                              the index s of its type                       *)
@@ -617,8 +617,8 @@ Arguments hop_script_nil {L R claim_of a b s}.
 Arguments result_of_script {L R claim_of a b s}.
 
 (* Some script type is uninhabited: the empty loss over the games 0 and 1.
-   A script therefore carries information, unlike a Prop that any proof
-   inhabits. *)
+   A script is therefore a witness, and its label list is data read by
+   result_of_script. *)
 Lemma hop_script_not_total (R : realType) :
   (forall (C : unit -> claim R) a b s, hop_script C a b s) -> False.
 Proof.
