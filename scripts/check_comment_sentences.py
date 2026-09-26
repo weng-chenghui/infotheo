@@ -30,7 +30,7 @@ import sys
 
 KW = re.compile(
     r'^\s*(Definition|Lemma|Theorem|Corollary|Fact|Let|Canonical|Variant'
-    r'|Record|Structure|Local Notation|Notation)\s+'
+    r'|Inductive|Fixpoint|Record|Structure|Local Notation|Notation)\s+'
     r'([A-Za-z_][A-Za-z0-9_\']*|"[^"]*")')
 SPLIT = re.compile(r'(?<=[.!?])\s+(?=[A-Z`\[|(])')
 PROSE = re.compile(r"^[A-Za-z][A-Za-z'\-]*[.,;:!?]?$")
