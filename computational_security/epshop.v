@@ -30,6 +30,14 @@ From mathcomp Require Import boolp reals.
 (* against the label, and a step naming one assumption while proving          *)
 (* another does not                                                           *)
 (* type-check.                                                                *)
+(* A label list is an assumption trail for a chain written through the        *)
+(* notations below; the constructor Chain itself accepts any list with a      *)
+(* numeric proof, and a chain_result statement listing two labels of equal    *)
+(* loss is met by a chain spending them in either order. The script type of   *)
+(* the last section makes both points kernel-checked: hop_script C a b s is   *)
+(* inhabited only by its three step constructors, so every label of s has its *)
+(* claim proved (hop_script_obligations) and the head label of s is the label *)
+(* of the first hop.                                                          *)
 (*                                                                            *)
 (* The quantity a finished program bounds is called an advantage, after       *)
 (* SSProve's AdvantageE G0 G1 A and adv_equiv and FCF's DistSingle_Adv: it    *)
@@ -110,6 +118,18 @@ From mathcomp Require Import boolp reals.
 (* statement returns a chain: it cannot be an operand of the level-90         *)
 (* separator, and that separator being right associative would swallow a      *)
 (* single ; before the bound token.                                           *)
+(* ## The tactic surface                                                      *)
+(*                                                                            *)
+(* Module EpsHopTac, activated by Import, writes a script one tactic line per *)
+(* step on a goal of type hop_script: hop l to g' by (H), same to g' by (H),  *)
+(* plus l by (H), stop. The residual goal after each line is the script type  *)
+(* of the rest, printed as \hops[ C ] `| g' - z | <= s. Tactic-notation tokens*)
+(* do not enter the term lexer, so stop, the one token not already a keyword  *)
+(* of the custom entry, stays readable as a term below. The proof slots are   *)
+(* elaborated against the goal, so the proof terms of the \epsilon programs   *)
+(* are written unchanged in parentheses. The normaliser of the target equation*)
+(* is cbn; lazy did not finish within 600 s and vm_compute within 125 s on a  *)
+(* client dictionary.                                                         *)
 (*                                                                            *)
 (* The claim function indexes a chain_result although no field of the result  *)
 (* reads it: it says which program the result came from, and it is what the   *)
@@ -176,6 +196,28 @@ From mathcomp Require Import boolp reals.
 (*                              that chain                                    *)
 (*               chain_assoc == the two groupings of a triple composition are *)
 (*                              equal                                         *)
+(*        hop_script C a b s == a script from game a to game b spending the   *)
+(*                              labels of s, built from the three steps below *)
+(*                              only, so each label of s had its claim proved *)
+(*             script_stop g == the empty script at g, logging nothing        *)
+(*    script_hop l g' H Hg p == the step under l from the game l's claim goes *)
+(*                              from to g', which Hg checks against that      *)
+(*                              claim, justified by H, followed by p          *)
+(*        script_same g' H p == the step to g' justified by the equality H,   *)
+(*                              followed by p, logging nothing                *)
+(*          script_hop_sound == a hop under l followed by a bound on the rest *)
+(*                              bounds the extended loss                      *)
+(*          hop_script_sound == a script from a to b over s bounds | a - b |  *)
+(*                              by loss_eval s                                *)
+(*          hop_script_total == the same bound at loss_total s                *)
+(*        loss_obligations s == the conjunction of the claims of the labels of*)
+(*                              s                                             *)
+(*    hop_script_obligations == every label of a script has its claim proved  *)
+(*            hop_script_nil == a script over the empty loss joins equal games*)
+(*      hop_script_not_total == some script type is uninhabited               *)
+(*        result_of_script p == the result a script returns, its label list   *)
+(*                              the index s of its type                       *)
+(*  \hops[ C ] `|a - b| <= s == the type hop_script C a b s                   *)
 (*                  le_of_eq == an inequality out of an equality              *)
 (*                   plus_le == a nonnegative quantity below c lies within c  *)
 (*                              of the zero game                              *)
@@ -491,3 +533,126 @@ Notation "'\epsilon[' C ']{' s ';;' 'bound' c 'by' H '}'" :=
   ((chain_bound s c H : chain_result C))
   (C constr at level 0, s custom epshop at level 99, c constr at level 0,
    H constr at level 10) : epshop_scope.
+
+Section hop_script.
+Variable L : Type.
+Variable R : realType.
+Variable claim_of : L -> claim R.
+
+(* A hop under l followed by a bound from its target is bounded by the loss
+   extended by l.  It spends assumption l first and leaves the rest of the
+   script to bound. *)
+Lemma script_hop_sound (l : L) (g' z : R) (s : loss L) :
+  hop_obligation (claim_of l) -> g' = claim_to (claim_of l) ->
+  `| g' - z | <= loss_eval claim_of s ->
+  `| claim_from (claim_of l) - z | <= loss_eval claim_of (l :: s).
+Proof.
+move=> ob gE gz.
+exact: (then_sound (m := chain_hop l _ g' ob erefl gE) (frag := Chain gz)
+  erefl).
+Qed.
+
+(* A derivation that a goes to b spending the labels of s, one constructor
+   per step.  Nothing but steps inhabits it, so its label list is the
+   assumptions its bound rests on. *)
+Inductive hop_script : R -> R -> loss L -> Type :=
+| script_stop g : hop_script g g [::]
+| script_hop l g' z s of hop_obligation (claim_of l)
+    & g' = claim_to (claim_of l) & hop_script g' z s
+  : hop_script (claim_from (claim_of l)) z (l :: s)
+| script_same x g' z s of x = g' & hop_script g' z s : hop_script x z s.
+
+(* A script from a to b over s bounds | a - b | by the sum of s.  It is the
+   one triangle argument every script is read through. *)
+Lemma hop_script_sound a b s :
+  hop_script a b s -> `| a - b | <= loss_eval claim_of s.
+Proof.
+elim=> [g | l g' z s' ob gE _ IH | x g' z s' xE _ IH].
+- exact: start_sound.
+- exact: script_hop_sound ob gE IH.
+- by rewrite xE.
+Qed.
+
+(* A script from a to b over s bounds | a - b | by the fold of s.  On
+   literal labels this total converts to the sum a theorem states. *)
+Lemma hop_script_total a b s :
+  hop_script a b s -> `| a - b | <= loss_total claim_of s.
+Proof. by rewrite -loss_evalE; exact: hop_script_sound. Qed.
+
+(* The conjunction of the claims of a label list.  It is what a script
+   certifies about the assumptions it names. *)
+Fixpoint loss_obligations (s : loss L) : Prop :=
+  if s is l :: s' then hop_obligation (claim_of l) /\ loss_obligations s'
+  else True.
+
+(* Every label of a script has its claim proved.  The label list of a script
+   is therefore an assumption trail checked by the kernel. *)
+Lemma hop_script_obligations a b s : hop_script a b s -> loss_obligations s.
+Proof. by elim=> // l g' z s' ob _ _ IH; split. Qed.
+
+(* A script over the empty loss joins equal games.  A bound that spends no
+   assumption is an identity of games. *)
+Lemma hop_script_nil a b s : hop_script a b s -> s = [::] -> a = b.
+Proof. by elim=> // x g' z s' -> _ IH /IH. Qed.
+
+(* The result a script returns: its games' distance, its label list, their
+   total.  The sequence terminal reads the labels off the index s. *)
+Definition result_of_script a b s (p : hop_script a b s) :
+  chain_result claim_of :=
+  ChainResult (hop_script_total p) erefl.
+
+End hop_script.
+
+Arguments script_hop_sound {L R claim_of} l g' {z s}.
+Arguments hop_script {L R} claim_of _ _ _.
+Arguments script_stop {L R claim_of g}.
+Arguments script_hop {L R claim_of} l g' {z s} _ _ _.
+Arguments script_same {L R claim_of x} g' {z s} _ _.
+Arguments hop_script_sound {L R claim_of a b s}.
+Arguments hop_script_total {L R claim_of a b s}.
+Arguments hop_script_obligations {L R claim_of a b s}.
+Arguments hop_script_nil {L R claim_of a b s}.
+Arguments result_of_script {L R claim_of a b s}.
+
+(* Some script type is uninhabited: the empty loss over the games 0 and 1.
+   A script therefore carries information, unlike a Prop that any proof
+   inhabits. *)
+Lemma hop_script_not_total (R : realType) :
+  (forall (C : unit -> claim R) a b s, hop_script C a b s) -> False.
+Proof.
+move=> /(_ (fun=> Claim 0 0 0) 0 1 [::]) /hop_script_nil /(_ erefl) /eqP.
+by rewrite eq_sym oner_eq0.
+Qed.
+
+(* A script type displayed as the inequality it witnesses.  A compound game
+   or list is written in parentheses, since the b slot reads x - y - z as
+   x - (y - z). *)
+Notation "'\hops[' C ']' '`|' a '-' b '|' '<=' s" := (hop_script C a b s)
+  (at level 70, C constr at level 99, a constr at level 49,
+   b constr at level 49, s constr at level 0,
+   format "'[hv' \hops[  C  ]  `|  a  -  b  |  '/' <=  s ']'")
+  : epshop_scope.
+
+(* The tactic surface: one line per step on a hop_script goal, activated by
+   Import EpsHopTac.  hop reads the dictionary off the goal and states the
+   target equation first, so a wrong game is reported with both games. *)
+Module EpsHopTac.
+
+Tactic Notation "stop" := exact: script_stop.
+
+Tactic Notation "hop" constr(l) "to" uconstr(g) "by" uconstr(H) :=
+  lazymatch goal with
+  | |- hop_script ?C _ _ _ =>
+      let t := eval cbn in (claim_to (C l)) in
+      let gE := fresh "gE" in
+      have gE : g = t := erefl;
+      refine (script_hop (claim_of := C) l g H gE _); clear gE
+  end.
+
+Tactic Notation "same" "to" uconstr(g) "by" uconstr(H) :=
+  refine (script_same g H _).
+
+Tactic Notation "plus" constr(l) "by" uconstr(H) :=
+  hop l to 0 by H; stop.
+
+End EpsHopTac.
