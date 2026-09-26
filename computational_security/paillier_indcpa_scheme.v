@@ -391,7 +391,6 @@ Hypothesis admissible_0 :
    challenge over unchanged. *)
 Local Notation D_g := (dcr_of_adversary (priv_gen dk) adv).
 Local Notation D_0 := (dcr_of_adversary_zero adv).
-Local Notation eps := (dcr_epsilon dcr).
 
 (* The two-call hybrid as a script from the real experiment to the zero
    experiment, spending one residuosity call per hop.  Its type names the two
