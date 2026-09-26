@@ -1165,7 +1165,7 @@ End dsdp_alice_raw_trace_avg.
    instance leaves open whether its two terms shrink as the parameter grows,
    and that is what the statements of this section settle: they hold the
    argument fixed and let the instance vary, so the two class-conditional
-   programs are written here and nowhere else. *)
+   scripts are written here and nowhere else. *)
 Section dsdp_alice_sequence.
 Context {R : realType}.
 Variable Q : dsdp_instance_sequence R.
@@ -1197,14 +1197,14 @@ Hypothesis charlie_admissible : forall k,
    instance. *)
 Definition f_guess_V2 k : R := alice_trace_guess_V2_pr (predict k).
 
-(* The dictionary the guessing program below is written at, one at each
-   security parameter.  It is a named constant rather than a lambda because
-   canonical inference keys on the head constant of the sequence. *)
+(* The dictionary alice_script below is read at, one at each security
+   parameter.  It is a named constant rather than a lambda because canonical
+   inference keys on the head constant of the sequence. *)
 Definition alice_claims_admissible_at (k : nat) : alice_label -> claim R :=
   alice_claim_admissible (assumption k)
     (hop_tuple_distinguisher (distinguisher_of_predictor (predict k))).
 
-(* The objects the programs of this section are written over, at the k-th
+(* The objects the scripts of this section are stated over, at the k-th
    instance.  They are the lifted trace test, the three experiments in
    visiting order, and the class epsilon. *)
 Local Notation tuple_distinguisher k :=
@@ -1386,7 +1386,7 @@ Canonical alice_sim_claims_negligible :=
 Definition f_sim_advantage k : R :=
   alice_trace_sim_advantage (trace_distinguishers k).
 
-(* That distance as the gap between the two games the simulation program
+(* That distance as the gap between the two games the simulation script
    joins.  It is stated on the games alone, as f_guess_V2_advantageE is. *)
 Lemma f_sim_advantageE k :
   f_sim_advantage k
@@ -1395,6 +1395,40 @@ Lemma f_sim_advantageE k :
                 trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])
        - accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)) |.
 Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
+
+(* The real trace game and the simulated one lie within two class epsilons of
+   each other.  Both hops zero a ciphertext slot; the simulated trace is the
+   image of the all-zero tuple. *)
+Lemma alice_sim_script k :
+  \hops[ alice_sim_claims_at k ]
+    `| accept (trace_distinguishers k)
+         (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+                trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])
+     - accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)) |
+    <= [:: cpa_bob; cpa_charlie].
+Proof.
+(* her trace is a deterministic image of her hopping tuple *)
+same to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G0 k))
+  by (accept_trace_tupleE _).
+(* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
+   which the class membership of the Bob-key reduction licenses *)
+hop cpa_bob
+  to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G1 k))
+  by (le_trans (le_of_eq (hop0_advantageE _))
+               (indcpa_admissible_epsilon_le (inst_dk_b (I k))
+                  (bob_admissible_distinguisher k))).
+(* Charlie's slot zeroed, at the same epsilon, licensed by the class
+   membership of the Charlie-key reduction *)
+hop cpa_charlie
+  to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G2 k))
+  by (le_trans (le_of_eq (hop1_advantageE _))
+               (indcpa_admissible_epsilon_le (inst_dk_c (I k))
+                  (charlie_admissible_distinguisher k))).
+(* the simulated trace is that same image of the all-zero tuple *)
+same to (accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)))
+  by (esym (accept_trace_ideal_tupleE _)).
+stop.
+Qed.
 
 (* Along a sequence of instances, a sequence of trace tests has negligible
    simulation advantage.  The class admits its two reduction adversaries at
@@ -1405,33 +1439,8 @@ Proof. by rewrite /f_sim_advantage /alice_trace_sim_advantage -!acceptE. Qed.
 Theorem alice_trace_sim_advantage_negligible :
   negligible_fun f_sim_advantage.
 Proof.
-exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]{ fun k =>
-  \epsilon[ alice_sim_claims_at k ]{
-    (* the trace of a run of the protocol by the interpreter *)
-    start (accept (trace_distinguishers k)
-             (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
-                      Alice])) ;
-    (* her trace is a deterministic image of her hopping tuple *)
-    same to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G0 k))
-      by accept_trace_tupleE _ ;
-    (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
-       which the class membership of the Bob-key reduction licenses *)
-    hop cpa_bob (eps k)
-      to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G1 k))
-      by le_trans (le_of_eq (hop0_advantageE _))
-                  (indcpa_admissible_epsilon_le (inst_dk_b (I k))
-                     (bob_admissible_distinguisher k)) ;
-    (* Charlie's slot zeroed, at the same epsilon, licensed by the class
-       membership of the Charlie-key reduction *)
-    hop cpa_charlie (eps k)
-      to (accept (hop_tuple_distinguisher (trace_distinguishers k)) (G2 k))
-      by le_trans (le_of_eq (hop1_advantageE _))
-                  (indcpa_admissible_epsilon_le (inst_dk_c (I k))
-                     (charlie_admissible_distinguisher k)) ;
-    (* the simulated trace is that same image of the all-zero tuple *)
-    same to (accept (trace_distinguishers k) (alice_trace_ideal (R:=R) (I k)))
-      by esym (accept_trace_ideal_tupleE _) } }).
+exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]
+  (fun k => result_of_script (alice_sim_script k))).
 Qed.
 
 End dsdp_alice_sequence.
