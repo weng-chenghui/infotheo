@@ -65,16 +65,16 @@ Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 (* second call carries the zero arm back.  Both terms are                     *)
 (* assumption-conditional, so the whole derived bound is computational.       *)
 (*                                                                            *)
-(* The reduction below is written in the epsHop language of                   *)
+(* The reduction below is written on the tactic surface of                    *)
 (* computational_security/epshop.v.  Its objects are the four acceptance      *)
-(* probabilities the hybrid passes through, and its loss is the two-label     *)
-(* list residuosity_y and residuosity_0, whose claims benaloh_claim fixes,    *)
-(* the dictionary written on the program's delimiter, each label carrying     *)
-(* the r-th residuosity epsilon its call assumes.  The bound of               *)
-(* benaloh_residuosity_epsilon_le is the bound that chain returns and its two *)
-(* hypotheses are the two class memberships the chain is built at, so the     *)
-(* bound is read off the chain rather than reassembled from a triangle        *)
-(* inequality of its own.  The chain differs from the Paillier chain of       *)
+(* probabilities the hybrid passes through, and the type of benaloh_script    *)
+(* names the two-label list residuosity_y and residuosity_0, whose claims     *)
+(* benaloh_claim fixes, each label carrying the r-th residuosity epsilon its  *)
+(* call assumes.  The bound of benaloh_residuosity_epsilon_le is read off the *)
+(* script through hop_script_total and residuosity_totalE, and its two        *)
+(* hypotheses are the two class memberships the script is proved at, so the   *)
+(* bound comes from the script rather than from a triangle inequality of its  *)
+(* own.  The script differs from the Paillier script of                       *)
 (* paillier_indcpa_scheme.v in one place: its middle equality takes no order  *)
 (* premise on the generator, the multiplier val y ^+ m being a unit whatever  *)
 (* y and m are.                                                               *)
@@ -141,11 +141,11 @@ Require Import negligible indcpa_game indcpa_scheme_sequence epshop.
 (* residuosity_totalE residuosity ==                                          *)
 (*                            the closed form of the two-call loss, twice     *)
 (*                            the residuosity epsilon                         *)
-(* benaloh_chain admissible_y admissible_0 ==                                 *)
-(*                            the reduction as a chain of two hops around     *)
-(*                            one equality, at the two class memberships it   *)
-(*                            spends, returning twice the residuosity         *)
-(*                            epsilon as its bound                            *)
+(* benaloh_script admissible_y admissible_0 ==                                *)
+(*                            the reduction as a script of two hops around    *)
+(*                            one equality, from the real arm to the zero     *)
+(*                            arm, spending residuosity_y and residuosity_0   *)
+(*                            at the two class memberships                    *)
 (* benaloh_residuosity_epsilon_le ==                                          *)
 (*                            an adversary whose two reductions are both      *)
 (*                            classified has IND-CPA advantage at most twice  *)
@@ -196,6 +196,7 @@ Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
+Import EpsHopTac.
 
 Local Open Scope ring_scope.
 Local Open Scope reals_ext_scope.
@@ -293,7 +294,7 @@ Definition residuosity_of_adversary_zero
 
 (* An encryption of m under generator y is y ^+ m times the r-th power of a
    uniform unit.  The real arm is therefore the first reduction against the
-   residue law, where the chain opens. *)
+   residue law, where the script opens. *)
 Lemma real_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   Pr (c <- adv_choose adv ;
@@ -345,7 +346,7 @@ exact: (unit_fdistmap_translateE 'Z_n card_renc_benaloh (adv_decide c)
 Qed.
 
 (* The acceptance probability of a residuosity distinguisher, under the short
-   name the chain below reads at. *)
+   name the script below reads at. *)
 Local Notation accept := (residuosity_accept (R:=R)).
 
 (* The two labels, one per residuosity call: residuosity_y for the
@@ -374,27 +375,24 @@ Definition benaloh_claim (residuosity : benaloh_residuosity_assumption)
 
 Local Open Scope epshop_scope.
 
-(* The closed form of the loss the chain below accumulates: one residuosity
-   epsilon per hop, twice the assumed epsilon.  The chain returns its bound by
-   this identity, and every factor two in this file comes from here. *)
+(* The closed form of the loss the script below spends: one residuosity
+   epsilon per hop, twice the assumed epsilon.  The bound is read through this
+   identity, and every factor two in this file comes from here. *)
 Lemma residuosity_totalE (residuosity : benaloh_residuosity_assumption) :
   benaloh_residuosity_epsilon residuosity
   + benaloh_residuosity_epsilon residuosity
   = 2 * benaloh_residuosity_epsilon residuosity.
 Proof. by rewrite mulr_natl mulr2n. Qed.
 
-(* The reduction as a chain of hops over acceptance probabilities.  It starts
-   at the real arm, which is the multiplying reduction accepting under the
-   residue law; one residuosity call moves that reduction to the unit law,
-   where the generator power cancels; the middle equality replaces the
-   multiplying reduction by the plain one at no loss; and a second call moves
-   the plain reduction back to the residue law, where its acceptance is the
-   zero arm.  Each call logs its own labelled term, so what the chain carries
-   is the list of the two assumptions the derived bound rests on.  Those two
-   assumptions are variables of the section, spent in the justification of the
-   hop each one licenses, so a chain that exists has already spent them and
-   leaves nothing to discharge. *)
-Section benaloh_chain.
+(* The reduction as a script over acceptance probabilities.  It starts at the
+   real arm, the multiplying reduction accepting under the residue law; one
+   residuosity call moves that reduction to the unit law, where the generator
+   power cancels; the middle equality replaces the multiplying reduction by
+   the plain one at no loss; and a second call moves the plain reduction back
+   to the residue law, where its acceptance is the zero arm.  The type of the
+   script names the two assumptions the derived bound rests on, both variables
+   of the section, spent in the justification of the hop each one licenses. *)
+Section benaloh_script.
 Variable residuosity : benaloh_residuosity_assumption.
 Variable dk : priv_key AHE.
 Variable adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme.
@@ -404,30 +402,30 @@ Hypothesis admissible_y :
 Hypothesis admissible_0 :
   residuosity_admissible residuosity (residuosity_of_adversary_zero adv).
 
-(* The two reductions the chain moves between, under the short names its
+(* The two reductions the script moves between, under the short names its
    steps read at.  D_y multiplies at the key's generator, D_0 passes the
    challenge through unchanged. *)
 Local Notation D_y := (residuosity_of_adversary (priv_gen dk) adv).
 Local Notation D_0 := (residuosity_of_adversary_zero adv).
-Local Notation eps := (benaloh_residuosity_epsilon residuosity).
-
-Definition benaloh_chain :=
-  \epsilon[ benaloh_claim residuosity dk adv ]{
-            (* the real arm *)
-            start (accept D_y residue_fdist) ;
-            (* the first residuosity call, through D_y *)
-            hop residuosity_y eps to (accept D_y unit_fdist)
-              by residuosity_admissible_epsilon_le _ _ admissible_y ;
-            (* the free step: under the unit law the multiplier erases the
-               plaintext, Katz and Lindell 2015 Lemma 11.15 *)
-            same to (accept D_0 unit_fdist)
-              by unit_accept_residuosityE (priv_gen dk) adv ;
-            (* the second residuosity call, through D_0 run backwards, and
-               the zero arm *)
-            hop residuosity_0 eps to (accept D_0 residue_fdist)
-              by residuosity_admissible_epsilon_leC _ _ admissible_0 ;;
-            (* the gap between the two arms, at the two calls it spent *)
-            bound (2 * eps) by residuosity_totalE residuosity }.
+(* The two-call hybrid as a script from the real arm to the zero arm,
+   spending one residuosity call per hop.  Its type names the two calls the
+   IND-CPA bound rests on. *)
+Lemma benaloh_script :
+  \hops[ benaloh_claim residuosity dk adv ]
+    `| accept D_y residue_fdist - accept D_0 residue_fdist |
+    <= [:: residuosity_y; residuosity_0].
+Proof.
+(* the first residuosity call, through D_y *)
+hop residuosity_y to (accept D_y unit_fdist)
+  by (residuosity_admissible_epsilon_le _ _ admissible_y).
+(* the free step: under the unit law the multiplier erases the plaintext,
+   Katz and Lindell 2015 Lemma 11.15 *)
+same to (accept D_0 unit_fdist) by (unit_accept_residuosityE (priv_gen dk) adv).
+(* the second residuosity call, through D_0 run backwards, and the zero arm *)
+hop residuosity_0 to (accept D_0 residue_fdist)
+  by (residuosity_admissible_epsilon_leC _ _ admissible_0).
+stop.
+Qed.
 
 (* An adversary whose two reductions the class admits has IND-CPA advantage
    at most twice the residuosity epsilon.  Both terms are
@@ -440,11 +438,11 @@ Lemma benaloh_residuosity_epsilon_le :
 Proof.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_benalohE /= real_accept_residuosityE.
-rewrite zero_accept_residuosityE.
-exact: result_sound benaloh_chain.
+rewrite zero_accept_residuosityE -(residuosity_totalE residuosity).
+exact: hop_script_total benaloh_script.
 Qed.
 
-End benaloh_chain.
+End benaloh_script.
 
 (* The IND-CPA class the derived assumption carries: the adversaries whose two
    residuosity reductions the residuosity class admits.  The first quantifier
