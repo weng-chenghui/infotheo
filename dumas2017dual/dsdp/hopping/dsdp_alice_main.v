@@ -71,10 +71,10 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* The last region reads the same two trace arguments along a sequence of     *)
 (* instances, with both ciphertext replacements charged at the epsilon an     *)
 (* adversary-class assumption promises rather than at the advantage each      *)
-(* reduction shows.  Those two class-conditional programs are written         *)
-(* inline under the terminal that reads them, one for the guessing            *)
-(* argument and one for the simulation argument, so the class-conditional     *)
-(* program text lives at the sequence alone:                                  *)
+(* reduction shows.  Those two class-conditional arguments are scripts,       *)
+(* alice_script and alice_sim_script, one tactic line per hop, whose types    *)
+(* name the labels they spend; the terminals read them through                *)
+(* result_of_script:                                                          *)
 (* alice_trace_guess_V2_admissible_le is the guessing bound at one            *)
 (* instance, read off the sequence that repeats it, and                       *)
 (* alice_trace_guess_V2_admissible_pq_le restates that bound at a plaintext   *)
@@ -164,7 +164,13 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_trace_guess_V2_negligible ==                                         *)
 (*                              the trace guessing sequence is negligible     *)
 (*                              under the two class premises                  *)
-(*            f_guess_V2_le k == the bound the same program returns at k      *)
+(*             alice_script k == the guessing script at k, from the trace     *)
+(*                              game to zero over cpa_bob, cpa_charlie and    *)
+(*                              uniform_fiber                                 *)
+(*         alice_sim_script k == the simulation script at k, from the real    *)
+(*                              trace game to the simulated one over cpa_bob  *)
+(*                              and cpa_charlie                               *)
+(*            f_guess_V2_le k == the bound alice_script returns at k          *)
 (* decrypt_reduction_admissible_eventuallyF ==                                *)
 (*                              an asymptotic value for the sequence          *)
 (*                              eventually rejects the decrypting             *)
@@ -193,6 +199,7 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (******************************************************************************)
 
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
+Import EpsHopTac.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -1211,10 +1218,19 @@ Local Notation G2 k :=
   (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
          alice_tuple_all_zero (I:=I k)]).
 Local Notation eps k := (indcpa_assumption_epsilon (assumption k)).
+(* The trace game the interpreter hands the predictor after a run. *)
+Local Notation trace_game k :=
+  (accept (distinguisher_of_predictor (predict k))
+     (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
+            trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k)) Alice])).
+
+(* Scripts print their label list; the process-list notation of proc_scope
+   would print it as [procs ...]. *)
+Local Close Scope proc_scope.
+Local Close Scope sproc_scope.
 
 (* The guessing sequence as the distance of the trace game from the zero game.
-   It speaks of the games alone, so the program under the terminal below stays
-   unnamed. *)
+   It speaks of the games alone, so alice_script below is stated on them. *)
 Lemma f_guess_V2_advantageE k :
   f_guess_V2 k
   = `| accept (distinguisher_of_predictor (predict k))
@@ -1247,84 +1263,51 @@ Canonical alice_claims_admissible_negligible :=
 
 Local Open Scope epshop_scope.
 
+(* Alice's trace game lies within the three labels' total of zero.  Bob's slot
+   and Charlie's slot each spend one class epsilon, the all-zero view spends
+   the guessing residue. *)
+Lemma alice_script k :
+  \hops[ alice_claims_admissible_at k ] `| trace_game k - 0 |
+    <= [:: cpa_bob; cpa_charlie; uniform_fiber].
+Proof.
+(* her trace is a deterministic image of her hopping tuple *)
+same to (accept (tuple_distinguisher k) (G0 k)) by (accept_trace_tupleE _).
+(* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
+   which the class membership of the Bob-key reduction licenses *)
+hop cpa_bob to (accept (tuple_distinguisher k) (G1 k))
+  by (le_trans (le_of_eq (hop0_advantageE _))
+               (indcpa_admissible_epsilon_le (inst_dk_b (I k))
+                  (bob_admissible k))).
+(* Charlie's slot zeroed, at the same epsilon, licensed by the class
+   membership of the Charlie-key reduction *)
+hop cpa_charlie to (accept (tuple_distinguisher k) (G2 k))
+  by (le_trans (le_of_eq (hop1_advantageE _))
+               (indcpa_admissible_epsilon_le (inst_dk_c (I k))
+                  (charlie_admissible k))).
+(* the guessing residue of the all-zero view, a term outside the hopping *)
+plus uniform_fiber
+  by (plus_le (accept_ge0 _ _)
+        (all_zero_game_V2_le_invm
+           (predict k \o alice_trace_of_hop_tuple (I:=I k)))).
+Qed.
+
+(* The bound the script returns at k: 1/#|plain| unconditional, plus twice
+   the class epsilon.  It is what alice_trace_guess_V2_admissible_le reads at
+   the sequence repeating one instance. *)
+Lemma f_guess_V2_le k :
+  f_guess_V2 k <= (#|plain (scheme_AHE (I k))|%:R : R)^-1 + 2 * eps k.
+Proof.
+rewrite f_guess_V2_advantageE -(alice_admissible_totalE (assumption k)).
+exact: hop_script_total (alice_script k).
+Qed.
+
 (* Along a sequence of instances, a sequence of trace predictors guesses Bob's
    input with negligible probability.  The two hop terms are
    assumption-conditional, the plaintext-count term unconditional. *)
 Theorem alice_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]{ fun k =>
-  \epsilon[ alice_claims_admissible_at k ]{
-    (* the trace of a run of the protocol by the interpreter *)
-    start (accept (distinguisher_of_predictor (predict k))
-             (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
-                      Alice])) ;
-    (* her trace is a deterministic image of her hopping tuple *)
-    same to (accept (tuple_distinguisher k) (G0 k))
-      by accept_trace_tupleE _ ;
-    (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
-       which the class membership of the Bob-key reduction licenses *)
-    hop cpa_bob (eps k) to (accept (tuple_distinguisher k) (G1 k))
-      by le_trans (le_of_eq (hop0_advantageE _))
-                  (indcpa_admissible_epsilon_le (inst_dk_b (I k))
-                     (bob_admissible k)) ;
-    (* Charlie's slot zeroed, at the same epsilon, licensed by the class
-       membership of the Charlie-key reduction *)
-    hop cpa_charlie (eps k) to (accept (tuple_distinguisher k) (G2 k))
-      by le_trans (le_of_eq (hop1_advantageE _))
-                  (indcpa_admissible_epsilon_le (inst_dk_c (I k))
-                     (charlie_admissible k)) ;
-    (* the guessing residue of the all-zero view, a term outside the
-       hopping, added to the loss so the total bounds the trace game *)
-    plus uniform_fiber #|plain (scheme_AHE (I k))|%:R^-1
-      by plus_le (accept_ge0 _ _)
-           (all_zero_game_V2_le_invm
-              (predict k \o alice_trace_of_hop_tuple (I:=I k))) ;;
-    (* the trace game, at the residue and twice the class epsilon *)
-    bound ((#|plain (scheme_AHE (I k))|%:R : R)^-1 + 2 * eps k)
-      by alice_admissible_totalE (assumption k) } }).
-Qed.
-
-(* The bound the same program returns at k: 1/#|plain| unconditional, plus
-   twice the class epsilon.  It is what alice_trace_guess_V2_admissible_le
-   reads at the sequence repeating one instance. *)
-Lemma f_guess_V2_le k :
-  f_guess_V2 k <= (#|plain (scheme_AHE (I k))|%:R : R)^-1 + 2 * eps k.
-Proof.
-(* The program is the one the terminal above is written over; the term there
-   carries no name, so the text stands a second time and the kernel checks
-   each copy on its own. *)
-rewrite f_guess_V2_advantageE.
-exact: (result_sound (\epsilon[ alice_claims_admissible_at k ]{
-    (* the trace of a run of the protocol by the interpreter *)
-    start (accept (distinguisher_of_predictor (predict k))
-             (`p_ [% sample_V2 (I:=I k), sample_V3 (I:=I k),
-                    trace_of_run (I:=I k) (dsdp_protocol (R:=R) (I:=I k))
-                      Alice])) ;
-    (* her trace is a deterministic image of her hopping tuple *)
-    same to (accept (tuple_distinguisher k) (G0 k))
-      by accept_trace_tupleE _ ;
-    (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
-       which the class membership of the Bob-key reduction licenses *)
-    hop cpa_bob (eps k) to (accept (tuple_distinguisher k) (G1 k))
-      by le_trans (le_of_eq (hop0_advantageE _))
-                  (indcpa_admissible_epsilon_le (inst_dk_b (I k))
-                     (bob_admissible k)) ;
-    (* Charlie's slot zeroed, at the same epsilon, licensed by the class
-       membership of the Charlie-key reduction *)
-    hop cpa_charlie (eps k) to (accept (tuple_distinguisher k) (G2 k))
-      by le_trans (le_of_eq (hop1_advantageE _))
-                  (indcpa_admissible_epsilon_le (inst_dk_c (I k))
-                     (charlie_admissible k)) ;
-    (* the guessing residue of the all-zero view, a term outside the
-       hopping, added to the loss so the total bounds the trace game *)
-    plus uniform_fiber #|plain (scheme_AHE (I k))|%:R^-1
-      by plus_le (accept_ge0 _ _)
-           (all_zero_game_V2_le_invm
-              (predict k \o alice_trace_of_hop_tuple (I:=I k))) ;;
-    (* the trace game, at the residue and twice the class epsilon *)
-    bound ((#|plain (scheme_AHE (I k))|%:R : R)^-1 + 2 * eps k)
-      by alice_admissible_totalE (assumption k) })).
+exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]
+  (fun k => result_of_script (alice_script k))).
 Qed.
 
 (* Under the two negligibility facts of N, the decrypting predictor's Bob-key
