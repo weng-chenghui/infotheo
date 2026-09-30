@@ -1189,6 +1189,25 @@ Definition~\ref{def:hop_script}.
   data a result carries.
 \end{lemma}
 
+\begin{definition}[Composition of scripts]
+  \label{def:script_cat}
+  \rocq{infotheo.computational_security.epshop.script_cat}
+  \rocqok
+  \uses{def:hop_script,def:loss,lem:hop_script_guard}
+  Two scripts that meet at a game compose into one script, which spends the
+  loss of the first and then the loss of the second.
+  \[ p : \mathrm{Script}_C(a, b, s_1),\quad q : \mathrm{Script}_C(b, c, s_2)
+     \quad\longmapsto\quad
+     p \cdot q : \mathrm{Script}_C(a,\, c,\, s_1 \mathbin{+\!\!+} s_2) \]
+  The composite replays the steps of $p$ and continues with $q$, so it is built
+  from the three constructors and Lemma~\ref{lem:hop_script_guard} holds of it
+  as of any script. A bound established as a script thereby enters a later
+  script as one step, its labels kept in the loss of that later script, and
+  its total is the sum of the two totals, $\mathrm{ev}$ being a morphism. The
+  $\mathrm{via}$ line of the tactic surface applies the composition to a
+  finished script $p$ and leaves $q$ as the rest of the script.
+\end{definition}
+
 \begin{definition}[What a script returns]
   \label{def:script_result}
   \rocq{infotheo.computational_security.epshop.script_result,
@@ -1272,39 +1291,76 @@ Definition~\ref{def:hop_script}.
   through soundness at its two class memberships.
 \end{definition}
 
-\begin{definition}[Alice's trace argument as a script opening at the protocol]
-  \label{def:alice_trace_script}
+\begin{definition}[Alice's trace against the simulation as one script]
+  \label{def:alice_trace_sim_script}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_label,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.hop_tuple_distinguisher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_script}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_ideal_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_script}
   \rocqok
-  \uses{def:hop_script,def:script_result,def:claim,def:loss,def:alice_trace,lem:trace_of_hop_tuple,lem:alice_view_advantage,lem:guess_all_zero}
-  Alice's guessing argument as one script, opening at the executed protocol.
+  \uses{def:hop_script,def:claim,def:loss,def:alice_trace,lem:trace_of_hop_tuple,lem:alice_view_advantage,lem:simulator_factorization}
+  Alice's simulation argument as one script, opening at the executed protocol.
   $G_\tau$ is the law of the honest input pair beside the trace the interpreter
   returns for Alice when it runs $\mathrm{dsdp\_protocol}$ at a sample, and
-  $\gamma_\tau(D_g)$ the probability that a predictor's distinguisher accepts a
+  $\gamma_\tau(D)$ the probability that a test $D$ on the trace accepts a
   value sampled from it, so the object the argument starts from is the executed
   protocol itself rather than the tuple $\hoptuple{0}$. The script's first line
   steps to the tuple.
-  \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
+  \[ \mathrm{same\ to}\ \gamma_0(D \circ \tau)\ \mathrm{by}\
        \texttt{accept\_trace\_tupleE} \]
   That step is an identity, free in the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift
-  $D_{g \circ \tau}$ on the tuple, which is
+  $D \circ \tau$ on the tuple, which is
   \texttt{hop\_tuple\_distinguisher} applied once under a local name. Two hops
   then run the ciphertext replacements over $\gamma_0$, $\gamma_1$ and
   $\gamma_2$ at that lift, each spending the advantage of the reduction its
-  label names, at Bob's key and then at Charlie's, and a $\mathrm{plus}$ step
-  adds the term of the all-zero game against the zero game. The script's type
+  label names, at Bob's key and then at Charlie's. Each hop is justified by
+  Lemma~\ref{lem:alice_view_advantage}, which makes its gap exactly the term
+  it spends, read as an inequality through \texttt{le\_of\_eq}.
+  \texttt{alice\_claim} fixes what each of the three labels claims: the games
+  a hop label joins and the advantage it loses, and the all-zero game against
+  the zero game. The script's last line steps to $\Pr_{\Ideal^\tau}[D]$, the
+  probability that the same test accepts the trace-level ideal law.
+  \[ \mathrm{same\ to}\ \Pr_{\Ideal^\tau}[D]\ \mathrm{by}\
+       \texttt{accept\_trace\_ideal\_tupleE} \]
+  That step holds because $\Ideal^\tau$ is the image under
+  $\tau$ of $\Ideal$, which Lemma~\ref{lem:simulator_factorization} identifies
+  with the law of the honest inputs beside $\hoptuple{2}$.
+  \[ \mathrm{Script}_C\big(\gamma_\tau(D),\ \Pr_{\Ideal^\tau}[D],\
+       [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}]\big),
+     \qquad \mathrm{tot}(s) = \epshopsum{D \circ \tau} \]
+  The script stops at the simulated trace itself, so the bound read off it
+  through soundness is the trace-level simulation bound of
+  Theorem~\ref{thm:alice_trace_bounds}.
+  \[ \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
+       \le \epshopsum{D \circ \tau} \]
+\end{definition}
+
+\begin{definition}[Alice's trace argument as a script opening at the protocol]
+  \label{def:alice_trace_script}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.all_zero_game_V2_le_invm,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_totalE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_script}
+  \rocqok
+  \uses{def:alice_trace_sim_script,def:script_cat,def:hop_script,def:script_result,def:loss,lem:guess_all_zero}
+  Alice's guessing argument as one script, opening at the executed protocol.
+  $D_g$ is the distinguisher of a predictor $g$ reading the trace, and the
+  script opens with the script of Definition~\ref{def:alice_trace_sim_script}
+  read at $D_g$, composed as in Definition~\ref{def:script_cat}. That step
+  carries the script from $\gamma_\tau(D_g)$ to $\Pr_{\Ideal^\tau}[D_g]$ and
+  spends the two hop labels.
+  \[ \mathrm{via}\ \texttt{alice\_trace\_sim\_script}(D_g),
+     \qquad
+     \mathrm{same\ to}\ \gamma_2(D_{g \circ \tau})\ \mathrm{by}\
+       \texttt{accept\_trace\_ideal\_tupleE} \]
+  The $\mathrm{same}$ step returns from the simulated trace to the all-zero
+  tuple, free in the loss, and a $\mathrm{plus}$ step adds the term of the
+  all-zero game against the zero game. The script's type
   is therefore a bound on $\lvert \gamma_\tau(D_g) - 0 \rvert$, which
-  \texttt{advantage0} reads as $\gamma_\tau(D_g)$. \texttt{alice\_claim} fixes what
-  each of the three labels claims: the games a hop label joins and the
-  advantage it loses, and the all-zero game against the zero game.
+  \texttt{advantage0} reads as $\gamma_\tau(D_g)$.
   \[ \mathrm{Script}_C\big(\gamma_\tau(D_g),\ 0,\
        [\mathsf{cpa\_bob}, \mathsf{cpa\_charlie},
         \mathsf{uniform\_fiber}]\big),
@@ -1318,45 +1374,14 @@ Definition~\ref{def:hop_script}.
   computational assumption only where a later statement requires it to be
   small. The term $\mathsf{uniform\_fiber}$ is information-theoretic and
   unconditional, the residue the leaked output leaves along the solution fiber.
-  Each hop is justified by Lemma~\ref{lem:alice_view_advantage}, which makes
-  its gap exactly the term it spends, read as an inequality through
-  \texttt{le\_of\_eq}. The $\mathrm{plus}$ step is justified by
+  The guessing bound is thus the simulation bound at $D_g$ with that one term
+  added. The $\mathrm{plus}$ step is justified by
   \texttt{all\_zero\_game\_V2\_le\_invm}, which is
   Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
   the fiber enters. The trace guessing bound of
   Theorem~\ref{thm:alice_trace_bounds} is this script read through soundness,
   \texttt{guess\_V2\_acceptE}, \texttt{advantage0} and
   \texttt{alice\_totalE}.
-\end{definition}
-
-\begin{definition}[Alice's trace against the simulation as one script]
-  \label{def:alice_trace_sim_script}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.accept_trace_ideal_tupleE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_script}
-  \rocqok
-  \uses{def:alice_trace_script,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
-  The two hops of Definition~\ref{def:alice_trace_script} with one
-  $\mathrm{same}$ step at each end. The script opens at $\gamma_\tau(D)$, runs
-  the two ciphertext replacements at the lifted test $D \circ \tau$, and stops
-  at $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
-  trace-level ideal law.
-  \[ \mathrm{same\ to}\ \gamma_0(D \circ \tau)\ \mathrm{by}\
-       \texttt{accept\_trace\_tupleE},
-     \qquad
-     \mathrm{same\ to}\ \Pr_{\Ideal^\tau}[D]\ \mathrm{by}\
-       \texttt{accept\_trace\_ideal\_tupleE} \]
-  The first step is Lemma~\ref{lem:trace_of_hop_tuple} read at acceptance
-  probabilities. The second holds because $\Ideal^\tau$ is the image under
-  $\tau$ of $\Ideal$, which Lemma~\ref{lem:simulator_factorization} identifies
-  with the law of the honest inputs beside $\hoptuple{2}$.
-  \[ \mathrm{Script}_C\big(\gamma_\tau(D),\ \Pr_{\Ideal^\tau}[D],\
-       [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}]\big),
-     \qquad \mathrm{tot}(s) = \epshopsum{D \circ \tau} \]
-  The script stops at the simulated trace itself, so the bound read off it
-  through soundness is the trace-level simulation bound of
-  Theorem~\ref{thm:alice_trace_bounds}.
-  \[ \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
-       \le \epshopsum{D \circ \tau} \]
 \end{definition}
 
 \begin{definition}[Alice's trace argument at the class epsilon]
@@ -1366,12 +1391,15 @@ Definition~\ref{def:hop_script}.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_script,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_guess_V2_le}
   \rocqok
-  \uses{def:alice_trace_script,def:indcpa_assumption,def:claim,def:loss}
-  The script of Definition~\ref{def:alice_trace_script} at the $k$-th instance
-  of a sequence, over the dictionary $C^{\mathcal{A}}$ that charges each hop
+  \uses{def:alice_trace_script,def:alice_trace_sim_script,def:indcpa_assumption,def:claim,def:loss}
+  The guessing argument of Definition~\ref{def:alice_trace_script} at the
+  $k$-th instance of a sequence, as a script over the dictionary
+  $C^{\mathcal{A}}$ that charges each hop
   the advantage $\mathcal{A}$ assumes in place of the advantage its own
   reduction shows. The three games and the three labels are those of
-  \texttt{alice\_claim}.
+  \texttt{alice\_claim}. Its steps are the first $\mathrm{same}$ step and the
+  two hops of Definition~\ref{def:alice_trace_sim_script}, written out at this
+  dictionary, followed by the $\mathrm{plus}$ step.
   \[ C^{\mathcal{A}}(\mathsf{cpa\_bob})
        = \big(\gamma_0(D),\ \gamma_1(D),\ \varepsilon_{\mathrm{cpa}}\big),
      \qquad
