@@ -39,14 +39,16 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (* Module EpsHopTac, activated by Import, writes a script one tactic line per *)
 (* step on a goal of type hop_script: hop l to g' by (H), same to g' by (H),  *)
-(* plus l by (H), stop.  The residual goal after each line is the script type *)
-(* of the rest, printed as \hops[ C ] `| g' - z | <= s.  A script type is     *)
-(* written \hops[ C ] `| a - b | <= s, and a compound game or list in it is   *)
+(* plus l by (H), stop, and via (p), which takes a finished script p as the   *)
+(* next step, the rest of the script continuing from the game p stops at.     *)
+(* The residual goal after each line is the script type of the rest, printed  *)
+(* as \hops[ C ] `| g' - z | <= s.  A script type is written                  *)
+(* \hops[ C ] `| a - b | <= s, and a compound game or list in it is           *)
 (* parenthesised.  The proof slots are elaborated against the goal, so a      *)
 (* proof term with holes is written in parentheses.  Below this file, hop,    *)
-(* same, plus, stop and to stay free term identifiers.  The normaliser of the *)
-(* target equation is cbn, which reduces a client dictionary in a millisecond *)
-(* where lazy and vm_compute run past 600 s and 125 s.                        *)
+(* same, plus, stop, via and to stay free term identifiers.  The normaliser   *)
+(* of the target equation is cbn, which reduces a client dictionary in a      *)
+(* millisecond where lazy and vm_compute run past 600 s and 125 s.            *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*                   claim R == what a label asserts: the game it goes from,  *)
@@ -104,6 +106,9 @@ From mathcomp Require Import boolp reals.
 (*      hop_script_not_total == some script type is uninhabited               *)
 (*        result_of_script p == the result a script returns, its label list   *)
 (*                              the index s of its type                       *)
+(*            script_cat p q == the script that runs p then q, from the game  *)
+(*                              p opens at to the game q stops at, spending   *)
+(*                              the labels of p followed by those of q        *)
 (*  \hops[ C ] `|a - b| <= s == the type hop_script C a b s                   *)
 (*                  le_of_eq == an inequality out of an equality              *)
 (*                   plus_le == a nonnegative quantity below c lies within c  *)
@@ -315,6 +320,27 @@ Arguments hop_script_obligations {L R claim_of a b s}.
 Arguments hop_script_nil {L R claim_of a b s}.
 Arguments result_of_script {L R claim_of a b s}.
 
+Section script_cat.
+Variables (L : Type) (R : realType) (C : L -> claim R).
+
+(* Two scripts meeting at a game compose into one, spending the first loss
+   then the second.  A finished bound thereby enters a later script as one
+   step. *)
+Fixpoint script_cat a b c s1 s2 (p : hop_script C a b s1) :
+  hop_script C b c s2 -> hop_script C a c (s1 ++ s2) :=
+  match p in hop_script _ a b s1
+    return hop_script C b c s2 -> hop_script C a c (s1 ++ s2) with
+  | script_stop _ => id
+  | script_hop l g' _ _ ob gE p' =>
+      fun q => script_hop l g' ob gE (script_cat p' q)
+  | script_same _ g' _ _ xE p' =>
+      fun q => script_same g' xE (script_cat p' q)
+  end.
+
+End script_cat.
+
+Arguments script_cat {L R C a b c s1 s2}.
+
 (* Some script type is uninhabited: the empty loss over the games 0 and 1.
    A script is therefore a witness, and its label list is data read by
    result_of_script. *)
@@ -355,5 +381,7 @@ Tactic Notation "same" "to" uconstr(g) "by" uconstr(H) :=
 
 Tactic Notation "plus" constr(l) "by" uconstr(H) :=
   hop l to 0 by H; stop.
+
+Tactic Notation "via" uconstr(p) := refine (script_cat p _).
 
 End EpsHopTac.

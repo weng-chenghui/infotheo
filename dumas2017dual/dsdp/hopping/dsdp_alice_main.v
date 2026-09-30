@@ -122,10 +122,10 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                                                                            *)
 (* The scripts                                                                *)
 (*                                                                            *)
-(*       alice_trace_script == the two ciphertext replacements at the         *)
-(*                              executed trace, with the fiber term added     *)
 (*   alice_trace_sim_script == the executed trace against the simulated       *)
 (*                              trace, losing the two advantages              *)
+(*       alice_trace_script == the two ciphertext replacements at the         *)
+(*                              executed trace, with the fiber term added     *)
 (*                                                                            *)
 (* The readings                                                               *)
 (*                                                                            *)
@@ -696,54 +696,6 @@ Lemma alice_admissible_totalE (A : indcpa_epsilon_assumption) :
   = (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof. by rewrite mulr_natl mulr2n addrC. Qed.
 
-(* Alice's trace secrecy as one script.  Its first game is the trace the
-   interpreter hands Alice when it runs the DSDP protocol at the sampled
-   inputs, so the object the argument starts from is the executed protocol
-   itself rather than a tuple of values standing for it.
-   alice_trace_guess_V2_le reads its bound through alice_totalE.  The trace is
-   a deterministic image of the hopping tuple, so the step to the tuple loses
-   nothing.  Each of the two ciphertext replacements carries the key its
-   advantage is charged to, which is what the class-conditional reading and
-   the sequence reading below read off a label.  The last line, the term
-   labelled uniform_fiber, is what that theorem adds to the simulation bound:
-   the mass the leaked output leaves along the DSDP solution fiber,
-   unconditional where the two hop terms are conditional on the IND-CPA
-   assumption at one key each. *)
-Section alice_trace_script.
-Variable predict : predictor alice_traceT.
-
-(* The predictor's test on the hopping tuple: it accepts when predict guesses
-   Bob's input.  Its advantage against the zero game is that guessing
-   probability.
-     |accept _ `p_[% V2, V3, alice_tuple_real] - 0| *)
-Local Notation tuple_distinguisher :=
-  (hop_tuple_distinguisher (distinguisher_of_predictor predict)).
-
-(* Alice's trace game lies within the three labels' total of zero.  Each
-   ciphertext replacement spends the advantage of its own reduction, the
-   all-zero view spends the guessing residue. *)
-Lemma alice_trace_script :
-  \hops[ alice_claim tuple_distinguisher ]
-    `| accept (distinguisher_of_predictor predict)
-         (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice]) - 0 |
-    <= [:: cpa_bob; cpa_charlie; uniform_fiber].
-Proof.
-(* her trace is a deterministic image of her hopping tuple *)
-same to (accept tuple_distinguisher G0) by (accept_trace_tupleE _).
-(* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
-hop cpa_bob to (accept tuple_distinguisher G1)
-  by (le_of_eq (hop0_advantageE tuple_distinguisher)).
-(* Charlie's slot zeroed, at a second IND-CPA advantage *)
-hop cpa_charlie to (accept tuple_distinguisher G2)
-  by (le_of_eq (hop1_advantageE tuple_distinguisher)).
-(* the guessing residue of the all-zero view, a term outside the hopping *)
-plus uniform_fiber
-  by (plus_le (accept_ge0 _ _)
-        (all_zero_game_V2_le_invm (predict \o alice_trace_of_hop_tuple))).
-Qed.
-
-End alice_trace_script.
-
 (* Alice's executed trace against the simulated trace as one script.  It
    opens at the trace the interpreter hands Alice when it runs the DSDP
    protocol at a sample, steps to her hopping tuple at no loss, replaces the
@@ -805,6 +757,51 @@ Definition alice_trace_sim_advantage : R :=
      - Pr alice_trace_ideal [set x | D x] |.
 
 End alice_trace_sim_script.
+
+(* Alice's trace secrecy as one script.  Its first game is the trace the
+   interpreter hands Alice when it runs the DSDP protocol at the sampled
+   inputs, so the object the argument starts from is the executed protocol
+   itself rather than a tuple of values standing for it.
+   alice_trace_guess_V2_le reads its bound through alice_totalE.  The script
+   opens with the trace simulation script read at the predictor's test.  Each
+   of the two ciphertext replacements carries the key its advantage is charged
+   to, which is what the class-conditional reading and the sequence reading
+   below read off a label.  The simulated trace is a deterministic image of
+   the all-zero tuple, so the step to that tuple loses nothing.  The last
+   line, the term labelled uniform_fiber, is what that theorem adds to the
+   simulation bound: the mass the leaked output leaves along the DSDP
+   solution fiber, unconditional where the two hop terms are conditional on
+   the IND-CPA assumption at one key each. *)
+Section alice_trace_script.
+Variable predict : predictor alice_traceT.
+
+(* The predictor's test on the hopping tuple: it accepts when predict guesses
+   Bob's input.  Its advantage against the zero game is that guessing
+   probability.
+     |accept _ `p_[% V2, V3, alice_tuple_real] - 0| *)
+Local Notation tuple_distinguisher :=
+  (hop_tuple_distinguisher (distinguisher_of_predictor predict)).
+
+(* Alice's trace game lies within the three labels' total of zero.  Each
+   ciphertext replacement spends the advantage of its own reduction, the
+   all-zero view spends the guessing residue. *)
+Lemma alice_trace_script :
+  \hops[ alice_claim tuple_distinguisher ]
+    `| accept (distinguisher_of_predictor predict)
+         (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice]) - 0 |
+    <= [:: cpa_bob; cpa_charlie; uniform_fiber].
+Proof.
+(* the simulation bound, read at the predictor's test *)
+via (alice_trace_sim_script (distinguisher_of_predictor predict)).
+(* the simulated trace is an image of the all-zero tuple *)
+same to (accept tuple_distinguisher G2) by (accept_trace_ideal_tupleE _).
+(* the guessing residue of the all-zero view, a term outside the hopping *)
+plus uniform_fiber
+  by (plus_le (accept_ge0 _ _)
+        (all_zero_game_V2_le_invm (predict \o alice_trace_of_hop_tuple))).
+Qed.
+
+End alice_trace_script.
 
 (* A distinguisher separates the real law from the ideal law by at most the
    two hop advantages.  The ideal law is the all-zero experiment, so the gap
