@@ -98,9 +98,9 @@ Proof.
 move Hp1: (extract l1 ps) => psl1 H1; move Hp2: (extract l2 ps) => psl2 H2.
 case: H1 Hp1 => i j d si sj /(congr1 val) /= [Hi Hj].
 case: H2 Hp2 => i' j' d' si' sj' /(congr1 val) /= [Hi' Hj'].
-have [Eii'|ii'] := eqVneq i i'.
-  move: Hi'; rewrite -Eii' Hi => -[/val_inj Ejj' Edd' Ess']; subst i' j' d' si'.
-  by move: Hj'; rewrite Hj => -[->]; left.
+case: (eqVneq i i') => [Eii'|ii'].
+  move: Hi' Hj'; rewrite -Eii' Hi => -[/val_inj <- <- <-].
+  by rewrite Hj => -[<-]; left.
 right=> a c; rewrite !inE => /orP[] /eqP -> /orP[] /eqP -> //.
 - by apply/eqP => E; move: Hi; rewrite E Hj'.
 - by apply/eqP => E; move: Hj; rewrite E Hi'.
@@ -151,8 +151,7 @@ Lemma stype_step_recv_matched n (ps : n.-tuple stype) (a b i : 'I_n)
   (stype_step ps i).2 -> i = b.
 Proof.
 rewrite !(tnth_nth STEnd) => Ha Hi.
-rewrite /stype_step Hi Ha /=; case: ifP => // /andP[/eqP H _] _.
-exact: val_inj.
+by rewrite /stype_step Hi Ha /=; case: ifP => // /andP[/eqP/val_inj ->].
 Qed.
 
 (* Every party that fires in the round belongs to a communication
@@ -164,23 +163,19 @@ Lemma stype_step_fires n (ps : n.-tuple stype) (i : 'I_n) :
     exists2 qs, i \in l & stype_rstep l (extract l ps) qs.
 Proof.
 move=> Hf; case Hi: (tnth ps i) => [j d k|a d k|].
-- have Hs : stype_send_fires ps i by rewrite /stype_send_fires Hi.
-  case: (stype_send_firesP Hs) => j' d' si sj Hi' Hj' _ _.
+- have /stype_send_firesP[j' d' si sj Hi' Hj' _ _] : stype_send_fires ps i.
+    by rewrite /stype_send_fires Hi.
   exists [tuple i; j'], [tuple si; sj]; first by rewrite !inE eqxx.
   by apply/stype_rstepP; apply: StypeRstepComm Hi' Hj' _.
-- have Hi0 := Hi; have Hf0 := Hf.
-  move: Hf; rewrite (tnth_nth STEnd) in Hi; rewrite /stype_step Hi.
+- move: (Hf); rewrite /stype_step -tnth_nth Hi.
   case Hj: (nth STEnd ps a) => [i' d' k'| |] //=.
   case: ifP => // /andP[/eqP Hii' /eqP Hdd'] _.
-  have ha : a < n.
-    rewrite -(size_tuple ps) ltnNge; apply/negP => /(nth_default STEnd).
-    by rewrite Hj.
-  have Hs : stype_send_fires ps (Ordinal ha).
-    rewrite /stype_send_fires (tnth_nth STEnd) /=.
-    by rewrite Hj /stype_step Hj -Hii' Hi /= Hdd' !eqxx.
-  case: (stype_send_firesP Hs) => j' d1 sa sb Ha Hb _ _.
-  have Eij : i = j' := stype_step_recv_matched (a := Ordinal ha) Ha Hi0 Hf0.
-  subst j'.
+  have [ha|ha] := ltnP a n; last by move: Hj; rewrite nth_default ?size_tuple.
+  have /stype_send_firesP[j' d1 sa sb Ha Hb _ _] :
+      stype_send_fires ps (Ordinal ha).
+    rewrite /stype_send_fires (tnth_nth STEnd) /= Hj /stype_step Hj -Hii'.
+    by rewrite -tnth_nth Hi /= Hdd' !eqxx.
+  have Eij := stype_step_recv_matched Ha Hi Hf; rewrite -{}Eij in Ha Hb.
   exists [tuple Ordinal ha; i], [tuple sa; sb]; first by rewrite !inE eqxx orbT.
   by apply/stype_rstepP; apply: StypeRstepComm Ha Hb _.
 - by move: Hf; rewrite /stype_step -(tnth_nth STEnd) Hi.
@@ -217,8 +212,7 @@ Lemma stypes_round_on_sound n (ps : n.-tuple stype) (s : seq 'I_n) :
 Proof.
 elim: s => [|a s IH] /=.
   by move=> _ _; rewrite stypes_round_on_nil; apply: stype_rrefl.
-case/andP => Has Hu /andP[Hfa Hall].
-case: (stype_send_firesP Hfa) => b d sa sb Ha Hb Hsa Hsb.
+case/andP => Has Hu /andP[/stype_send_firesP[b d sa sb Ha Hb Hsa Hsb] Hall].
 have Hbs : b \notin s.
   by apply/negP => /(allP Hall); rewrite /stype_send_fires Hb.
 have Hext : extract [tuple a; b] (stypes_round_on s ps) =
@@ -234,11 +228,10 @@ have Hinj : inject [tuple a; b] (stypes_round_on s ps) [tuple sa; sb] =
   congr (if _ then _ else _).
   rewrite /stype_touched in_cons (eq_sym i) (negbTE Hai) /=.
   case Hi: (tnth ps i) => [j d' k|j d' k|] //=.
-  rewrite in_cons; case: eqP => [Hja|] //=.
-  rewrite Hja (mem_map val_inj) (negbTE Has) /=.
+  rewrite in_cons; case: eqP Hi => [-> Hi|] //=.
+  rewrite (mem_map val_inj) (negbTE Has) /=.
   suff -> : (stype_step ps i).2 = false by [].
-  apply/negbTE/negP => Hst; move: Hi; rewrite Hja => Hi.
-  by move: Hbi; rewrite (stype_step_recv_matched Ha Hi Hst) eqxx.
+  by apply/negbTE; apply: contra Hbi => /(stype_step_recv_matched Ha Hi) ->.
 apply: stype_rtrans (IH Hu Hall) _.
 by rewrite -Hinj; apply: stype_rone; rewrite Hext; apply: stype_rcomm.
 Qed.
@@ -248,9 +241,8 @@ Lemma stype_step_idle n (ps : n.-tuple stype) (i : 'I_n) :
   ~~ (stype_step ps i).2 -> (stype_step ps i).1 = tnth ps i.
 Proof.
 rewrite /stype_step (tnth_nth STEnd).
-case: (nth STEnd ps i) => [j d k|j d k|] //=.
-  by case: (nth STEnd ps j) => // i' d' k'; case: ifP.
-by case: (nth STEnd ps j) => // i' d' k'; case: ifP.
+by case: (nth STEnd ps i) => [j ? ?|j ? ?|] //=;
+  case: (nth STEnd ps j) => // ? ? ?; case: ifP.
 Qed.
 
 (* Restricted to the active senders, the round is the full round. Every
@@ -260,19 +252,16 @@ Lemma stypes_round_on_active n (ps : n.-tuple stype) :
 Proof.
 apply: eq_from_tnth => i; rewrite !tnth_mktuple.
 case: ifP => // Hnt; apply/esym/stype_step_idle; apply: contraFN Hnt => Hf.
-rewrite /stype_touched.
-case Hi: (tnth ps i) => [j d k|j d k|].
-- by apply/orP; left; rewrite mem_filter mem_enum andbT /stype_send_fires Hi.
+rewrite /stype_touched; case Hi: (tnth ps i) => [j d k|j d k|].
+- by rewrite orbF mem_filter mem_enum andbT /stype_send_fires Hi.
 - apply/orP; right; rewrite Hf andbT.
-  move: Hf; rewrite (tnth_nth STEnd) in Hi; rewrite /stype_step Hi.
+  move: Hf; rewrite /stype_step -tnth_nth Hi.
   case Hj: (nth STEnd ps j) => [i' d' k'| |] //=.
   case: ifP => // /andP[/eqP Hii' /eqP Hdd'] _.
-  have hj : j < n.
-    rewrite -(size_tuple ps) ltnNge; apply/negP => /(nth_default STEnd).
-    by rewrite Hj.
+  have [hj|hj] := ltnP j n; last by move: Hj; rewrite nth_default ?size_tuple.
   apply/mapP; exists (Ordinal hj) => //.
-  rewrite mem_filter mem_enum andbT /stype_send_fires (tnth_nth STEnd) /=.
-  by rewrite Hj /stype_step Hj -Hii' Hi /= Hdd' !eqxx.
+  rewrite mem_filter mem_enum andbT /stype_send_fires (tnth_nth STEnd) /= Hj.
+  by rewrite /stype_step Hj -Hii' -tnth_nth Hi /= Hdd' !eqxx.
 - by move: Hf; rewrite /stype_step -(tnth_nth STEnd) Hi.
 Qed.
 
@@ -316,9 +305,8 @@ Lemma stypes_compat_rsteps n (ps : n.-tuple stype) :
   stypes_compat ps -> stype_rsteps ps [tuple STEnd | _ < n].
 Proof.
 rewrite /stypes_compat.
-have [ps' Hs ->] := @stypes_interp_sound n ps _ (leqnn _).
-move=> /all_tnthP Hall.
-suff -> : [tuple STEnd | _ < n] = ps' by [].
+have [ps' Hs ->] := stypes_interp_sound (leqnn (stypes_interp_fuel ps)).
+move=> /all_tnthP Hall; suff -> : [tuple STEnd | _ < n] = ps' by [].
 by apply: eq_from_tnth => i; rewrite tnth_mktuple (eqP (Hall i)).
 Qed.
 
