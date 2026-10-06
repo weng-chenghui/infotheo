@@ -103,6 +103,7 @@ smc/smc_interpreter.v
 smc/smc_interpreter_sound.v
 smc/graded_resource.v
 smc/smc_session_types.v
+smc/smc_session_types_sound.v
 smc/pismc.v
 du2002/spp_tactics.v
 du2002/spp_proba.v
