@@ -74,9 +74,8 @@ move=> Hs H; elim: H Hs => [l' {}ps qs' Hs' Hs | {}ps Hs
   by rewrite extract_inject_disj.
 - by right; split => //; exact: stype_rrefl.
 - case: (IH1 Hs) => [H12|[Hs2 H12]]; first by left; exact: stype_rtrans H12 Hr.
-  case: (IH2 Hs2) => [H23|[Hs3 H23]].
-    by left; exact: stype_rtrans H12 H23.
-  by right; split => //; exact: stype_rtrans H12 H23.
+  case: (IH2 Hs2) => [H23|[Hs3 H23]]; [left | right; split=> //];
+    exact: stype_rtrans H12 H23.
 Qed.
 
 (* One communication preserves `stypes_rcompat`, whichever available
@@ -121,13 +120,13 @@ Lemma stypes_rcompat_interp n h (ps : n.-tuple stype) :
   stypes_interp_fuel ps <= h -> stypes_rcompat ps ->
   all (eq_op STEnd) (stypes_interp h ps).
 Proof.
-elim: h ps => [|h IH] ps; first by rewrite /stypes_interp_fuel addn1.
-rewrite /stypes_interp_fuel addn1 ltnS => Hfuel Hend /=.
+elim: h ps => [|h IH] ps; rewrite /stypes_interp_fuel addn1 // ltnS.
+move=> Hfuel Hend /=.
 case: ifP => Hh.
   have := stypes_interp_fuel_step Hh; rewrite -val_stypes_round => Hf.
   apply: IH (leq_trans Hf Hfuel) _.
   exact: stypes_rcompat_rsteps (stype_step_sound ps) Hend.
-have [->|Hne] := eqVneq ps [tuple STEnd | _ < n].
+case: (eqVneq ps [tuple STEnd | _ < n]) => [->|Hne].
   by apply/allP => x /mapP[? _ ->].
 have [l [qs /stype_step_complete]] := stype_rsteps_first Hend Hne.
 move=> /(congr1 (fun t => tnth t ord0)) /=.
@@ -155,8 +154,8 @@ Lemma stypes_rcompat_kind_match n (ps : n.-tuple stype) (i j : 'I_n)
   stypes_rcompat ps ->
   tnth ps i = STSend j d si -> tnth ps j = STRecv i d' sj -> d = d'.
 Proof.
-move=> /stypes_compatP/stypes_compat_not_stuck/hasPn H Hi Hj.
-apply/eqP; apply: contraTT (H i _); last first.
+move=> /stypes_compatP/stypes_compat_not_stuck/hasPn Hns Hi Hj.
+apply/eqP; apply: contraTT (Hns i _); last first.
   by rewrite size_tuple mem_iota /= add0n ltn_ord.
 by rewrite /stype_stuck -!tnth_nth Hi -tnth_nth Hj eqxx /= => ->.
 Qed.
@@ -174,7 +173,7 @@ Lemma erase_aproc_Init (ap : aproc) x p :
   erase_aproc ap = Init x p ->
   exists2 ap' : aproc, erase_aproc ap' = p & aproc_env ap' = aproc_env ap.
 Proof.
-case: ap => party [n [env sp]]; rewrite /erase_aproc /=.
+case: ap => party [n [env sp]].
 case: n env / sp => //= n env d k [_ <-].
 by exists (mk_aproc k).
 Qed.
@@ -186,9 +185,9 @@ Lemma erase_aproc_Ret (ap : aproc) x :
   exists2 ap' : aproc,
     erase_aproc ap' = Finish & aproc_env ap' = aproc_env ap.
 Proof.
-case: ap => party [n [env sp]]; rewrite /erase_aproc /=.
+case: ap => party [n [env sp]].
 case: n env / sp => //= d _.
-by exists (mk_aproc (@SFinish dtype data party)).
+by exists (mk_aproc (SFinish (party:=party))).
 Qed.
 
 (* A typed process erasing to `Send j x p` has a send head to `j` and
@@ -198,7 +197,7 @@ Lemma erase_aproc_Send (ap : aproc) j x p :
   exists d, exists2 ap' : aproc,
     erase_aproc ap' = p & aproc_env ap = STSend j d (aproc_env ap').
 Proof.
-case: ap => party [n [env sp]]; rewrite /erase_aproc /=.
+case: ap => party [n [env sp]].
 case: n env / sp => //= n env dst dt d k [<- _ <-].
 by exists dt, (mk_aproc k).
 Qed.
@@ -212,7 +211,7 @@ Lemma erase_aproc_Recv (ap : aproc) i f :
     aproc_env ap = STRecv i d e &
     forall x, erase_aproc (g x) = f x /\ aproc_env (g x) = e.
 Proof.
-case: ap => party [n [env sp]]; rewrite /erase_aproc /=.
+case: ap => party [n [env sp]].
 case: n env / sp => //= n env src dt k [<- <-].
 by exists dt, env, (fun x => mk_aproc (k x)).
 Qed.
@@ -231,28 +230,17 @@ Lemma aprocs_rstep_lift n m (l : lens n m) (aps : n.-tuple aproc) ps' tr :
 Proof.
 move Hps: (extract l _) => psl H; case: H Hps => [i x p | i x | i j x pi pj]
   /(congr1 val) /=.
-- rewrite tnth_map => -[/erase_aproc_Init [ap' Hp Henv]] _.
+1,2: rewrite tnth_map => -[+] _;
+  (move/erase_aproc_Init || move/erase_aproc_Ret) => -[ap' Hp Henv];
   exists [tuple ap']; first by apply: val_inj; rewrite /= Hp.
-  rewrite map_inject.
-  have -> : map_tuple aproc_env [tuple ap'] =
-            [tuple tnth (map_tuple aproc_env aps) i].
-    by apply: val_inj; rewrite /= tnth_map Henv.
-  by rewrite inject1_id; apply: stype_rrefl.
-- rewrite tnth_map => -[/erase_aproc_Ret [ap' Hp Henv]] _.
-  exists [tuple ap']; first by apply: val_inj; rewrite /= Hp.
-  rewrite map_inject.
-  have -> : map_tuple aproc_env [tuple ap'] =
-            [tuple tnth (map_tuple aproc_env aps) i].
-    by apply: val_inj; rewrite /= tnth_map Henv.
-  by rewrite inject1_id; apply: stype_rrefl.
+1,2: rewrite map_inject (_ : map_tuple aproc_env [tuple ap'] =
+         [tuple tnth (map_tuple aproc_env aps) i]) ?inject1_id;
+  [exact: stype_rrefl | by apply: val_inj; rewrite /= tnth_map Henv].
 rewrite !tnth_map => -[/erase_aproc_Send [d [api Hpi Hei]]].
 move=> /erase_aproc_Recv [d' [e [g Hej Hg]]] Hend.
-have Hi : tnth (map_tuple aproc_env aps) i = STSend j d (aproc_env api).
-  by rewrite tnth_map.
-have Hj : tnth (map_tuple aproc_env aps) j = STRecv i d' e.
-  by rewrite tnth_map.
-have Edd := stypes_rcompat_kind_match Hend Hi Hj.
-case: (Hg x) => Hgx Hge.
+have Edd := stypes_rcompat_kind_match Hend
+  (etrans (tnth_map _ _ _) Hei) (etrans (tnth_map _ _ _) Hej).
+have [Hgx Hge] := Hg x.
 exists [tuple api; g x]; first by apply: val_inj; rewrite /= Hpi Hgx.
 rewrite map_inject.
 have -> : map_tuple aproc_env [tuple api; g x] =
@@ -297,9 +285,7 @@ Lemma aprocs_rsteps_preserve n (aps : n.-tuple aproc) ps' tr :
     stype_rsteps (map_tuple aproc_env aps) (map_tuple aproc_env aps') /\
     aprocs_compat aps'.
 Proof.
-move=> Hc Hr.
-have Hend : stypes_rcompat (map_tuple aproc_env aps) by apply/stypes_compatP.
-have [aps' Hps' Hst] := aprocs_rsteps_lift Hr Hend.
+move=> /stypes_compatP Hend /aprocs_rsteps_lift/(_ Hend)[aps' Hps' Hst].
 exists aps' => //; split => //.
 by apply/stypes_compatP; exact: stypes_rcompat_rsteps Hst Hend.
 Qed.
