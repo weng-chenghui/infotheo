@@ -46,11 +46,13 @@ End stype_rstep.
 
 (* `extract [tuple a; b] ps = [tuple tnth ps a; tnth ps b]` reads the types
    of parties `a` and `b` out of the `n`-party environment as a 2-tuple.
+
    `stype_rstep` is defined on that 2-tuple, the local view of the two
    parties, not on the `n`-tuple. A communication between `a` and `b`
    available in `ps` is therefore written
    `stype_rstep [tuple a; b] (extract [tuple a; b] ps) qs`, abbreviated
-   `stype_comm_available_at [tuple a; b] ps qs`. The converse
+   `stype_comm_available_at [tuple a; b] ps qs`.
+
    `inject [tuple a; b] ps qs` writes `qs` back at the positions `a` and
    `b` of `ps`; the other `n - 2` parties keep their types. When `qs` holds
    the two continuations, the result is the environment in which `a` and
