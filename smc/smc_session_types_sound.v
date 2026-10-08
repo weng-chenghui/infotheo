@@ -50,7 +50,10 @@ End stype_rstep.
    parties, not on the `n`-tuple. A communication between `a` and `b`
    available in `ps` is therefore written
    `stype_rstep [tuple a; b] (extract [tuple a; b] ps) qs`, abbreviated
-   `stype_comm_available_at [tuple a; b] ps qs`. *)
+   `stype_comm_available_at [tuple a; b] ps qs`. The converse
+   `inject [tuple a; b] ps qs` writes the two continuations `qs` back at
+   the positions `a` and `b` of `ps`; the other `n - 2` parties keep
+   their types. *)
 
 (* A communication between the two parties of `l`, available in `ps`, with
    continuations `qs`. *)
@@ -64,8 +67,9 @@ Local Notation stype := (stype dtype).
    environment. A reduction rewrites two coordinates through a lens and
    leaves the others unchanged. *)
 Inductive stype_rsteps {n} : n.-tuple stype -> n.-tuple stype -> Prop :=
-  | stype_rone (l : lens n 2) ps ps' :
-      stype_comm_available_at l ps ps' -> stype_rsteps ps (inject l ps ps')
+  | stype_rone (l : lens n 2) ps qs :
+      stype_comm_available_at l ps qs ->   (* `l` can communicate in `ps` *)
+      stype_rsteps ps (inject l ps qs)     (* `ps` with `qs` written at `l` *)
   | stype_rrefl ps : stype_rsteps ps ps
   | stype_rtrans ps1 ps2 ps3 :
       stype_rsteps ps1 ps2 -> stype_rsteps ps2 ps3 -> stype_rsteps ps1 ps3.
