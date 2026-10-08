@@ -17,11 +17,11 @@ Require Import ssr_ext smc_interpreter smc_session_types.
 (* a reduction path of the relational semantics.                              *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*        stype_rstep l qs qs' == one communication at the 2-lens l           *)
-(*      stype_rstep_at l ps qs == that communication, available in ps         *)
-(*          stype_rsteps ps ps' == reflexive transitive closure in n parties  *)
-(*               stypes_round ps == one parallel round of stype_step          *)
-(*               stype_fires ps i == party i fires in the round               *)
+(*            stype_rstep l qs qs' == one communication at the 2-lens l       *)
+(* stype_comm_available_at l ps qs == that communication, available in ps     *)
+(*             stype_rsteps ps ps' == reflexive transitive closure, n parties *)
+(*                 stypes_round ps == one parallel round of stype_step        *)
+(*                stype_fires ps i == party i fires in the round              *)
 (* ```                                                                        *)
 (******************************************************************************)
 
@@ -50,11 +50,11 @@ End stype_rstep.
    parties, not on the `n`-tuple. A communication between `a` and `b`
    available in `ps` is therefore written
    `stype_rstep [tuple a; b] (extract [tuple a; b] ps) qs`, abbreviated
-   `stype_rstep_at [tuple a; b] ps qs`. *)
+   `stype_comm_available_at [tuple a; b] ps qs`. *)
 
 (* A communication between the two parties of `l`, available in `ps`, with
    continuations `qs`. *)
-Notation stype_rstep_at l ps qs := (stype_rstep l (extract l ps) qs).
+Notation stype_comm_available_at l ps qs := (stype_rstep l (extract l ps) qs).
 
 Section stype_sound.
 Variable dtype : eqType.
@@ -65,7 +65,7 @@ Local Notation stype := (stype dtype).
    leaves the others unchanged. *)
 Inductive stype_rsteps {n} : n.-tuple stype -> n.-tuple stype -> Prop :=
   | stype_rone (l : lens n 2) ps ps' :
-      stype_rstep_at l ps ps' -> stype_rsteps ps (inject l ps ps')
+      stype_comm_available_at l ps ps' -> stype_rsteps ps (inject l ps ps')
   | stype_rrefl ps : stype_rsteps ps ps
   | stype_rtrans ps1 ps2 ps3 :
       stype_rsteps ps1 ps2 -> stype_rsteps ps2 ps3 -> stype_rsteps ps1 ps3.
@@ -93,7 +93,7 @@ Variant stype_rstep_spec n (ps : n.-tuple stype) (a b : 'I_n)
    and receive at `b`. The relation therefore contains head communications
    only. *)
 Lemma stype_rstepP n (ps : n.-tuple stype) (a b : 'I_n) qs :
-  stype_rstep_at [tuple a; b] ps qs <->
+  stype_comm_available_at [tuple a; b] ps qs <->
   stype_rstep_spec ps a b qs.
 Proof.
 split.
@@ -110,7 +110,7 @@ Qed.
    parties fire and receive their continuations. The round omits none of
    the reductions of the relational semantics. *)
 Lemma stype_step_complete n (l : lens n 2) (ps : n.-tuple stype) qs :
-  stype_rstep_at l ps qs ->
+  stype_comm_available_at l ps qs ->
   extract l (stypes_round ps) = qs /\ all (stype_fires ps) l.
 Proof.
 move Hps: (extract l ps) => psl H.
@@ -127,7 +127,7 @@ Qed.
    disjoint parties. Hence the communications of one round commute. *)
 Lemma stype_rstep_disjoint n (ps : n.-tuple stype) (l1 l2 : lens n 2)
     qs1 qs2 :
-  stype_rstep_at l1 ps qs1 -> stype_rstep_at l2 ps qs2 ->
+  stype_comm_available_at l1 ps qs1 -> stype_comm_available_at l2 ps qs2 ->
   l1 = l2 /\ qs1 = qs2 \/ {in l1 & l2, forall a b, a != b}.
 Proof.
 move Hp1: (extract l1 ps) => psl1 H1; move Hp2: (extract l2 ps) => psl2 H2.
@@ -199,7 +199,7 @@ Qed.
 Lemma stype_fires_rstep n (ps : n.-tuple stype) (i : 'I_n) :
   stype_fires ps i ->
   exists l : lens n 2,
-    exists2 qs, i \in l & stype_rstep_at l ps qs.
+    exists2 qs, i \in l & stype_comm_available_at l ps qs.
 Proof.
 move=> Hf; case Hi: (tnth ps i) => [j d k|a d k|].
 - have /stype_send_firesP[j' d' si sj Hi' Hj' _ _] : stype_send_fires ps i.

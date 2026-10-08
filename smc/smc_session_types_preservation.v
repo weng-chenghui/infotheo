@@ -58,9 +58,9 @@ Definition stypes_rcompat n (ps : n.-tuple stype) : Prop :=
    it available and commutes with it. It is the commutation property behind
    the preservation of `stypes_rcompat`. *)
 Lemma stype_rsteps_commute n (ps ps' : n.-tuple stype) (l : lens n 2) qs :
-  stype_rstep_at l ps qs -> stype_rsteps ps ps' ->
+  stype_comm_available_at l ps qs -> stype_rsteps ps ps' ->
   stype_rsteps (inject l ps qs) ps' \/
-  stype_rstep_at l ps' qs /\
+  stype_comm_available_at l ps' qs /\
   stype_rsteps (inject l ps qs) (inject l ps' qs).
 Proof.
 move=> Hs H; elim: H Hs => [l' {}ps qs' Hs' Hs | {}ps Hs
@@ -82,7 +82,7 @@ Qed.
    communication is chosen. The schedule therefore does not affect whether
    the session can end. *)
 Lemma stypes_rcompat_rstep n (ps : n.-tuple stype) (l : lens n 2) qs :
-  stype_rstep_at l ps qs ->
+  stype_comm_available_at l ps qs ->
   stypes_rcompat ps -> stypes_rcompat (inject l ps qs).
 Proof.
 move=> Hs He; case: (stype_rsteps_commute Hs He) => [//|[]].
@@ -105,7 +105,7 @@ Qed.
    communication reaches only itself. *)
 Lemma stype_rsteps_first n (ps ps' : n.-tuple stype) :
   stype_rsteps ps ps' -> ps != ps' ->
-  exists (l : lens n 2) qs, stype_rstep_at l ps qs.
+  exists (l : lens n 2) qs, stype_comm_available_at l ps qs.
 Proof.
 move=> H /eqP; elim: H => {ps ps'}
   [l ps qs H _ | ps /(_ erefl) // | ps1 ps2 ps3 _ IH1 _ IH2 Hne].
