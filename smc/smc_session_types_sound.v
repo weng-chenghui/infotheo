@@ -350,7 +350,7 @@ Qed.
    all-ended environment. Compatibility, defined through one parallel
    schedule, implies that the session can be completed in the relational
    semantics. *)
-Lemma stypes_compat_rsteps n (ps : n.-tuple stype) :
+Corollary stypes_compat_rsteps n (ps : n.-tuple stype) :
   stypes_compat ps -> stype_rsteps ps [tuple STEnd | _ < n].
 Proof.
 rewrite /stypes_compat.
