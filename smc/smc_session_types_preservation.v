@@ -13,8 +13,6 @@ Require Import smc_session_types_sound.
 (* `stypes_rcompat`, is preserved.                                            *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*        stypes_rcompat ps == ps reduces by stype_rsteps to all STEnd        *)
-(*          stypes_compatP == stypes_compat reflects stypes_rcompat           *)
 (*       aprocs_rstep_lift == one rstep of the erased processes lifts         *)
 (*  aprocs_rsteps_preserve == compatibility is preserved along rsteps         *)
 (* ```                                                                        *)
@@ -43,122 +41,6 @@ Proof.
 apply: eq_from_tnth => k; rewrite tnth_mktuple /=.
 by case: (eqVneq i k) => [->|ik] /=; rewrite ?eqxx // eq_sym (negbTE ik).
 Qed.
-
-Section stypes_rcompat.
-Variable dtype : eqType.
-Local Notation stype := (stype dtype).
-
-(* The environment reduces by pairwise communications to the all-ended
-   environment. It is the schedule-free form of `stypes_compat` and the
-   invariant one communication preserves. *)
-Definition stypes_rcompat n (ps : n.-tuple stype) : Prop :=
-  stype_rsteps ps [tuple STEnd | _ < n].
-
-(* A path from `ps` either can begin with the communication at `l`, or keeps
-   it available and commutes with it. It is the commutation property behind
-   the preservation of `stypes_rcompat`. *)
-Lemma stype_rsteps_commute n (ps ps' : n.-tuple stype) (l : lens n 2) qs :
-  stype_comm_available_at l ps qs -> stype_rsteps ps ps' ->
-  stype_rsteps (stypes_continue_at l ps qs) ps' \/
-  stype_comm_available_at l ps' qs /\
-  stype_rsteps (stypes_continue_at l ps qs) (stypes_continue_at l ps' qs).
-Proof.
-move=> Hs H; elim: H Hs => [l' {}ps qs' Hs' Hs | {}ps Hs
-                           | ps1 ps2 ps3 _ IH1 Hr IH2 Hs].
-- case: (stype_rstep_disjoint Hs Hs') => [[<- <-]|Hd].
-    by left; exact: stype_rrefl.
-  have Hd' : {in l' & l, forall a b : 'I_n, a != b}.
-    by move=> a b ha hb; rewrite eq_sym; exact: Hd.
-  right; split; first by rewrite extract_inject_disj.
-  rewrite (injectC_disj _ _ _ Hd'); apply: stype_rone.
-  by rewrite extract_inject_disj.
-- by right; split => //; exact: stype_rrefl.
-- case: (IH1 Hs) => [H12|[Hs2 H12]]; first by left; exact: stype_rtrans H12 Hr.
-  case: (IH2 Hs2) => [H23|[Hs3 H23]]; [left | right; split=> //];
-    exact: stype_rtrans H12 H23.
-Qed.
-
-(* One communication preserves `stypes_rcompat`, whichever available
-   communication is chosen. The schedule therefore does not affect whether
-   the session can end. *)
-Lemma stypes_rcompat_rstep n (ps : n.-tuple stype) (l : lens n 2) qs :
-  stype_comm_available_at l ps qs ->
-  stypes_rcompat ps -> stypes_rcompat (stypes_continue_at l ps qs).
-Proof.
-move=> Hs He; case: (stype_rsteps_commute Hs He) => [//|[]].
-move Hx: (extract l _) => x H; case: H Hx => i j d si sj /(congr1 val) /=.
-by rewrite !tnth_mktuple.
-Qed.
-
-(* Any sequence of communications preserves `stypes_rcompat`. Every
-   environment reachable from a compatible one can therefore still end. *)
-Lemma stypes_rcompat_rsteps n (ps ps' : n.-tuple stype) :
-  stype_rsteps ps ps' -> stypes_rcompat ps -> stypes_rcompat ps'.
-Proof.
-elim=> [l {}ps qs Hs|//|ps1 ps2 ps3 _ IH1 _ IH2] He.
-  exact: stypes_rcompat_rstep Hs He.
-exact/IH2/IH1.
-Qed.
-
-(* A path between distinct environments starts with a communication
-   available in its source. Hence an environment with no available
-   communication reaches only itself. *)
-Lemma stype_rsteps_first n (ps ps' : n.-tuple stype) :
-  stype_rsteps ps ps' -> ps != ps' ->
-  exists (l : lens n 2) qs, stype_comm_available_at l ps qs.
-Proof.
-move=> H /eqP; elim: H => {ps ps'}
-  [l ps qs H _ | ps /(_ erefl) // | ps1 ps2 ps3 _ IH1 _ IH2 Hne].
-  by exists l, qs.
-case: (eqVneq ps1 ps2) => [E|/eqP /IH1 //].
-by move: Hne; rewrite E => /IH2.
-Qed.
-
-(* The parallel schedule completes every session the relational semantics
-   can complete, given fuel at least `stypes_interp_fuel ps`. *)
-Lemma stypes_rcompat_interp n h (ps : n.-tuple stype) :
-  stypes_interp_fuel ps <= h -> stypes_rcompat ps ->
-  all (eq_op STEnd) (stypes_interp h ps).
-Proof.
-elim: h ps => [|h IH] ps; rewrite /stypes_interp_fuel addn1 // ltnS.
-move=> Hfuel Hend /=.
-case: ifP => Hh.
-  have := stypes_interp_fuel_step Hh; rewrite -val_stypes_round => Hf.
-  apply: IH (leq_trans Hf Hfuel) _.
-  exact: stypes_rcompat_rsteps (stype_step_sound ps) Hend.
-case: (eqVneq ps [tuple STEnd | _ < n]) => [->|Hne].
-  by apply/allP => x /mapP[? _ ->].
-have [l [qs /stype_step_complete [_ /allP Hf]]] := stype_rsteps_first Hend Hne.
-case/negP: (negbT Hh); apply/hasP; exists (stype_step ps (tnth l ord0)).
-  by apply: map_f; rewrite mem_iota size_tuple /=.
-exact: Hf (mem_tnth _ _).
-Qed.
-
-(* The decidable `stypes_compat` and the relational `stypes_rcompat` hold for
-   the same environments. Compatibility can be computed and reasoned about
-   one communication at a time. *)
-Lemma stypes_compatP n (ps : n.-tuple stype) :
-  reflect (stypes_rcompat ps) (stypes_compat ps).
-Proof.
-apply: (iffP idP); first exact: stypes_compat_rsteps.
-exact: stypes_rcompat_interp (leqnn (stypes_interp_fuel ps)).
-Qed.
-
-(* In an environment that can end, a send head and the receive head it names
-   agree on the data kind. It is the communication safety that lets a
-   process communication lift to a type communication. *)
-Lemma stypes_rcompat_kind_match n (ps : n.-tuple stype) (i j : 'I_n)
-    d d' si sj :
-  stypes_rcompat ps ->
-  tnth ps i = STSend j d si -> tnth ps j = STRecv i d' sj -> d = d'.
-Proof.
-move=> /stypes_compatP/stypes_compat_not_stuck/hasPn Hns Hi Hj.
-apply/eqP; apply: contraTT (Hns i _); last first.
-  by rewrite size_tuple mem_iota /= add0n ltn_ord.
-by rewrite /stype_stuck -!tnth_nth Hi -tnth_nth Hj eqxx /= => ->.
-Qed.
-
-End stypes_rcompat.
 
 Section aprocs_preservation.
 Variables (dtype : eqType) (data : Type).
