@@ -59,9 +59,9 @@ Definition stypes_rcompat n (ps : n.-tuple stype) : Prop :=
    the preservation of `stypes_rcompat`. *)
 Lemma stype_rsteps_commute n (ps ps' : n.-tuple stype) (l : lens n 2) qs :
   stype_comm_available_at l ps qs -> stype_rsteps ps ps' ->
-  stype_rsteps (inject l ps qs) ps' \/
+  stype_rsteps (stypes_continue_at l ps qs) ps' \/
   stype_comm_available_at l ps' qs /\
-  stype_rsteps (inject l ps qs) (inject l ps' qs).
+  stype_rsteps (stypes_continue_at l ps qs) (stypes_continue_at l ps' qs).
 Proof.
 move=> Hs H; elim: H Hs => [l' {}ps qs' Hs' Hs | {}ps Hs
                            | ps1 ps2 ps3 _ IH1 Hr IH2 Hs].
@@ -83,7 +83,7 @@ Qed.
    the session can end. *)
 Lemma stypes_rcompat_rstep n (ps : n.-tuple stype) (l : lens n 2) qs :
   stype_comm_available_at l ps qs ->
-  stypes_rcompat ps -> stypes_rcompat (inject l ps qs).
+  stypes_rcompat ps -> stypes_rcompat (stypes_continue_at l ps qs).
 Proof.
 move=> Hs He; case: (stype_rsteps_commute Hs He) => [//|[]].
 move Hx: (extract l _) => x H; case: H Hx => i j d si sj /(congr1 val) /=.

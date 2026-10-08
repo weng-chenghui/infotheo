@@ -51,25 +51,29 @@ End stype_rstep.
    available in `ps` is therefore written
    `stype_rstep [tuple a; b] (extract [tuple a; b] ps) qs`, abbreviated
    `stype_comm_available_at [tuple a; b] ps qs`. The converse
-   `inject [tuple a; b] ps qs` writes the two continuations `qs` back at
-   the positions `a` and `b` of `ps`; the other `n - 2` parties keep
-   their types. *)
+   `inject [tuple a; b] ps qs` writes `qs` back at the positions `a` and
+   `b` of `ps`; the other `n - 2` parties keep their types. When `qs` holds
+   the two continuations, the result is the environment in which `a` and
+   `b` have continued, `stypes_continue_at [tuple a; b] ps qs`. *)
 
 (* A communication between the two parties of `l`, available in `ps`, with
    continuations `qs`. *)
 Notation stype_comm_available_at l ps qs := (stype_rstep l (extract l ps) qs).
 
+(* The environment `ps` after the two parties of `l` continue as `qs`. *)
+Notation stypes_continue_at l ps qs := (inject l ps qs).
+
 Section stype_sound.
 Variable dtype : eqType.
 Local Notation stype := (stype dtype).
 
-(* Reflexive transitive closure of `stype_rstep` inside an `n`-party
-   environment. A reduction rewrites two coordinates through a lens and
-   leaves the others unchanged. *)
+(* `stype_rsteps ps ps'` holds when `ps'` is reachable from `ps` by zero or
+   more communications. One communication rewrites the two parties of a
+   lens and leaves the others unchanged. *)
 Inductive stype_rsteps {n} : n.-tuple stype -> n.-tuple stype -> Prop :=
   | stype_rone (l : lens n 2) ps qs :
-      stype_comm_available_at l ps qs ->   (* `l` can communicate in `ps` *)
-      stype_rsteps ps (inject l ps qs)     (* `ps` with `qs` written at `l` *)
+      stype_comm_available_at l ps qs ->
+      stype_rsteps ps (stypes_continue_at l ps qs)
   | stype_rrefl ps : stype_rsteps ps ps
   | stype_rtrans ps1 ps2 ps3 :
       stype_rsteps ps1 ps2 -> stype_rsteps ps2 ps3 -> stype_rsteps ps1 ps3.
@@ -262,8 +266,8 @@ have Hext : extract [tuple a; b] (stypes_round_on s ps) =
     [tuple STSend b d sa; STRecv a d sb].
   apply: val_inj => /=; rewrite !tnth_mktuple /stype_active_on.
   by rewrite (negbTE Has) (negbTE Hbs) Ha Hb /= (mem_map val_inj) (negbTE Has).
-have Hinj : inject [tuple a; b] (stypes_round_on s ps) [tuple sa; sb] =
-    stypes_round_on (a :: s) ps.
+have Hinj : stypes_continue_at [tuple a; b] (stypes_round_on s ps)
+    [tuple sa; sb] = stypes_round_on (a :: s) ps.
   apply: eq_from_tnth => i; rewrite !tnth_mktuple /=.
   case: eqP => [<-|/eqP Hai]; first by rewrite /stype_active_on mem_head Hsa.
   case: eqP => [<-|/eqP Hbi].
