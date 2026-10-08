@@ -323,7 +323,7 @@ Proof. by rewrite size_tuple /unzip1 -map_comp map_iota_tuple. Qed.
 (* One parallel round of `stype_step` is a sequence of pairwise
    communications. Every environment the functional interpreter reaches in
    a round is reachable in the relational semantics. *)
-Lemma stype_step_sound n (ps : n.-tuple stype) :
+Theorem stype_step_sound n (ps : n.-tuple stype) :
   stype_rsteps ps (stypes_round ps).
 Proof.
 rewrite -stypes_round_on_active.
