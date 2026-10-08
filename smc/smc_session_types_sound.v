@@ -18,8 +18,10 @@ Require Import ssr_ext smc_interpreter smc_session_types.
 (*                                                                            *)
 (* ```                                                                        *)
 (*        stype_rstep l qs qs' == one communication at the 2-lens l           *)
+(*      stype_rstep_at l ps qs == that communication, available in ps         *)
 (*          stype_rsteps ps ps' == reflexive transitive closure in n parties  *)
 (*               stypes_round ps == one parallel round of stype_step          *)
+(*               stype_fires ps i == party i fires in the round               *)
 (* ```                                                                        *)
 (******************************************************************************)
 
@@ -27,7 +29,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-Section stype_sound.
+Section stype_rstep.
 Variable dtype : eqType.
 Local Notation stype := (stype dtype).
 
@@ -40,12 +42,30 @@ Variant stype_rstep {n} :
       stype_rstep [tuple i; j]
         [tuple STSend j d si; STRecv i d sj] [tuple si; sj].
 
+End stype_rstep.
+
+(* `extract [tuple a; b] ps = [tuple tnth ps a; tnth ps b]` reads the types
+   of parties `a` and `b` out of the `n`-party environment as a 2-tuple.
+   `stype_rstep` is defined on that 2-tuple, the local view of the two
+   parties, not on the `n`-tuple. A communication between `a` and `b`
+   available in `ps` is therefore written
+   `stype_rstep [tuple a; b] (extract [tuple a; b] ps) qs`, abbreviated
+   `stype_rstep_at [tuple a; b] ps qs`. *)
+
+(* A communication between the two parties of `l`, available in `ps`, with
+   continuations `qs`. *)
+Notation stype_rstep_at l ps qs := (stype_rstep l (extract l ps) qs).
+
+Section stype_sound.
+Variable dtype : eqType.
+Local Notation stype := (stype dtype).
+
 (* Reflexive transitive closure of `stype_rstep` inside an `n`-party
    environment. A reduction rewrites two coordinates through a lens and
    leaves the others unchanged. *)
 Inductive stype_rsteps {n} : n.-tuple stype -> n.-tuple stype -> Prop :=
   | stype_rone (l : lens n 2) ps ps' :
-      stype_rstep l (extract l ps) ps' -> stype_rsteps ps (inject l ps ps')
+      stype_rstep_at l ps ps' -> stype_rsteps ps (inject l ps ps')
   | stype_rrefl ps : stype_rsteps ps ps
   | stype_rtrans ps1 ps2 ps3 :
       stype_rsteps ps1 ps2 -> stype_rsteps ps2 ps3 -> stype_rsteps ps1 ps3.
@@ -55,8 +75,14 @@ Inductive stype_rsteps {n} : n.-tuple stype -> n.-tuple stype -> Prop :=
 Definition stypes_round n (ps : n.-tuple stype) : n.-tuple stype :=
   [tuple (stype_step ps i).1 | i < n].
 
-(* Party `a` holds a send to `b` and `b` the receive from `a` of the same
-   kind. `qs` holds the two continuations. *)
+(* Party `i` fires in the round: `stype_step` consumes its head and returns
+   the flag `true`. *)
+Definition stype_fires n (ps : n.-tuple stype) (i : 'I_n) : bool :=
+  (stype_step ps i).2.
+
+(* Party `a` sends kind `d` to `b` and continues as `sa`, party `b`
+   receives kind `d` from `a` and continues as `sb`. `qs` is the pair
+   `(sa, sb)`. *)
 Variant stype_rstep_spec n (ps : n.-tuple stype) (a b : 'I_n)
     (qs : 2.-tuple stype) : Prop :=
   | StypeRstepComm d sa sb of
@@ -67,7 +93,7 @@ Variant stype_rstep_spec n (ps : n.-tuple stype) (a b : 'I_n)
    and receive at `b`. The relation therefore contains head communications
    only. *)
 Lemma stype_rstepP n (ps : n.-tuple stype) (a b : 'I_n) qs :
-  stype_rstep [tuple a; b] (extract [tuple a; b] ps) qs <->
+  stype_rstep_at [tuple a; b] ps qs <->
   stype_rstep_spec ps a b qs.
 Proof.
 split.
@@ -80,25 +106,28 @@ have -> : extract [tuple a; b] ps = [tuple STSend b d sa; STRecv a d sb].
 exact: stype_rcomm.
 Qed.
 
-(* Every communication available in `ps` is performed by the round at both
-   of its parties. The round omits none of the reductions of the relational
-   semantics. *)
+(* Every communication available in `ps` is performed by the round: both
+   parties fire and receive their continuations. The round omits none of
+   the reductions of the relational semantics. *)
 Lemma stype_step_complete n (l : lens n 2) (ps : n.-tuple stype) qs :
-  stype_rstep l (extract l ps) qs ->
-  extract l [tuple stype_step ps i | i < n] =
-  map_tuple (pair^~ true) qs.
+  stype_rstep_at l ps qs ->
+  extract l (stypes_round ps) = qs /\ all (stype_fires ps) l.
 Proof.
 move Hps: (extract l ps) => psl H.
 case: H Hps => i j d si sj /(congr1 val) /= [Hi Hj].
-apply: val_inj; rewrite /= !tnth_mktuple /stype_step.
-by rewrite -!tnth_nth Hi Hj -!tnth_nth Hi Hj !eqxx.
+have Hsi : stype_step ps i = (si, true).
+  by rewrite /stype_step -tnth_nth Hi -tnth_nth Hj !eqxx.
+have Hsj : stype_step ps j = (sj, true).
+  by rewrite /stype_step -tnth_nth Hj -tnth_nth Hi !eqxx.
+split; first by apply: val_inj; rewrite /= !tnth_mktuple Hsi Hsj.
+by rewrite /stype_fires Hsi Hsj.
 Qed.
 
 (* Two reductions available in one environment are equal or act on
    disjoint parties. Hence the communications of one round commute. *)
 Lemma stype_rstep_disjoint n (ps : n.-tuple stype) (l1 l2 : lens n 2)
     qs1 qs2 :
-  stype_rstep l1 (extract l1 ps) qs1 -> stype_rstep l2 (extract l2 ps) qs2 ->
+  stype_rstep_at l1 ps qs1 -> stype_rstep_at l2 ps qs2 ->
   l1 = l2 /\ qs1 = qs2 \/ {in l1 & l2, forall a b, a != b}.
 Proof.
 move Hp1: (extract l1 ps) => psl1 H1; move Hp2: (extract l2 ps) => psl2 H2.
@@ -117,25 +146,27 @@ Qed.
 (* Party `i` holds a send head whose matching receive is present, so the
    round consumes both. *)
 Definition stype_send_fires n (ps : n.-tuple stype) (i : 'I_n) : bool :=
-  if tnth ps i is STSend _ _ _ then (stype_step ps i).2 else false.
+  if tnth ps i is STSend _ _ _ then stype_fires ps i else false.
 
 (* The senders whose communication the round performs, in index order.
    Each performed communication appears once, from its send side. *)
 Definition stypes_active_senders n (ps : n.-tuple stype) : seq 'I_n :=
   [seq i <- enum 'I_n | stype_send_fires ps i].
 
-(* A firing sender `i` names a valid party `j` holding the matching
-   receive. The round gives both parties their continuations. *)
+(* Sender `i` sends kind `d` to `j`, `j` receives kind `d` from `i`, and
+   the round gives `i` the pair `(si, true)` and `j` the pair `(sj, true)`. *)
 Variant stype_send_fires_spec n (ps : n.-tuple stype) (i : 'I_n) : Prop :=
   | StypeSendComm (j : 'I_n) d si sj of
       tnth ps i = STSend j d si & tnth ps j = STRecv i d sj
       & stype_step ps i = (si, true) & stype_step ps j = (sj, true)
     : stype_send_fires_spec ps i.
 
+(* A firing sender has a receiver that exists, matches its kind and fires in
+   the same round. *)
 Lemma stype_send_firesP n (ps : n.-tuple stype) (i : 'I_n) :
   stype_send_fires ps i -> stype_send_fires_spec ps i.
 Proof.
-rewrite /stype_send_fires; case Ha: (tnth ps i) => [j d sa|//|//].
+rewrite /stype_send_fires /stype_fires; case Ha: (tnth ps i) => [j d sa|//|//].
 rewrite /stype_step -tnth_nth Ha.
 have [jn|jn] := ltnP j n; last by rewrite nth_default ?size_tuple.
 have -> : nth STEnd ps j = tnth ps (Ordinal jn) by rewrite (tnth_nth STEnd).
@@ -149,64 +180,66 @@ have Hss : stype_step ps (Ordinal jn) = (sb, true).
 exact: (StypeSendComm (j := Ordinal jn)) Ha Hb Hsa Hss.
 Qed.
 
-(* A receiver that fires on a message from sender `a` is the party `a`
-   names. *)
+(* Only the receiver that `a` addresses can fire on the send of `a`. Two
+   receivers waiting on `a` cannot both fire. *)
 Lemma stype_step_recv_matched n (ps : n.-tuple stype) (a b i : 'I_n)
     d sa d' k :
-  tnth ps a = STSend b d sa -> tnth ps i = STRecv a d' k ->
-  (stype_step ps i).2 -> i = b.
+  tnth ps a = STSend b d sa ->   (* `a` sends to `b` *)
+  tnth ps i = STRecv a d' k ->   (* `i` waits on a message from `a` *)
+  stype_fires ps i ->            (* `i` fires in the round *)
+  i = b.                         (* so `i` is `b` *)
 Proof.
-rewrite !(tnth_nth STEnd) => Ha Hi.
+rewrite /stype_fires !(tnth_nth STEnd) => Ha Hi.
 by rewrite /stype_step Hi Ha /=; case: ifP => // /andP[/eqP/val_inj ->].
 Qed.
 
 (* Every party that fires in the round belongs to a communication
    available in `ps`. Together with completeness, the round performs
    exactly the available communications. *)
-Lemma stype_step_fires n (ps : n.-tuple stype) (i : 'I_n) :
-  (stype_step ps i).2 ->
+Lemma stype_fires_rstep n (ps : n.-tuple stype) (i : 'I_n) :
+  stype_fires ps i ->
   exists l : lens n 2,
-    exists2 qs, i \in l & stype_rstep l (extract l ps) qs.
+    exists2 qs, i \in l & stype_rstep_at l ps qs.
 Proof.
 move=> Hf; case Hi: (tnth ps i) => [j d k|a d k|].
 - have /stype_send_firesP[j' d' si sj Hi' Hj' _ _] : stype_send_fires ps i.
     by rewrite /stype_send_fires Hi.
   exists [tuple i; j'], [tuple si; sj]; first by rewrite !inE eqxx.
   by apply/stype_rstepP; apply: StypeRstepComm Hi' Hj' _.
-- move: (Hf); rewrite /stype_step -tnth_nth Hi.
+- move: (Hf); rewrite /stype_fires /stype_step -tnth_nth Hi.
   case Hj: (nth STEnd ps a) => [i' d' k'| |] //=.
   case: ifP => // /andP[/eqP Hii' /eqP Hdd'] _.
   have [ha|ha] := ltnP a n; last by move: Hj; rewrite nth_default ?size_tuple.
   have /stype_send_firesP[j' d1 sa sb Ha Hb _ _] :
       stype_send_fires ps (Ordinal ha).
-    rewrite /stype_send_fires (tnth_nth STEnd) /= Hj /stype_step Hj -Hii'.
-    by rewrite -tnth_nth Hi /= Hdd' !eqxx.
+    rewrite /stype_send_fires /stype_fires (tnth_nth STEnd) /= Hj.
+    by rewrite /stype_step Hj -Hii' -tnth_nth Hi /= Hdd' !eqxx.
   have Eij := stype_step_recv_matched Ha Hi Hf; rewrite -{}Eij in Ha Hb.
   exists [tuple Ordinal ha; i], [tuple sa; sb]; first by rewrite !inE eqxx orbT.
   by apply/stype_rstepP; apply: StypeRstepComm Ha Hb _.
-- by move: Hf; rewrite /stype_step -(tnth_nth STEnd) Hi.
+- by move: Hf; rewrite /stype_fires /stype_step -(tnth_nth STEnd) Hi.
 Qed.
 
-(* Party `i` is a sender in `s` or the receiver matched with a firing
-   sender in `s`. *)
-Definition stype_touched n (s : seq 'I_n) (ps : n.-tuple stype)
+(* Party `i` is one of the senders `s`, or a receiver that waits on a sender
+   in `s` and fires in the round. *)
+Definition stype_active_on n (s : seq 'I_n) (ps : n.-tuple stype)
     (i : 'I_n) : bool :=
   (i \in s) ||
   (if tnth ps i is STRecv a _ _
-   then (a \in map val s) && (stype_step ps i).2 else false).
+   then (a \in map val s) && stype_fires ps i else false).
 
 (* The round restricted to the senders in `s` and their matched receivers.
    Every other party keeps its type. *)
 Definition stypes_round_on n (s : seq 'I_n) (ps : n.-tuple stype) :
     n.-tuple stype :=
-  [tuple if stype_touched s ps i then (stype_step ps i).1 else tnth ps i
+  [tuple if stype_active_on s ps i then (stype_step ps i).1 else tnth ps i
   | i < n].
 
 (* The round restricted to no sender leaves every session type in place. *)
 Lemma stypes_round_on_nil n (ps : n.-tuple stype) :
   stypes_round_on [::] ps = ps.
 Proof.
-apply: eq_from_tnth => i; rewrite tnth_mktuple /stype_touched /=.
+apply: eq_from_tnth => i; rewrite tnth_mktuple /stype_active_on /=.
 by case: (tnth ps i).
 Qed.
 
@@ -223,20 +256,20 @@ have Hbs : b \notin s.
   by apply/negP => /(allP Hall); rewrite /stype_send_fires Hb.
 have Hext : extract [tuple a; b] (stypes_round_on s ps) =
     [tuple STSend b d sa; STRecv a d sb].
-  apply: val_inj => /=; rewrite !tnth_mktuple /stype_touched.
+  apply: val_inj => /=; rewrite !tnth_mktuple /stype_active_on.
   by rewrite (negbTE Has) (negbTE Hbs) Ha Hb /= (mem_map val_inj) (negbTE Has).
 have Hinj : inject [tuple a; b] (stypes_round_on s ps) [tuple sa; sb] =
     stypes_round_on (a :: s) ps.
   apply: eq_from_tnth => i; rewrite !tnth_mktuple /=.
-  case: eqP => [<-|/eqP Hai]; first by rewrite /stype_touched mem_head Hsa.
+  case: eqP => [<-|/eqP Hai]; first by rewrite /stype_active_on mem_head Hsa.
   case: eqP => [<-|/eqP Hbi].
-    by rewrite /stype_touched Hb /= mem_head Hsb orbT.
+    by rewrite /stype_active_on /stype_fires Hb /= mem_head Hsb orbT.
   congr (if _ then _ else _).
-  rewrite /stype_touched in_cons (eq_sym i) (negbTE Hai) /=.
+  rewrite /stype_active_on in_cons (eq_sym i) (negbTE Hai) /=.
   case Hi: (tnth ps i) => [j d' k|j d' k|] //=.
   rewrite in_cons; case: eqP Hi => [-> Hi|] //=.
   rewrite (mem_map val_inj) (negbTE Has) /=.
-  suff -> : (stype_step ps i).2 = false by [].
+  suff -> : stype_fires ps i = false by [].
   by apply/negbTE; apply: contra Hbi => /(stype_step_recv_matched Ha Hi) ->.
 apply: stype_rtrans (IH Hu Hall) _.
 by rewrite -Hinj; apply: stype_rone; rewrite Hext; apply: stype_rcomm.
@@ -244,9 +277,9 @@ Qed.
 
 (* A party that does not fire keeps its session type. *)
 Lemma stype_step_idle n (ps : n.-tuple stype) (i : 'I_n) :
-  ~~ (stype_step ps i).2 -> (stype_step ps i).1 = tnth ps i.
+  ~~ stype_fires ps i -> (stype_step ps i).1 = tnth ps i.
 Proof.
-rewrite /stype_step (tnth_nth STEnd).
+rewrite /stype_fires /stype_step (tnth_nth STEnd).
 by case: (nth STEnd ps i) => [j ? ?|j ? ?|] //=;
   case: (nth STEnd ps j) => // ? ? ?; case: ifP.
 Qed.
@@ -258,17 +291,17 @@ Lemma stypes_round_on_active n (ps : n.-tuple stype) :
 Proof.
 apply: eq_from_tnth => i; rewrite !tnth_mktuple.
 case: ifP => // Hnt; apply/esym/stype_step_idle; apply: contraFN Hnt => Hf.
-rewrite /stype_touched; case Hi: (tnth ps i) => [j d k|j d k|].
+rewrite /stype_active_on; case Hi: (tnth ps i) => [j d k|j d k|].
 - by rewrite orbF mem_filter mem_enum andbT /stype_send_fires Hi.
 - apply/orP; right; rewrite Hf andbT.
-  move: Hf; rewrite /stype_step -tnth_nth Hi.
+  move: Hf; rewrite /stype_fires /stype_step -tnth_nth Hi.
   case Hj: (nth STEnd ps j) => [i' d' k'| |] //=.
   case: ifP => // /andP[/eqP Hii' /eqP Hdd'] _.
   have [hj|hj] := ltnP j n; last by move: Hj; rewrite nth_default ?size_tuple.
   apply/mapP; exists (Ordinal hj) => //.
   rewrite mem_filter mem_enum andbT /stype_send_fires (tnth_nth STEnd) /= Hj.
-  by rewrite /stype_step Hj -Hii' -tnth_nth Hi /= Hdd' !eqxx.
-- by move: Hf; rewrite /stype_step -(tnth_nth STEnd) Hi.
+  by rewrite /stype_fires /stype_step Hj -Hii' -tnth_nth Hi /= Hdd' !eqxx.
+- by move: Hf; rewrite /stype_fires /stype_step -(tnth_nth STEnd) Hi.
 Qed.
 
 (* The tuple round is the seq round that `stypes_interp` iterates. It
@@ -281,9 +314,9 @@ Proof. by rewrite size_tuple /unzip1 -map_comp map_iota_tuple. Qed.
    communications. Every environment the functional interpreter reaches in
    a round is reachable in the relational semantics. *)
 Lemma stype_step_sound n (ps : n.-tuple stype) :
-  stype_rsteps ps [tuple (stype_step ps i).1 | i < n].
+  stype_rsteps ps (stypes_round ps).
 Proof.
-rewrite -/(stypes_round ps) -stypes_round_on_active.
+rewrite -stypes_round_on_active.
 apply: stypes_round_on_sound; first exact: filter_uniq (enum_uniq _).
 exact: filter_all.
 Qed.
