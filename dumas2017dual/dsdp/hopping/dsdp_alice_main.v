@@ -430,6 +430,28 @@ Definition charlie_challenge_adversary
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
+(* The real game is the IND-CPA sampling program at Bob's key with V2 in the
+   challenge.  Bob's coin Rho2 becomes the challenger's fresh coin. *)
+Lemma hop0_real_fdistE :
+  `p_ [% V2, V3, alice_tuple_real]
+  = indcpa_fdist Hop0State bob_pkey (fun c : hop0_stateT => c.1.1.1.1)
+      hop0_assemble.
+Proof.
+rewrite -(protocol_indcpa_fdistE _ _ _ hop0_state_prodE) /dist_of_RV.
+congr fdistmap.
+by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+Qed.
+
+(* The Bob-zero game is the same program with 0 in the challenge. *)
+Lemma hop0_zero_fdistE :
+  `p_ [% V2, V3, alice_tuple_bob_zero]
+  = indcpa_fdist Hop0State bob_pkey (fun _ : hop0_stateT => 0) hop0_assemble.
+Proof.
+rewrite -(protocol_indcpa_fdistE _ _ _ hop0_state_prodE) /dist_of_RV.
+congr fdistmap.
+by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+Qed.
+
 (* D's acceptance probability on the real experiment equals the real-bit
    success probability of bob_challenge_adversary D against Bob's key. *)
 Lemma hop0_real_challengeE
@@ -437,14 +459,7 @@ Lemma hop0_real_challengeE
   accept D (`p_ [% V2, V3, alice_tuple_real])
     = indcpa_success_real bob_pkey (bob_challenge_adversary D).
 Proof.
-rewrite acceptE.
-have -> : `p_ [% V2, V3, alice_tuple_real]
-        = `p_ (protocol_RV Hop0State Rho2 bob_pkey
-                 (fun c : hop0_stateT => c.1.1.1.1) hop0_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
-by rewrite indcpa_fdist_acceptE indcpa_success_realE.
+by rewrite acceptE hop0_real_fdistE indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
 (* D accepts the Bob-zero experiment as often as bob_challenge_adversary D
@@ -454,14 +469,7 @@ Lemma hop0_zero_challengeE
   accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
     = indcpa_success_zero bob_pkey (bob_challenge_adversary D).
 Proof.
-rewrite acceptE.
-have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
-        = `p_ (protocol_RV Hop0State Rho2 bob_pkey
-                 (fun _ : hop0_stateT => 0) hop0_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ hop0_state_prodE).
-by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
+by rewrite acceptE hop0_zero_fdistE indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
 
 (* The gap D shows between the real and the Bob-zero experiment equals the
@@ -476,6 +484,29 @@ Proof.
 by rewrite /indcpa_epsilon hop0_real_challengeE hop0_zero_challengeE.
 Qed.
 
+(* The Bob-zero game is also the IND-CPA sampling program at Charlie's key with
+   V3 in the challenge.  Charlie's coin Rho3 becomes the challenger's coin. *)
+Lemma hop1_real_fdistE :
+  `p_ [% V2, V3, alice_tuple_bob_zero]
+  = indcpa_fdist Hop1State charlie_pkey (fun c : hop1_stateT => c.1.1.1.2)
+      hop1_assemble.
+Proof.
+rewrite -(protocol_indcpa_fdistE _ _ _ hop1_state_prodE) /dist_of_RV.
+congr fdistmap.
+by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+Qed.
+
+(* The all-zero game is that program with 0 in the challenge. *)
+Lemma hop1_zero_fdistE :
+  `p_ [% V2, V3, alice_tuple_all_zero]
+  = indcpa_fdist Hop1State charlie_pkey (fun _ : hop1_stateT => 0)
+      hop1_assemble.
+Proof.
+rewrite -(protocol_indcpa_fdistE _ _ _ hop1_state_prodE) /dist_of_RV.
+congr fdistmap.
+by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+Qed.
+
 (* D accepts the Bob-zero experiment as often as charlie_challenge_adversary D
    succeeds at the real bit.  That experiment is the zero side for Bob's key
    and the real side for Charlie's. *)
@@ -484,14 +515,7 @@ Lemma hop1_real_challengeE
   accept D (`p_ [% V2, V3, alice_tuple_bob_zero])
     = indcpa_success_real charlie_pkey (charlie_challenge_adversary D).
 Proof.
-rewrite acceptE.
-have -> : `p_ [% V2, V3, alice_tuple_bob_zero]
-        = `p_ (protocol_RV Hop1State Rho3 charlie_pkey
-                 (fun c : hop1_stateT => c.1.1.1.2) hop1_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
-by rewrite indcpa_fdist_acceptE indcpa_success_realE.
+by rewrite acceptE hop1_real_fdistE indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
 (* D's acceptance probability on the all-zero experiment equals the zero-bit
@@ -502,14 +526,7 @@ Lemma hop1_zero_challengeE
   accept D (`p_ [% V2, V3, alice_tuple_all_zero])
     = indcpa_success_zero charlie_pkey (charlie_challenge_adversary D).
 Proof.
-rewrite acceptE.
-have -> : `p_ [% V2, V3, alice_tuple_all_zero]
-        = `p_ (protocol_RV Hop1State Rho3 charlie_pkey
-                 (fun _ : hop1_stateT => 0) hop1_assemble).
-  rewrite /dist_of_RV; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (protocol_indcpa_fdistE _ _ _ hop1_state_prodE).
-by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
+by rewrite acceptE hop1_zero_fdistE indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
 
 (* The gap D shows between the Bob-zero and the all-zero experiment equals the
