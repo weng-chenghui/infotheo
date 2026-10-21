@@ -49,10 +49,9 @@ Lemma negligible_fun_nearP f :
   negligible_fun f <-> forall c : nat, \forall n \near \oo, f n < n%:R ^- c.
 Proof.
 split=> [fn c|fn c].
-  have [N fN] := fn c; near=> n; apply: fN.
-  by near: n; exact: nbhs_infty_gt.
+  by have [N fN] := fn c; exact: filterS fN (nbhs_infty_gt N).
 by have [N _ fN] := fn c; exists N => n Nn; apply: fN; exact: ltnW.
-Unshelve. all: by end_near. Qed.
+Qed.
 
 (* A nonnegative f is negligible iff n ^+ c * f n tends to 0 along \oo at
    every exponent c.  Negligibility is the convergence to 0 of f against
@@ -62,19 +61,16 @@ Lemma negligible_fun_cvgP f : (forall n, 0 <= f n) ->
 Proof.
 move=> f_ge0; split=> [/negligible_fun_nearP fn c|fn].
   apply/cvgr0Pnorm_lt => e e_gt0; near=> n.
-  have n_gt0 : (0 < n)%N by near: n; exact: nbhs_infty_gt.
-  rewrite normrM normrX normr_nat ger0_norm ?f_ge0//.
-  have : f n < n%:R ^- c.+1 by near: n; exact: fn.
-  rewrite -(ltr_pM2l (_ : 0 < n%:R ^+ c)) ?exprn_gt0 ?ltr0n // exprSr invfM.
-  rewrite mulVKf ?expf_neq0 ?pnatr_eq0 -?lt0n // => /lt_trans; apply.
-  rewrite -[e]invrK ltf_pV2 ?posrE ?ltr0n ?invr_gt0 //.
+  have n_gt0 : 0 < n%:R :> R by near: n; exact: nbhs_infty_gtr.
+  rewrite ger0_norm ?mulr_ge0 ?exprn_ge0 ?f_ge0// -ltr_pdivlMl ?exprn_gt0//.
+  apply: (@lt_trans _ _ (n%:R ^- c.+1)); first by near: n; exact: fn.
+  rewrite exprSr invfM ltr_pM2l ?invr_gt0 ?exprn_gt0// invf_plt//.
   by near: n; exact: nbhs_infty_gtr.
 apply/negligible_fun_nearP => c; near=> n.
-have n_gt0 : (0 < n)%N by near: n; exact: nbhs_infty_gt.
-have : `|n%:R ^+ c * f n| < 1.
-  by near: n; apply: (cvgr0Pnorm_lt _).1 ltr01; exact: fn.
-rewrite normrM normrX normr_nat ger0_norm ?f_ge0//.
-by rewrite -ltr_pdivlMl ?exprn_gt0 ?ltr0n ?mulr1.
+have n_gt0 : 0 < n%:R :> R by near: n; exact: nbhs_infty_gtr.
+rewrite -[_ ^- c]mulr1 ltr_pdivlMl ?exprn_gt0//.
+apply: le_lt_trans (ler_norm _) _.
+by near: n; apply: (cvgr0Pnorm_lt _).1 ltr01; exact: fn.
 Unshelve. all: by end_near. Qed.
 
 (* A nonnegative f is negligible iff f is little-o of n ^- c along \oo at
@@ -85,17 +81,14 @@ Lemma negligible_fun_eqoP f : (forall n, 0 <= f n) ->
 Proof.
 move=> f_ge0; split=> [/(negligible_fun_cvgP f_ge0) fn c|fo].
   apply/eqoP => e e_gt0; near=> n.
-  have n_gt0 : (0 < n)%N by near: n; exact: nbhs_infty_gt.
-  have : `|n%:R ^+ c * f n| < e.
-    by near: n; apply: (cvgr0Pnorm_lt _).1 e_gt0; exact: fn.
-  rewrite normrM normrX normr_nat normfV normrX normr_nat.
-  by rewrite ler_pdivlMr ?exprn_gt0 ?ltr0n // mulrC => /ltW.
+  have n_gt0 : 0 < n%:R :> R by near: n; exact: nbhs_infty_gtr.
+  rewrite normfV ler_pdivlMr ?normr_gt0 ?expf_neq0 ?gt_eqF// mulrC -normrM.
+  by apply/ltW; near: n; apply: (cvgr0Pnorm_lt _).1 e_gt0; exact: fn.
 apply/negligible_fun_nearP => c; near=> n.
-have n_gt0 : (0 < n)%N by near: n; exact: nbhs_infty_gt.
-have : `|f n| <= 2^-1 * `|n%:R ^- c : R|.
+have n_gt0 : 0 < n%:R :> R by near: n; exact: nbhs_infty_gtr.
+apply: le_lt_trans (ler_norm _) (le_lt_trans (_ : _ <= 2^-1 * `|n%:R ^- c|) _).
   by near: n; apply: (eqoP _ _ _).1 (fo c) _ _; rewrite invr_gt0 ltr0n.
-rewrite ger0_norm ?f_ge0// normfV normrX normr_nat => /le_lt_trans; apply.
-by rewrite gtr_pMl ?invf_lt1 ?ltr1n // invr_gt0 exprn_gt0 ?ltr0n.
+by rewrite gtr0_norm ?gtr_pMl ?invf_lt1 ?ltr1n ?invr_gt0 ?exprn_gt0.
 Unshelve. all: by end_near. Qed.
 
 End negligible_littleo.
