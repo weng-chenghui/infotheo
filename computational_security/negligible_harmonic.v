@@ -118,7 +118,7 @@ Proof.
 move=> cd [L HL]; have L0 : 0 <= L.
   by have := HL 1%N isT; rewrite expr1n invr1 mulr1; apply: le_trans.
 exists L => n n0; apply: le_trans (HL n n0) _; rewrite ler_wpM2l //.
-by rewrite -2!exprVn ler_wiXn2l // ?invr_ge0 ?ler0n // invf_le1 ?ltr0n // ler1n.
+by rewrite lef_pV2 ?posrE ?exprn_gt0 ?ltr0n // ler_weXn2l // ler1n.
 Qed.
 
 (* A nonnegative function is negligible iff it is Lipschitz at the point at
@@ -137,8 +137,8 @@ move=> f0; split=> Hf c.
     apply/ltW/(lt_le_trans (HN n Nn)).
     by rewrite ler_peMl ?(ltW nc0) // le_max lexx.
   have nc : n%:R ^+ c != 0 :> R by rewrite expf_neq0 // pnatr_eq0 -lt0n.
-  rewrite -[f n](mulfK nc) ler_wpM2r ?(ltW nc0) // le_max; apply/orP; right.
-  exact: (le_bigmax _ _ (Ordinal (nN : (n < N.+1)%N))).
+  rewrite -[f n](mulfK nc) ler_wpM2r ?(ltW nc0) // le_max.
+  by rewrite (le_bigmax _ _ (Ordinal (nN : (n < N.+1)%N))) orbT.
 have [L HL] := Hf c.+1; have L0 : 0 <= L.
   by have := HL 1%N isT; rewrite expr1n invr1 mulr1; apply: le_trans.
 exists (Num.bound L) => n Nn.

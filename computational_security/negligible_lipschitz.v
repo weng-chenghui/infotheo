@@ -106,8 +106,8 @@ have Vle k m n : (0 < m)%N -> (m <= n)%N -> n%:R ^- k <= m%:R ^- k :> R.
 have L4 : L <= 4 * L by rewrite ler_peMl // ler1n.
 have Hinf n : (0 < n)%N -> `|f n| <= 4 * L * n%:R ^- c.
   move=> n0; apply: le_trans (HL n n0) _.
-  rewrite ler_pM ?invr_ge0 ?exprn_ge0 ?ler0n // -2!exprVn.
-  by rewrite ler_wiXn2l // ?invr_ge0 ?ler0n // invf_le1 ?ltr0n // ler1n.
+  rewrite ler_pM ?invr_ge0 ?exprn_ge0 ?ler0n //.
+  by rewrite lef_pV2 ?posrE ?exprn_gt0 ?ltr0n // ler_weXn2l // ler1n.
 have Hlt m n : (0 < m)%N -> (m < n)%N ->
     `|f m - f n| <= 4 * L * harmonic_dist c (Some m) (Some n).
   move=> m0 mn; have n0 := ltn_trans m0 mn.
@@ -116,8 +116,7 @@ have Hlt m n : (0 < m)%N -> (m < n)%N ->
   apply: le_trans (_ : _ <= 2 * L * m%:R ^- c.+1) _.
     by rewrite -mulrA mulr2n mulrDl mul1r lerD2l ler_wpM2l // Vle // ltnW.
   rewrite (_ : 4 * L = 2 * L * 2); last by rewrite mulrAC -natrM.
-  rewrite -[_ * 2 * _]mulrA; apply: ler_wpM2l; first exact: mulr_ge0.
-  exact: harmonic_dist_ge_inv.
+  rewrite -[_ * 2 * _]mulrA ler_wpM2l ?mulr_ge0 //; exact: harmonic_dist_ge_inv.
 exists (4 * L) => -[[|m]|] [[|n]|] //= _ _.
 - have [mn|nm|->] := ltngtP m n.
   + exact: Hlt.
