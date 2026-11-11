@@ -90,6 +90,9 @@ Local Open Scope proc_scope.
 Definition dsdp_ideal_saprocs : seq (aproc dsdp_dtype data) :=
   [aprocs palice_inst; pbob_inst; pcharlie_inst].
 
+Lemma dsdp_ideal_compat : aprocs_compat dsdp_ideal_saprocs.
+Proof. by []. Qed.
+
 Definition dsdp_ideal_procs : seq (proc data) :=
   erase_aprocs dsdp_ideal_saprocs.
 

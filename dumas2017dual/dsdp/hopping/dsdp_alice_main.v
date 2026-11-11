@@ -414,8 +414,8 @@ Local Notation alice_trace_idealE := (alice_trace_idealE (R:=R) I).
 Definition bob_challenge_adversary
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
     indcpa_adversary :=
-  {| adv_state := hop0_stateT ;
-     adv_choose := `p_ Hop0State ;
+  {| adv_stateT := hop0_stateT ;
+     adv_state_fdist := `p_ Hop0State ;
      adv_plain := fun c => c.1.1.1.1 ;
      adv_decide := fun c ch => D (hop0_assemble c ch) |}.
 
@@ -425,8 +425,8 @@ Definition bob_challenge_adversary
 Definition charlie_challenge_adversary
     (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :
     indcpa_adversary :=
-  {| adv_state := hop1_stateT ;
-     adv_choose := `p_ Hop1State ;
+  {| adv_stateT := hop1_stateT ;
+     adv_state_fdist := `p_ Hop1State ;
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 

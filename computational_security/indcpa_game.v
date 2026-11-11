@@ -241,18 +241,18 @@ Definition distinguisher (T : finType) : Type := T -> bool.
 (* The probability that D accepts a value sampled from G.  A hopping
    argument's games are such numbers at any carrier, a protocol trace or a
    tuple alike. *)
-Definition accept (T : finType) (D : T -> bool) (G : R.-fdist T) : R :=
+Definition accept (T : finType) (D : distinguisher T) (G : R.-fdist T) : R :=
   Pr (fdistmap D G) [set true].
 
 (* The pushforward form of the acceptance probability agrees with the event
    form.  A reduction correspondence is stated in the event form. *)
-Lemma acceptE (T : finType) (D : T -> bool) (G : R.-fdist T) :
+Lemma acceptE (T : finType) (D : distinguisher T) (G : R.-fdist T) :
   accept D G = Pr G [set x | D x].
 Proof. exact: Pr_fdistmap_bool. Qed.
 
 (* That probability is nonnegative.  A hop to the zero game bounds the game
    it leaves only because acceptance is nonnegative. *)
-Lemma accept_ge0 (T : finType) (D : T -> bool) (G : R.-fdist T) :
+Lemma accept_ge0 (T : finType) (D : distinguisher T) (G : R.-fdist T) :
   0 <= accept D G.
 Proof. exact: Pr_ge0. Qed.
 
@@ -274,16 +274,16 @@ Definition distinguisher_of_predictor {observation : finType}
    and a verdict on state and ciphertext.  Every DSDP epsilon is measured in
    this attack model: one public key, one challenge. *)
 Record indcpa_adversary := {
-  (* everything the adversary holds before the challenge *)
-  adv_state : finType ;
-  (* the law that state is drawn from *)
-  adv_choose : R.-fdist adv_state ;
+  (* the type of everything the adversary holds before the challenge *)
+  adv_stateT : finType ;
+  (* the distribution that state is drawn from *)
+  adv_state_fdist : R.-fdist adv_stateT ;
   (* the challenge plaintext read off the state *)
-  adv_plain : adv_state -> plain AHE ;
+  adv_plain : adv_stateT -> plain AHE ;
   (* the verdict on the state and the challenge ciphertext *)
-  adv_decide : adv_state -> cipher AHE -> bool }.
+  adv_decide : adv_stateT -> cipher AHE -> bool }.
 
-Arguments adv_choose : clear implicits.
+Arguments adv_state_fdist : clear implicits.
 Arguments adv_plain : clear implicits.
 Arguments adv_decide : clear implicits.
 
@@ -294,12 +294,12 @@ Definition indcpa_challenger (b : bool) (pk : pub_key AHE) (v : plain AHE) :
     R.-fdist (cipher AHE) :=
   enc_fdist pk (if b then v else 0).
 
-(* The law of the adversary's verdict at the hidden bit b: sample its state,
-   sample the challenge, decide.  The gap between the acceptance at b = true
-   and at b = false is the advantage. *)
+(* The law of the adversary's verdict at hidden bit b: draw its state,
+   encrypt the state's plaintext or zero, decide.  The advantage is the gap
+   between the acceptances at b = true and b = false. *)
 Definition indcpa_experiment (b : bool) (pk : pub_key AHE)
     (adv : indcpa_adversary) : R.-fdist bool :=
-  c  <- adv_choose adv ;
+  c  <- adv_state_fdist adv ;
   ch <- indcpa_challenger b pk (adv_plain adv c) ;
   ret (adv_decide adv c ch).
 
@@ -318,7 +318,7 @@ Definition indcpa_success_real := indcpa_accept true.
 Lemma indcpa_success_realE (pk : pub_key AHE)
     (adv : indcpa_adversary) :
   indcpa_success_real pk adv
-  = Pr (c <- adv_choose adv ;
+  = Pr (c <- adv_state_fdist adv ;
         fdistmap (adv_decide adv c) (enc_fdist pk (adv_plain adv c)))
        [set true].
 Proof. by []. Qed.
@@ -333,7 +333,7 @@ Definition indcpa_success_zero := indcpa_accept false.
 Lemma indcpa_success_zeroE (pk : pub_key AHE)
     (adv : indcpa_adversary) :
   indcpa_success_zero pk adv
-  = Pr (c <- adv_choose adv ;
+  = Pr (c <- adv_state_fdist adv ;
         fdistmap (adv_decide adv c) (enc_fdist pk 0))
        [set true].
 Proof. by []. Qed.

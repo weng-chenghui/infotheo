@@ -278,8 +278,8 @@ Definition benaloh_residuosity_epsilon
 Definition residuosity_of_adversary (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_n :=
-  {| state := adv_state adv ;
-     state_fdist := adv_choose adv ;
+  {| state := adv_stateT adv ;
+     state_fdist := adv_state_fdist adv ;
      decide := fun c x => adv_decide c (val y ^+ (adv_plain c) * x) |}.
 
 (* The second reduction: the same adversary with its challenge passed through
@@ -288,8 +288,8 @@ Definition residuosity_of_adversary (y : ring_units 'Z_n)
 Definition residuosity_of_adversary_zero
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_n :=
-  {| state := adv_state adv ;
-     state_fdist := adv_choose adv ;
+  {| state := adv_stateT adv ;
+     state_fdist := adv_state_fdist adv ;
      decide := fun c x => adv_decide c x |}.
 
 (* An encryption of m under generator y is y ^+ m times the r-th power of a
@@ -297,7 +297,7 @@ Definition residuosity_of_adversary_zero
    residue law, where the script opens. *)
 Lemma real_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
-  Pr (c <- adv_choose adv ;
+  Pr (c <- adv_state_fdist adv ;
       fdistmap (adv_decide c)
         (fdistmap (benaloh_enc y (adv_plain c))
            (fdist_uniform card_renc_benaloh))) [set true]
@@ -312,7 +312,7 @@ Qed.
    plaintext (0 : plain AHE). *)
 Lemma zero_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
-  Pr (c <- adv_choose adv ;
+  Pr (c <- adv_state_fdist adv ;
       fdistmap (adv_decide c)
         (fdistmap (benaloh_enc y (0 : plain AHE))
            (fdist_uniform card_renc_benaloh))) [set true]
@@ -503,11 +503,11 @@ Qed.
 Lemma benaloh_indcpa_epsilon_le (residuosity : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) benaloh_indcpa_scheme) :
   benaloh_residuosity_admissible residuosity adv ->
-  `| Pr (c <- adv_choose adv ;
+  `| Pr (c <- adv_state_fdist adv ;
          fdistmap (adv_decide c)
            (fdistmap (benaloh_enc (priv_gen dk) (adv_plain c))
               (fdist_uniform card_renc_benaloh))) [set true]
-   - Pr (c <- adv_choose adv ;
+   - Pr (c <- adv_state_fdist adv ;
          fdistmap (adv_decide c)
            (fdistmap (benaloh_enc (priv_gen dk) (0 : plain AHE))
               (fdist_uniform card_renc_benaloh))) [set true] |

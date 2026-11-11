@@ -259,8 +259,8 @@ Definition dcr_epsilon (dcr : dcr_assumption) : R :=
 Definition dcr_of_adversary (g : 'Z_((p * q) * (p * q)))
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_((p * q) * (p * q)) :=
-  {| state := adv_state adv ;
-     state_fdist := adv_choose adv ;
+  {| state := adv_stateT adv ;
+     state_fdist := adv_state_fdist adv ;
      decide := fun c x => adv_decide c (g ^+ adv_plain c * x) |}.
 
 (* The second reduction: the same adversary run on the residuosity challenge
@@ -269,8 +269,8 @@ Definition dcr_of_adversary (g : 'Z_((p * q) * (p * q)))
 Definition dcr_of_adversary_zero
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
     residuosity_distinguisher (R:=R) 'Z_((p * q) * (p * q)) :=
-  {| state := adv_state adv ;
-     state_fdist := adv_choose adv ;
+  {| state := adv_stateT adv ;
+     state_fdist := adv_state_fdist adv ;
      decide := fun c x => adv_decide c x |}.
 
 (* An encryption of m under g is g^m times a (p q)-th power of a uniform
@@ -278,7 +278,7 @@ Definition dcr_of_adversary_zero
    residue challenge, where the script opens. *)
 Lemma real_accept_dcrE (g : 'Z_((p * q) * (p * q)))
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
-  Pr (c <- adv_choose adv ;
+  Pr (c <- adv_state_fdist adv ;
       fdistmap (adv_decide c)
         (fdistmap (paillier_enc g (adv_plain c))
            (fdist_uniform (R:=R) card_renc_paillier))) [set true]
@@ -293,7 +293,7 @@ Qed.
    the residue challenge. *)
 Lemma zero_accept_dcrE (g : 'Z_((p * q) * (p * q)))
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
-  Pr (c <- adv_choose adv ;
+  Pr (c <- adv_state_fdist adv ;
       fdistmap (adv_decide c)
         (fdistmap (paillier_enc g 0)
            (fdist_uniform (R:=R) card_renc_paillier))) [set true]
@@ -482,11 +482,11 @@ Qed.
 Lemma paillier_indcpa_epsilon_le (dcr : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) paillier_indcpa_scheme) :
   paillier_dcr_admissible dcr adv ->
-  `| Pr (c <- adv_choose adv ;
+  `| Pr (c <- adv_state_fdist adv ;
          fdistmap (adv_decide c)
            (fdistmap (paillier_enc (priv_gen dk) (adv_plain c))
               (fdist_uniform card_renc_paillier))) [set true]
-   - Pr (c <- adv_choose adv ;
+   - Pr (c <- adv_state_fdist adv ;
          fdistmap (adv_decide c)
            (fdistmap (paillier_enc (priv_gen dk) 0)
               (fdist_uniform card_renc_paillier))) [set true] |
