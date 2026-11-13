@@ -742,17 +742,26 @@ Lemma alice_trace_sim_script :
     <= [:: cpa_bob; cpa_charlie].
 Proof.
 (* her trace is a deterministic image of her hopping tuple *)
-same to (accept tuple_distinguisher G0) by (accept_trace_tupleE _).
+(* same to (accept tuple_distinguisher G0) by (accept_trace_tupleE _). *)
+(* rewrite accept_trace_tupleE. *)
+apply: (script_same (accept tuple_distinguisher G0)).
+  exact: accept_trace_tupleE.
 (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
-hop cpa_bob to (accept tuple_distinguisher G1)
-  by (le_of_eq (hop0_advantageE tuple_distinguisher)).
+hop cpa_bob to (accept tuple_distinguisher G1).
+  exact/le_of_eq/hop0_advantageE.
+  (* by (le_of_eq (hop0_advantageE tuple_distinguisher)). *)
 (* Charlie's slot zeroed, at a second IND-CPA advantage *)
-hop cpa_charlie to (accept tuple_distinguisher G2)
-  by (le_of_eq (hop1_advantageE tuple_distinguisher)).
+hop cpa_charlie to (accept tuple_distinguisher G2).
+  exact/le_of_eq/hop1_advantageE.
+  (* by (le_of_eq (hop1_advantageE tuple_distinguisher)). *)
 (* the simulated trace is that same image of the all-zero tuple *)
-same to (accept D alice_trace_ideal) by (esym (accept_trace_ideal_tupleE D)).
-stop.
+(*same to (accept D alice_trace_ideal) by (esym (accept_trace_ideal_tupleE D)).*)
+apply: (script_same (accept D alice_trace_ideal)).
+  by rewrite accept_trace_ideal_tupleE.
+(* stop. *)
+exact: script_stop.
 Qed.
+Print alice_trace_sim_script.
 
 (* A trace test separates the real and simulated laws by at most the two hop
    advantages.  The steps at either end lose nothing, so only the two

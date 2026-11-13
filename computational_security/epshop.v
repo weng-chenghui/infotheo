@@ -376,6 +376,15 @@ Tactic Notation "hop" constr(l) "to" uconstr(g) "by" uconstr(H) :=
       refine (script_hop (claim_of := C) l g H gE _); clear gE
   end.
 
+Tactic Notation "hop" constr(l) "to" uconstr(g) :=
+  lazymatch goal with
+  | |- hop_script ?C _ _ _ =>
+      let t := eval cbn in (claim_to (C l)) in
+      let gE := fresh "gE" in
+      have gE : g = t := erefl;
+      refine (script_hop (claim_of := C) l g _ gE _); clear gE
+  end.
+
 Tactic Notation "same" "to" uconstr(g) "by" uconstr(H) :=
   refine (script_same g H _).
 
